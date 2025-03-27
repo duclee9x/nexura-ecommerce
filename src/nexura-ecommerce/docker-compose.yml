@@ -1,0 +1,58 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: nexura-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: nexura
+      MYSQL_USER: nexura
+      MYSQL_PASSWORD: nexura
+    ports:
+      - 3306:3306
+    volumes:
+      - nexura-mysql:/var/lib/mysql
+
+  postgres:
+    image: postgres:15
+    container_name: nexura-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: nexura
+      POSTGRES_DB: nexura
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_PASSWORD: nexura
+    ports:
+      - 5432:5432
+    volumes:
+      - nexura-postgres:/var/lib/postgresql/data
+
+  redis:
+    image: redis:latest
+    container_name: nexura-redis
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - nexura-redis:/data
+
+  mongo:
+    image: mongo:latest
+    container_name: nexura-mongo
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - nexura-mongo:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=nexura
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=nexura
+      - MONGO_REPLICA_HOST=localhost
+      - MONGO_REPLICA_PORT=27017
+
+volumes:
+  nexura-mysql:
+  nexura-postgres:
+  nexura-redis:
+  nexura-mongo:

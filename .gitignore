@@ -1,0 +1,17 @@
+node_modules
+dist
+build
+coverage
+logs
+temp
+src/*/node_modules
+src/*/dist
+src/*/build
+src/*/coverage
+src/*/logs
+src/*/temp
+src/*/.next
+src/*/*/migrations
+
+opentelemetry-demo
+.env

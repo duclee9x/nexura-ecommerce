@@ -1,0 +1,202 @@
+x-default-logging: &logging
+  driver: "json-file"
+  options:
+    max-size: "5m"
+    max-file: "2"
+    tag: "{{.Name}}"
+
+networks:
+  default:
+    name: nexura
+    driver: bridge
+
+volumes:
+  user-service-db-data:
+
+services:
+  user-service:
+    container_name: ${IMAGE_NAME}-user:${IMAGE_VERSION}
+    build:
+      context: ./
+      dockerfile: ${USER_SERVICE_DOCKERFILE}
+      cache_from:
+        - ${IMAGE_NAME}-user:${IMAGE_VERSION}
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+    depends_on:
+      user-service-db:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+    restart: unless-stopped
+    ports:
+      - "${USER_SERVICE_PORT}:${USER_SERVICE_PORT}"
+    environment:
+      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+      - OTEL_EXPORTER_OTLP_TRACES_TEMPORALITY_PREFERENCE
+      - OTEL_EXPORTER_OTLP_LOGS_TEMPORALITY_PREFERENCE
+      - OTEL_EXPORTER_OTLP_ENDPOINT
+      - OTEL_RESOURCE_ATTRIBUTES
+      - OTEL_SERVICE_NAME=user-service
+      - OTEL_RESOURCE_NAMESPACE=nexura
+      - DATABASE_URL=mysql://${USER_SERVICE_DB_USER}:${USER_SERVICE_DB_PASSWORD}@${USER_SERVICE_DB_HOST}:${USER_SERVICE_DB_PORT}/${USER_SERVICE_DB_NAME}
+      - JWT_ACCESS_SECRET
+      - JWT_REFRESH_SECRET
+      - JWT_ACCESS_EXPIRATION
+      - JWT_REFRESH_EXPIRATION
+    logging: *logging
+    
+  user-service-db:
+    image: ${USER_SERVICE_DB_IMAGE}
+    environment:
+      TZ: "UTC"
+      MYSQL_ROOT_PASSWORD: ${USER_SERVICE_DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${USER_SERVICE_DB_NAME}
+      MYSQL_USER: ${USER_SERVICE_DB_USER}
+      MYSQL_PASSWORD: ${USER_SERVICE_DB_PASSWORD}
+      DATABASE_URL: mysql://${USER_SERVICE_DB_USER}:${USER_SERVICE_DB_PASSWORD}@${USER_SERVICE_DB_HOST}:${USER_SERVICE_DB_PORT}/${USER_SERVICE_DB_NAME}
+    ports:
+      - "${USER_SERVICE_DB_PORT}:${USER_SERVICE_DB_PORT}"
+    volumes:
+      - user-service-db-data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${USER_SERVICE_DB_ROOT_PASSWORD}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+
+  jaeger:
+    image: ${JAEGER_IMAGE}
+    container_name: jaeger
+    command:
+      - "--memory.max-traces=25000"
+      - "--query.base-path=/jaeger/ui"
+      - "--prometheus.server-url=http://${PROMETHEUS_ADDR}"
+      - "--prometheus.query.normalize-calls=true"
+      - "--prometheus.query.normalize-duration=true"
+    deploy:
+      resources:
+        limits:
+          memory: 1000M
+    restart: unless-stopped
+    ports:
+      - "${JAEGER_UI_PORT}"         # Jaeger UI
+      - "${OTEL_COLLECTOR_PORT_GRPC}"
+    environment:
+      - METRICS_STORAGE_TYPE=prometheus
+    logging: *logging
+
+  # Grafana
+  grafana:
+    image: ${GRAFANA_IMAGE}
+    container_name: grafana
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    restart: unless-stopped
+    environment:
+      - "GF_INSTALL_PLUGINS=grafana-opensearch-datasource"
+    volumes:
+      - ./src/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./src/grafana/provisioning/:/etc/grafana/provisioning/
+    ports:
+      - "${GRAFANA_PORT}"
+    logging: *logging
+
+  # OpenTelemetry Collector
+  otel-collector:
+    image: ${COLLECTOR_CONTRIB_IMAGE}
+    container_name: otel-collector
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    restart: unless-stopped
+    command: [ "--config=/etc/otelcol-config.yml"]
+    user: 0:0
+    volumes:
+      - ${HOST_FILESYSTEM}:/hostfs:ro
+      - ${DOCKER_SOCK}:/var/run/docker.sock:ro
+      - ${OTEL_COLLECTOR_CONFIG}:/etc/otelcol-config.yml
+    ports:
+      - "${OTEL_COLLECTOR_PORT_GRPC}"
+      - "${OTEL_COLLECTOR_PORT_HTTP}"
+    depends_on:
+      jaeger:
+        condition: service_started
+      opensearch:
+        condition: service_healthy
+    logging: *logging
+    environment:
+      - ENVOY_PORT
+      - HOST_FILESYSTEM
+      - OTEL_COLLECTOR_HOST
+      - OTEL_COLLECTOR_PORT_GRPC
+      - OTEL_COLLECTOR_PORT_HTTP
+      - GOMEMLIMIT=160MiB
+
+  # Prometheus
+  prometheus:
+    image: ${PROMETHEUS_IMAGE}
+    container_name: prometheus
+    command:
+      - --web.console.templates=/etc/prometheus/consoles
+      - --web.console.libraries=/etc/prometheus/console_libraries
+      - --storage.tsdb.retention.time=1h
+      - --config.file=/etc/prometheus/prometheus-config.yaml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+      - --web.route-prefix=/
+      - --web.enable-otlp-receiver
+      - --enable-feature=exemplar-storage
+    volumes:
+      - ./config/prometheus-config.yaml:/etc/prometheus/prometheus-config.yaml
+    deploy:
+      resources:
+        limits:
+          memory: 300M
+    restart: unless-stopped
+    ports:
+      - "${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
+    logging: *logging
+
+  # OpenSearch
+  opensearch:
+    image: ${OPENSEARCH_IMAGE}
+    container_name: opensearch
+    deploy:
+      resources:
+        limits:
+          memory: 1.1G
+    restart: unless-stopped
+    environment:
+      - cluster.name=demo-cluster
+      - node.name=demo-node
+      - bootstrap.memory_lock=true
+      - discovery.type=single-node
+      - OPENSEARCH_JAVA_OPTS=-Xms300m -Xmx300m
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - DISABLE_SECURITY_PLUGIN=true
+      # Workaround on OSX for https://bugs.openjdk.org/browse/JDK-8345296
+      - _JAVA_OPTIONS
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "${OPENSEARCH_PORT}:${OPENSEARCH_PORT}"
+    healthcheck:
+      test: curl -s http://localhost:${OPENSEARCH_PORT}/_cluster/health | grep -E '"status":"(green|yellow)"'
+      start_period: 10s
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    logging: *logging
+

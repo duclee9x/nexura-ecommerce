@@ -1,0 +1,175 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGO_URL")
+}
+
+model Warehouse {
+  id                 String           @id @default(cuid()) @map("_id") @db.ObjectId
+  name               String
+  code               String
+  location           String
+  address            String
+  manager            String
+  contact            String
+  totalProducts      Int
+  lowStock           Int
+  outOfStock         Int
+  status             String
+  productInventoryId String[]         @db.ObjectId
+  ProductInventory   ProductInventory @relation("WarehouseInventory", fields: [productInventoryId], references: [id])
+}
+
+model ProductAttribute {
+  id               String          @id @default(cuid()) @map("_id") @db.ObjectId
+  name             String
+  value            String
+  ProductVariant   ProductVariant? @relation(fields: [productVariantId], references: [id])
+  productVariantId String?         @db.ObjectId
+  Product          Product?        @relation(fields: [productId], references: [id])
+  productId        String?         @db.ObjectId
+}
+
+model ProductInventory {
+  id                String           @id @default(cuid()) @map("_id") @db.ObjectId
+  quantity          Int
+  lowStockThreshold Int
+  trackInventory    Boolean
+  allowBackorders   Boolean
+  ProductVariant    ProductVariant[] @relation("ProductVariant")
+  Product           Product[]
+  warehouseId       String[]         @db.ObjectId
+  Warehouse         Warehouse[]      @relation("WarehouseInventory")
+}
+
+model ProductVariant {
+  id                  String             @id @default(cuid()) @map("_id") @db.ObjectId
+  product             Product            @relation("ProductVariant", fields: [productId], references: [id])
+  productId           String             @db.ObjectId
+  name                String
+  price               Int
+  compareAtPrice      Int?
+  cost                Int?
+  productInventory    ProductInventory?  @relation("ProductVariant", fields: [productInventoryId], references: [id])
+  productInventoryId  String?            @db.ObjectId
+  attributes          ProductAttribute[]
+  image               ProductImage?      @relation(fields: [productImageId], references: [id])
+  weight              Int?
+  productDimensions   ProductDimensions? @relation("ProductVariant", fields: [productDimensionsId], references: [id])
+  productDimensionsId String?            @db.ObjectId
+  isDefault           Boolean
+  status              String
+  sku                 String
+  barcode             String?
+  productImageId      String?            @db.ObjectId
+}
+
+model ProductImage {
+  id             String           @id @default(cuid()) @map("_id") @db.ObjectId
+  url            String
+  alt            String?
+  position       Int
+  ProductVariant ProductVariant[]
+  Product        Product?         @relation(fields: [productId], references: [id])
+  productId      String?          @db.ObjectId
+}
+
+model ProductDimensions {
+  id             String           @id @default(cuid()) @map("_id") @db.ObjectId
+  length         Int
+  width          Int
+  height         Int
+  unit           String
+  ProductVariant ProductVariant[] @relation("ProductVariant")
+}
+
+model SEO {
+  id          String    @id @default(cuid()) @map("_id") @db.ObjectId
+  title       String?
+  description String?
+  keywords    String[]
+  ogImage     String?
+  twitterCard String?
+  products    Product[] @relation("ProductSEO")
+}
+
+model ProductCategory {
+  id        String    @id @default(cuid()) @map("_id") @db.ObjectId
+  name      String
+  products  Product[] @relation("ProductCategory", fields: [productId], references: [id])
+  productId String[]  @db.ObjectId
+}
+
+model Product {
+  id                 String             @id @default(cuid()) @map("_id") @db.ObjectId
+  name               String
+  price              Int
+  compareAtPrice     Int
+  cost               Int
+  sku                String
+  barcode            String?
+  productInventory   ProductInventory   @relation(fields: [productInventoryId], references: [id])
+  productInventoryId String             @db.ObjectId
+  images             ProductImage[]
+  categories         ProductCategory[]  @relation("ProductCategory", fields: [categoriesIds], references: [id])
+  categoriesIds      String[]           @db.ObjectId
+  tags               String[]
+  attributes         ProductAttribute[]
+  variants           ProductVariant[]   @relation("ProductVariant")
+  status             String
+  visibility         String
+  seo                SEO                @relation("ProductSEO", fields: [seoId], references: [id])
+  seoId              String             @db.ObjectId
+  publishedAt        DateTime?
+  warehouseId        String?
+  reviews            Review[]           @relation("ProductReviews")
+  averageRating      Float
+  totalReviews       Int
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  sEOId              String             @db.ObjectId
+}
+
+model Review {
+  id               String       @id @default(cuid()) @map("_id") @db.ObjectId
+  Product          Product      @relation("ProductReviews", fields: [productId], references: [id])
+  productId        String       @db.ObjectId
+  customerId       String
+  customerName     String
+  rating           Int
+  title            String
+  content          String
+  images           String[]
+  status           String
+  helpful          Int
+  notHelpful       Int
+  reply            ReviewReply? @relation("ReviewReply", fields: [reviewReplyId], references: [id])
+  verifiedPurchase Boolean
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  reviewReplyId    String?      @db.ObjectId
+}
+
+model ReviewReply {
+  id          String   @id @default(cuid()) @map("_id") @db.ObjectId
+  reviewId    String   @db.ObjectId
+  content     String
+  dateCreated DateTime
+  staffId     String
+  staffName   String
+  Review      Review[] @relation("ReviewReply")
+}
