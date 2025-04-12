@@ -510,7 +510,8 @@ message VariantAttribute {
 message Image {
     string id = 1;
     string url = 2;
-    bool isMain = 3;
+    string blurhash = 3;
+    bool isMain = 4;
 }
 
 message CreateProductRequest {

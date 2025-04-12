@@ -25,6 +25,7 @@ import { createCategoryGateway, getProductGateway, newBrandGateway, updateCatego
 import { Product, ProductAttribute, ProductVariant, VariantAttribute } from "@/protos/nexura"
 import { useQuery } from "@tanstack/react-query"
 import { Skeleton } from "@/components/ui/skeleton"
+import { encode } from "blurhash"
 
 interface ProductFormProps {
   productId?: string
@@ -326,13 +327,14 @@ console.log(product, "product")
           quantity: variant.quantity || 0,
           lowStockThreshold: variant.lowStockThreshold || 0,
           warehouseId: variant.warehouseId || "",
-          images: variant.images.map((image: ProductImage) => ({
+          images: variant.images.map((image) => ({
             ...image,
-            id: image.id || "",
-            url: image.url || "",
-            isMain: image.isMain || false,
+            id: image.id,
+            url: image.url,
+            isMain: image.isMain,
+            blurhash: image.blurhash
           })),
-          attributes: variant.attributes?.map((attribute: VariantAttribute) => ({
+          attributes: variant.attributes?.map((attribute) => ({
             ...attribute,
             id: attribute.id || "",
             name: attribute.name || "",
@@ -408,12 +410,7 @@ console.log(product, "product")
   const handleImagesUpdate = (updatedImages: ProductImage[]) => {
     setProduct((prev) => ({
       ...prev,
-      images: updatedImages.map((image) => ({
-        ...image,
-        id: image.id || "",
-        url: image.url || "",
-        isMain: image.isMain || false,
-      })),
+      images: updatedImages,
     }))
   }
 

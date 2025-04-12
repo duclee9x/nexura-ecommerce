@@ -64,5 +64,9 @@ export async function getCroppedImg(imageSrc: string, pixelCrop: any): Promise<F
 
 
 export const getAvatarUrl = (fileName: string) => {
-  return `http://${process.env.NEXT_PUBLIC_IMAGE_HOST}:${process.env.NEXT_PUBLIC_IMAGE_PORT}/${process.env.NEXT_PUBLIC_AVATAR_BUCKET}/${fileName}`
+  return `http://${process.env.NEXT_PUBLIC_IMAGE_HOST}/${process.env.NEXT_PUBLIC_AVATAR_BUCKET}/${fileName}`
+}
+
+export const getProductUrl = (fileName: string) => {
+  return `http://${process.env.NEXT_PUBLIC_IMAGE_HOST}/${process.env.NEXT_PUBLIC_PRODUCT_BUCKET}/${fileName}`
 }

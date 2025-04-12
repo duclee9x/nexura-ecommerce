@@ -52,6 +52,7 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
           deleteMany: {},
           create: request.product.images?.map((img) => ({
             url: img.url,
+            blurhash: img.blurhash,
             isMain: img.isMain,
           })) || [],
         },
@@ -78,6 +79,7 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
             images: {
               create: variant.images?.map((img) => ({
                 url: img.url,
+                blurhash: img.blurhash,
                 isMain: img.isMain,
               })) || [],
             },
@@ -220,6 +222,7 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
         })),
         images: updatedProduct.images.map((img) => ({
           id: img.id,
+          blurhash: img.blurhash,
           url: img.url,
           isMain: img.isMain,
         })),
@@ -245,6 +248,7 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
           images: variant.images.map((img) => ({
             id: img.id,
             url: img.url,
+            blurhash: img.blurhash,
             isMain: img.isMain,
           })),
           attributes: variant.attributes.map((attr) => ({

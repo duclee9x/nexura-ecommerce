@@ -113,6 +113,7 @@ export const getProduct = async (call: ServerUnaryCall<GetProductRequest, GetPro
           id: img.id,
           url: img.url,
           isMain: img.isMain,
+          blurhash: img.blurhash,
         })),
         attributes: product.attributes.map(attr => ({
           id: attr.id,
@@ -137,6 +138,7 @@ export const getProduct = async (call: ServerUnaryCall<GetProductRequest, GetPro
             id: img.id,
             url: img.url,
             isMain: img.isMain,
+            blurhash: img.blurhash,
           })),
           attributes: variant.attributes.map(attr => ({
             id: attr.id,

@@ -473,6 +473,7 @@ export interface VariantAttribute {
 export interface Image {
   id: string;
   url: string;
+  blurhash: string;
   isMain: boolean;
 }
 
@@ -7858,7 +7859,7 @@ export const VariantAttribute: MessageFns<VariantAttribute> = {
 };
 
 function createBaseImage(): Image {
-  return { id: "", url: "", isMain: false };
+  return { id: "", url: "", blurhash: "", isMain: false };
 }
 
 export const Image: MessageFns<Image> = {
@@ -7869,8 +7870,11 @@ export const Image: MessageFns<Image> = {
     if (message.url !== "") {
       writer.uint32(18).string(message.url);
     }
+    if (message.blurhash !== "") {
+      writer.uint32(26).string(message.blurhash);
+    }
     if (message.isMain !== false) {
-      writer.uint32(24).bool(message.isMain);
+      writer.uint32(32).bool(message.isMain);
     }
     return writer;
   },
@@ -7899,7 +7903,15 @@ export const Image: MessageFns<Image> = {
           continue;
         }
         case 3: {
-          if (tag !== 24) {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.blurhash = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
             break;
           }
 
@@ -7919,6 +7931,7 @@ export const Image: MessageFns<Image> = {
     return {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
       url: isSet(object.url) ? globalThis.String(object.url) : "",
+      blurhash: isSet(object.blurhash) ? globalThis.String(object.blurhash) : "",
       isMain: isSet(object.isMain) ? globalThis.Boolean(object.isMain) : false,
     };
   },
@@ -7930,6 +7943,9 @@ export const Image: MessageFns<Image> = {
     }
     if (message.url !== "") {
       obj.url = message.url;
+    }
+    if (message.blurhash !== "") {
+      obj.blurhash = message.blurhash;
     }
     if (message.isMain !== false) {
       obj.isMain = message.isMain;
@@ -7944,6 +7960,7 @@ export const Image: MessageFns<Image> = {
     const message = createBaseImage();
     message.id = object.id ?? "";
     message.url = object.url ?? "";
+    message.blurhash = object.blurhash ?? "";
     message.isMain = object.isMain ?? false;
     return message;
   },

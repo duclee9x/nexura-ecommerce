@@ -148,18 +148,18 @@ export default function PersonalTab({ user, refresh }: { user: User | null, refr
                 try {
                     const fileName = `${user.id}.jpeg`
                     // Get presigned URL for avatar upload
-                    const response = await fetch(`/api/presignedPut?name=${fileName}`)
+                    const response = await fetch(`/api/presignedPut?name=${fileName}&bucket=avatar`)
                     if (!response.ok) {
                         throw new Error("Failed to get upload URL")
                     }
-                    const { url } = await response.json()
+                    const { urls } = await response.json()
                     
-                    if (!url) {
+                    if (!urls?.[0]) {
                         throw new Error("Invalid upload URL received")
                     }
 
                     // Upload to S3
-                    const uploadResponse = await fetch(url, {
+                    const uploadResponse = await fetch(urls[0], {
                         method: 'PUT',
                         body: avatarFile,
                     })

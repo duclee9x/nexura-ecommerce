@@ -118,6 +118,7 @@ export const listProducts = async (call: ServerUnaryCall<ListProductsRequest, Li
             id: image.id,
             url: image.url,
             isMain: image.isMain,
+            blurhash: image.blurhash,
           })),
           attributes: variant.attributes.map(attribute => ({
             id: attribute.id,
@@ -142,6 +143,7 @@ export const listProducts = async (call: ServerUnaryCall<ListProductsRequest, Li
           id: image.id,
           url: image.url,
           isMain: image.isMain,
+          blurhash: image.blurhash,
         })),
         attributes: product.attributes.map(attribute => ({
           id: attribute.id,

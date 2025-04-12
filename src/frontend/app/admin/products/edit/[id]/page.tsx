@@ -222,23 +222,54 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
   }
 
   // Handle image upload
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
 
-    // In a real app, you would upload these files to a server
-    // Here we'll just create object URLs for demonstration
-    const newImages = Array.from(files).map((file) => URL.createObjectURL(file))
+    try {
+        // Get presigned URLs for all files
+        const fileNames = Array.from(files).map(file => `${Date.now()}-${file.name}`)
+        const response = await fetch(`/api/presignedPut?${fileNames.map(name => `name=${name}`).join('&')}&bucket=products`)
+        
+        if (!response.ok) {
+            throw new Error("Failed to get upload URLs")
+        }
 
-    setProduct((prev) => ({
-      ...prev,
-      images: [...prev.images, ...newImages],
-    }))
+        const { urls } = await response.json()
+        if (!urls?.length) {
+            throw new Error("Invalid upload URLs received")
+        }
 
-    setIsUnsaved(true)
+        // Upload all files to S3
+        const uploadPromises = Array.from(files).map((file, index) => 
+            fetch(urls[index], {
+                method: 'PUT',
+                body: file,
+            })
+        )
 
-    // Reset the input
-    e.target.value = ""
+        await Promise.all(uploadPromises)
+
+        // Create object URLs for preview
+        const newImages = Array.from(files).map(file => URL.createObjectURL(file))
+
+        setProduct((prev) => ({
+            ...prev,
+            images: [...prev.images, ...newImages],
+        }))
+
+        setIsUnsaved(true)
+
+        // Reset the input
+        e.target.value = ""
+    } catch (error) {
+        console.error("Error uploading images:", error)
+        toast({
+            title: "Error",
+            description: "Failed to upload images. Please try again.",
+            variant: "destructive",
+        })
+    }
   }
 
   // Handle image remove

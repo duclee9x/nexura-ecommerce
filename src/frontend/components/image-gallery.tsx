@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ImageIcon, X, Star, StarOff } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
+import NextImage from "next/image"
+import { getProductUrl } from "@/lib/utils"
 import {
   DndContext,
   closestCenter,
@@ -24,11 +26,13 @@ import {
   rectSortingStrategy,
 } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import { encode } from "blurhash"
 
 export interface ProductImage {
   id: string
   url: string
-  isMain?: boolean
+  isMain: boolean
+  blurhash: string
 }
 
 interface ImageGalleryProps {
@@ -51,18 +55,17 @@ const SortableImage = ({
     transform: CSS.Transform.toString(transform),
     transition,
   }
-
   return (
     <div
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className={`relative aspect-square border rounded-md overflow-hidden ${
-        image.isMain ? "ring-2 ring-primary" : ""
-      }`}
+      className={`relative aspect-square border rounded-md overflow-hidden ${image.isMain ? "ring-2 ring-primary" : ""
+        }`}
     >
       <div {...listeners} className="absolute inset-0 cursor-move" />
-      <img src={image.url || "/placeholder.svg"} alt="Product image" className="object-cover w-full h-full" />
+      <NextImage src={getProductUrl(image.url)} alt="Product image" fill objectFit="contain"   style={{ pointerEvents: "none" }}
+ />
       <div className="absolute top-1 right-1 flex gap-1">
         <Button
           variant="ghost"
@@ -94,6 +97,7 @@ const SortableImage = ({
 
 export function ImageGallery({ images, onChange }: ImageGalleryProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  console.log(images, "image gallery")
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -121,20 +125,60 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
     }
   }
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
 
     const newImages: ProductImage[] = []
 
     for (let i = 0; i < files.length; i++) {
-      // In a real app, you would upload the file to a server
-      // Here we're just creating object URLs for demo purposes
-      const imageUrl = URL.createObjectURL(files[i])
+      const file = files[i]
+      const imageUrl = URL.createObjectURL(file)
+
+      // Create a canvas to get image data for blurhash
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      const img = new Image()
+
+      await new Promise((resolve) => {
+        img.onload = () => {
+          canvas.width = img.width
+          canvas.height = img.height
+          ctx?.drawImage(img, 0, 0)
+          resolve(null)
+        }
+        img.src = imageUrl
+      })
+
+      // Get image data and encode to blurhash
+      const imageData = ctx?.getImageData(0, 0, canvas.width, canvas.height)
+      const blurhash = imageData ? encode(imageData.data, imageData.width, imageData.height, 4, 4) : ''
+
+      // Get presigned URL for upload
+      const id = `img-${Date.now()}-${i}`
+      const fileName = `${id}.jpg`
+      const response = await fetch(`/api/presignedPut?name=${fileName}&bucket=products`)
+
+      if (!response.ok) {
+        throw new Error("Failed to get upload URL")
+      }
+      const { urls } = await response.json()
+      console.log(urls, "urls")
+      if (!urls?.length) {
+        throw new Error("Invalid upload URL received")
+      }
+
+      // Upload image to S3
+      await fetch(urls[0], {
+        method: 'PUT',
+        body: file,
+      })
+
       newImages.push({
-        id: `img-${Date.now()}-${i}`,
-        url: imageUrl,
+        id,
+        url: fileName, // Use the returned path directly
         isMain: images.length === 0 && i === 0, // First image is main by default
+        blurhash: blurhash
       })
     }
 
@@ -194,8 +238,13 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
       <div className="space-y-4">
         <div className="border rounded-md aspect-square overflow-hidden bg-muted/50 flex items-center justify-center">
           {images.length > 0 ? (
-            <img
-              src={images[currentImageIndex]?.url || "/placeholder.svg"}
+            <NextImage
+              src={getProductUrl(images[currentImageIndex]?.url || "")}
+              width={500}
+              height={500}
+              objectFit="contain"
+              // placeholder="blur"
+              // blurDataURL={images[currentImageIndex]?.blurhash}
               alt={`Product image ${currentImageIndex + 1}`}
               className="object-contain max-h-full max-w-full"
             />

@@ -5,7 +5,7 @@ import { getUserGateway, getAddressesGateway, updateUserGateway, registerUserGat
 
 import { DefaultResponse } from "@/lib/types"
 
-export async function getUser(userId: string ): Promise<User | DefaultResponse> {
+export async function getUser(userId: string): Promise<User | DefaultResponse> {
     if (!userId) {
         return {success: false, message: "User ID is required"}
     }
@@ -14,9 +14,9 @@ export async function getUser(userId: string ): Promise<User | DefaultResponse> 
         return {success, message}
     }
     if (user?.profilePictureUrl) {
-        const presignedUrl = await fetch(`/api/presignedUrl?name=${user.id}`)
+        const presignedUrl = await fetch(`/api/presignedPut?name=${user.id}&bucket=avatar`)
         const presignedUrlData = await presignedUrl.json()
-        user.profilePictureUrl = presignedUrlData.url
+        user.profilePictureUrl = presignedUrlData.urls[0] // Get first URL from the array
     }
     return user
 }

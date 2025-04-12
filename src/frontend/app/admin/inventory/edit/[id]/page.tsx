@@ -23,6 +23,18 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     queryKey: ["brands"],
     queryFn: () => getAllBrandGateway().then((res) => res.brands)
   })
+
+  
+  const handleUpdateProduct = (product: Product) => {
+    
+    updateProduct(product)
+    toast({
+      title: "Product Updated",
+      description: "Product has been updated successfully.",
+    })
+  }
+
+
   const { mutate: updateProduct, isPending } = useMutation({
     mutationFn: (product: Product) => updateProductGateway(product),
     onSuccess: async () => {

@@ -44,6 +44,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getWarehousesGateway } from "@/gateway/gateway"
 import { useQuery } from "@tanstack/react-query"
 import { ProductVariant, ProductAttribute, VariantAttribute } from "@/protos/nexura"
+import { encode } from "blurhash"
 
 interface VariantManagerProps {
   variants: ProductVariant[]
@@ -379,20 +380,59 @@ export function VariantManager({
   }
 
   // Handle image upload
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files || files.length === 0) return
 
     const newImages: typeof newVariant.images = []
 
     for (let i = 0; i < files.length; i++) {
-      // In a real app, you would upload the file to a server
-      // Here we're just creating object URLs for demo purposes
-      const imageUrl = URL.createObjectURL(files[i])
+      const file = files[i]
+      const imageUrl = URL.createObjectURL(file)
+      
+      // Create a canvas to get image data for blurhash
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      const img = new Image()
+      
+      await new Promise((resolve) => {
+        img.onload = () => {
+          canvas.width = img.width
+          canvas.height = img.height
+          ctx?.drawImage(img, 0, 0)
+          resolve(null)
+        }
+        img.src = imageUrl
+      })
+
+      // Get image data and encode to blurhash
+      const imageData = ctx?.getImageData(0, 0, canvas.width, canvas.height)
+      const blurhash = imageData ? encode(imageData.data, imageData.width, imageData.height, 4, 4) : ''
+
+      // Get presigned URL for upload
+      const id = `var-img-${Date.now()}-${i}`
+      const fileName = `${id}.jpg`
+      const response = await fetch(`/api/presignedPut?name=${fileName}&bucket=products`)
+      
+      if (!response.ok) {
+        throw new Error("Failed to get upload URL")
+      }
+      const { urls } = await response.json()
+      if (!urls?.length) {
+        throw new Error("Invalid upload URL received")
+      }
+
+      // Upload image to S3
+      await fetch(urls[0], {
+        method: 'PUT',
+        body: file,
+      })
+
       newImages.push({
-        id: `var-img-${Date.now()}-${i}`,
-        url: imageUrl,
+        id,
+        url: fileName, // Use the filename as the URL
         isMain: newVariant.images.length === 0 && i === 0, // First image is main by default
+        blurhash: blurhash
       })
     }
 
