@@ -1,0 +1,39 @@
+import Link from "next/link"
+import type { Metadata } from "next"
+import { ForgotPasswordForm } from "@/components/forgot-password-form"
+
+export const metadata: Metadata = {
+  title: "Forgot Password | NEXURA",
+  description: "Reset your NEXURA account password",
+}
+
+export default function ForgotPasswordPage() {
+  
+  return (
+    <div className="container mx-auto px-4 py-16 flex flex-col items-center">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <Link href="/" className="inline-block">
+            <h1 className="text-3xl font-bold">NEXURA</h1>
+          </Link>
+          <h2 className="mt-6 text-2xl font-bold tracking-tight">Reset your password</h2>
+          <p className="mt-2 text-sm text-text-muted">
+            Enter your email address and we'll send you a code to reset your password
+          </p>
+        </div>
+
+        <ForgotPasswordForm />
+
+        <div className="text-center">
+          <p className="text-sm text-text-base">
+            Remember your password?{" "}
+            <Link href="/login" className="font-medium text-brand-primary hover:underline">
+              Sign in
+            </Link>
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+

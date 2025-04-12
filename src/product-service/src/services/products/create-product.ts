@@ -1,0 +1,257 @@
+import { PrismaClient, Prisma } from '@prisma/client'
+import { handleError } from '../../utils/error'
+import { sendUnaryData, ServerUnaryCall, UntypedHandleCall } from '@grpc/grpc-js'
+import { CreateProductRequest, CreateProductResponse } from '../../proto/nexura'
+
+const prisma = new PrismaClient()
+
+export const createProduct: UntypedHandleCall = async (call: ServerUnaryCall<CreateProductRequest, CreateProductResponse>, callback: sendUnaryData<CreateProductResponse>) => {
+  try {
+    console.log("Creating product", call.request)
+    const productData = call.request.product
+    if (productData == undefined) {
+      throw new Error("Product data is required")
+    }
+
+    // Validate required fields
+    if (!productData.name) throw new Error("Product name is required")
+    if (!productData.slug) throw new Error("Product slug is required")
+    if (!productData.sku) throw new Error("Product SKU is required")
+    if (!productData.variants?.length) throw new Error("At least one variant is required")
+
+    // Find or create default warehouse
+    const defaultWarehouse = await prisma.warehouse.upsert({
+      where: {
+        code: "WH-DEFAULT"
+      },
+      update: {},
+      create: {
+        name: "Default Warehouse",
+        code: "WH-DEFAULT",
+        status: "active",
+        address: "Default Location",
+        manager: "System",
+        contact: "system@nexura.com"
+      }
+    })
+
+    const images: Prisma.ProductImageCreateWithoutProductInput[] = productData.images?.map((image) => ({
+      url: image.url,
+      isMain: image.isMain,
+    })) || []
+
+    const attributes: Prisma.ProductAttributeCreateWithoutProductInput[] = productData.attributes?.map((attribute) => ({
+      name: attribute.name,
+      required: attribute.required,
+      visible: attribute.visible,
+      values: attribute.values,
+      variantable: attribute.variantable,
+      filterable: attribute.filterable,
+      searchable: attribute.searchable,
+      displayOrder: attribute.displayOrder,
+    })) || []
+
+    // Check for existing SKUs first
+    const existingSkus = await Promise.all(
+      productData.variants?.map(async (variant) => {
+        const existingVariant = await prisma.productVariant.findUnique({
+          where: { sku: variant.sku }
+        })
+        return existingVariant ? variant.sku : null
+      }) || []
+    )
+
+    const duplicateSkus = existingSkus.filter(sku => sku !== null)
+    if (duplicateSkus.length > 0) {
+      throw new Error(`The following SKUs already exist: ${duplicateSkus.join(', ')}`)
+    }
+
+    const variants: Prisma.ProductVariantCreateWithoutProductInput[] = productData.variants?.map((variant) => {
+      // Create a new variant object without the ID if it's a generated one
+      const variantData = {
+        sku: variant.sku,
+        price: variant.price,
+        quantity: variant.quantity,
+        lowStockThreshold: variant.lowStockThreshold,
+        images: {
+          create: variant.images?.map((img) => ({
+            url: img.url,
+            isMain: img.isMain,
+          })) || [],
+        },
+        attributes: {
+          create: variant.attributes?.map((attr) => ({
+            name: attr.name,
+            value: attr.value,
+            extraValue: attr.extraValue || "",
+          })) || [],
+        },
+        warehouse: {
+          connect: {
+            id: variant.warehouseId || defaultWarehouse.id
+          }
+        }
+      }
+
+      return variantData
+    }) || []
+
+    const newProduct = {
+      data: {
+        name: productData.name,
+        slug: productData.slug,
+        description: productData.description,
+        costPrice: productData.costPrice,
+        basePrice: productData.basePrice,
+        sku: productData.sku,
+        barcode: productData.barcode,
+        categories: productData.categories,
+        images: {
+          create: images,
+        },
+        attributes: {
+          create: attributes,
+        },
+        variants: {
+          create: variants,
+        },
+        productTags: {
+          create: productData.productTags?.map(productTag => {
+            if (!productTag?.tag?.name) {
+              throw new Error("Tag name is required");
+            }
+            return {
+              tag: {
+                connectOrCreate: {
+                  where: { name: productTag.tag.name },
+                  create: { name: productTag.tag.name }
+                }
+              }
+            };
+          }) || []
+        },
+        brandId: productData.brandId,
+        featured: productData.featured,
+        status: productData.status,
+        dimensions: productData.dimensions ? {
+          create: {
+            length: productData.dimensions.length,
+            width: productData.dimensions.width,
+            height: productData.dimensions.height,
+            weight: productData.dimensions.weight,
+          }
+        } : undefined,
+        seo: productData.seo ? {
+          create: {
+            title: productData.seo.title,
+            description: productData.seo.description,
+            keywords: productData.seo.keywords,
+          }
+        } : undefined,
+        taxable: productData.taxable,
+        shippable: productData.shippable,
+      },
+      include: {
+        images: true,
+        attributes: true,
+        variants: {
+          include: {
+            images: true,
+            attributes: true,
+            warehouse: true,
+          }
+        },
+        dimensions: true,
+        seo: true,
+        productTags: {
+          include: {
+            tag: true
+          }
+        }
+      }
+    }
+    console.log(JSON.stringify(newProduct, null, 2), "newProduct")
+    const product = await prisma.product.create(newProduct)
+    const response: CreateProductResponse = {
+      product: {
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        description: product.description,
+        costPrice: product.costPrice,
+        basePrice: product.basePrice,
+        sku: product.sku,
+        barcode: product.barcode || "",
+        categories: product.categories,
+        productTags: product.productTags.map((pt) => ({
+          id: pt.id,
+          tag: {
+            id: pt.tag.id,
+            name: pt.tag.name,
+            createdAt: pt.tag.createdAt.toISOString(),
+            updatedAt: pt.tag.updatedAt.toISOString()
+          },
+          productId: product.id
+        })),
+        images: product.images.map((img) => ({
+          id: img.id,
+          url: img.url,
+          isMain: img.isMain,
+        })),
+        attributes: product.attributes.map((attr) => ({
+          id: attr.id,
+          name: attr.name,
+          required: attr.required,
+          visible: attr.visible,
+          values: attr.values,
+          variantable: attr.variantable,
+          filterable: attr.filterable,
+          searchable: attr.searchable,
+          displayOrder: attr.displayOrder,
+          productId: product.id,
+        })),
+        variants: product.variants.map((variant) => ({
+          id: variant.id,
+          sku: variant.sku,
+          price: variant.price,
+          quantity: variant.quantity,
+          lowStockThreshold: variant.lowStockThreshold,
+          warehouseId: variant.warehouseId,
+          images: variant.images.map((img) => ({
+            id: img.id,
+            url: img.url,
+            isMain: img.isMain,
+          })),
+          attributes: variant.attributes.map((attr) => ({
+            id: attr.id,
+            name: attr.name,
+            value: attr.value,
+            extraValue: attr.extraValue || "",
+          })),
+        })),
+        brandId: product.brandId || "",
+        featured: product.featured,
+        status: product.status,
+        dimensions: product.dimensions ? {
+          length: product.dimensions.length,
+          width: product.dimensions.width,
+          height: product.dimensions.height,
+          weight: product.dimensions.weight,
+        } : undefined,
+        seo: product.seo ? {
+          title: product.seo.title,
+          description: product.seo.description,
+          keywords: product.seo.keywords,
+        } : undefined,
+        taxable: product.taxable,
+        shippable: product.shippable,
+        createdAt: product.createdAt.toISOString(),
+        updatedAt: product.updatedAt.toISOString(),
+      }
+    }
+
+    callback(null, response)
+  } catch (error) {
+    handleError(error, callback)
+  }
+}

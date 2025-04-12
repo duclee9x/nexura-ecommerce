@@ -33,12 +33,11 @@ export function verifyAccessToken(token: string): TokenPayload | null {
     }
 }
 
-export function validateToken(metadata: any): string | null {
-    const token = metadata.get('authorization')[0]?.replace('Bearer ', '');
+export function validateToken(token: string): { emailFromToken: string, userIdFromToken: string } | null {
     if (!token) return null;
 
     const payload = verifyAccessToken(token);
-    return payload?.userId || null;
+    return payload ? { emailFromToken: payload.email, userIdFromToken: payload.userId } : null;
 }
 
 export function verifyRefreshToken(token: string): TokenPayload | null {
@@ -48,4 +47,24 @@ export function verifyRefreshToken(token: string): TokenPayload | null {
     } catch (error) {
         return null;
     }
+} 
+
+
+const JWT_SECRET = process.env.JWT_ACCESS_SECRET || 'access-secret';
+const JWT_EXPIRES_IN = '60m' // Token expires in 60 minutes
+
+export function createToken(email: string, otp: string): string {
+  return jwt.sign(
+    { email, otp },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN }
+  )
+}
+
+export function verifyToken(token: string): { email: string; otp: string } | null {
+  try {
+    return jwt.verify(token, JWT_SECRET) as { email: string; otp: string }
+  } catch (error) {
+    return null
+  }
 } 

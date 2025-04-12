@@ -1,19 +1,13 @@
-import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import {
-  PeriodicExportingMetricReader,
-  ConsoleMetricExporter,
-} from '@opentelemetry/sdk-metrics';
-import { envDetector, hostDetector, osDetector, processDetector, Resource } from '@opentelemetry/resources';
+import { Resource } from '@opentelemetry/resources';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
-import { ConsoleSpanExporter, NodeTracerProvider, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node';
+import { NodeTracerProvider, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node';
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 import { GrpcInstrumentation } from '@opentelemetry/instrumentation-grpc';
 import { PrismaInstrumentation } from '@prisma/instrumentation';
 import { WinstonInstrumentation } from '@opentelemetry/instrumentation-winston';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { SimpleLogRecordProcessor, ConsoleLogRecordExporter } from '@opentelemetry/sdk-logs';
-import { trace } from '@opentelemetry/api';
+import { Span, Tracer, SpanStatusCode, trace } from '@opentelemetry/api';
 // const sdk = new NodeSDK({
 //   resource: new Resource({
 //     [ATTR_SERVICE_NAME]: 'user-microservice',
@@ -40,9 +34,9 @@ import { trace } from '@opentelemetry/api';
 
 // sdk.start();
 
-const defaultTracer = (serviceName: string) => {
+export const defaultTracer = (serviceName: string) => {
   const exporter = new OTLPTraceExporter({
-    url: 'http://localhost:4318/v1/traces',
+    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
     headers: {
       'Content-Type': 'application/json',
     },
@@ -69,4 +63,26 @@ const defaultTracer = (serviceName: string) => {
   return trace.getTracer('user-microservice');
 }
 
-export default defaultTracer;
+
+type TracingFunction<T> = (span: Span) => Promise<T>
+
+export const withTracing = async <T>(
+    tracer: Tracer,
+    spanName: string,
+    fn: TracingFunction<T>,
+    parentSpan?: Span
+): Promise<T> => {
+    const span = tracer.startSpan(spanName)
+    try {
+        const result = await fn(span)
+        return result
+    } catch (error) {
+        span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: error instanceof Error ? error.message : 'Unknown error'
+        })
+        throw error
+    } finally {
+        span.end()
+    }
+}

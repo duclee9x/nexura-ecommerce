@@ -1,0 +1,338 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+   
+ 
+@layer base {
+  :root {
+    /* Original shadcn variables */
+    --background: 0 0% 100%;
+    --foreground: 159.98 100% 30%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 159.98 100% 30%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 159.98 100% 30%;
+
+    --primary: 159.98 100% 30%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 159.98 100% 30%;
+
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 159.98 100% 30%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 159.98 100% 30%;
+
+    --radius: 0.5rem;
+
+    /* Semantic color system - Light mode */
+    /* Text colors */
+    --text-base: 159.98 100% 30%;
+    --text-muted: 0 0% 45.1%;
+    --text-inverted: 0 0% 98%;
+    --text-selected: 221 83% 53%;
+    --text-disabled: 215 20% 65%;
+    --text-error: 0 84% 60%;
+    --text-success: 142 76% 36%;
+    --text-warning: 38 92% 50%;
+    --text-info: 221 83% 53%;
+
+    /* Background colors */
+    --bg-base: 0 0% 100%;
+    --bg-muted: 0 0% 96.1%;
+    --bg-subtle: 220 14% 96%;
+    --bg-inverted: 159.98 100% 30%;
+    --bg-highlighted: 0 0% 98%;
+    --bg-selected: 221 83% 95%;
+    --bg-error: 0 84% 95%;
+    --bg-success: 142 76% 95%;
+    --bg-warning: 38 92% 95%;
+    --bg-info: 221 83% 95%;
+
+    /* Border colors */
+    --border-base: 0 0% 89.8%;
+    --border-muted: 214.3 31.8% 86%;
+    --border-strong: 0 0% 45.1%;
+    --border-inverted: 159.98 100% 30%;
+    --border-error: 0 84% 60%;
+    --border-success: 142 76% 36%;
+
+    /* Button colors */
+    --button-primary: 159.98 100% 30%;
+    --button-primary-hover: 222.2 47.4% 16%;
+    --button-primary-text: 0 0% 98%;
+    --button-secondary: 0 0% 96.1%;
+    --button-secondary-hover: 210 40% 92%;
+    --button-secondary-text: 159.98 100% 30%;
+    --button-accent: 221 83% 53%;
+    --button-accent-hover: 221 83% 48%;
+    --button-accent-text: 0 0% 98%;
+    --button-muted: 215 20% 90%;
+    --button-muted-hover: 215 20% 85%;
+    --button-muted-text: 0 0% 45.1%;
+    --button-destructive: 0 84.2% 60.2%;
+    --button-destructive-hover: 0 84.2% 55%;
+    --button-destructive-text: 0 0% 98%;
+    --button-disabled: 0 0% 96.1%;
+    --button-disabled-text: 215 20% 65%;
+
+    /* Form element colors */
+    --input-base: 0 0% 100%;
+    --input-focus: 0 0% 100%;
+    --input-disabled: 0 0% 96.1%;
+    --input-placeholder: 215 20% 65%;
+    --input-border: 0 0% 89.8%;
+    --input-border-focus: 221 83% 53%;
+
+    /* Status colors */
+    --status-error: 0 84% 60%;
+    --status-success: 142 76% 36%;
+    --status-warning: 38 92% 50%;
+    --status-info: 221 83% 53%;
+
+    /* Brand colors */
+    --brand-primary: 221 83% 53%;
+    --brand-secondary: 159.98 100% 30%;
+    --brand-accent: 38 92% 50%;
+  }
+ 
+  :root.dark {
+    --background: 222.2 47.4% 11.2%;
+    --foreground: 0 0% 98%;
+
+    --card: 222.2 47.4% 11.2%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 222.2 47.4% 11.2%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 159.98 100% 40%; /* Slightly brighter for dark mode */
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 215 27.9% 16.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 215 27.9% 16.9%;
+    --muted-foreground: 159.98 100% 30%;
+
+    --accent: 215 27.9% 16.9%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --ring: 159.98 100% 40%;
+
+    /* Semantic color system - Dark mode */
+    /* Text colors */
+    --text-base: 0 0% 98%;
+    --text-muted: 215 20% 65%;
+    --text-inverted: 222.2 47.4% 11.2%;
+    --text-selected: 217.2 91.2% 59.8%;
+    --text-disabled: 215 16% 47%;
+    --text-error: 0 84% 60%;
+    --text-success: 142 76% 45%;
+    --text-warning: 38 92% 55%;
+    --text-info: 217.2 91.2% 59.8%;
+
+    /* Background colors */
+    --bg-base: 222.2 47.4% 11.2%;
+    --bg-muted: 215 27.9% 16.9%;
+    --bg-subtle: 215 25% 22%;
+    --bg-inverted: 0 0% 98%;
+    --bg-highlighted: 215 20% 25%;
+    --bg-selected: 217.2 91.2% 20%;
+    --bg-error: 0 84% 20%;
+    --bg-success: 142 76% 20%;
+    --bg-warning: 38 92% 20%;
+    --bg-info: 217.2 91.2% 20%;
+
+    /* Border colors */
+    --border-base: 215 27.9% 16.9%;
+    --border-muted: 215 20% 30%;
+    --border-strong: 215 20% 65%;
+    --border-inverted: 0 0% 98%;
+    --border-error: 0 84% 60%;
+    --border-success: 142 76% 45%;
+
+    /* Button colors */
+    --button-primary: 159.98 100% 40%;
+    --button-primary-hover: 159.98 100% 35%;
+    --button-primary-text: 0 0% 98%;
+    --button-secondary: 215 27.9% 16.9%;
+    --button-secondary-hover: 215 27.9% 21.9%;
+    --button-secondary-text: 0 0% 98%;
+    --button-accent: 217.2 91.2% 59.8%;
+    --button-accent-hover: 217.2 91.2% 54.8%;
+    --button-accent-text: 0 0% 98%;
+    --button-muted: 215 20% 30%;
+    --button-muted-hover: 215 20% 35%;
+    --button-muted-text: 215 20% 65%;
+    --button-destructive: 0 84.2% 60.2%;
+    --button-destructive-hover: 0 84.2% 55.2%;
+    --button-destructive-text: 0 0% 98%;
+    --button-disabled: 215 27.9% 16.9%;
+    --button-disabled-text: 215 16% 47%;
+
+    /* Form element colors */
+    --input-base: 215 27.9% 16.9%;
+    --input-focus: 215 27.9% 16.9%;
+    --input-disabled: 215 25% 22%;
+    --input-placeholder: 215 16% 47%;
+    --input-border: 215 27.9% 16.9%;
+    --input-border-focus: 217.2 91.2% 59.8%;
+
+    /* Status colors */
+    --status-error: 0 84% 60%;
+    --status-success: 142 76% 45%;
+    --status-warning: 38 92% 55%;
+    --status-info: 217.2 91.2% 59.8%;
+
+    /* Brand colors */
+    --brand-primary: 217.2 91.2% 59.8%;
+    --brand-secondary: 159.98 100% 40%;
+    --brand-accent: 38 92% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Smooth transitions for theme changes */
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  div,
+  span,
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, text-decoration 0.3s ease;
+  }
+}
+
+/* Semantic utility classes */
+@layer utilities {
+  .text-base {
+    @apply text-text-base;
+  }
+  .text-muted {
+    @apply text-text-muted;
+  }
+  .text-inverted {
+    @apply text-text-inverted;
+  }
+  .text-selected {
+    @apply text-text-selected;
+  }
+  .text-disabled {
+    @apply text-text-disabled;
+  }
+  .text-error {
+    @apply text-text-error;
+  }
+  .text-success {
+    @apply text-text-success;
+  }
+  .text-warning {
+    @apply text-text-warning;
+  }
+  .text-info {
+    @apply text-text-info;
+  }
+
+  .bg-base {
+    @apply bg-bg-base;
+  }
+  .bg-muted {
+    @apply bg-bg-muted;
+  }
+  .bg-subtle {
+    @apply bg-bg-subtle;
+  }
+  .bg-inverted {
+    @apply bg-bg-inverted;
+  }
+  .bg-highlighted {
+    @apply bg-bg-highlighted;
+  }
+  .bg-selected {
+    @apply bg-bg-selected;
+  }
+  .bg-error {
+    @apply bg-bg-error;
+  }
+  .bg-success {
+    @apply bg-bg-success;
+  }
+  .bg-warning {
+    @apply bg-bg-warning;
+  }
+  .bg-info {
+    @apply bg-bg-info;
+  }
+
+  .border-base {
+    @apply border-border-base;
+  }
+  .border-muted {
+    @apply border-border-muted;
+  }
+  .border-strong {
+    @apply border-border-strong;
+  }
+  .border-inverted {
+    @apply border-border-inverted;
+  }
+  .border-error {
+    @apply border-border-error;
+  }
+  .border-success {
+    @apply border-border-success;
+  }
+
+  .btn-primary {
+    @apply bg-button-primary text-button-primary-text hover:bg-button-primary-hover;
+  }
+  .btn-secondary {
+    @apply bg-button-secondary text-button-secondary-text hover:bg-button-secondary-hover;
+  }
+  .btn-accent {
+    @apply bg-button-accent text-button-accent-text hover:bg-button-accent-hover;
+  }
+  .btn-muted {
+    @apply bg-button-muted text-button-muted-text hover:bg-button-muted-hover;
+  }
+  .btn-destructive {
+    @apply bg-button-destructive text-button-destructive-text hover:bg-button-destructive-hover;
+  }
+  .btn-disabled {
+    @apply bg-button-disabled text-button-disabled-text cursor-not-allowed;
+  }
+}
+

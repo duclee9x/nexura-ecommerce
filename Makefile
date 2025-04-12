@@ -5,6 +5,8 @@
 # All documents to be used in spell check.
 ALL_DOCS := $(shell find . -type f -name '*.md' -not -path './.github/*' -not -path '*/node_modules/*' -not -path '*/_build/*' -not -path '*/deps/*' -not -path */Pods/* -not -path */.expo/* | sort)
 PWD := $(shell pwd)
+BASE_DIR := D:/nexura-ecommerce
+
 
 TOOLS_DIR := ./internal/tools
 MISSPELL_BINARY=bin/misspell
@@ -169,6 +171,15 @@ docker-generate-protobuf:
 copy-proto:
 	./copy-proto.sh
 
+.PHONY: copy-nexura-proto
+copy-nexura-proto:
+	@echo "Copying nexura.proto to all proto folders..."
+	@cp ./proto/nexura.proto ./src/user-service/protos/
+	@cp ./proto/nexura.proto ./src/frontend/protos/
+	@cp ./proto/nexura.proto ./src/user-service/dist/proto/
+	@cp ./proto/nexura.proto ./src/email-service/protos/
+	@echo "Nexura proto file copied successfully"
+
 .PHONY: clean
 clean:
 	rm -rf ./src/{checkout,product-catalog}/genproto/oteldemo/
@@ -254,3 +265,29 @@ endif
 .PHONY: build-react-native-android
 build-react-native-android:
 	docker build -f src/react-native-app/android.Dockerfile --platform=linux/amd64 --output=. src/react-native-app
+
+
+.PHONY: rus
+rus:
+	$(DOCKER_COMPOSE_CMD) restart user-service
+
+.PHONY: proto
+proto:
+	docker compose up protoc
+	echo "Copying proto files..."
+	cp ./protos/nexura.ts ./src/frontend/protos/nexura.ts
+	cp ./protos/nexura.proto ./src/frontend/protos/nexura.proto
+
+	cp -r ./protos/nexura.ts ./src/user-service/src/proto/nexura.ts
+	cp -r ./protos/nexura.proto ./src/user-service/src/proto/nexura.proto
+	cp -r ./src/user-service/src/proto/ ./src/user-service/dist/
+	
+	cp -r ./protos/nexura.ts ./src/product-service/src/proto/nexura.ts
+	cp -r ./protos/nexura.proto ./src/product-service/src/proto/nexura.proto
+	cp -r ./src/product-service/src/proto/ ./src/product-service/dist/
+	
+	sed -i 's/from protos import/from . import/g' ./protos/nexura_pb2_grpc.py
+	cp ./protos/nexura_pb2* ./src/email-service/protos
+	cp ./protos/nexura.proto ./src/email-service/protos/nexura.proto
+	echo "Proto files generated successfully"
+

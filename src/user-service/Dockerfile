@@ -1,12 +1,12 @@
 FROM node:22-alpine AS build
 
-WORKDIR /usr/src/app/
+WORKDIR /app
 
-COPY ./src/user-service/package*.json ./
+COPY ./package*.json ./
 
-RUN apk add --no-cache python3 make g++ && yarn install
+RUN apk add python3 make g++ && yarn 
 
-COPY ./src/user-service/ ./
+COPY . .
 RUN yarn build
 
 # -----------------------------------------------------------------------------
@@ -14,12 +14,12 @@ RUN yarn build
 FROM node:22-alpine
 
 USER node
-WORKDIR /usr/src/app/
+WORKDIR /app
 ENV NODE_ENV=production
 
-COPY --chown=node:node --from=build /usr/src/app/node_modules/ ./node_modules/
-COPY --chown=node:node --from=build /usr/src/app/dist/ ./dist/
-COPY ./proto/nexura.proto ./
+COPY --chown=node:node --from=build /app/node_modules/ ./node_modules/
+COPY --chown=node:node --from=build /app/dist ./dist
+COPY ./protos/nexura.proto ./
 
 EXPOSE ${USER_SERVICE_PORT}
-ENTRYPOINT [ "npm", "run", "start" ]
+ENTRYPOINT [ "sh", "-c", "yarn prisma:migrate:deploy && yarn start" ]

@@ -1,7 +1,7 @@
 import path from 'path';
 import { loadSync, ServiceDefinition } from '@grpc/proto-loader';
-const USER_PROTO_PATH = path.resolve(__dirname, '../../proto/nexura.proto');
-const HEALTH_PROTO_PATH = path.resolve(__dirname, '../../proto/health.proto');
+const USER_PROTO_PATH = path.resolve(__dirname, '../proto/nexura.proto');
+const HEALTH_PROTO_PATH = path.resolve(__dirname, '../proto/health.proto');
 
 const userProtoDefinition = loadSync(USER_PROTO_PATH, {
     keepCase: true,
@@ -19,8 +19,8 @@ const healthProtoDefinition = loadSync(HEALTH_PROTO_PATH, {
     oneofs: true,
 });
 
-
 const userPackageDefinition = userProtoDefinition['nexuraTelemetry.UserService'] as ServiceDefinition;
+const addressPackageDefinition = userProtoDefinition['nexuraTelemetry.AddressService'] as ServiceDefinition;
 const healthPackageDefinition = healthProtoDefinition['grpc.health.v1.Health'] as ServiceDefinition;
 
-export { userProtoDefinition, userPackageDefinition, healthPackageDefinition };
+export { userProtoDefinition, userPackageDefinition, addressPackageDefinition, healthPackageDefinition };

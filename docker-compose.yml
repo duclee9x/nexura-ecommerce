@@ -12,22 +12,25 @@ networks:
 
 volumes:
   user-service-db-data:
-
+  nexura-ecommerce_minio-data:
 services:
   user-service:
-    container_name: ${IMAGE_NAME}-user:${IMAGE_VERSION}
+    container_name: user-service
     build:
       context: ./
       dockerfile: ${USER_SERVICE_DOCKERFILE}
       cache_from:
-        - ${IMAGE_NAME}-user:${IMAGE_VERSION}
+        - user-service
+    volumes:
+      - ./src/user-service:/app
     deploy:
       resources:
         limits:
-          memory: 64M
+          memory: 128M
     depends_on:
       user-service-db:
         condition: service_healthy
+        restart: true
       otel-collector:
         condition: service_started
     restart: unless-stopped
@@ -46,10 +49,40 @@ services:
       - JWT_REFRESH_SECRET
       - JWT_ACCESS_EXPIRATION
       - JWT_REFRESH_EXPIRATION
+    # entrypoint: ["sleep", "infinity"]
     logging: *logging
     
+
+  # product-service:
+  #   container_name: product-service
+  #   build:
+  #     context: ./src/product-service
+  #     dockerfile: Dockerfile
+  #     cache_from:
+  #       - product-service
+  #   working_dir: /app
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 64M
+  #   restart: no
+  #   ports:
+  #     - "${PRODUCT_SERVICE_PORT}:${PRODUCT_SERVICE_PORT}"
+  #   environment:
+  #     - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+  #     - OTEL_EXPORTER_OTLP_TRACES_TEMPORALITY_PREFERENCE
+  #     - OTEL_EXPORTER_OTLP_LOGS_TEMPORALITY_PREFERENCE
+  #     - OTEL_EXPORTER_OTLP_ENDPOINT
+  #     - OTEL_RESOURCE_ATTRIBUTES
+  #     - OTEL_SERVICE_NAME=product-service
+  #     - OTEL_RESOURCE_NAMESPACE=nexura
+  #     - PRODUCT_SERVICE_DB_URL=${PRODUCT_SERVICE_DB_URL}
+  #   # logging: *logging
+
+
   user-service-db:
     image: ${USER_SERVICE_DB_IMAGE}
+    container_name: user-service-db
     environment:
       TZ: "UTC"
       MYSQL_ROOT_PASSWORD: ${USER_SERVICE_DB_ROOT_PASSWORD}
@@ -87,25 +120,25 @@ services:
       - "${OTEL_COLLECTOR_PORT_GRPC}"
     environment:
       - METRICS_STORAGE_TYPE=prometheus
-    logging: *logging
+    # logging: *logging
 
   # Grafana
-  grafana:
-    image: ${GRAFANA_IMAGE}
-    container_name: grafana
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-    restart: unless-stopped
-    environment:
-      - "GF_INSTALL_PLUGINS=grafana-opensearch-datasource"
-    volumes:
-      - ./src/grafana/grafana.ini:/etc/grafana/grafana.ini
-      - ./src/grafana/provisioning/:/etc/grafana/provisioning/
-    ports:
-      - "${GRAFANA_PORT}"
-    logging: *logging
+  # grafana:
+  #   image: ${GRAFANA_IMAGE}
+  #   container_name: grafana
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 128M
+  #   restart: unless-stopped
+  #   environment:
+  #     - "GF_INSTALL_PLUGINS=grafana-opensearch-datasource"
+  #   volumes:
+  #     - ./src/grafana/grafana.ini:/etc/grafana/grafana.ini
+  #     - ./src/grafana/provisioning/:/etc/grafana/provisioning/
+  #   ports:
+  #     - "${GRAFANA_PORT}"
+    # logging: *logging
 
   # OpenTelemetry Collector
   otel-collector:
@@ -128,9 +161,9 @@ services:
     depends_on:
       jaeger:
         condition: service_started
-      opensearch:
-        condition: service_healthy
-    logging: *logging
+      # opensearch:
+      #   condition: service_healthy
+    # logging: *logging
     environment:
       - ENVOY_PORT
       - HOST_FILESYSTEM
@@ -139,64 +172,102 @@ services:
       - OTEL_COLLECTOR_PORT_HTTP
       - GOMEMLIMIT=160MiB
 
-  # Prometheus
-  prometheus:
-    image: ${PROMETHEUS_IMAGE}
-    container_name: prometheus
-    command:
-      - --web.console.templates=/etc/prometheus/consoles
-      - --web.console.libraries=/etc/prometheus/console_libraries
-      - --storage.tsdb.retention.time=1h
-      - --config.file=/etc/prometheus/prometheus-config.yaml
-      - --storage.tsdb.path=/prometheus
-      - --web.enable-lifecycle
-      - --web.route-prefix=/
-      - --web.enable-otlp-receiver
-      - --enable-feature=exemplar-storage
+  protoc:
+    image: rvolosatovs/protoc
+    container_name: protoc
+    working_dir: /protos
+    command: ["--proto_path=.","--python_out=.","--plugin=/protoc/node_modules/.bin/protoc-gen-ts_proto","--ts_proto_opt=esModuleInterop=true","--ts_proto_opt=outputServices=grpc-js","--ts_proto_out=.","--grpc-python_out=.", "./nexura.proto"]
     volumes:
-      - ./config/prometheus-config.yaml:/etc/prometheus/prometheus-config.yaml
-    deploy:
-      resources:
-        limits:
-          memory: 300M
-    restart: unless-stopped
-    ports:
-      - "${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
-    logging: *logging
+      - ./protos:/protos
+      - ./src/frontend/node_modules/ts-proto-descriptors:/protoc/node_modules/ts-proto-descriptors
+      - ./src/frontend/node_modules/ts-proto:/protoc/node_modules/ts-proto
+      - ./src/frontend/node_modules/ts-poet:/protoc/node_modules/ts-poet
+      - ./src/frontend/node_modules/dprint-node:/protoc/node_modules/dprint-node
+      - ./src/frontend/node_modules/case-anything:/protoc/node_modules/case-anything
+      - ./src/frontend/node_modules/@bufbuild:/protoc/node_modules/@bufbuild
+      - ./src/frontend/node_modules/.bin/protoc-gen-ts_proto:/protoc/node_modules/.bin/protoc-gen-ts_proto
 
-  # OpenSearch
-  opensearch:
-    image: ${OPENSEARCH_IMAGE}
-    container_name: opensearch
-    deploy:
-      resources:
-        limits:
-          memory: 1.1G
-    restart: unless-stopped
-    environment:
-      - cluster.name=demo-cluster
-      - node.name=demo-node
-      - bootstrap.memory_lock=true
-      - discovery.type=single-node
-      - OPENSEARCH_JAVA_OPTS=-Xms300m -Xmx300m
-      - DISABLE_INSTALL_DEMO_CONFIG=true
-      - DISABLE_SECURITY_PLUGIN=true
-      # Workaround on OSX for https://bugs.openjdk.org/browse/JDK-8345296
-      - _JAVA_OPTIONS
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
+  image-proxy:
+    container_name: image-proxy
+    image: ghcr.io/willnorris/imageproxy:latest
     ports:
-      - "${OPENSEARCH_PORT}:${OPENSEARCH_PORT}"
-    healthcheck:
-      test: curl -s http://localhost:${OPENSEARCH_PORT}/_cluster/health | grep -E '"status":"(green|yellow)"'
-      start_period: 10s
-      interval: 5s
-      timeout: 10s
-      retries: 10
-    logging: *logging
+      - "${IMAGE_PROXY_PORT}:${IMAGE_PROXY_PORT}"
+    command: ["-addr", "0.0.0.0:${IMAGE_PROXY_PORT}"]  
+
+  image-provider:
+    image: ${IMAGE_PROVIDER_IMAGE}
+    container_name: image-provider
+    ports:
+      - "${IMAGE_PROVIDER_API_PORT}:${IMAGE_PROVIDER_API_PORT}"
+      - "${IMAGE_PROVIDER_CONSOLE_PORT}:${IMAGE_PROVIDER_CONSOLE_PORT}"
+    environment:
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_BUCKET_ACCESS_KEY=${MINIO_BUCKET_ACCESS_KEY}
+      - MINIO_BUCKET_SECRET_KEY=${MINIO_BUCKET_SECRET_KEY}
+    command: ["server","/data","--console-address", ":${IMAGE_PROVIDER_CONSOLE_PORT}"]
+    volumes:
+      - nexura-ecommerce_minio-data:/data
+    # logging: *logging
+
+  # Prometheus
+  # prometheus:
+  #   image: ${PROMETHEUS_IMAGE}
+  #   container_name: prometheus
+  #   command:
+  #     - --web.console.templates=/etc/prometheus/consoles
+  #     - --web.console.libraries=/etc/prometheus/console_libraries
+  #     - --storage.tsdb.retention.time=1h
+  #     - --config.file=/etc/prometheus/prometheus-config.yaml
+  #     - --storage.tsdb.path=/prometheus
+  #     - --web.enable-lifecycle
+  #     - --web.route-prefix=/
+  #     - --web.enable-otlp-receiver
+  #     - --enable-feature=exemplar-storage
+  #   volumes:
+  #     - ./config/prometheus-config.yaml:/etc/prometheus/prometheus-config.yaml
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 300M
+  #   restart: unless-stopped
+  #   ports:
+  #     - "${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
+  #   logging: *logging
+
+  # # OpenSearch
+  # opensearch:
+  #   image: ${OPENSEARCH_IMAGE}
+  #   container_name: opensearch
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 1.1G
+  #   restart: unless-stopped
+  #   environment:
+  #     - cluster.name=demo-cluster
+  #     - node.name=demo-node
+  #     - bootstrap.memory_lock=true
+  #     - discovery.type=single-node
+  #     - OPENSEARCH_JAVA_OPTS=-Xms300m -Xmx300m
+  #     - DISABLE_INSTALL_DEMO_CONFIG=true
+  #     - DISABLE_SECURITY_PLUGIN=true
+  #     # Workaround on OSX for https://bugs.openjdk.org/browse/JDK-8345296
+  #     - _JAVA_OPTIONS
+  #   ulimits:
+  #     memlock:
+  #       soft: -1
+  #       hard: -1
+  #     nofile:
+  #       soft: 65536
+  #       hard: 65536
+  #   ports:
+  #     - "${OPENSEARCH_PORT}:${OPENSEARCH_PORT}"
+  #   healthcheck:
+  #     test: curl -s http://localhost:${OPENSEARCH_PORT}/_cluster/health | grep -E '"status":"(green|yellow)"'
+  #     start_period: 10s
+  #     interval: 5s
+  #     timeout: 10s
+  #     retries: 10
+  #   logging: *logging
 
