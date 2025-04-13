@@ -49,11 +49,24 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
         shippable: request.product.shippable,
         categories: request.product.categories,
         images: {
-          deleteMany: {},
-          create: request.product.images?.map((img) => ({
-            url: img.url,
-            blurhash: img.blurhash,
-            isMain: img.isMain,
+          deleteMany: {
+            id: {
+              notIn: request.product.images?.map(img => img.id) || []
+            }
+          },
+          upsert: request.product.images?.map((img) => ({
+            where: { id: img.id },
+            create: {
+              id: img.id,
+              url: img.url,
+              blurhash: img.blurhash,
+              isMain: img.isMain,
+            },
+            update: {
+              url: img.url,
+              blurhash: img.blurhash,
+              isMain: img.isMain,
+            }
           })) || [],
         },
         attributes: {
@@ -76,13 +89,7 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
             price: variant.price,
             quantity: variant.quantity,
             lowStockThreshold: variant.lowStockThreshold,
-            images: {
-              create: variant.images?.map((img) => ({
-                url: img.url,
-                blurhash: img.blurhash,
-                isMain: img.isMain,
-              })) || [],
-            },
+            imageIds: variant.imageIds,
             attributes: {
               create: variant.attributes?.map((attr) => ({
                 name: attr.name,
@@ -145,7 +152,6 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
         attributes: true,
         variants: {
           include: {
-            images: true,
             attributes: true,
             warehouse: true,
           }
@@ -245,12 +251,7 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
           quantity: variant.quantity,
           lowStockThreshold: variant.lowStockThreshold,
           warehouseId: variant.warehouseId,
-          images: variant.images.map((img) => ({
-            id: img.id,
-            url: img.url,
-            blurhash: img.blurhash,
-            isMain: img.isMain,
-          })),
+          imageIds: variant.imageIds,
           attributes: variant.attributes.map((attr) => ({
             id: attr.id,
             name: attr.name,

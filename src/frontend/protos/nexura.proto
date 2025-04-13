@@ -496,7 +496,7 @@ message ProductVariant {
     int32 quantity = 4;
     float lowStockThreshold = 5;
     string warehouseId = 6;
-    repeated Image images = 7;
+    repeated string imageIds = 7;
     repeated VariantAttribute attributes = 8;
 }
 

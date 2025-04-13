@@ -30,7 +30,6 @@ export const getProduct = async (call: ServerUnaryCall<GetProductRequest, GetPro
         },
         variants: {
           include: {
-            images: true,
             attributes: true,
             warehouse: true,
           }
@@ -134,12 +133,7 @@ export const getProduct = async (call: ServerUnaryCall<GetProductRequest, GetPro
           quantity: variant.quantity,
           lowStockThreshold: variant.lowStockThreshold,
           warehouseId: variant.warehouseId,
-          images: variant.images.map(img => ({
-            id: img.id,
-            url: img.url,
-            isMain: img.isMain,
-            blurhash: img.blurhash,
-          })),
+          imageIds: variant.imageIds,
           attributes: variant.attributes.map(attr => ({
             id: attr.id,
             name: attr.name,

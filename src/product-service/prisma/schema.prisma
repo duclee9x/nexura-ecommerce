@@ -67,8 +67,7 @@ model ProductVariant {
   colorName        String?
   attributes       VariantAttribute[]
   attributesIds    String[]
-  images           ProductVariantImage[]
-  imagesIds        String[]
+  imageIds         String[]
   product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId        String   @db.ObjectId
   warehouse        Warehouse @relation(fields: [warehouseId], references: [id])
@@ -88,14 +87,6 @@ model VariantAttribute {
   variantId String   @db.ObjectId
 }
 
-model ProductVariantImage {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  url       String
-  blurhash  String
-  isMain    Boolean  @default(false)
-  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  variantId String   @db.ObjectId
-}
 
 model ProductAttribute {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId

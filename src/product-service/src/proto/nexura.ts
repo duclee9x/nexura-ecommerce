@@ -459,7 +459,7 @@ export interface ProductVariant {
   quantity: number;
   lowStockThreshold: number;
   warehouseId: string;
-  images: Image[];
+  imageIds: string[];
   attributes: VariantAttribute[];
 }
 
@@ -7577,7 +7577,16 @@ export const Seo: MessageFns<Seo> = {
 };
 
 function createBaseProductVariant(): ProductVariant {
-  return { id: "", sku: "", price: 0, quantity: 0, lowStockThreshold: 0, warehouseId: "", images: [], attributes: [] };
+  return {
+    id: "",
+    sku: "",
+    price: 0,
+    quantity: 0,
+    lowStockThreshold: 0,
+    warehouseId: "",
+    imageIds: [],
+    attributes: [],
+  };
 }
 
 export const ProductVariant: MessageFns<ProductVariant> = {
@@ -7600,8 +7609,8 @@ export const ProductVariant: MessageFns<ProductVariant> = {
     if (message.warehouseId !== "") {
       writer.uint32(50).string(message.warehouseId);
     }
-    for (const v of message.images) {
-      Image.encode(v!, writer.uint32(58).fork()).join();
+    for (const v of message.imageIds) {
+      writer.uint32(58).string(v!);
     }
     for (const v of message.attributes) {
       VariantAttribute.encode(v!, writer.uint32(66).fork()).join();
@@ -7669,7 +7678,7 @@ export const ProductVariant: MessageFns<ProductVariant> = {
             break;
           }
 
-          message.images.push(Image.decode(reader, reader.uint32()));
+          message.imageIds.push(reader.string());
           continue;
         }
         case 8: {
@@ -7697,7 +7706,7 @@ export const ProductVariant: MessageFns<ProductVariant> = {
       quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
       lowStockThreshold: isSet(object.lowStockThreshold) ? globalThis.Number(object.lowStockThreshold) : 0,
       warehouseId: isSet(object.warehouseId) ? globalThis.String(object.warehouseId) : "",
-      images: globalThis.Array.isArray(object?.images) ? object.images.map((e: any) => Image.fromJSON(e)) : [],
+      imageIds: globalThis.Array.isArray(object?.imageIds) ? object.imageIds.map((e: any) => globalThis.String(e)) : [],
       attributes: globalThis.Array.isArray(object?.attributes)
         ? object.attributes.map((e: any) => VariantAttribute.fromJSON(e))
         : [],
@@ -7724,8 +7733,8 @@ export const ProductVariant: MessageFns<ProductVariant> = {
     if (message.warehouseId !== "") {
       obj.warehouseId = message.warehouseId;
     }
-    if (message.images?.length) {
-      obj.images = message.images.map((e) => Image.toJSON(e));
+    if (message.imageIds?.length) {
+      obj.imageIds = message.imageIds;
     }
     if (message.attributes?.length) {
       obj.attributes = message.attributes.map((e) => VariantAttribute.toJSON(e));
@@ -7744,7 +7753,7 @@ export const ProductVariant: MessageFns<ProductVariant> = {
     message.quantity = object.quantity ?? 0;
     message.lowStockThreshold = object.lowStockThreshold ?? 0;
     message.warehouseId = object.warehouseId ?? "";
-    message.images = object.images?.map((e) => Image.fromPartial(e)) || [];
+    message.imageIds = object.imageIds?.map((e) => e) || [];
     message.attributes = object.attributes?.map((e) => VariantAttribute.fromPartial(e)) || [];
     return message;
   },

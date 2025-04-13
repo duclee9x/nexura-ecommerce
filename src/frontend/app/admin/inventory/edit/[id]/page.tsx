@@ -15,11 +15,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const router = useRouter()
   const { id: productId } = use(params)
   const queryClient = useQueryClient()
-  const {data: categories} = useQuery({
+  const {data: categories, isLoading: isLoadingCategories} = useQuery({
     queryKey: ["categories"],
     queryFn: () => getAllCategoryGateway().then((res) => res.categories)
   })
-  const {data: brands} = useQuery({
+  const {data: brands, isLoading: isLoadingBrands} = useQuery({
     queryKey: ["brands"],
     queryFn: () => getAllBrandGateway().then((res) => res.brands)
   })
@@ -60,8 +60,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       <AdminSidebar />
       <ProductForm
         productId={productId}
-        categories={categories}
-        brands={brands}
+        categoriesData={{categories, isLoadingCategories}}
+        brandsData={{brands, isLoadingBrands}}
         onSave={updateProduct}
         onCancel={handleCancel}
         mode="edit"

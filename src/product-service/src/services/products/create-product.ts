@@ -38,6 +38,7 @@ export const createProduct: UntypedHandleCall = async (call: ServerUnaryCall<Cre
     const images: Prisma.ProductImageCreateWithoutProductInput[] = productData.images?.map((image) => ({
       url: image.url,
       isMain: image.isMain,
+      blurhash: image.blurhash,
     })) || []
 
     const attributes: Prisma.ProductAttributeCreateWithoutProductInput[] = productData.attributes?.map((attribute) => ({
@@ -73,12 +74,7 @@ export const createProduct: UntypedHandleCall = async (call: ServerUnaryCall<Cre
         price: variant.price,
         quantity: variant.quantity,
         lowStockThreshold: variant.lowStockThreshold,
-        images: {
-          create: variant.images?.map((img) => ({
-            url: img.url,
-            isMain: img.isMain,
-          })) || [],
-        },
+        imageIds: variant.imageIds || [],
         attributes: {
           create: variant.attributes?.map((attr) => ({
             name: attr.name,
@@ -152,11 +148,17 @@ export const createProduct: UntypedHandleCall = async (call: ServerUnaryCall<Cre
         shippable: productData.shippable,
       },
       include: {
+        sizeCharts: {
+          include: {
+            images: true,
+            columns: true,
+            rows: true,
+          }
+        },
         images: true,
         attributes: true,
         variants: {
           include: {
-            images: true,
             attributes: true,
             warehouse: true,
           }
@@ -197,6 +199,38 @@ export const createProduct: UntypedHandleCall = async (call: ServerUnaryCall<Cre
           id: img.id,
           url: img.url,
           isMain: img.isMain,
+          blurhash: img.blurhash,
+        })),
+        sizeCharts: product.sizeCharts.map((sizeChart) => ({
+          id: sizeChart.id,
+          name: sizeChart.name,
+          description: sizeChart.description || "",
+          category: sizeChart.category,
+          productId: sizeChart.productId,
+          images: sizeChart.images.map(img => ({
+            id: img.id,
+            url: img.url,
+            name: img.name,
+            sizeChartId: img.sizeChartId,
+            createdAt: img.createdAt.toISOString(),
+          })),
+          createdAt: sizeChart.createdAt.toISOString(),
+          updatedAt: sizeChart.updatedAt.toISOString(),
+          columns: sizeChart.columns.map((column) => ({
+            id: column.id,
+            name: column.name,
+            type: column.type,
+            unit: column.unit || "",
+            sizeChartId: column.sizeChartId,
+            createdAt: column.createdAt.toISOString(),
+          })),
+          rows: sizeChart.rows.map(row => ({
+            id: row.id,
+            name: row.name,
+            cells: row.values as any,
+            sizeChartId: row.sizeChartId,
+            createdAt: row.createdAt.toISOString(),
+          })),
         })),
         attributes: product.attributes.map((attr) => ({
           id: attr.id,
@@ -217,11 +251,7 @@ export const createProduct: UntypedHandleCall = async (call: ServerUnaryCall<Cre
           quantity: variant.quantity,
           lowStockThreshold: variant.lowStockThreshold,
           warehouseId: variant.warehouseId,
-          images: variant.images.map((img) => ({
-            id: img.id,
-            url: img.url,
-            isMain: img.isMain,
-          })),
+          imageIds: variant.imageIds,
           attributes: variant.attributes.map((attr) => ({
             id: attr.id,
             name: attr.name,

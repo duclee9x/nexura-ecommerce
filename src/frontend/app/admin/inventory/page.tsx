@@ -24,11 +24,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useCurrency } from "@/contexts/currency-context"
-import { deleteProductGateway, listProductsGateway, updateProductGateway } from "@/gateway/gateway"
+import { deleteProductGateway, getAllCategoryGateway, listProductsGateway, updateProductGateway } from "@/gateway/gateway"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Product } from "@/protos/nexura"
 
-const productCategories = ["backpack", "bag", "accessory"]
 
 export default function InventoryManagementPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -40,9 +39,15 @@ export default function InventoryManagementPage() {
     queryKey: ["inventory"],
     queryFn: () => listProductsGateway("").then((res) => res.products),
   })
+
+  const {data: categories} = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => getAllCategoryGateway().then((res) => res.categories)
+  })
+  console.log(JSON.stringify(categories, null, 2), "categories")
   const [isPublishing, setIsPublishing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-
+  
   const { mutate: publishProduct } = useMutation({
     mutationFn: (product: Product) => updateProductGateway(product),
     onSuccess: async () => {
@@ -56,7 +61,6 @@ export default function InventoryManagementPage() {
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["inventory"] })
       await queryClient.prefetchQuery({ queryKey: ["inventory"], queryFn: ()=>listProductsGateway("").then((res) => res.products) });
-
     }
   })
 
@@ -82,7 +86,7 @@ export default function InventoryManagementPage() {
     errors: Array<{ row: number; message: string }>
   }>({ success: 0, errors: [] })
   const [showUploadResults, setShowUploadResults] = useState(false)
-
+  const productCategories = inventory?.map((product) => product.categories).flat()
   // Handle form input changes
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -249,6 +253,14 @@ export default function InventoryManagementPage() {
     })
   }
 
+  // Get unique categories from inventory
+  const usedCategories = inventory
+    ? [...new Set(inventory.flatMap(product => product.categories))]
+        .map(categoryId => categories?.find(c => c.id === categoryId))
+        .filter((category): category is NonNullable<typeof category> => category !== undefined)
+        .sort((a, b) => a.name.localeCompare(b.name))
+    : []
+
   // Filter inventory based on search and filters
   const filteredInventory = inventory?.filter((product) => {
     // Filter by search query
@@ -266,7 +278,7 @@ export default function InventoryManagementPage() {
     }
 
     // Filter by category
-    if (selectedCategory !== "all" && product.categories.some((category) => category === selectedCategory)) {
+    if (selectedCategory !== "all" && product.categories.filter((category) => category.includes(selectedCategory)).length === 0) {
       return false
     }
 
@@ -352,6 +364,7 @@ export default function InventoryManagementPage() {
                       <SelectItem value="all">All Status</SelectItem>
                       <SelectItem value="draft">Draft</SelectItem>
                       <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
                     </SelectContent>
                   </Select>
 
@@ -361,9 +374,9 @@ export default function InventoryManagementPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>
-                      {productCategories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category.charAt(0).toUpperCase() + category.slice(1)}
+                      {usedCategories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -378,7 +391,8 @@ export default function InventoryManagementPage() {
                       <TableHead>SKU</TableHead>
                       <TableHead>Name</TableHead>
                       <TableHead>Category</TableHead>
-                      <TableHead className="text-right">Price</TableHead>
+                      <TableHead className="text-right">Min Price</TableHead>
+                      <TableHead className="text-right">Max Price</TableHead>
                       <TableHead className="text-right">Stock</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -397,10 +411,11 @@ export default function InventoryManagementPage() {
                           <TableCell className="font-medium">{product.sku}</TableCell>
                           <TableCell>{product.name}</TableCell>
                           <TableCell>
-                            {product.categories.map((category) => category.charAt(0).toUpperCase() + category.slice(1)).join(", ")}
+                            {product.categories.map((category) => categories?.find((c) => c.id === category)?.name).join(", ")}
                           </TableCell>
-                          <TableCell className="text-right">{formatPrice(product.basePrice)}</TableCell>
-                          <TableCell className="text-right">{product.variants.reduce((acc, variant) => acc + variant.quantity, 0)}</TableCell>
+                          <TableCell className="text-right">{formatPrice(product.variants.reduce((prev, curr) => prev < curr.price ? prev : curr.price, 0))}</TableCell>
+                          <TableCell className="text-right">{formatPrice(product.variants.reduce((prev, curr) => prev > curr.price ? prev : curr.price, 0))}</TableCell>
+                          <TableCell className="text-right">{product.variants.reduce((prev, curr) => prev + curr.quantity, 0)}</TableCell>
                           <TableCell>
                             <span
                               className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.status === "published"

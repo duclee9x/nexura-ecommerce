@@ -15,8 +15,6 @@ import {
   Save,
   AlertCircle,
   X,
-  Star,
-  StarOff,
   Info,
   Wand2,
   Settings,
@@ -24,9 +22,10 @@ import {
   RefreshCw,
   Layers,
 } from "lucide-react"
+import NextImage from "next/image"
 import { toast } from "@/hooks/use-toast"
 import { ColorPicker } from "@/components/color-picker"
-import { cn } from "@/lib/utils"
+import { cn, getProductUrl } from "@/lib/utils"
 import {
   Dialog,
   DialogContent,
@@ -44,12 +43,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getWarehousesGateway } from "@/gateway/gateway"
 import { useQuery } from "@tanstack/react-query"
 import { ProductVariant, ProductAttribute, VariantAttribute } from "@/protos/nexura"
-import { encode } from "blurhash"
+import type { ProductImage } from "@/components/image-gallery"
 
 interface VariantManagerProps {
   variants: ProductVariant[]
   onVariantUpdate: (variants: ProductVariant[], action: "delete" | "update") => void
-  // onVariantCreate: (variant: ProductVariant) => void
+
   basePrice: number
   baseSku: string
   warehouses?: Warehouse[]
@@ -57,17 +56,18 @@ interface VariantManagerProps {
   onWarehouseReload?: () => void
   categoryPath?: string
   attributes?: ProductAttribute[]
+  productImages: ProductImage[]
 }
 
 export function VariantManager({
   variants,
   onVariantUpdate,
-  // onVariantCreate,
   basePrice,
   baseSku,
   onWarehouseReload,
   categoryPath,
   attributes = [],
+  productImages,
 }: VariantManagerProps) {
 
   const [productVariants, setProductVariants] = useState<ProductVariant[]>(variants)
@@ -78,7 +78,7 @@ export function VariantManager({
     price: basePrice,
     quantity: 0,
     lowStockThreshold: 5,
-    images: [],
+    imageIds: [],
     attributes: [],
     warehouseId: "",
   })
@@ -133,7 +133,7 @@ export function VariantManager({
       price: basePrice,
       quantity: 0,
       lowStockThreshold: 5,
-      images: [],
+      imageIds: [],
       attributes: attributes.map((attr) => ({
         id: attr.id,
         name: attr.name,
@@ -208,7 +208,20 @@ export function VariantManager({
   const startEditingVariant = (variantId: string) => {
     const variantToEdit = productVariants.find((v) => v.id === variantId)
     if (variantToEdit) {
-      setNewVariant({ ...variantToEdit })
+      // Map old image IDs to new ones based on URL matching
+      const updatedImageIds = variantToEdit.imageIds.map(oldId => {
+        // Find the old image URL from the variant's image ID
+        const matchingImage = productImages.find(img => img.id === oldId)
+        if (matchingImage) {
+          return matchingImage.id
+        }
+        return null
+      }).filter(Boolean) as string[]
+
+      setNewVariant({ 
+        ...variantToEdit,
+        imageIds: updatedImageIds
+      })
       setEditingVariantId(variantId)
       setIsAddingVariant(true)
     }
@@ -379,94 +392,31 @@ export function VariantManager({
     }
   }
 
-  // Handle image upload
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
-
-    const newImages: typeof newVariant.images = []
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i]
-      const imageUrl = URL.createObjectURL(file)
+  // Handle image selection
+  const handleImageSelect = (imageId: string) => {
+    setNewVariant((prev) => {
+      // Ensure imageIds is always an array
+      const currentImages = prev.imageIds
+      // Find if the image exists in product images
+      const imageExists = productImages.find(img => img.id === imageId)
+      if (!imageExists) return prev
       
-      // Create a canvas to get image data for blurhash
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      const img = new Image()
+      const isSelected = currentImages.includes(imageId)
       
-      await new Promise((resolve) => {
-        img.onload = () => {
-          canvas.width = img.width
-          canvas.height = img.height
-          ctx?.drawImage(img, 0, 0)
-          resolve(null)
+      if (isSelected) {
+        // Remove image if already selected
+        return {
+          ...prev,
+          imageIds: currentImages.filter((id) => id !== imageId),
         }
-        img.src = imageUrl
-      })
-
-      // Get image data and encode to blurhash
-      const imageData = ctx?.getImageData(0, 0, canvas.width, canvas.height)
-      const blurhash = imageData ? encode(imageData.data, imageData.width, imageData.height, 4, 4) : ''
-
-      // Get presigned URL for upload
-      const id = `var-img-${Date.now()}-${i}`
-      const fileName = `${id}.jpg`
-      const response = await fetch(`/api/presignedPut?name=${fileName}&bucket=products`)
-      
-      if (!response.ok) {
-        throw new Error("Failed to get upload URL")
+      } else {
+        // Add image if not selected
+        return {
+          ...prev,
+          imageIds: [...currentImages, imageId],
+        }
       }
-      const { urls } = await response.json()
-      if (!urls?.length) {
-        throw new Error("Invalid upload URL received")
-      }
-
-      // Upload image to S3
-      await fetch(urls[0], {
-        method: 'PUT',
-        body: file,
-      })
-
-      newImages.push({
-        id,
-        url: fileName, // Use the filename as the URL
-        isMain: newVariant.images.length === 0 && i === 0, // First image is main by default
-        blurhash: blurhash
-      })
-    }
-
-    setNewVariant((prev) => ({
-      ...prev,
-      images: [...prev.images, ...newImages],
-    }))
-  }
-
-  // Handle image removal
-  const handleRemoveImage = (imageId: string) => {
-    setNewVariant((prev) => ({
-      ...prev,
-      images: prev.images.filter((img) => img.id !== imageId),
-    }))
-  }
-
-  // Add a function to set the main image
-  const handleSetMainImage = (imageId: string) => {
-    setNewVariant((prev) => ({
-      ...prev,
-      images: prev.images.map((img) => ({
-        ...img,
-        isMain: img.id === imageId,
-      })),
-    }))
-  }
-
-  // Handle warehouse selection
-  const handleWarehouseSelect = (warehouseId: string) => {
-    setNewVariant((prev) => ({
-      ...prev,
-      warehouseId: warehouseId,
-    }))
+    })
   }
 
   // Generate SKU from base SKU and variant attributes
@@ -604,7 +554,7 @@ export function VariantManager({
         price: basePrice,
         quantity: 0,
         lowStockThreshold: 5,
-        images: [],
+        imageIds: [],
         attributes: combination,
         warehouseId: "",
       }
@@ -744,6 +694,14 @@ export function VariantManager({
       setSelectedVariantAttributes(variantableAttributes.map((attr) => attr.id))
     }
   }, [variantableAttributes])
+
+  // Handle warehouse selection
+  const handleWarehouseSelect = (warehouseId: string) => {
+    setNewVariant((prev) => ({
+      ...prev,
+      warehouseId: warehouseId,
+    }))
+  }
 
   const filteredVariants = getFilteredVariants()
   return (
@@ -1307,44 +1265,48 @@ export function VariantManager({
 
             <TabsContent value="images" className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label htmlFor="variant-images">Variant Images</Label>
-                <Input type="file" id="variant-images" accept="image/*" multiple onChange={handleImageUpload} />
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {newVariant.images.map((image) => (
-                    <div key={image.id} className="relative w-20 h-20 border rounded-md overflow-hidden">
-                      <img
-                        src={image.url || "/placeholder.svg"}
-                        alt="Variant image"
-                        className="object-cover w-full h-full"
-                      />
-                      <div className="absolute top-1 right-1 flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="bg-black/50 text-white hover:bg-black/80 h-5 w-5"
-                          onClick={() => handleSetMainImage(image.id)}
-                          title={image.isMain ? "Main image" : "Set as main image"}
-                        >
-                          {image.isMain ? (
-                            <Star className="h-3 w-3 text-yellow-400" />
-                          ) : (
-                            <StarOff className="h-3 w-3" />
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="bg-black/50 text-white hover:bg-black/80 h-5 w-5"
-                          onClick={() => handleRemoveImage(image.id)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
+                <Label>Select Product Images</Label>
+                <div className="grid grid-cols-4 gap-2">
+                  {productImages.map((image) => {
+                    // Ensure imageIds is always an array
+                    const currentImageIds = Array.isArray(newVariant.imageIds) ? newVariant.imageIds : []
+                    const isSelected = currentImageIds.includes(image.id)
+                    console.log(isSelected, "isSelected")
+                    console.log(JSON.stringify(newVariant, null, 2), "newVariant")
+                    console.log(JSON.stringify(productImages, null, 2), "productImages")
+                    return (
+                      <div
+                        key={image.id}
+                        className={cn(
+                          "relative aspect-square border rounded-md overflow-hidden cursor-pointer",
+                          isSelected && "ring-2 ring-primary"
+                        )}
+                        onClick={() => handleImageSelect(image.id)}
+                      >
+                        <NextImage
+                          src={getProductUrl(image.url)}
+                          objectFit="contain"
+                          blurDataURL={image.blurhash}
+                          fill
+                          alt="Product image"
+                          className="object-cover w-full h-full"
+                        />
+                        <div className="absolute top-1 right-1">
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={() => handleImageSelect(image.id)}
+                            className="bg-white/80"
+                          />
+                        </div>
+                        {isSelected && (
+                          <div className="absolute inset-0 bg-primary/10" />
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
-                {newVariant.images.length === 0 && (
-                  <p className="text-xs text-muted-foreground">No images added yet. Upload images for this variant.</p>
+                {!Array.isArray(newVariant.imageIds) || newVariant.imageIds.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No images selected. Select images from the product gallery.</p>
                 )}
               </div>
             </TabsContent>

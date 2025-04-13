@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "@/hooks/use-toast"
-import { ChevronLeft, Save } from "lucide-react"
+import { ChevronLeft, Loader2, Save } from "lucide-react"
 import { CategoryTree, type Category } from "@/components/category-tree"
 import { VariantManager } from "@/components/variant-manager"
 import { TagCombobox } from "@/components/tag-combobox"
@@ -23,14 +23,20 @@ import { AttributesManager } from "@/components/attributes-manager"
 import { SizeInstructionEditor, type SizeChart } from "@/components/size-instruction-editor"
 import { createCategoryGateway, getProductGateway, newBrandGateway, updateCategoryGateway } from "@/gateway/gateway"
 import { Product, ProductAttribute, ProductVariant, VariantAttribute } from "@/protos/nexura"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Skeleton } from "@/components/ui/skeleton"
 import { encode } from "blurhash"
 
 interface ProductFormProps {
   productId?: string
-  categories: Category[] | undefined
-  brands: Brand[] | undefined
+  categoriesData: {
+    categories: Category[] | undefined
+    isLoadingCategories: boolean
+  }
+  brandsData: {
+    brands: Brand[] | undefined
+    isLoadingBrands: boolean
+  }
   onSave: (product: Product) => void
   onCancel?: () => void
   mode: "add" | "edit"
@@ -38,8 +44,8 @@ interface ProductFormProps {
 
 export function ProductForm({
   productId,
-  categories,
-  brands,
+  categoriesData,
+  brandsData,
   onSave,
   onCancel,
   mode,
@@ -87,14 +93,15 @@ export function ProductForm({
   const [selectedTag, setSelectedTag] = useState("")
   const [isSaving, setIsSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-console.log(product, "product")
+  console.log(JSON.stringify(product, null, 2), "product")
   const { data: productData, isLoading: isLoadingProduct } = useQuery({
     queryKey: ["product", productId],
     queryFn: () => getProductGateway(productId || "").then((res) => res.product),
     enabled: !!productId
   })
-
-
+  const queryClient = useQueryClient()
+  const {categories, isLoadingCategories} = categoriesData
+  const {brands, isLoadingBrands} = brandsData
   useEffect(() => {
     if (productData) {
       setProduct(productData)
@@ -250,6 +257,7 @@ console.log(product, "product")
         name: category.name,
         parentId: parentCategoryId,
       })
+      queryClient.invalidateQueries({ queryKey: ["categories"] })
     } catch (error) {
       toast({
         title: "Error",
@@ -266,6 +274,7 @@ console.log(product, "product")
         name: updatedCategory.name,
         parentId: updatedCategory.parentId || "",
       })
+      queryClient.invalidateQueries({ queryKey: ["categories"] })
     } catch (error) {
       toast({
         title: "Error",
@@ -327,12 +336,12 @@ console.log(product, "product")
           quantity: variant.quantity || 0,
           lowStockThreshold: variant.lowStockThreshold || 0,
           warehouseId: variant.warehouseId || "",
-          images: variant.images.map((image) => ({
-            ...image,
-            id: image.id,
-            url: image.url,
-            isMain: image.isMain,
-            blurhash: image.blurhash
+          images: variant.imageIds.map((imageId) => ({
+            ...product.images.find((image) => image.id === imageId),
+            id: imageId,
+            url: product.images.find((image) => image.id === imageId)?.url || "",
+            isMain: product.images.find((image) => image.id === imageId)?.isMain || false,
+            blurhash: product.images.find((image) => image.id === imageId)?.blurhash || ""
           })),
           attributes: variant.attributes?.map((attribute) => ({
             ...attribute,
@@ -906,6 +915,7 @@ console.log(product, "product")
                         onVariantUpdate={handleVariantsUpdate}
                         // onVariantCreate={handleVariantCreate}
                         basePrice={product.basePrice}
+                        productImages={product.images || []}
                         baseSku={product.sku}
                       categoryPath={getCategoryPath}
                       />
@@ -1010,25 +1020,33 @@ console.log(product, "product")
                         <div className="space-y-2">
                           <Label>Product Categories</Label>
                           <div className={errors.categories ? "border border-destructive rounded-md p-2" : ""}>
-                            <CategoryTree
-                              categories={categories}
-                              selectedCategories={product.categories}
-                              onCategorySelect={handleCategorySelect}
-                              onCategoryUpdate={handleCategoryUpdate}
-                              onCategoryCreate={handleCategoryCreate}
-                              allowMultipleRoots={false}
-                            />
+                            {isLoadingCategories ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <CategoryTree
+                                categories={categories}
+                                selectedCategories={product.categories}
+                                onCategorySelect={handleCategorySelect}
+                                onCategoryUpdate={handleCategoryUpdate}
+                                onCategoryCreate={handleCategoryCreate}
+                                allowMultipleRoots={false}
+                              />
+                            )}
                           </div>
                           <ErrorMessage field="categories" />
                         </div>
                         <div className="space-y-2">
                           <Label>Brand</Label>
-                          <BrandSelector
-                            brands={brands}
-                            selectedBrandId={product.brandId}
-                            onBrandSelect={handleBrandSelect}
-                            onBrandCreate={handleBrandCreate}
-                          />
+                          {isLoadingBrands ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <BrandSelector
+                              brands={brands}
+                              selectedBrandId={product.brandId}
+                              onBrandSelect={handleBrandSelect}
+                              onBrandCreate={handleBrandCreate}
+                            />
+                          )}
                         </div>
                         <div className="space-y-2">
                           <Label>Tags</Label>

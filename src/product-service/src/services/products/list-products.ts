@@ -26,7 +26,6 @@ export const listProducts = async (call: ServerUnaryCall<ListProductsRequest, Li
         },
         variants: {
           include: {
-            images: true,
             attributes: true,
             warehouse: true,
           }
@@ -114,12 +113,7 @@ export const listProducts = async (call: ServerUnaryCall<ListProductsRequest, Li
           colorValue: variant.colorValue || "",
           colorName: variant.colorName || "",
           price: variant.price,
-          images: variant.images.map(image => ({
-            id: image.id,
-            url: image.url,
-            isMain: image.isMain,
-            blurhash: image.blurhash,
-          })),
+          imageIds: variant.imageIds,
           attributes: variant.attributes.map(attribute => ({
             id: attribute.id,
             name: attribute.name || "",
