@@ -4,22 +4,18 @@ import { useState, useEffect } from "react"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import { ColorButton } from "@/components/ui/color-button"
-import type { ProductVariant, AttributeValue } from "@/types/product"
+import { ProductVariant } from "@/protos/nexura"
 
 interface ProductVariantSelectorProps {
     variants: ProductVariant[]
     onVariantSelect: (variant: ProductVariant | null) => void
     selectedVariant: ProductVariant | null
+    disableOutOfStock?: boolean
 }
 
 interface AttributeInfo {
-    id: string
     name: string
-    values: {
-        id: string
-        name: string
-        color?: string
-    }[]
+    values: Set<string>
     required: boolean
 }
 
@@ -27,39 +23,40 @@ export function ProductVariantSelector({
     variants,
     onVariantSelect,
     selectedVariant,
+    disableOutOfStock = false,
 }: ProductVariantSelectorProps) {
     const [selectedValues, setSelectedValues] = useState<Record<string, string>>({})
 
     // Extract unique attributes and their values from variants
     const variantAttributes = variants.reduce<Record<string, AttributeInfo>>((acc, variant) => {
-        variant.attributeValues.forEach(({ attributeId, valueId }) => {
-            if (!acc[attributeId]) {
-                acc[attributeId] = {
-                    id: attributeId,
-                    name: attributeId.split("-")[1].charAt(0).toUpperCase() + attributeId.split("-")[1].slice(1),
-                    values: [],
+        variant.attributes.forEach((attr) => {
+            if (!acc[attr.name]) {
+                acc[attr.name] = {
+                    name: attr.name,
+                    values: new Set(),
                     required: true
                 }
             }
-            
-            // Add value if not already present
-            if (!acc[attributeId].values.some(v => v.id === valueId)) {
-                acc[attributeId].values.push({
-                    id: valueId,
-                    name: valueId.split("-")[1].charAt(0).toUpperCase() + valueId.split("-")[1].slice(1),
-                })
-            }
+            acc[attr.name].values.add(attr.value)
         })
         return acc
     }, {})
-    const variantableAttributes = Object.values(variantAttributes)
+
+    // Convert to array and sort attributes for consistent display
+    const variantableAttributes = Object.entries(variantAttributes)
+        .map(([name, info]) => ({
+            name,
+            values: Array.from(info.values),
+            required: info.required
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name))
 
     // Initialize selected values from selected variant
     useEffect(() => {
         if (selectedVariant) {
             const values: Record<string, string> = {}
-            selectedVariant.attributeValues.forEach(({ attributeId, valueId }) => {
-                values[attributeId] = valueId
+            selectedVariant.attributes.forEach((attr) => {
+                values[attr.name] = attr.value
             })
             setSelectedValues(values)
         } else {
@@ -68,10 +65,10 @@ export function ProductVariantSelector({
     }, [selectedVariant])
 
     // Handle attribute value selection
-    const handleValueSelect = (attributeId: string, valueId: string) => {
+    const handleValueSelect = (attributeName: string, value: string) => {
         const newSelectedValues = {
             ...selectedValues,
-            [attributeId]: valueId,
+            [attributeName]: value,
         }
         setSelectedValues(newSelectedValues)
 
@@ -82,63 +79,84 @@ export function ProductVariantSelector({
 
     // Find a variant that matches the selected attribute values
     const findMatchingVariant = (values: Record<string, string>) => {
-        const selectedAttributeIds = Object.keys(values)
+        const selectedAttributeNames = Object.keys(values)
 
         // If not all variantable attributes are selected, return null
-        if (selectedAttributeIds.length !== variantableAttributes.length) {
+        if (selectedAttributeNames.length !== variantableAttributes.length) {
             return null
         }
 
         // Find a variant that matches all selected attribute values
         return variants.find((variant) => {
-            return selectedAttributeIds.every((attributeId) => {
-                const valueId = values[attributeId]
-                return variant.attributeValues.some((av) => av.attributeId === attributeId && av.valueId === valueId)
+            return selectedAttributeNames.every((attributeName) => {
+                const selectedValue = values[attributeName]
+                return variant.attributes.some(
+                    (attr) => attr.name === attributeName && attr.value === selectedValue
+                )
             })
         }) || null
     }
 
     // Get available values for an attribute based on current selections
-    const getAvailableValues = (attributeId: string) => {
+    const getAvailableValues = (attributeName: string) => {
         // If no selections yet, return all values for this attribute
         if (Object.keys(selectedValues).length === 0) {
-            return variantAttributes[attributeId]?.values || []
+            return Array.from(variantAttributes[attributeName]?.values || [])
         }
 
         // Get all variants that match current selections (excluding the current attribute)
         const matchingVariants = variants.filter((variant) => {
-            return Object.entries(selectedValues).every(([attrId, valueId]) => {
+            return Object.entries(selectedValues).every(([attrName, value]) => {
                 // Skip the current attribute
-                if (attrId === attributeId) return true
+                if (attrName === attributeName) return true
 
                 // Check if this variant matches the selected value for other attributes
-                return variant.attributeValues.some((av) => av.attributeId === attrId && av.valueId === valueId)
+                return variant.attributes.some(
+                    (attr) => attr.name === attrName && attr.value === value
+                )
             })
         })
 
         // Get unique values for this attribute from matching variants
-        const uniqueValueIds = new Set<string>()
+        const availableValues = new Set<string>()
         matchingVariants.forEach((variant) => {
-            variant.attributeValues.forEach((av) => {
-                if (av.attributeId === attributeId) {
-                    uniqueValueIds.add(av.valueId)
+            variant.attributes.forEach((attr) => {
+                if (attr.name === attributeName) {
+                    availableValues.add(attr.value)
                 }
             })
         })
 
-        // Get the actual value objects
-        return variantAttributes[attributeId]?.values.filter((value) => uniqueValueIds.has(value.id)) || []
+        return Array.from(availableValues)
     }
 
-    const isValueAvailable = (attributeId: string, valueId: string) => {
-        const availableValues = getAvailableValues(attributeId)
-        return availableValues.some((value) => value.id === valueId)
+    const isValueAvailable = (attributeName: string, value: string) => {
+        const availableValues = getAvailableValues(attributeName)
+        if (!availableValues.includes(value)) {
+            return false
+        }
+
+        if (disableOutOfStock) {
+            const matchingVariants = variants.filter((variant) => {
+                return variant.attributes.some(
+                    (attr) => attr.name === attributeName && attr.value === value
+                ) && Object.entries(selectedValues).every(([attrName, selectedValue]) => {
+                    if (attrName === attributeName) return true
+                    return variant.attributes.some(
+                        (attr) => attr.name === attrName && attr.value === selectedValue
+                    )
+                })
+            })
+            return matchingVariants.some((variant) => variant.quantity > 0)
+        }
+
+        return true
     }
 
     return (
         <div className="space-y-6">
             {variantableAttributes.map((attribute) => (
-                <div key={attribute.id} className="space-y-2">
+                <div key={attribute.name} className="space-y-2">
                     <Label className="font-medium">
                         {attribute.name}
                         {attribute.required && <span className="text-destructive ml-1">*</span>}
@@ -146,18 +164,18 @@ export function ProductVariantSelector({
 
                     <div className="flex flex-wrap gap-2">
                         {attribute.values.map((value) => {
-                            const isSelected = selectedValues[attribute.id] === value.id
-                            const isAvailable = isValueAvailable(attribute.id, value.id)
+                            const isSelected = selectedValues[attribute.name] === value
+                            const isAvailable = isValueAvailable(attribute.name, value)
                             const isDisabled = !isAvailable && !isSelected
                             return (
                                 <ColorButton
-                                    isColor={value.id.startsWith('color-') ? true : false}
-                                    key={value.id}
-                                    name={value.name}
-                                    color={value.color || "#CCCCCC"}
+                                    isColor={attribute.name.toLowerCase() === "color"}
+                                    key={value}
+                                    name={value}
+                                    color={attribute.name.toLowerCase() === "color" ? value : "#CCCCCC"}
                                     isSelected={isSelected}
                                     disabled={isDisabled}
-                                    onClick={() => handleValueSelect(attribute.id, value.id)}
+                                    onClick={() => handleValueSelect(attribute.name, value)}
                                 />
                             )
                         })}

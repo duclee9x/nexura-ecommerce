@@ -94,7 +94,7 @@ export function SiteHeader() {
   ]
 
   return (
-    <header className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* Announcement Bar */}
       <div className="bg-black text-white dark:bg-gray-900 text-xs py-2 px-4 text-center">
         Enjoy an exclusive 10% coupon for your first purchase.

@@ -42,17 +42,6 @@ export const deleteUserGateway = async (id: string) => {
     return userService.deleteUser(id);
 };
 
-export const addItemGateway = async (userId: string, item: any) => {
-    return cartService.addItem(userId, item);
-};
-
-export const emptyCartGateway = async (userId: string) => {
-    return cartService.emptyCart(userId);
-};
-
-export const getCartGateway = async (userId: string) => {
-    return cartService.getCart(userId);
-};
 
 export const searchProductsGateway = async (query: string) => {
     return productService.searchProducts(query);
@@ -151,14 +140,41 @@ export const createProductGateway = async (product: any) => {
     return productService.createProduct(product);
 };
 
-export const getProductGateway = async (id: string) => {
-    return productService.getProduct(id);
+export const getProductByIdGateway = async (id: string) => {
+    return productService.getProductById(id);
+};
+export const getProductBySlugGateway = async (slug: string) => {
+    return productService.getProductBySlug(slug);
 };
 
-export const listProductsGateway = async (status: string) => {
-    return productService.listProducts(status);
+export const listProductsGateway = async () => {
+    return productService.listProducts();
 };
 
 export const getWarehousesGateway = async () => {
     return productService.getWarehouses();
+};
+
+export const getVariantsForCartGateway = async (variantIds: string[]) => {
+    return productService.getVariantsForCart(variantIds);
+};
+
+export const getCartGateway = async (userId: string) => {
+    return cartService.getCart(userId);
+};
+
+export const addItemGateway = async (userId: string, item: any) => {
+    return cartService.addItem(userId, item);
+};  
+
+export const updateItemGateway = async (userId: string, item: any) => {
+    return cartService.updateItem(userId, item);
+};
+
+export const removeItemGateway = async (userId: string, item: any) => {
+    return cartService.removeItem(userId, item);
+};
+
+export const clearCartGateway = async (userId: string) => {
+    return cartService.clearCart(userId);
 };

@@ -13,7 +13,8 @@ import { createProductAttribute } from './attributes/create-product-attribute'
 import { createProduct } from './products/create-product'
 import { updateProduct } from './products/update-product'
 import { deleteProduct } from './products/delete-product'
-import { getProduct } from './products/get-products'
+import { getProductBySlug } from './products/get-product-by-slug'
+import { getProductById } from './products/get-product-by-id'
 import { listProducts } from './products/list-products'
 import { getWarehouses } from './warehouses/get-warehouses'
 // import { createVariant } from './variants/create-variant'
@@ -30,7 +31,8 @@ export const productService: UntypedServiceImplementation = {
   createProduct: createProduct,
   updateProduct: updateProduct,
   deleteProduct: deleteProduct,
-  getProduct: getProduct,
+  getProductById: getProductById,
+  getProductBySlug: getProductBySlug,
   listProducts: listProducts,
 
   getProductAttributes: getProductAttributes,

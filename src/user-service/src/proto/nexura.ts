@@ -11,7 +11,9 @@ import {
   ChannelCredentials,
   Client,
   type ClientOptions,
+  type ClientReadableStream,
   type ClientUnaryCall,
+  type handleServerStreamingCall,
   type handleUnaryCall,
   makeGenericClientConstructor,
   Metadata,
@@ -20,6 +22,106 @@ import {
 } from "@grpc/grpc-js";
 
 export const protobufPackage = "nexuraTelemetry";
+
+/** Service names for health checks */
+export enum ServiceName {
+  UNSPECIFIED = 0,
+  CART_SERVICE = 1,
+  USER_SERVICE = 2,
+  PRODUCT_CATALOG_SERVICE = 3,
+  RECOMMENDATION_SERVICE = 4,
+  SHIPPING_SERVICE = 5,
+  CURRENCY_SERVICE = 6,
+  PAYMENT_SERVICE = 7,
+  EMAIL_SERVICE = 8,
+  CHECKOUT_SERVICE = 9,
+  AD_SERVICE = 10,
+  FEATURE_FLAG_SERVICE = 11,
+  ADDRESS_SERVICE = 12,
+  UNRECOGNIZED = -1,
+}
+
+export function serviceNameFromJSON(object: any): ServiceName {
+  switch (object) {
+    case 0:
+    case "UNSPECIFIED":
+      return ServiceName.UNSPECIFIED;
+    case 1:
+    case "CART_SERVICE":
+      return ServiceName.CART_SERVICE;
+    case 2:
+    case "USER_SERVICE":
+      return ServiceName.USER_SERVICE;
+    case 3:
+    case "PRODUCT_CATALOG_SERVICE":
+      return ServiceName.PRODUCT_CATALOG_SERVICE;
+    case 4:
+    case "RECOMMENDATION_SERVICE":
+      return ServiceName.RECOMMENDATION_SERVICE;
+    case 5:
+    case "SHIPPING_SERVICE":
+      return ServiceName.SHIPPING_SERVICE;
+    case 6:
+    case "CURRENCY_SERVICE":
+      return ServiceName.CURRENCY_SERVICE;
+    case 7:
+    case "PAYMENT_SERVICE":
+      return ServiceName.PAYMENT_SERVICE;
+    case 8:
+    case "EMAIL_SERVICE":
+      return ServiceName.EMAIL_SERVICE;
+    case 9:
+    case "CHECKOUT_SERVICE":
+      return ServiceName.CHECKOUT_SERVICE;
+    case 10:
+    case "AD_SERVICE":
+      return ServiceName.AD_SERVICE;
+    case 11:
+    case "FEATURE_FLAG_SERVICE":
+      return ServiceName.FEATURE_FLAG_SERVICE;
+    case 12:
+    case "ADDRESS_SERVICE":
+      return ServiceName.ADDRESS_SERVICE;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return ServiceName.UNRECOGNIZED;
+  }
+}
+
+export function serviceNameToJSON(object: ServiceName): string {
+  switch (object) {
+    case ServiceName.UNSPECIFIED:
+      return "UNSPECIFIED";
+    case ServiceName.CART_SERVICE:
+      return "CART_SERVICE";
+    case ServiceName.USER_SERVICE:
+      return "USER_SERVICE";
+    case ServiceName.PRODUCT_CATALOG_SERVICE:
+      return "PRODUCT_CATALOG_SERVICE";
+    case ServiceName.RECOMMENDATION_SERVICE:
+      return "RECOMMENDATION_SERVICE";
+    case ServiceName.SHIPPING_SERVICE:
+      return "SHIPPING_SERVICE";
+    case ServiceName.CURRENCY_SERVICE:
+      return "CURRENCY_SERVICE";
+    case ServiceName.PAYMENT_SERVICE:
+      return "PAYMENT_SERVICE";
+    case ServiceName.EMAIL_SERVICE:
+      return "EMAIL_SERVICE";
+    case ServiceName.CHECKOUT_SERVICE:
+      return "CHECKOUT_SERVICE";
+    case ServiceName.AD_SERVICE:
+      return "AD_SERVICE";
+    case ServiceName.FEATURE_FLAG_SERVICE:
+      return "FEATURE_FLAG_SERVICE";
+    case ServiceName.ADDRESS_SERVICE:
+      return "ADDRESS_SERVICE";
+    case ServiceName.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
 
 export interface GetAddressesRequest {
   userId: string;
@@ -279,30 +381,69 @@ export interface VerifyAccountResponse {
   message: string;
 }
 
-export interface CartItem {
-  productId: string;
-  quantity: number;
-}
-
-export interface AddItemRequest {
-  userId: string;
-  item: CartItem | undefined;
-}
-
-export interface EmptyCartRequest {
-  userId: string;
-}
-
 export interface GetCartRequest {
   userId: string;
 }
 
-export interface Cart {
-  userId: string;
-  items: CartItem[];
+export interface GetCartResponse {
+  cart: Cart | undefined;
 }
 
-export interface Empty {
+export interface AddItemRequest {
+  userId: string;
+  productId: string;
+  variantId: string;
+  quantity: number;
+}
+
+export interface AddItemResponse {
+  cart: Cart | undefined;
+}
+
+export interface UpdateItemRequest {
+  userId: string;
+  productId: string;
+  variantId: string;
+  quantity: number;
+}
+
+export interface UpdateItemResponse {
+  cart: Cart | undefined;
+}
+
+export interface RemoveItemRequest {
+  userId: string;
+  productId: string;
+  variantId: string;
+}
+
+export interface RemoveItemResponse {
+  cart: Cart | undefined;
+}
+
+export interface ClearCartRequest {
+  userId: string;
+}
+
+export interface ClearCartResponse {
+  success: boolean;
+}
+
+export interface Cart {
+  id: string;
+  userId: string;
+  items: CartItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CartItem {
+  id: string;
+  productId: string;
+  variantId: string;
+  quantity: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ListRecommendationsRequest {
@@ -312,6 +453,25 @@ export interface ListRecommendationsRequest {
 
 export interface ListRecommendationsResponse {
   productIds: string[];
+}
+
+/** ---------------Product Catalog---------------- */
+export interface Empty {
+}
+
+export interface GetVariantsForCartRequest {
+  variantIds: string[];
+}
+
+export interface GetVariantsForCartResponse {
+  variants: VariantCart[];
+}
+
+export interface VariantCart {
+  id: string;
+  price: number;
+  image: string;
+  quantity: number;
 }
 
 export interface GetProductAttributesRequest {
@@ -560,8 +720,12 @@ export interface ListProductsResponse {
 export interface ListProductsRequest {
 }
 
-export interface GetProductRequest {
+export interface GetProductByIdRequest {
   id: string;
+}
+
+export interface GetProductBySlugRequest {
+  slug: string;
 }
 
 export interface GetProductResponse {
@@ -816,6 +980,61 @@ export interface GetAllBrandResponse {
   success: boolean;
   message: string;
   brands: Brand[];
+}
+
+export interface HealthCheckRequest {
+  /** The name of the service to check */
+  service: string;
+}
+
+export interface HealthCheckResponse {
+  status: HealthCheckResponse_ServingStatus;
+}
+
+export enum HealthCheckResponse_ServingStatus {
+  UNKNOWN = 0,
+  SERVING = 1,
+  NOT_SERVING = 2,
+  /** SERVICE_UNKNOWN - Used when the requested service is not known */
+  SERVICE_UNKNOWN = 3,
+  UNRECOGNIZED = -1,
+}
+
+export function healthCheckResponse_ServingStatusFromJSON(object: any): HealthCheckResponse_ServingStatus {
+  switch (object) {
+    case 0:
+    case "UNKNOWN":
+      return HealthCheckResponse_ServingStatus.UNKNOWN;
+    case 1:
+    case "SERVING":
+      return HealthCheckResponse_ServingStatus.SERVING;
+    case 2:
+    case "NOT_SERVING":
+      return HealthCheckResponse_ServingStatus.NOT_SERVING;
+    case 3:
+    case "SERVICE_UNKNOWN":
+      return HealthCheckResponse_ServingStatus.SERVICE_UNKNOWN;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return HealthCheckResponse_ServingStatus.UNRECOGNIZED;
+  }
+}
+
+export function healthCheckResponse_ServingStatusToJSON(object: HealthCheckResponse_ServingStatus): string {
+  switch (object) {
+    case HealthCheckResponse_ServingStatus.UNKNOWN:
+      return "UNKNOWN";
+    case HealthCheckResponse_ServingStatus.SERVING:
+      return "SERVING";
+    case HealthCheckResponse_ServingStatus.NOT_SERVING:
+      return "NOT_SERVING";
+    case HealthCheckResponse_ServingStatus.SERVICE_UNKNOWN:
+      return "SERVICE_UNKNOWN";
+    case HealthCheckResponse_ServingStatus.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
 }
 
 function createBaseGetAddressesRequest(): GetAddressesRequest {
@@ -4849,216 +5068,6 @@ export const VerifyAccountResponse: MessageFns<VerifyAccountResponse> = {
   },
 };
 
-function createBaseCartItem(): CartItem {
-  return { productId: "", quantity: 0 };
-}
-
-export const CartItem: MessageFns<CartItem> = {
-  encode(message: CartItem, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.productId !== "") {
-      writer.uint32(10).string(message.productId);
-    }
-    if (message.quantity !== 0) {
-      writer.uint32(16).int32(message.quantity);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): CartItem {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseCartItem();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.productId = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 16) {
-            break;
-          }
-
-          message.quantity = reader.int32();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): CartItem {
-    return {
-      productId: isSet(object.productId) ? globalThis.String(object.productId) : "",
-      quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
-    };
-  },
-
-  toJSON(message: CartItem): unknown {
-    const obj: any = {};
-    if (message.productId !== "") {
-      obj.productId = message.productId;
-    }
-    if (message.quantity !== 0) {
-      obj.quantity = Math.round(message.quantity);
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<CartItem>, I>>(base?: I): CartItem {
-    return CartItem.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<CartItem>, I>>(object: I): CartItem {
-    const message = createBaseCartItem();
-    message.productId = object.productId ?? "";
-    message.quantity = object.quantity ?? 0;
-    return message;
-  },
-};
-
-function createBaseAddItemRequest(): AddItemRequest {
-  return { userId: "", item: undefined };
-}
-
-export const AddItemRequest: MessageFns<AddItemRequest> = {
-  encode(message: AddItemRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.userId !== "") {
-      writer.uint32(10).string(message.userId);
-    }
-    if (message.item !== undefined) {
-      CartItem.encode(message.item, writer.uint32(18).fork()).join();
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): AddItemRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseAddItemRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.userId = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.item = CartItem.decode(reader, reader.uint32());
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): AddItemRequest {
-    return {
-      userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
-      item: isSet(object.item) ? CartItem.fromJSON(object.item) : undefined,
-    };
-  },
-
-  toJSON(message: AddItemRequest): unknown {
-    const obj: any = {};
-    if (message.userId !== "") {
-      obj.userId = message.userId;
-    }
-    if (message.item !== undefined) {
-      obj.item = CartItem.toJSON(message.item);
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<AddItemRequest>, I>>(base?: I): AddItemRequest {
-    return AddItemRequest.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<AddItemRequest>, I>>(object: I): AddItemRequest {
-    const message = createBaseAddItemRequest();
-    message.userId = object.userId ?? "";
-    message.item = (object.item !== undefined && object.item !== null) ? CartItem.fromPartial(object.item) : undefined;
-    return message;
-  },
-};
-
-function createBaseEmptyCartRequest(): EmptyCartRequest {
-  return { userId: "" };
-}
-
-export const EmptyCartRequest: MessageFns<EmptyCartRequest> = {
-  encode(message: EmptyCartRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.userId !== "") {
-      writer.uint32(10).string(message.userId);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): EmptyCartRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseEmptyCartRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.userId = reader.string();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): EmptyCartRequest {
-    return { userId: isSet(object.userId) ? globalThis.String(object.userId) : "" };
-  },
-
-  toJSON(message: EmptyCartRequest): unknown {
-    const obj: any = {};
-    if (message.userId !== "") {
-      obj.userId = message.userId;
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<EmptyCartRequest>, I>>(base?: I): EmptyCartRequest {
-    return EmptyCartRequest.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<EmptyCartRequest>, I>>(object: I): EmptyCartRequest {
-    const message = createBaseEmptyCartRequest();
-    message.userId = object.userId ?? "";
-    return message;
-  },
-};
-
 function createBaseGetCartRequest(): GetCartRequest {
   return { userId: "" };
 }
@@ -5117,25 +5126,89 @@ export const GetCartRequest: MessageFns<GetCartRequest> = {
   },
 };
 
-function createBaseCart(): Cart {
-  return { userId: "", items: [] };
+function createBaseGetCartResponse(): GetCartResponse {
+  return { cart: undefined };
 }
 
-export const Cart: MessageFns<Cart> = {
-  encode(message: Cart, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.userId !== "") {
-      writer.uint32(10).string(message.userId);
-    }
-    for (const v of message.items) {
-      CartItem.encode(v!, writer.uint32(18).fork()).join();
+export const GetCartResponse: MessageFns<GetCartResponse> = {
+  encode(message: GetCartResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.cart !== undefined) {
+      Cart.encode(message.cart, writer.uint32(10).fork()).join();
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): Cart {
+  decode(input: BinaryReader | Uint8Array, length?: number): GetCartResponse {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseCart();
+    const message = createBaseGetCartResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.cart = Cart.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetCartResponse {
+    return { cart: isSet(object.cart) ? Cart.fromJSON(object.cart) : undefined };
+  },
+
+  toJSON(message: GetCartResponse): unknown {
+    const obj: any = {};
+    if (message.cart !== undefined) {
+      obj.cart = Cart.toJSON(message.cart);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetCartResponse>, I>>(base?: I): GetCartResponse {
+    return GetCartResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetCartResponse>, I>>(object: I): GetCartResponse {
+    const message = createBaseGetCartResponse();
+    message.cart = (object.cart !== undefined && object.cart !== null) ? Cart.fromPartial(object.cart) : undefined;
+    return message;
+  },
+};
+
+function createBaseAddItemRequest(): AddItemRequest {
+  return { userId: "", productId: "", variantId: "", quantity: 0 };
+}
+
+export const AddItemRequest: MessageFns<AddItemRequest> = {
+  encode(message: AddItemRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
+    }
+    if (message.productId !== "") {
+      writer.uint32(18).string(message.productId);
+    }
+    if (message.variantId !== "") {
+      writer.uint32(26).string(message.variantId);
+    }
+    if (message.quantity !== 0) {
+      writer.uint32(32).int32(message.quantity);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): AddItemRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAddItemRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -5152,7 +5225,632 @@ export const Cart: MessageFns<Cart> = {
             break;
           }
 
+          message.productId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.variantId = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.quantity = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): AddItemRequest {
+    return {
+      userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
+      productId: isSet(object.productId) ? globalThis.String(object.productId) : "",
+      variantId: isSet(object.variantId) ? globalThis.String(object.variantId) : "",
+      quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
+    };
+  },
+
+  toJSON(message: AddItemRequest): unknown {
+    const obj: any = {};
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    if (message.productId !== "") {
+      obj.productId = message.productId;
+    }
+    if (message.variantId !== "") {
+      obj.variantId = message.variantId;
+    }
+    if (message.quantity !== 0) {
+      obj.quantity = Math.round(message.quantity);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<AddItemRequest>, I>>(base?: I): AddItemRequest {
+    return AddItemRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<AddItemRequest>, I>>(object: I): AddItemRequest {
+    const message = createBaseAddItemRequest();
+    message.userId = object.userId ?? "";
+    message.productId = object.productId ?? "";
+    message.variantId = object.variantId ?? "";
+    message.quantity = object.quantity ?? 0;
+    return message;
+  },
+};
+
+function createBaseAddItemResponse(): AddItemResponse {
+  return { cart: undefined };
+}
+
+export const AddItemResponse: MessageFns<AddItemResponse> = {
+  encode(message: AddItemResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.cart !== undefined) {
+      Cart.encode(message.cart, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): AddItemResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAddItemResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.cart = Cart.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): AddItemResponse {
+    return { cart: isSet(object.cart) ? Cart.fromJSON(object.cart) : undefined };
+  },
+
+  toJSON(message: AddItemResponse): unknown {
+    const obj: any = {};
+    if (message.cart !== undefined) {
+      obj.cart = Cart.toJSON(message.cart);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<AddItemResponse>, I>>(base?: I): AddItemResponse {
+    return AddItemResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<AddItemResponse>, I>>(object: I): AddItemResponse {
+    const message = createBaseAddItemResponse();
+    message.cart = (object.cart !== undefined && object.cart !== null) ? Cart.fromPartial(object.cart) : undefined;
+    return message;
+  },
+};
+
+function createBaseUpdateItemRequest(): UpdateItemRequest {
+  return { userId: "", productId: "", variantId: "", quantity: 0 };
+}
+
+export const UpdateItemRequest: MessageFns<UpdateItemRequest> = {
+  encode(message: UpdateItemRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
+    }
+    if (message.productId !== "") {
+      writer.uint32(18).string(message.productId);
+    }
+    if (message.variantId !== "") {
+      writer.uint32(26).string(message.variantId);
+    }
+    if (message.quantity !== 0) {
+      writer.uint32(32).int32(message.quantity);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): UpdateItemRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUpdateItemRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.productId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.variantId = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.quantity = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): UpdateItemRequest {
+    return {
+      userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
+      productId: isSet(object.productId) ? globalThis.String(object.productId) : "",
+      variantId: isSet(object.variantId) ? globalThis.String(object.variantId) : "",
+      quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
+    };
+  },
+
+  toJSON(message: UpdateItemRequest): unknown {
+    const obj: any = {};
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    if (message.productId !== "") {
+      obj.productId = message.productId;
+    }
+    if (message.variantId !== "") {
+      obj.variantId = message.variantId;
+    }
+    if (message.quantity !== 0) {
+      obj.quantity = Math.round(message.quantity);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<UpdateItemRequest>, I>>(base?: I): UpdateItemRequest {
+    return UpdateItemRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<UpdateItemRequest>, I>>(object: I): UpdateItemRequest {
+    const message = createBaseUpdateItemRequest();
+    message.userId = object.userId ?? "";
+    message.productId = object.productId ?? "";
+    message.variantId = object.variantId ?? "";
+    message.quantity = object.quantity ?? 0;
+    return message;
+  },
+};
+
+function createBaseUpdateItemResponse(): UpdateItemResponse {
+  return { cart: undefined };
+}
+
+export const UpdateItemResponse: MessageFns<UpdateItemResponse> = {
+  encode(message: UpdateItemResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.cart !== undefined) {
+      Cart.encode(message.cart, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): UpdateItemResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUpdateItemResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.cart = Cart.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): UpdateItemResponse {
+    return { cart: isSet(object.cart) ? Cart.fromJSON(object.cart) : undefined };
+  },
+
+  toJSON(message: UpdateItemResponse): unknown {
+    const obj: any = {};
+    if (message.cart !== undefined) {
+      obj.cart = Cart.toJSON(message.cart);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<UpdateItemResponse>, I>>(base?: I): UpdateItemResponse {
+    return UpdateItemResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<UpdateItemResponse>, I>>(object: I): UpdateItemResponse {
+    const message = createBaseUpdateItemResponse();
+    message.cart = (object.cart !== undefined && object.cart !== null) ? Cart.fromPartial(object.cart) : undefined;
+    return message;
+  },
+};
+
+function createBaseRemoveItemRequest(): RemoveItemRequest {
+  return { userId: "", productId: "", variantId: "" };
+}
+
+export const RemoveItemRequest: MessageFns<RemoveItemRequest> = {
+  encode(message: RemoveItemRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
+    }
+    if (message.productId !== "") {
+      writer.uint32(18).string(message.productId);
+    }
+    if (message.variantId !== "") {
+      writer.uint32(26).string(message.variantId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RemoveItemRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRemoveItemRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.productId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.variantId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RemoveItemRequest {
+    return {
+      userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
+      productId: isSet(object.productId) ? globalThis.String(object.productId) : "",
+      variantId: isSet(object.variantId) ? globalThis.String(object.variantId) : "",
+    };
+  },
+
+  toJSON(message: RemoveItemRequest): unknown {
+    const obj: any = {};
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    if (message.productId !== "") {
+      obj.productId = message.productId;
+    }
+    if (message.variantId !== "") {
+      obj.variantId = message.variantId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<RemoveItemRequest>, I>>(base?: I): RemoveItemRequest {
+    return RemoveItemRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<RemoveItemRequest>, I>>(object: I): RemoveItemRequest {
+    const message = createBaseRemoveItemRequest();
+    message.userId = object.userId ?? "";
+    message.productId = object.productId ?? "";
+    message.variantId = object.variantId ?? "";
+    return message;
+  },
+};
+
+function createBaseRemoveItemResponse(): RemoveItemResponse {
+  return { cart: undefined };
+}
+
+export const RemoveItemResponse: MessageFns<RemoveItemResponse> = {
+  encode(message: RemoveItemResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.cart !== undefined) {
+      Cart.encode(message.cart, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RemoveItemResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRemoveItemResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.cart = Cart.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RemoveItemResponse {
+    return { cart: isSet(object.cart) ? Cart.fromJSON(object.cart) : undefined };
+  },
+
+  toJSON(message: RemoveItemResponse): unknown {
+    const obj: any = {};
+    if (message.cart !== undefined) {
+      obj.cart = Cart.toJSON(message.cart);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<RemoveItemResponse>, I>>(base?: I): RemoveItemResponse {
+    return RemoveItemResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<RemoveItemResponse>, I>>(object: I): RemoveItemResponse {
+    const message = createBaseRemoveItemResponse();
+    message.cart = (object.cart !== undefined && object.cart !== null) ? Cart.fromPartial(object.cart) : undefined;
+    return message;
+  },
+};
+
+function createBaseClearCartRequest(): ClearCartRequest {
+  return { userId: "" };
+}
+
+export const ClearCartRequest: MessageFns<ClearCartRequest> = {
+  encode(message: ClearCartRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ClearCartRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseClearCartRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ClearCartRequest {
+    return { userId: isSet(object.userId) ? globalThis.String(object.userId) : "" };
+  },
+
+  toJSON(message: ClearCartRequest): unknown {
+    const obj: any = {};
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ClearCartRequest>, I>>(base?: I): ClearCartRequest {
+    return ClearCartRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ClearCartRequest>, I>>(object: I): ClearCartRequest {
+    const message = createBaseClearCartRequest();
+    message.userId = object.userId ?? "";
+    return message;
+  },
+};
+
+function createBaseClearCartResponse(): ClearCartResponse {
+  return { success: false };
+}
+
+export const ClearCartResponse: MessageFns<ClearCartResponse> = {
+  encode(message: ClearCartResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ClearCartResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseClearCartResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ClearCartResponse {
+    return { success: isSet(object.success) ? globalThis.Boolean(object.success) : false };
+  },
+
+  toJSON(message: ClearCartResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ClearCartResponse>, I>>(base?: I): ClearCartResponse {
+    return ClearCartResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ClearCartResponse>, I>>(object: I): ClearCartResponse {
+    const message = createBaseClearCartResponse();
+    message.success = object.success ?? false;
+    return message;
+  },
+};
+
+function createBaseCart(): Cart {
+  return { id: "", userId: "", items: [], createdAt: "", updatedAt: "" };
+}
+
+export const Cart: MessageFns<Cart> = {
+  encode(message: Cart, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.userId !== "") {
+      writer.uint32(18).string(message.userId);
+    }
+    for (const v of message.items) {
+      CartItem.encode(v!, writer.uint32(26).fork()).join();
+    }
+    if (message.createdAt !== "") {
+      writer.uint32(34).string(message.createdAt);
+    }
+    if (message.updatedAt !== "") {
+      writer.uint32(42).string(message.updatedAt);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Cart {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCart();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
           message.items.push(CartItem.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.createdAt = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.updatedAt = reader.string();
           continue;
         }
       }
@@ -5166,18 +5864,30 @@ export const Cart: MessageFns<Cart> = {
 
   fromJSON(object: any): Cart {
     return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
       userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
       items: globalThis.Array.isArray(object?.items) ? object.items.map((e: any) => CartItem.fromJSON(e)) : [],
+      createdAt: isSet(object.createdAt) ? globalThis.String(object.createdAt) : "",
+      updatedAt: isSet(object.updatedAt) ? globalThis.String(object.updatedAt) : "",
     };
   },
 
   toJSON(message: Cart): unknown {
     const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
     if (message.userId !== "") {
       obj.userId = message.userId;
     }
     if (message.items?.length) {
       obj.items = message.items.map((e) => CartItem.toJSON(e));
+    }
+    if (message.createdAt !== "") {
+      obj.createdAt = message.createdAt;
+    }
+    if (message.updatedAt !== "") {
+      obj.updatedAt = message.updatedAt;
     }
     return obj;
   },
@@ -5187,28 +5897,97 @@ export const Cart: MessageFns<Cart> = {
   },
   fromPartial<I extends Exact<DeepPartial<Cart>, I>>(object: I): Cart {
     const message = createBaseCart();
+    message.id = object.id ?? "";
     message.userId = object.userId ?? "";
     message.items = object.items?.map((e) => CartItem.fromPartial(e)) || [];
+    message.createdAt = object.createdAt ?? "";
+    message.updatedAt = object.updatedAt ?? "";
     return message;
   },
 };
 
-function createBaseEmpty(): Empty {
-  return {};
+function createBaseCartItem(): CartItem {
+  return { id: "", productId: "", variantId: "", quantity: 0, createdAt: "", updatedAt: "" };
 }
 
-export const Empty: MessageFns<Empty> = {
-  encode(_: Empty, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const CartItem: MessageFns<CartItem> = {
+  encode(message: CartItem, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.productId !== "") {
+      writer.uint32(18).string(message.productId);
+    }
+    if (message.variantId !== "") {
+      writer.uint32(26).string(message.variantId);
+    }
+    if (message.quantity !== 0) {
+      writer.uint32(32).int32(message.quantity);
+    }
+    if (message.createdAt !== "") {
+      writer.uint32(42).string(message.createdAt);
+    }
+    if (message.updatedAt !== "") {
+      writer.uint32(50).string(message.updatedAt);
+    }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): Empty {
+  decode(input: BinaryReader | Uint8Array, length?: number): CartItem {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseEmpty();
+    const message = createBaseCartItem();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.productId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.variantId = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.quantity = reader.int32();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.createdAt = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.updatedAt = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -5218,20 +5997,51 @@ export const Empty: MessageFns<Empty> = {
     return message;
   },
 
-  fromJSON(_: any): Empty {
-    return {};
+  fromJSON(object: any): CartItem {
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      productId: isSet(object.productId) ? globalThis.String(object.productId) : "",
+      variantId: isSet(object.variantId) ? globalThis.String(object.variantId) : "",
+      quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
+      createdAt: isSet(object.createdAt) ? globalThis.String(object.createdAt) : "",
+      updatedAt: isSet(object.updatedAt) ? globalThis.String(object.updatedAt) : "",
+    };
   },
 
-  toJSON(_: Empty): unknown {
+  toJSON(message: CartItem): unknown {
     const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.productId !== "") {
+      obj.productId = message.productId;
+    }
+    if (message.variantId !== "") {
+      obj.variantId = message.variantId;
+    }
+    if (message.quantity !== 0) {
+      obj.quantity = Math.round(message.quantity);
+    }
+    if (message.createdAt !== "") {
+      obj.createdAt = message.createdAt;
+    }
+    if (message.updatedAt !== "") {
+      obj.updatedAt = message.updatedAt;
+    }
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<Empty>, I>>(base?: I): Empty {
-    return Empty.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<CartItem>, I>>(base?: I): CartItem {
+    return CartItem.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<Empty>, I>>(_: I): Empty {
-    const message = createBaseEmpty();
+  fromPartial<I extends Exact<DeepPartial<CartItem>, I>>(object: I): CartItem {
+    const message = createBaseCartItem();
+    message.id = object.id ?? "";
+    message.productId = object.productId ?? "";
+    message.variantId = object.variantId ?? "";
+    message.quantity = object.quantity ?? 0;
+    message.createdAt = object.createdAt ?? "";
+    message.updatedAt = object.updatedAt ?? "";
     return message;
   },
 };
@@ -5372,6 +6182,281 @@ export const ListRecommendationsResponse: MessageFns<ListRecommendationsResponse
   fromPartial<I extends Exact<DeepPartial<ListRecommendationsResponse>, I>>(object: I): ListRecommendationsResponse {
     const message = createBaseListRecommendationsResponse();
     message.productIds = object.productIds?.map((e) => e) || [];
+    return message;
+  },
+};
+
+function createBaseEmpty(): Empty {
+  return {};
+}
+
+export const Empty: MessageFns<Empty> = {
+  encode(_: Empty, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Empty {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseEmpty();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): Empty {
+    return {};
+  },
+
+  toJSON(_: Empty): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Empty>, I>>(base?: I): Empty {
+    return Empty.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Empty>, I>>(_: I): Empty {
+    const message = createBaseEmpty();
+    return message;
+  },
+};
+
+function createBaseGetVariantsForCartRequest(): GetVariantsForCartRequest {
+  return { variantIds: [] };
+}
+
+export const GetVariantsForCartRequest: MessageFns<GetVariantsForCartRequest> = {
+  encode(message: GetVariantsForCartRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.variantIds) {
+      writer.uint32(10).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetVariantsForCartRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetVariantsForCartRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.variantIds.push(reader.string());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetVariantsForCartRequest {
+    return {
+      variantIds: globalThis.Array.isArray(object?.variantIds)
+        ? object.variantIds.map((e: any) => globalThis.String(e))
+        : [],
+    };
+  },
+
+  toJSON(message: GetVariantsForCartRequest): unknown {
+    const obj: any = {};
+    if (message.variantIds?.length) {
+      obj.variantIds = message.variantIds;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetVariantsForCartRequest>, I>>(base?: I): GetVariantsForCartRequest {
+    return GetVariantsForCartRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetVariantsForCartRequest>, I>>(object: I): GetVariantsForCartRequest {
+    const message = createBaseGetVariantsForCartRequest();
+    message.variantIds = object.variantIds?.map((e) => e) || [];
+    return message;
+  },
+};
+
+function createBaseGetVariantsForCartResponse(): GetVariantsForCartResponse {
+  return { variants: [] };
+}
+
+export const GetVariantsForCartResponse: MessageFns<GetVariantsForCartResponse> = {
+  encode(message: GetVariantsForCartResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.variants) {
+      VariantCart.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetVariantsForCartResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetVariantsForCartResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.variants.push(VariantCart.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetVariantsForCartResponse {
+    return {
+      variants: globalThis.Array.isArray(object?.variants)
+        ? object.variants.map((e: any) => VariantCart.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: GetVariantsForCartResponse): unknown {
+    const obj: any = {};
+    if (message.variants?.length) {
+      obj.variants = message.variants.map((e) => VariantCart.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetVariantsForCartResponse>, I>>(base?: I): GetVariantsForCartResponse {
+    return GetVariantsForCartResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetVariantsForCartResponse>, I>>(object: I): GetVariantsForCartResponse {
+    const message = createBaseGetVariantsForCartResponse();
+    message.variants = object.variants?.map((e) => VariantCart.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseVariantCart(): VariantCart {
+  return { id: "", price: 0, image: "", quantity: 0 };
+}
+
+export const VariantCart: MessageFns<VariantCart> = {
+  encode(message: VariantCart, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.price !== 0) {
+      writer.uint32(21).float(message.price);
+    }
+    if (message.image !== "") {
+      writer.uint32(26).string(message.image);
+    }
+    if (message.quantity !== 0) {
+      writer.uint32(32).int32(message.quantity);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): VariantCart {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseVariantCart();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 21) {
+            break;
+          }
+
+          message.price = reader.float();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.image = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 32) {
+            break;
+          }
+
+          message.quantity = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): VariantCart {
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      price: isSet(object.price) ? globalThis.Number(object.price) : 0,
+      image: isSet(object.image) ? globalThis.String(object.image) : "",
+      quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
+    };
+  },
+
+  toJSON(message: VariantCart): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.price !== 0) {
+      obj.price = message.price;
+    }
+    if (message.image !== "") {
+      obj.image = message.image;
+    }
+    if (message.quantity !== 0) {
+      obj.quantity = Math.round(message.quantity);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<VariantCart>, I>>(base?: I): VariantCart {
+    return VariantCart.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<VariantCart>, I>>(object: I): VariantCart {
+    const message = createBaseVariantCart();
+    message.id = object.id ?? "";
+    message.price = object.price ?? 0;
+    message.image = object.image ?? "";
+    message.quantity = object.quantity ?? 0;
     return message;
   },
 };
@@ -9204,22 +10289,22 @@ export const ListProductsRequest: MessageFns<ListProductsRequest> = {
   },
 };
 
-function createBaseGetProductRequest(): GetProductRequest {
+function createBaseGetProductByIdRequest(): GetProductByIdRequest {
   return { id: "" };
 }
 
-export const GetProductRequest: MessageFns<GetProductRequest> = {
-  encode(message: GetProductRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const GetProductByIdRequest: MessageFns<GetProductByIdRequest> = {
+  encode(message: GetProductByIdRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.id !== "") {
       writer.uint32(10).string(message.id);
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): GetProductRequest {
+  decode(input: BinaryReader | Uint8Array, length?: number): GetProductByIdRequest {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGetProductRequest();
+    const message = createBaseGetProductByIdRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -9240,11 +10325,11 @@ export const GetProductRequest: MessageFns<GetProductRequest> = {
     return message;
   },
 
-  fromJSON(object: any): GetProductRequest {
+  fromJSON(object: any): GetProductByIdRequest {
     return { id: isSet(object.id) ? globalThis.String(object.id) : "" };
   },
 
-  toJSON(message: GetProductRequest): unknown {
+  toJSON(message: GetProductByIdRequest): unknown {
     const obj: any = {};
     if (message.id !== "") {
       obj.id = message.id;
@@ -9252,12 +10337,70 @@ export const GetProductRequest: MessageFns<GetProductRequest> = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<GetProductRequest>, I>>(base?: I): GetProductRequest {
-    return GetProductRequest.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<GetProductByIdRequest>, I>>(base?: I): GetProductByIdRequest {
+    return GetProductByIdRequest.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<GetProductRequest>, I>>(object: I): GetProductRequest {
-    const message = createBaseGetProductRequest();
+  fromPartial<I extends Exact<DeepPartial<GetProductByIdRequest>, I>>(object: I): GetProductByIdRequest {
+    const message = createBaseGetProductByIdRequest();
     message.id = object.id ?? "";
+    return message;
+  },
+};
+
+function createBaseGetProductBySlugRequest(): GetProductBySlugRequest {
+  return { slug: "" };
+}
+
+export const GetProductBySlugRequest: MessageFns<GetProductBySlugRequest> = {
+  encode(message: GetProductBySlugRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.slug !== "") {
+      writer.uint32(10).string(message.slug);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetProductBySlugRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetProductBySlugRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.slug = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetProductBySlugRequest {
+    return { slug: isSet(object.slug) ? globalThis.String(object.slug) : "" };
+  },
+
+  toJSON(message: GetProductBySlugRequest): unknown {
+    const obj: any = {};
+    if (message.slug !== "") {
+      obj.slug = message.slug;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetProductBySlugRequest>, I>>(base?: I): GetProductBySlugRequest {
+    return GetProductBySlugRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetProductBySlugRequest>, I>>(object: I): GetProductBySlugRequest {
+    const message = createBaseGetProductBySlugRequest();
+    message.slug = object.slug ?? "";
     return message;
   },
 };
@@ -12824,6 +13967,122 @@ export const GetAllBrandResponse: MessageFns<GetAllBrandResponse> = {
   },
 };
 
+function createBaseHealthCheckRequest(): HealthCheckRequest {
+  return { service: "" };
+}
+
+export const HealthCheckRequest: MessageFns<HealthCheckRequest> = {
+  encode(message: HealthCheckRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.service !== "") {
+      writer.uint32(10).string(message.service);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): HealthCheckRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseHealthCheckRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.service = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): HealthCheckRequest {
+    return { service: isSet(object.service) ? globalThis.String(object.service) : "" };
+  },
+
+  toJSON(message: HealthCheckRequest): unknown {
+    const obj: any = {};
+    if (message.service !== "") {
+      obj.service = message.service;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<HealthCheckRequest>, I>>(base?: I): HealthCheckRequest {
+    return HealthCheckRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<HealthCheckRequest>, I>>(object: I): HealthCheckRequest {
+    const message = createBaseHealthCheckRequest();
+    message.service = object.service ?? "";
+    return message;
+  },
+};
+
+function createBaseHealthCheckResponse(): HealthCheckResponse {
+  return { status: 0 };
+}
+
+export const HealthCheckResponse: MessageFns<HealthCheckResponse> = {
+  encode(message: HealthCheckResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.status !== 0) {
+      writer.uint32(8).int32(message.status);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): HealthCheckResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseHealthCheckResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.status = reader.int32() as any;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): HealthCheckResponse {
+    return { status: isSet(object.status) ? healthCheckResponse_ServingStatusFromJSON(object.status) : 0 };
+  },
+
+  toJSON(message: HealthCheckResponse): unknown {
+    const obj: any = {};
+    if (message.status !== 0) {
+      obj.status = healthCheckResponse_ServingStatusToJSON(message.status);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<HealthCheckResponse>, I>>(base?: I): HealthCheckResponse {
+    return HealthCheckResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<HealthCheckResponse>, I>>(object: I): HealthCheckResponse {
+    const message = createBaseHealthCheckResponse();
+    message.status = object.status ?? 0;
+    return message;
+  },
+};
+
 export type AddressServiceService = typeof AddressServiceService;
 export const AddressServiceService = {
   getCountries: {
@@ -13292,80 +14551,136 @@ export const UserServiceClient = makeGenericClientConstructor(
 
 export type CartServiceService = typeof CartServiceService;
 export const CartServiceService = {
-  addItem: {
-    path: "/nexuraTelemetry.CartService/AddItem",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: AddItemRequest) => Buffer.from(AddItemRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => AddItemRequest.decode(value),
-    responseSerialize: (value: Empty) => Buffer.from(Empty.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => Empty.decode(value),
-  },
   getCart: {
     path: "/nexuraTelemetry.CartService/GetCart",
     requestStream: false,
     responseStream: false,
     requestSerialize: (value: GetCartRequest) => Buffer.from(GetCartRequest.encode(value).finish()),
     requestDeserialize: (value: Buffer) => GetCartRequest.decode(value),
-    responseSerialize: (value: Cart) => Buffer.from(Cart.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => Cart.decode(value),
+    responseSerialize: (value: GetCartResponse) => Buffer.from(GetCartResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetCartResponse.decode(value),
   },
-  emptyCart: {
-    path: "/nexuraTelemetry.CartService/EmptyCart",
+  addItem: {
+    path: "/nexuraTelemetry.CartService/AddItem",
     requestStream: false,
     responseStream: false,
-    requestSerialize: (value: EmptyCartRequest) => Buffer.from(EmptyCartRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => EmptyCartRequest.decode(value),
-    responseSerialize: (value: Empty) => Buffer.from(Empty.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => Empty.decode(value),
+    requestSerialize: (value: AddItemRequest) => Buffer.from(AddItemRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => AddItemRequest.decode(value),
+    responseSerialize: (value: AddItemResponse) => Buffer.from(AddItemResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => AddItemResponse.decode(value),
+  },
+  updateItem: {
+    path: "/nexuraTelemetry.CartService/UpdateItem",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: UpdateItemRequest) => Buffer.from(UpdateItemRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => UpdateItemRequest.decode(value),
+    responseSerialize: (value: UpdateItemResponse) => Buffer.from(UpdateItemResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => UpdateItemResponse.decode(value),
+  },
+  removeItem: {
+    path: "/nexuraTelemetry.CartService/RemoveItem",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: RemoveItemRequest) => Buffer.from(RemoveItemRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => RemoveItemRequest.decode(value),
+    responseSerialize: (value: RemoveItemResponse) => Buffer.from(RemoveItemResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => RemoveItemResponse.decode(value),
+  },
+  clearCart: {
+    path: "/nexuraTelemetry.CartService/ClearCart",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: ClearCartRequest) => Buffer.from(ClearCartRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => ClearCartRequest.decode(value),
+    responseSerialize: (value: ClearCartResponse) => Buffer.from(ClearCartResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => ClearCartResponse.decode(value),
   },
 } as const;
 
 export interface CartServiceServer extends UntypedServiceImplementation {
-  addItem: handleUnaryCall<AddItemRequest, Empty>;
-  getCart: handleUnaryCall<GetCartRequest, Cart>;
-  emptyCart: handleUnaryCall<EmptyCartRequest, Empty>;
+  getCart: handleUnaryCall<GetCartRequest, GetCartResponse>;
+  addItem: handleUnaryCall<AddItemRequest, AddItemResponse>;
+  updateItem: handleUnaryCall<UpdateItemRequest, UpdateItemResponse>;
+  removeItem: handleUnaryCall<RemoveItemRequest, RemoveItemResponse>;
+  clearCart: handleUnaryCall<ClearCartRequest, ClearCartResponse>;
 }
 
 export interface CartServiceClient extends Client {
-  addItem(request: AddItemRequest, callback: (error: ServiceError | null, response: Empty) => void): ClientUnaryCall;
-  addItem(
-    request: AddItemRequest,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: Empty) => void,
+  getCart(
+    request: GetCartRequest,
+    callback: (error: ServiceError | null, response: GetCartResponse) => void,
   ): ClientUnaryCall;
-  addItem(
-    request: AddItemRequest,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: Empty) => void,
-  ): ClientUnaryCall;
-  getCart(request: GetCartRequest, callback: (error: ServiceError | null, response: Cart) => void): ClientUnaryCall;
   getCart(
     request: GetCartRequest,
     metadata: Metadata,
-    callback: (error: ServiceError | null, response: Cart) => void,
+    callback: (error: ServiceError | null, response: GetCartResponse) => void,
   ): ClientUnaryCall;
   getCart(
     request: GetCartRequest,
     metadata: Metadata,
     options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: Cart) => void,
+    callback: (error: ServiceError | null, response: GetCartResponse) => void,
   ): ClientUnaryCall;
-  emptyCart(
-    request: EmptyCartRequest,
-    callback: (error: ServiceError | null, response: Empty) => void,
+  addItem(
+    request: AddItemRequest,
+    callback: (error: ServiceError | null, response: AddItemResponse) => void,
   ): ClientUnaryCall;
-  emptyCart(
-    request: EmptyCartRequest,
+  addItem(
+    request: AddItemRequest,
     metadata: Metadata,
-    callback: (error: ServiceError | null, response: Empty) => void,
+    callback: (error: ServiceError | null, response: AddItemResponse) => void,
   ): ClientUnaryCall;
-  emptyCart(
-    request: EmptyCartRequest,
+  addItem(
+    request: AddItemRequest,
     metadata: Metadata,
     options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: Empty) => void,
+    callback: (error: ServiceError | null, response: AddItemResponse) => void,
+  ): ClientUnaryCall;
+  updateItem(
+    request: UpdateItemRequest,
+    callback: (error: ServiceError | null, response: UpdateItemResponse) => void,
+  ): ClientUnaryCall;
+  updateItem(
+    request: UpdateItemRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: UpdateItemResponse) => void,
+  ): ClientUnaryCall;
+  updateItem(
+    request: UpdateItemRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: UpdateItemResponse) => void,
+  ): ClientUnaryCall;
+  removeItem(
+    request: RemoveItemRequest,
+    callback: (error: ServiceError | null, response: RemoveItemResponse) => void,
+  ): ClientUnaryCall;
+  removeItem(
+    request: RemoveItemRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: RemoveItemResponse) => void,
+  ): ClientUnaryCall;
+  removeItem(
+    request: RemoveItemRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: RemoveItemResponse) => void,
+  ): ClientUnaryCall;
+  clearCart(
+    request: ClearCartRequest,
+    callback: (error: ServiceError | null, response: ClearCartResponse) => void,
+  ): ClientUnaryCall;
+  clearCart(
+    request: ClearCartRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: ClearCartResponse) => void,
+  ): ClientUnaryCall;
+  clearCart(
+    request: ClearCartRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: ClearCartResponse) => void,
   ): ClientUnaryCall;
 }
 
@@ -13462,12 +14777,21 @@ export const ProductCatalogServiceService = {
     responseSerialize: (value: CreateVariantResponse) => Buffer.from(CreateVariantResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => CreateVariantResponse.decode(value),
   },
-  getProduct: {
-    path: "/nexuraTelemetry.ProductCatalogService/GetProduct",
+  getProductById: {
+    path: "/nexuraTelemetry.ProductCatalogService/GetProductById",
     requestStream: false,
     responseStream: false,
-    requestSerialize: (value: GetProductRequest) => Buffer.from(GetProductRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => GetProductRequest.decode(value),
+    requestSerialize: (value: GetProductByIdRequest) => Buffer.from(GetProductByIdRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetProductByIdRequest.decode(value),
+    responseSerialize: (value: GetProductResponse) => Buffer.from(GetProductResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetProductResponse.decode(value),
+  },
+  getProductBySlug: {
+    path: "/nexuraTelemetry.ProductCatalogService/GetProductBySlug",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: GetProductBySlugRequest) => Buffer.from(GetProductBySlugRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetProductBySlugRequest.decode(value),
     responseSerialize: (value: GetProductResponse) => Buffer.from(GetProductResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => GetProductResponse.decode(value),
   },
@@ -13515,6 +14839,17 @@ export const ProductCatalogServiceService = {
     requestDeserialize: (value: Buffer) => Empty.decode(value),
     responseSerialize: (value: GetAllBrandResponse) => Buffer.from(GetAllBrandResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => GetAllBrandResponse.decode(value),
+  },
+  getVariantsForCart: {
+    path: "/nexuraTelemetry.ProductCatalogService/GetVariantsForCart",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: GetVariantsForCartRequest) =>
+      Buffer.from(GetVariantsForCartRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetVariantsForCartRequest.decode(value),
+    responseSerialize: (value: GetVariantsForCartResponse) =>
+      Buffer.from(GetVariantsForCartResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetVariantsForCartResponse.decode(value),
   },
   createCategory: {
     path: "/nexuraTelemetry.ProductCatalogService/CreateCategory",
@@ -13612,12 +14947,14 @@ export interface ProductCatalogServiceServer extends UntypedServiceImplementatio
   updateProduct: handleUnaryCall<UpdateProductRequest, UpdateProductResponse>;
   deleteProduct: handleUnaryCall<DeleteProductRequest, DeleteProductResponse>;
   createVariant: handleUnaryCall<CreateVariantRequest, CreateVariantResponse>;
-  getProduct: handleUnaryCall<GetProductRequest, GetProductResponse>;
+  getProductById: handleUnaryCall<GetProductByIdRequest, GetProductResponse>;
+  getProductBySlug: handleUnaryCall<GetProductBySlugRequest, GetProductResponse>;
   listProducts: handleUnaryCall<ListProductsRequest, ListProductsResponse>;
   createBrand: handleUnaryCall<CreateBrandRequest, CreateBrandResponse>;
   newBrand: handleUnaryCall<NewBrandRequest, NewBrandResponse>;
   removeBrand: handleUnaryCall<RemoveBrandRequest, RemoveBrandResponse>;
   getAllBrand: handleUnaryCall<Empty, GetAllBrandResponse>;
+  getVariantsForCart: handleUnaryCall<GetVariantsForCartRequest, GetVariantsForCartResponse>;
   createCategory: handleUnaryCall<CreateCategoryRequest, CreateCategoryResponse>;
   updateCategory: handleUnaryCall<UpdateCategoryRequest, UpdateCategoryResponse>;
   deleteCategory: handleUnaryCall<DeleteCategoryRequest, DeleteCategoryResponse>;
@@ -13690,17 +15027,32 @@ export interface ProductCatalogServiceClient extends Client {
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: CreateVariantResponse) => void,
   ): ClientUnaryCall;
-  getProduct(
-    request: GetProductRequest,
+  getProductById(
+    request: GetProductByIdRequest,
     callback: (error: ServiceError | null, response: GetProductResponse) => void,
   ): ClientUnaryCall;
-  getProduct(
-    request: GetProductRequest,
+  getProductById(
+    request: GetProductByIdRequest,
     metadata: Metadata,
     callback: (error: ServiceError | null, response: GetProductResponse) => void,
   ): ClientUnaryCall;
-  getProduct(
-    request: GetProductRequest,
+  getProductById(
+    request: GetProductByIdRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: GetProductResponse) => void,
+  ): ClientUnaryCall;
+  getProductBySlug(
+    request: GetProductBySlugRequest,
+    callback: (error: ServiceError | null, response: GetProductResponse) => void,
+  ): ClientUnaryCall;
+  getProductBySlug(
+    request: GetProductBySlugRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: GetProductResponse) => void,
+  ): ClientUnaryCall;
+  getProductBySlug(
+    request: GetProductBySlugRequest,
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: GetProductResponse) => void,
@@ -13779,6 +15131,21 @@ export interface ProductCatalogServiceClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: GetAllBrandResponse) => void,
+  ): ClientUnaryCall;
+  getVariantsForCart(
+    request: GetVariantsForCartRequest,
+    callback: (error: ServiceError | null, response: GetVariantsForCartResponse) => void,
+  ): ClientUnaryCall;
+  getVariantsForCart(
+    request: GetVariantsForCartRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: GetVariantsForCartResponse) => void,
+  ): ClientUnaryCall;
+  getVariantsForCart(
+    request: GetVariantsForCartRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: GetVariantsForCartResponse) => void,
   ): ClientUnaryCall;
   createCategory(
     request: CreateCategoryRequest,
@@ -14434,6 +15801,73 @@ export const FeatureFlagServiceClient = makeGenericClientConstructor(
 ) as unknown as {
   new (address: string, credentials: ChannelCredentials, options?: Partial<ClientOptions>): FeatureFlagServiceClient;
   service: typeof FeatureFlagServiceService;
+  serviceName: string;
+};
+
+/** Health service definition */
+export type HealthServiceService = typeof HealthServiceService;
+export const HealthServiceService = {
+  /** Check is the health checking method for all services */
+  check: {
+    path: "/nexuraTelemetry.HealthService/Check",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: HealthCheckRequest) => Buffer.from(HealthCheckRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => HealthCheckRequest.decode(value),
+    responseSerialize: (value: HealthCheckResponse) => Buffer.from(HealthCheckResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => HealthCheckResponse.decode(value),
+  },
+  /** Watch is for watching health status changes */
+  watch: {
+    path: "/nexuraTelemetry.HealthService/Watch",
+    requestStream: false,
+    responseStream: true,
+    requestSerialize: (value: HealthCheckRequest) => Buffer.from(HealthCheckRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => HealthCheckRequest.decode(value),
+    responseSerialize: (value: HealthCheckResponse) => Buffer.from(HealthCheckResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => HealthCheckResponse.decode(value),
+  },
+} as const;
+
+export interface HealthServiceServer extends UntypedServiceImplementation {
+  /** Check is the health checking method for all services */
+  check: handleUnaryCall<HealthCheckRequest, HealthCheckResponse>;
+  /** Watch is for watching health status changes */
+  watch: handleServerStreamingCall<HealthCheckRequest, HealthCheckResponse>;
+}
+
+export interface HealthServiceClient extends Client {
+  /** Check is the health checking method for all services */
+  check(
+    request: HealthCheckRequest,
+    callback: (error: ServiceError | null, response: HealthCheckResponse) => void,
+  ): ClientUnaryCall;
+  check(
+    request: HealthCheckRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: HealthCheckResponse) => void,
+  ): ClientUnaryCall;
+  check(
+    request: HealthCheckRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: HealthCheckResponse) => void,
+  ): ClientUnaryCall;
+  /** Watch is for watching health status changes */
+  watch(request: HealthCheckRequest, options?: Partial<CallOptions>): ClientReadableStream<HealthCheckResponse>;
+  watch(
+    request: HealthCheckRequest,
+    metadata?: Metadata,
+    options?: Partial<CallOptions>,
+  ): ClientReadableStream<HealthCheckResponse>;
+}
+
+export const HealthServiceClient = makeGenericClientConstructor(
+  HealthServiceService,
+  "nexuraTelemetry.HealthService",
+) as unknown as {
+  new (address: string, credentials: ChannelCredentials, options?: Partial<ClientOptions>): HealthServiceClient;
+  service: typeof HealthServiceService;
   serviceName: string;
 };
 

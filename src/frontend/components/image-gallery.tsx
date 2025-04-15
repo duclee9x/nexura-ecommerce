@@ -29,6 +29,7 @@ import { CSS } from "@dnd-kit/utilities"
 import { encode } from "blurhash"
 import { useToast } from "@/hooks/use-toast"
 import path from "path"
+import { ObjectId } from 'bson'
 
 export interface ProductImage {
   id: string
@@ -182,7 +183,7 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
 
     // Create temporary images with loading states
     const newUploads = Array.from(files).map(file => {
-      const tempId = `img-${Date.now()}-${Math.random().toString(36).substring(7)}`
+      const tempId = new ObjectId().toString()
       const tempUrl = URL.createObjectURL(file)
       return { file, tempUrl, id: tempId }
     })

@@ -1112,59 +1112,10 @@ export function VariantManager({
 
           <Tabs defaultValue="attributes" className="mt-4">
             <TabsList className="grid grid-cols-3">
-              <TabsTrigger value="attributes">Attributes</TabsTrigger>
               <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="attributes">Attributes</TabsTrigger>
               <TabsTrigger value="images">Images</TabsTrigger>
             </TabsList>
-
-            <TabsContent value="attributes" className="space-y-4 pt-4">
-              <div className="space-y-4">
-                <h4 className="font-medium">Variant Attributes</h4>
-                {variantableAttributes.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-4">
-                    {variantableAttributes.map((attribute) => (
-                      <div key={attribute.id} className="space-y-2">
-                        <Label htmlFor={`attr-${attribute.id}`}>
-                          {attribute.name}
-                          {attribute.required && <span className="text-destructive ml-1">*</span>}
-                        </Label>
-
-                        {attribute.name.toLowerCase() === "color" ? (
-                          <div className={cn(errors[`attribute_${attribute.id}`] && "border border-destructive rounded-md p-1")}>
-                            <ColorPicker
-                              value={newVariant.attributes?.find((attr) => attr.name.toLowerCase() === "color")?.extraValue || "#000000"}
-                              onChange={(color) => handleAttributeValueChange(attribute.id, color)}
-                              showFavorites={true}
-                              colorName={newVariant.attributes?.find((attr) => attr.name.toLowerCase() === "color")?.value || ""}
-                              onColorNameChange={(name) => handleAttributeValueChange(attribute.id, name, true)}
-                            />
-                          </div>
-                        ) : (
-                          <Input
-                            id={`attr-${attribute.id}`}
-                            value={newVariant.attributes?.find((attr) => attr.name.toLowerCase() === attribute.name.toLowerCase())?.value || ""}
-                            onChange={(e) => handleAttributeValueChange(attribute.id, e.target.value)}
-                            placeholder={`Enter ${attribute.name}`}
-                            className={cn(errors[`attribute_${attribute.id}`] && "border-destructive")}
-                            type="text"
-                          />
-                        )}
-
-                        {errors[`attribute_${attribute.id}`] && (
-                          <p className="text-xs text-destructive mt-1">{errors[`attribute_${attribute.id}`]}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-4 border rounded-md bg-muted/50">
-                    <p className="text-muted-foreground">
-                      No variantable attributes found. Mark attributes as "Use for variants" in the Attributes Manager.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
 
             <TabsContent value="details" className="space-y-4 pt-4">
               <div className="grid grid-cols-2 gap-4">
@@ -1262,6 +1213,57 @@ export function VariantManager({
                 />
               </div>
             </TabsContent>
+            
+            <TabsContent value="attributes" className="space-y-4 pt-4">
+              <div className="space-y-4">
+                <h4 className="font-medium">Variant Attributes</h4>
+                {variantableAttributes.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-4">
+                    {variantableAttributes.map((attribute) => (
+                      <div key={attribute.id} className="space-y-2">
+                        <Label htmlFor={`attr-${attribute.id}`}>
+                          {attribute.name}
+                          {attribute.required && <span className="text-destructive ml-1">*</span>}
+                        </Label>
+
+                        {attribute.name.toLowerCase() === "color" ? (
+                          <div className={cn(errors[`attribute_${attribute.id}`] && "border border-destructive rounded-md p-1")}>
+                            <ColorPicker
+                              value={newVariant.attributes?.find((attr) => attr.name.toLowerCase() === "color")?.extraValue || "#000000"}
+                              onChange={(color) => handleAttributeValueChange(attribute.id, color)}
+                              showFavorites={true}
+                              colorName={newVariant.attributes?.find((attr) => attr.name.toLowerCase() === "color")?.value || ""}
+                              onColorNameChange={(name) => handleAttributeValueChange(attribute.id, name, true)}
+                            />
+                          </div>
+                        ) : (
+                          <Input
+                            id={`attr-${attribute.id}`}
+                            value={newVariant.attributes?.find((attr) => attr.name.toLowerCase() === attribute.name.toLowerCase())?.value || ""}
+                            onChange={(e) => handleAttributeValueChange(attribute.id, e.target.value)}
+                            placeholder={`Enter ${attribute.name}`}
+                            className={cn(errors[`attribute_${attribute.id}`] && "border-destructive")}
+                            type="text"
+                          />
+                        )}
+
+                        {errors[`attribute_${attribute.id}`] && (
+                          <p className="text-xs text-destructive mt-1">{errors[`attribute_${attribute.id}`]}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-4 border rounded-md bg-muted/50">
+                    <p className="text-muted-foreground">
+                      No variantable attributes found. Mark attributes as "Use for variants" in the Attributes Manager.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            
 
             <TabsContent value="images" className="space-y-4 pt-4">
               <div className="space-y-2">

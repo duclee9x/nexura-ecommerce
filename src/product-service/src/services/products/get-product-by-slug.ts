@@ -1,17 +1,18 @@
 import { PrismaClient } from '@prisma/client'
 import { handleError } from '../../utils/error'
 import { sendUnaryData } from '@grpc/grpc-js'
-import { GetProductRequest, GetProductResponse } from '@/src/proto/nexura'
+import { GetProductBySlugRequest, GetProductResponse } from '@/src/proto/nexura'
 import { ServerUnaryCall } from '@grpc/grpc-js'
 
 const prisma = new PrismaClient()
 
-export const getProduct = async (call: ServerUnaryCall<GetProductRequest, GetProductResponse>, callback: sendUnaryData<GetProductResponse>) => {
+export const getProductBySlug = async (call: ServerUnaryCall<GetProductBySlugRequest, GetProductResponse>, callback: sendUnaryData<GetProductResponse>) => {
   try {
-    const {id} = call.request
+    const { slug } = call.request
+    console.log(call.request, "call.request")
     const product = await prisma.product.findUnique({
       where: {
-        id: id,
+        slug: slug,
       },
       include: {
         images: true,

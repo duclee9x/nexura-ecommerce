@@ -3,7 +3,8 @@ import { Server, ServerCredentials } from '@grpc/grpc-js'
 import { productProtoDefinition } from './utils/load-proto';
 import { HealthImplementation, ServingStatusMap } from 'grpc-health-check';
 import { productService } from "./services/product.service";
-import { ProductCatalogServiceService } from "./proto/nexura";
+import { HealthServiceImpl} from "./services/health.service"
+import { ProductCatalogServiceService, HealthServiceService } from "./proto/nexura";
 
 export function startServer(port: string): Server {
     const server = new Server();
@@ -14,9 +15,7 @@ export function startServer(port: string): Server {
 
     // Add services
     server.addService(ProductCatalogServiceService, productService);
-
-    healthImplementation.addToServer(server);
-    healthImplementation.setStatus('', 'SERVING');
+    server.addService(HealthServiceService, new HealthServiceImpl)
 
     const productReflection = new ReflectionService(productProtoDefinition);
     productReflection.addToServer(server);

@@ -2,7 +2,6 @@ import path from "path"
 import { loadSync, ServiceDefinition } from "@grpc/proto-loader"
 
 const PRODUCT_PROTO_PATH = path.resolve(__dirname, "../proto/nexura.proto")
-const HEALTH_PROTO_PATH = path.resolve(__dirname, "../proto/health.proto")
 
 const productProtoDefinition = loadSync(PRODUCT_PROTO_PATH, {
   keepCase: true,
@@ -12,15 +11,7 @@ const productProtoDefinition = loadSync(PRODUCT_PROTO_PATH, {
   oneofs: true,
 })
 
-const healthProtoDefinition = loadSync(HEALTH_PROTO_PATH, {
-  keepCase: true,
-  longs: String,
-  enums: String,
-  defaults: true,
-  oneofs: true,
-})
 
 const productPackageDefinition = productProtoDefinition["nexuraTelemetry.ProductCatalogService"] as ServiceDefinition
-const healthPackageDefinition = healthProtoDefinition["grpc.health.v1.Health"] as ServiceDefinition
 
-export { productProtoDefinition, productPackageDefinition, healthPackageDefinition } 
+export { productProtoDefinition, productPackageDefinition } 

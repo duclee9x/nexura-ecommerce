@@ -21,7 +21,7 @@ import { ImageGallery, type ProductImage } from "@/components/image-gallery"
 import { BrandSelector, type Brand } from "@/components/brand-selector"
 import { AttributesManager } from "@/components/attributes-manager"
 import { SizeInstructionEditor, type SizeChart } from "@/components/size-instruction-editor"
-import { createCategoryGateway, getProductGateway, newBrandGateway, updateCategoryGateway } from "@/gateway/gateway"
+import { createCategoryGateway, getProductByIdGateway, newBrandGateway, updateCategoryGateway } from "@/gateway/gateway"
 import { Product, ProductAttribute, ProductVariant, VariantAttribute } from "@/protos/nexura"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -78,7 +78,7 @@ export function ProductForm({
         height: 0,
         weight: 0
       },
-    seo: {
+      seo: {
         title: "",
         description: "",
         keywords: "",
@@ -96,12 +96,12 @@ export function ProductForm({
   console.log(JSON.stringify(product, null, 2), "product")
   const { data: productData, isLoading: isLoadingProduct } = useQuery({
     queryKey: ["product", productId],
-    queryFn: () => getProductGateway(productId || "").then((res) => res.product),
+    queryFn: () => getProductByIdGateway(productId || "").then((res) => res.product),
     enabled: !!productId
   })
   const queryClient = useQueryClient()
-  const {categories, isLoadingCategories} = categoriesData
-  const {brands, isLoadingBrands} = brandsData
+  const { categories, isLoadingCategories } = categoriesData
+  const { brands, isLoadingBrands } = brandsData
   useEffect(() => {
     if (productData) {
       setProduct(productData)
@@ -168,7 +168,7 @@ export function ProductForm({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setProduct((prev) => ({ ...prev, [name]: value }))
-    
+
     // Clear error when field becomes valid
     if (errors[name]) {
       setErrors((prev) => {
@@ -184,7 +184,7 @@ export function ProductForm({
     const value = Number.parseFloat(e.target.value)
     if (!isNaN(value)) {
       setProduct((prev) => ({ ...prev, [field]: value }))
-      
+
       // Clear error when field becomes valid
       if (errors[field]) {
         setErrors((prev) => {
@@ -207,7 +207,7 @@ export function ProductForm({
           [field]: value,
         },
       }))
-      
+
       // Clear error when field becomes valid
       if (errors[`dimensions.${field}`]) {
         setErrors((prev) => {
@@ -239,7 +239,7 @@ export function ProductForm({
       ...prev,
       categories: categoryIds,
     }))
-    
+
     // Clear error when categories are selected
     if (errors.categories) {
       setErrors((prev) => {
@@ -289,7 +289,7 @@ export function ProductForm({
     const existingColorAttribute = productAttributes.find(
       (attr) => attr.name.toLowerCase() === "color"
     )
-    
+
     if (!existingColorAttribute) return productAttributes
 
     // Get all unique color values from variants
@@ -317,11 +317,11 @@ export function ProductForm({
     return updatedAttributes
   }
 
-  
+
   // Handle variants update
   const handleVariantsUpdate = (updatedVariants: ProductVariant[], action: "delete" | "update") => {
     setProduct((prev) => {
-      const updatedAttributes = action !== "delete" 
+      const updatedAttributes = action !== "delete"
         ? updateColorAttribute(updatedVariants, prev.attributes)
         : prev.attributes
 
@@ -361,7 +361,7 @@ export function ProductForm({
       ...prev,
       brandId: brandId,
     }))
-    
+
     // Clear error when brand is selected
     if (errors.brandId) {
       setErrors((prev) => {
@@ -441,7 +441,7 @@ export function ProductForm({
   }
 
   const validateNumericField = (value: number, field: string, min: number = 0): string | null => {
-    
+
     if (value <= min) return `${field} must be greater than ${min}`
     return null
   }
@@ -529,11 +529,11 @@ export function ProductForm({
   const handleSave = async () => {
     setIsSaving(true)
     setIsLoading(true)
-    
+
     const { isValid, errors: validationErrors } = validateProduct(product)
     console.log(validationErrors, "validationErrors")
     setErrors(validationErrors)
-    
+
     if (!isValid) {
       setIsLoading(false)
       setIsSaving(false)
@@ -776,13 +776,12 @@ export function ProductForm({
               </Card>
 
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid grid-cols-6">
+                <TabsList className="grid grid-cols-5">
                   <TabsTrigger value="details">Details</TabsTrigger>
                   <TabsTrigger value="images">Images</TabsTrigger>
                   <TabsTrigger value="variants">Variants</TabsTrigger>
                   <TabsTrigger value="size-charts">Size Charts</TabsTrigger>
                   <TabsTrigger value="seo">SEO</TabsTrigger>
-                  <TabsTrigger value="attributes">Attributes</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="details" className="space-y-4 pt-4">
@@ -917,7 +916,7 @@ export function ProductForm({
                         basePrice={product.basePrice}
                         productImages={product.images || []}
                         baseSku={product.sku}
-                      categoryPath={getCategoryPath}
+                        categoryPath={getCategoryPath}
                       />
                     </CardContent>
                   </Card>
@@ -970,26 +969,7 @@ export function ProductForm({
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="attributes" className="space-y-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Product Attributes</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <Label>Product Attributes</Label>
-                        <div className={errors.attributes ? "border border-destructive rounded-md p-2" : ""}>
-                          <AttributesManager
-                            attributes={product.attributes}
-                            onChange={handleAttributesUpdate}
-                            showAdvancedOptions={true}
-                          />
-                        </div>
-                        <ErrorMessage field="attributes" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
+
               </Tabs>
             </div>
 

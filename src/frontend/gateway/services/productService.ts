@@ -1,4 +1,4 @@
-import { ProductCatalogServiceClient, Product, Brand, Category, ProductAttribute, Warehouse } from '../../protos/nexura';
+import { ProductCatalogServiceClient, Product, Brand, Category, ProductAttribute, Warehouse, Cart, CartItem, VariantCart } from '../../protos/nexura';
 import { DefaultResponse } from '../../lib/types';
 import { createServiceConfig, createClient, promisifyGrpcCall } from './baseAdapter';
 
@@ -14,8 +14,11 @@ export const productService = {
         return promisifyGrpcCall(productClient, 'listRecommendations', { userId, productIds });
     },
 
-    getProduct: async (id: string): Promise<DefaultResponse & { product: Product }> => {
-        return promisifyGrpcCall(productClient, 'getProduct', { id });
+    getProductById: async (id: string): Promise<DefaultResponse & { product: Product }> => {
+        return promisifyGrpcCall(productClient, 'getProductById', { id });
+    },
+    getProductBySlug: async (slug: string): Promise<DefaultResponse & { product: Product }> => {
+        return promisifyGrpcCall(productClient, 'getProductBySlug', { slug });
     },
 
     createProduct: async (product: Product): Promise<DefaultResponse & { product: Product }> => {
@@ -74,12 +77,15 @@ export const productService = {
         return promisifyGrpcCall(productClient, 'createProductAttribute', { attribute });
     },
 
-    listProducts: async (status: string): Promise<DefaultResponse & { products: Product[] }> => {
-        return promisifyGrpcCall(productClient, 'listProducts', { status });
+    listProducts: async (): Promise<DefaultResponse & { products: Product[] }> => {
+        return promisifyGrpcCall(productClient, 'listProducts', {});
     },
 
     getWarehouses: async (): Promise<DefaultResponse & { warehouses: Warehouse[] }> => {
         return promisifyGrpcCall(productClient, 'getWarehouses', {});
     },
 
+    getVariantsForCart: async (variantIds: string[]): Promise<DefaultResponse & { variants: VariantCart[] }> => {
+        return promisifyGrpcCall(productClient, 'getVariantsForCart', { variantIds });
+    },
 }; 

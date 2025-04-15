@@ -3,28 +3,28 @@
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
 import { useCurrency, type CurrencyCode } from "@/contexts/currency-context"
+import { VariantCart } from "@/protos/nexura"
 
 export type CartItem = {
   id: string
-  name: string
-  price: number
-  image: string
+  product_id: string
+  variant_id: string
   quantity: number
-  color?: string
-  baseCurrency?: CurrencyCode
-  sku?: string
-  variantId?: string
+  created_at: string
+  updated_at: string
+  variant?: VariantCart
 }
 
 export type CartContextType = {
   items: CartItem[]
-  addItem: (item: CartItem) => void
-  removeItem: (id: string) => void
-  updateQuantity: (id: string, quantity: number) => void
+  addItem: (item: Omit<CartItem, "id" | "created_at" | "updated_at" | "variant">) => void
+  removeItem: (productId: string, variantId: string) => void
+  updateQuantity: (productId: string, variantId: string, quantity: number) => void
   clearCart: () => void
   itemCount: number
   subtotal: number
   isReady: boolean
+  updateVariantInfo: (variantId: string, variant: VariantCart) => void
 }
 
 // Create context with a default value that matches the shape but is obviously not functional
@@ -37,6 +37,7 @@ const defaultCartContext: CartContextType = {
   itemCount: 0,
   subtotal: 0,
   isReady: false,
+  updateVariantInfo: () => {},
 }
 
 export const CartContext = createContext<CartContextType>(defaultCartContext)
@@ -68,39 +69,58 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isReady])
 
-  const addItem = (newItem: CartItem) => {
-    // Always store the base currency (USD) with the item
-    const itemWithCurrency: CartItem = {
-      ...newItem,
-      baseCurrency: "USD",
-    }
-
+  const addItem = (newItem: Omit<CartItem, "id" | "created_at" | "updated_at" | "variant">) => {
     setItems((prevItems: CartItem[]) => {
-      const existingItemIndex = prevItems.findIndex((item) => item.id === newItem.id && item.color === newItem.color)
+      const existingItemIndex = prevItems.findIndex(
+        (item) => item.product_id === newItem.product_id && item.variant_id === newItem.variant_id
+      )
 
       if (existingItemIndex >= 0) {
         // Item already exists, update quantity
         const updatedItems = [...prevItems]
         updatedItems[existingItemIndex].quantity += newItem.quantity
+        updatedItems[existingItemIndex].updated_at = new Date().toISOString()
         return updatedItems
       } else {
         // Item doesn't exist, add it
-        return [...prevItems, itemWithCurrency]
+        const itemWithMetadata: CartItem = {
+          ...newItem,
+          id: crypto.randomUUID(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+        return [...prevItems, itemWithMetadata]
       }
     })
   }
 
-  const removeItem = (id: string) => {
-    setItems((prevItems) => prevItems.filter((item) => item.id !== id))
+  const removeItem = (productId: string, variantId: string) => {
+    setItems((prevItems) => 
+      prevItems.filter((item) => !(item.product_id === productId && item.variant_id === variantId))
+    )
   }
 
-  const updateQuantity = (id: string, quantity: number) => {
+  const updateQuantity = (productId: string, variantId: string, quantity: number) => {
     if (quantity <= 0) {
-      removeItem(id)
+      removeItem(productId, variantId)
       return
     }
 
-    setItems((prevItems) => prevItems.map((item) => (item.id === id ? { ...item, quantity } : item)))
+    setItems((prevItems) => 
+      prevItems.map((item) => 
+        item.product_id === productId && item.variant_id === variantId 
+          ? { ...item, quantity, updated_at: new Date().toISOString() } 
+          : item
+      )
+    )
+  }
+
+  const updateVariantInfo = (variantId: string, variant: VariantCart) => {
+    setItems((prevItems) =>
+      prevItems.map((item) =>
+        item.variant_id === variantId ? { ...item, variant } : item
+      )
+    )
   }
 
   const clearCart = () => {
@@ -111,8 +131,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Calculate subtotal in the current currency
   const subtotal = items.reduce((total, item) => {
-    // If the item has a baseCurrency that's different from USD, we need to convert it
-    const itemPrice = item.price
+    if (!item.variant) return total
+    const itemPrice = item.variant.price
     return total + itemPrice * item.quantity
   }, 0)
 
@@ -127,6 +147,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         itemCount,
         subtotal,
         isReady,
+        updateVariantInfo,
       }}
     >
       {children}

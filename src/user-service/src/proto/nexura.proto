@@ -280,35 +280,77 @@ service UserService {
 // -----------------Cart service-----------------
 
 service CartService {
-    rpc AddItem(AddItemRequest) returns (Empty) {}
-    rpc GetCart(GetCartRequest) returns (Cart) {}
-    rpc EmptyCart(EmptyCartRequest) returns (Empty) {}
-}
-
-message CartItem {
-    string product_id = 1;
-    int32  quantity = 2;
-}
-
-message AddItemRequest {
-    string user_id = 1;
-    CartItem item = 2;
-}
-
-message EmptyCartRequest {
-    string user_id = 1;
+  rpc GetCart(GetCartRequest) returns (GetCartResponse) {}
+  rpc AddItem(AddItemRequest) returns (AddItemResponse) {}
+  rpc UpdateItem(UpdateItemRequest) returns (UpdateItemResponse) {}
+  rpc RemoveItem(RemoveItemRequest) returns (RemoveItemResponse) {}
+  rpc ClearCart(ClearCartRequest) returns (ClearCartResponse) {}
 }
 
 message GetCartRequest {
-    string user_id = 1;
+  string user_id = 1;
+}
+
+message GetCartResponse {
+  Cart cart = 1;
+}
+
+message AddItemRequest {
+  string user_id = 1;
+  string product_id = 2;
+  string variant_id = 3;
+  int32 quantity = 4;
+}
+
+message AddItemResponse {
+  Cart cart = 1;
+}
+
+message UpdateItemRequest {
+  string user_id = 1;
+  string product_id = 2;
+  string variant_id = 3;
+  int32 quantity = 4;
+}
+
+message UpdateItemResponse {
+  Cart cart = 1;
+}
+
+message RemoveItemRequest {
+  string user_id = 1;
+  string product_id = 2;
+  string variant_id = 3;
+}
+
+message RemoveItemResponse {
+  Cart cart = 1;
+}
+
+message ClearCartRequest {
+  string user_id = 1;
+}
+
+message ClearCartResponse {
+  bool success = 1;
 }
 
 message Cart {
-    string user_id = 1;
-    repeated CartItem items = 2;
+  string id = 1;
+  string user_id = 2;
+  repeated CartItem items = 3;
+  string created_at = 4;
+  string updated_at = 5;
 }
 
-message Empty {}
+message CartItem {
+  string id = 1;
+  string product_id = 2;
+  string variant_id = 3;
+  int32 quantity = 4;
+  string created_at = 5;
+  string updated_at = 6;
+} 
 
 // ---------------Recommendation service----------
 
@@ -326,18 +368,22 @@ message ListRecommendationsResponse {
 }
 
 // ---------------Product Catalog----------------
+message Empty {}
 
 service ProductCatalogService {
     rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse) {}
     rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse) {}
     rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse) {}
     rpc CreateVariant(CreateVariantRequest) returns (CreateVariantResponse) {}
-    rpc GetProduct(GetProductRequest) returns (GetProductResponse) {}
+    rpc GetProductById(GetProductByIdRequest) returns (GetProductResponse) {}
+    rpc GetProductBySlug(GetProductBySlugRequest) returns (GetProductResponse) {}
     rpc ListProducts(ListProductsRequest) returns (ListProductsResponse) {}
     rpc CreateBrand(CreateBrandRequest) returns (CreateBrandResponse) {}
     rpc NewBrand(NewBrandRequest) returns (NewBrandResponse) {}
     rpc RemoveBrand(RemoveBrandRequest) returns (RemoveBrandResponse) {}
     rpc GetAllBrand(Empty) returns (GetAllBrandResponse) {}
+
+    rpc GetVariantsForCart(GetVariantsForCartRequest) returns (GetVariantsForCartResponse) {}
     
     rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse) {}
     rpc UpdateCategory(UpdateCategoryRequest) returns (UpdateCategoryResponse) {}
@@ -352,6 +398,20 @@ service ProductCatalogService {
     rpc GetWarehouses(Empty) returns (GetWarehousesResponse) {}
   }
 
+  message GetVariantsForCartRequest {
+    repeated string variant_ids = 1;
+  }
+
+  message GetVariantsForCartResponse {
+    repeated VariantCart variants = 1;
+  }
+
+  message VariantCart {
+    string id = 1;
+    float price = 2;
+    string image = 3;
+    int32 quantity = 4;
+  }
 message GetProductAttributesRequest {
     string product_id = 1;
 }
@@ -596,9 +656,14 @@ message ListProductsResponse {
 message ListProductsRequest {
 }
 
-message GetProductRequest {
+message GetProductByIdRequest {
     string id = 1;
 }
+
+message GetProductBySlugRequest {
+    string slug = 1;
+}
+
 
 message GetProductResponse {
     Product product = 1;
@@ -900,4 +965,43 @@ message GetAllBrandResponse {
     bool success = 1;
     string message = 2;
     repeated Brand brands = 3;
+}
+
+// Health service definition
+service HealthService {
+  // Check is the health checking method for all services
+  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+  // Watch is for watching health status changes
+  rpc Watch(HealthCheckRequest) returns (stream HealthCheckResponse);
+}
+
+message HealthCheckRequest {
+  string service = 1;  // The name of the service to check
+}
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+    SERVICE_UNKNOWN = 3;  // Used when the requested service is not known
+  }
+  ServingStatus status = 1;
+}
+
+// Service names for health checks
+enum ServiceName {
+  UNSPECIFIED = 0;
+  CART_SERVICE = 1;
+  USER_SERVICE = 2;
+  PRODUCT_CATALOG_SERVICE = 3;
+  RECOMMENDATION_SERVICE = 4;
+  SHIPPING_SERVICE = 5;
+  CURRENCY_SERVICE = 6;
+  PAYMENT_SERVICE = 7;
+  EMAIL_SERVICE = 8;
+  CHECKOUT_SERVICE = 9;
+  AD_SERVICE = 10;
+  FEATURE_FLAG_SERVICE = 11;
+  ADDRESS_SERVICE = 12;
 }

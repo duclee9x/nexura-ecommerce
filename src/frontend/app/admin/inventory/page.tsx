@@ -37,7 +37,7 @@ export default function InventoryManagementPage() {
   const queryClient = useQueryClient()
   const { data: inventory } = useQuery({
     queryKey: ["inventory"],
-    queryFn: () => listProductsGateway("").then((res) => res.products),
+    queryFn: () => listProductsGateway().then((res) => res.products),
   })
 
   const {data: categories} = useQuery({
@@ -52,7 +52,7 @@ export default function InventoryManagementPage() {
     mutationFn: (product: Product) => updateProductGateway(product),
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["inventory"] })
-      await queryClient.prefetchQuery({ queryKey: ["inventory"], queryFn: ()=>listProductsGateway("").then((res) => res.products) });
+      await queryClient.prefetchQuery({ queryKey: ["inventory"], queryFn: ()=>listProductsGateway().then((res) => res.products) });
     }
   })
 
@@ -60,7 +60,7 @@ export default function InventoryManagementPage() {
     mutationFn: (product: Product) => deleteProductGateway(product.id),
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["inventory"] })
-      await queryClient.prefetchQuery({ queryKey: ["inventory"], queryFn: ()=>listProductsGateway("").then((res) => res.products) });
+      await queryClient.prefetchQuery({ queryKey: ["inventory"], queryFn: ()=>listProductsGateway().then((res) => res.products) });
     }
   })
 
@@ -374,7 +374,7 @@ export default function InventoryManagementPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>
-                      {usedCategories.map((category) => (
+                      {categories?.map((category) => (
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}
                         </SelectItem>

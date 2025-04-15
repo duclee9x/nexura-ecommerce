@@ -1,4 +1,3 @@
 {
-
-    
+    "python.defaultInterpreterPath": "./src/cart-service/Scripts/python.exe"
 }

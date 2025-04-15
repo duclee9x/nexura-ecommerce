@@ -3,7 +3,7 @@
 import { ProductForm } from "@/components/product-form"
 import { AdminSidebar } from "@/components/admin-sidebar"
 import { Product } from "@/protos/nexura"
-import { use } from "react"
+import { use, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "@/hooks/use-toast"
 import { getAllBrandGateway, updateProductGateway } from "@/gateway/gateway"
@@ -15,6 +15,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const router = useRouter()
   const { id: productId } = use(params)
   const queryClient = useQueryClient()
+  const [isLoading, setIsLoading] = useState(false)
+
   const {data: categories, isLoading: isLoadingCategories} = useQuery({
     queryKey: ["categories"],
     queryFn: () => getAllCategoryGateway().then((res) => res.categories)
@@ -26,12 +28,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
   
   const handleUpdateProduct = (product: Product) => {
-    
+    if (isLoading) return
+
+    setIsLoading(true)
     updateProduct(product)
-    toast({
-      title: "Product Updated",
-      description: "Product has been updated successfully.",
-    })
+    setIsLoading(false)
+
   }
 
 
@@ -39,7 +41,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     mutationFn: (product: Product) => updateProductGateway(product),
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: [ "inventory" ] })
-      await queryClient.prefetchQuery({ queryKey: ["inventory"], queryFn: ()=>listProductsGateway("").then((res) => res.products) });
+      await queryClient.prefetchQuery({ queryKey: ["inventory"], queryFn: ()=>listProductsGateway().then((res) => res.products) });
       router.push("/admin/inventory")
     },
     onError: () => {
@@ -54,7 +56,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const handleCancel = () => {
     router.back()
   }
+  
   if (isPending) return <div className="flex justify-center items-center h-screen"><Loader2 className="w-10 h-10 animate-spin" /></div>
+
   return (
     <div className="flex min-h-screen">
       <AdminSidebar />
@@ -62,7 +66,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         productId={productId}
         categoriesData={{categories, isLoadingCategories}}
         brandsData={{brands, isLoadingBrands}}
-        onSave={updateProduct}
+        onSave={handleUpdateProduct}
         onCancel={handleCancel}
         mode="edit"
       />
