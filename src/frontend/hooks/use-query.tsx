@@ -1,0 +1,307 @@
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { getAllCategoryGateway, getUserGateway, listProductsGateway, getCartGateway, addItemGateway, updateItemGateway, removeItemGateway, clearCartGateway, getVariantsForCartGateway } from "@/gateway/gateway"
+import { Product, User } from "@/protos/nexura"
+import { useRouter } from "next/navigation"
+
+interface QueryConfig {
+  retry?: number
+  refetchOnWindowFocus?: boolean
+}
+
+const defaultConfig: QueryConfig = {
+  retry: 1,
+  refetchOnWindowFocus: false
+}
+
+export const useUserSession = (config: Partial<QueryConfig> = {}) => {
+  return useQuery({
+    queryKey: ["userSession"],
+    queryFn: async () => {
+      try {
+        const response = await fetch("/api/auth/session")
+        if (!response.ok) {
+          throw new Error("Failed to fetch session")
+        }
+        const data = await response.json()
+        const user = await getUserGateway(data.user.id)
+        return user.user as User
+      } catch (error) {
+        console.error("Error fetching session:", error)
+        return null
+      }
+    },
+    ...defaultConfig,
+    ...config
+  })
+}
+
+export const useSessionActions = () => {
+  const router = useRouter()
+  const queryClient = useQueryClient()
+
+  const login = async (email: string, password: string) => {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || "Failed to login")
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["userSession"] })
+      router.push("/")
+    } catch (error) {
+      console.error("Login error:", error)
+      throw error
+    }
+  }
+
+  const logout = async () => {
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to logout")
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["userSession"] })
+      router.push("/")
+    } catch (error) {
+      console.error("Logout error:", error)
+      throw error
+    }
+  }
+
+  const refresh = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["userSession"] })
+  }
+
+  return {
+    login,
+    logout,
+    refresh
+  }
+}
+
+export const useProducts = (config: Partial<QueryConfig> = {}) => {
+  return useQuery({
+    queryKey: ["productsCatalog"],
+    queryFn: async () => {
+      try {
+        const res = await listProductsGateway()
+        return res.products
+      } catch (error) {
+        console.error("Error fetching products:", error)
+        throw new Error("Failed to load products. Please try again later.")
+      }
+    },
+    ...defaultConfig,
+    ...config
+  })
+}
+
+export const useCategories = (config: Partial<QueryConfig> = {}) => {
+  return useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      try {
+        const res = await getAllCategoryGateway()
+        return res.categories
+      } catch (error) {
+        console.error("Error fetching categories:", error)
+        throw new Error("Failed to load categories. Please try again later.")
+      }
+    },
+    ...defaultConfig,
+    ...config
+  })
+}
+
+export const useFilteredProducts = (
+  products: Product[] | undefined,
+  filters: {
+    searchQuery: string
+    categories: string[]
+    colors: string[]
+    features: string[]
+    priceRange: [number, number]
+  }
+) => {
+  return products?.filter((product) => {
+    // Search filter
+    if (
+      filters.searchQuery &&
+      !product.name.toLowerCase().includes(filters.searchQuery.toLowerCase()) &&
+      !product.sku.toLowerCase().includes(filters.searchQuery.toLowerCase())
+    ) {
+      return false
+    }
+
+    // Category filter
+    if (filters.categories.length > 0) {
+      const hasMatchingCategory = product.categories.some((category) =>
+        filters.categories.includes(category)
+      )
+      if (!hasMatchingCategory) return false
+    }
+
+    // Color filter
+    if (filters.colors.length > 0) {
+      const hasMatchingColor = product.variants.some((variant) => {
+        const colorAttribute = variant.attributes.find(
+          (attr) => attr.name.toLowerCase() === "color"
+        )
+        return colorAttribute?.extraValue && filters.colors.includes(colorAttribute.extraValue)
+      })
+      if (!hasMatchingColor) return false
+    }
+
+    // Feature filter
+    if (filters.features.includes("featured") && !product.featured) {
+      return false
+    }
+
+    // Price range filter
+    const minPrice = product.variants.reduce(
+      (min, variant) => Math.min(min, variant.price),
+      Infinity
+    )
+    const maxPrice = product.variants.reduce(
+      (max, variant) => Math.max(max, variant.price),
+      0
+    )
+    if (minPrice > filters.priceRange[1] || maxPrice < filters.priceRange[0]) {
+      return false
+    }
+
+    return true
+  })
+}
+
+export const useQueryUtils = () => {
+  const queryClient = useQueryClient()
+
+  const invalidateQueries = (queryKey: string[]) => {
+    queryClient.invalidateQueries({ queryKey })
+  }
+
+  const prefetchQueries = async (queryKey: string[], queryFn: () => Promise<any>) => {
+    await queryClient.prefetchQuery({
+      queryKey,
+      queryFn
+    })
+  }
+
+  return {
+    invalidateQueries,
+    prefetchQueries
+  }
+}
+
+export const useCart = (userId: string, config: Partial<QueryConfig> = {}) => {
+  return useQuery({
+    queryKey: ["cart", userId],
+    queryFn: async () => {
+      try {
+        const response = await getCartGateway({ userId })
+        return response.cart
+      } catch (error) {
+        console.error("Error fetching cart:", error)
+        throw error
+      }
+    },
+    ...defaultConfig,
+    ...config
+  })
+}
+
+export const useCartVariants = (variantIds: string[], config: Partial<QueryConfig> = {}) => {
+  return useQuery({
+    queryKey: ["cartVariants", variantIds],
+    queryFn: async () => {
+      const response = await getVariantsForCartGateway(variantIds)
+      return response.variants
+    },
+    ...defaultConfig,
+    ...config
+  })
+}
+export const useCartActions = () => {
+  const queryClient = useQueryClient()
+
+  const addItem = async (params: {
+    userId: string
+    productId: string
+    variantId: string
+    quantity: number
+    image: string
+    currencyCode: string
+  }) => {
+    try {
+      const response = await addItemGateway(params)
+      await queryClient.invalidateQueries({ queryKey: ["cart", params.userId] })
+      return response.cart
+    } catch (error) {
+      console.error("Error adding item to cart:", error)
+      throw error
+    }
+  }
+
+  const updateItem = async (params: {
+    userId: string
+    productId: string
+    variantId: string
+    quantity: number
+    image: string
+  }) => {
+    try {
+      const response = await updateItemGateway(params)
+      await queryClient.invalidateQueries({ queryKey: ["cart", params.userId] })
+      return response.cart
+    } catch (error) {
+      console.error("Error updating cart item:", error)
+      throw error
+    }
+  }
+
+  const removeItem = async (params: {
+    userId: string
+    productId: string
+    variantId: string
+  }) => {
+    try {
+      const response = await removeItemGateway(params)
+      await queryClient.invalidateQueries({ queryKey: ["cart", params.userId] })
+      return response.cart
+    } catch (error) {
+      console.error("Error removing item from cart:", error)
+      throw error
+    }
+  }
+
+  const clearCart = async (params: { userId: string }) => {
+    try {
+      const response = await clearCartGateway(params)
+      await queryClient.invalidateQueries({ queryKey: ["cart", params.userId] })
+      return response.cart
+    } catch (error) {
+      console.error("Error clearing cart:", error)
+      throw error
+    }
+  }
+
+  return {
+    addItem,
+    updateItem,
+    removeItem,
+    clearCart
+  }
+}

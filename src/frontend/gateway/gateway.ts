@@ -4,7 +4,7 @@ import { userService } from './services/userService';
 import { cartService } from './services/cartService';
 import { productService } from './services/productService';
 import { addressService } from './services/addressService';
-import { Product } from '@/protos/nexura';
+import { AddItemRequest, ClearCartRequest, GetCartRequest, Product, RemoveItemRequest, UpdateItemRequest } from '@/protos/nexura';
 
 export const validateOTPGateway = async (email: string, otp: string) => {
     return userService.validateOTP(email, otp);
@@ -159,22 +159,23 @@ export const getVariantsForCartGateway = async (variantIds: string[]) => {
     return productService.getVariantsForCart(variantIds);
 };
 
-export const getCartGateway = async (userId: string) => {
-    return cartService.getCart(userId);
+export const getCartGateway = async ({userId}: GetCartRequest) => {
+    return cartService.getCart({userId});
 };
 
-export const addItemGateway = async (userId: string, item: any) => {
-    return cartService.addItem(userId, item);
+export const addItemGateway = async ({userId, productId, variantId, quantity, image, currencyCode}: AddItemRequest) => {
+    return cartService.addItem({userId, productId, variantId, quantity, image, currencyCode});
 };  
 
-export const updateItemGateway = async (userId: string, item: any) => {
-    return cartService.updateItem(userId, item);
+export const updateItemGateway = async ({userId, productId, variantId, quantity, image}: UpdateItemRequest) => {
+    return cartService.updateItem({userId, productId, variantId, quantity, image});
 };
 
-export const removeItemGateway = async (userId: string, item: any) => {
-    return cartService.removeItem(userId, item);
+export const removeItemGateway = async ({userId, productId, variantId}: RemoveItemRequest) => {
+    return cartService.removeItem({userId, productId, variantId});
 };
 
-export const clearCartGateway = async (userId: string) => {
-    return cartService.clearCart(userId);
+export const clearCartGateway = async ({userId}: ClearCartRequest) => {
+    return cartService.clearCart({userId});
 };
+

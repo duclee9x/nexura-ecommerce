@@ -1,12 +1,15 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, Minus, Plus, X, ShoppingBag, ArrowRight, Info } from "lucide-react"
 import { useCart } from "@/contexts/cart-context"
 import { useCurrency } from "@/contexts/currency-context"
+import { useCartVariants } from "@/hooks/use-query"
+import { VariantCart } from "@/protos/nexura"
+import { toast } from "@/hooks/use-toast"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,42 +27,64 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { getProductUrl } from "@/lib/utils"
+
 // Shipping options
 const shippingOptions = [
   { id: "free", name: "Free Shipping", price: 0, description: "7-10 business days", minOrderValue: 50 },
   { id: "standard", name: "Standard Shipping", price: 12, description: "3-5 business days" },
   { id: "express", name: "Express Shipping", price: 20, description: "1-2 business days" },
-]
+] as const
+
+const TAX_RATE = 0.1 // 10% tax rate
 
 export default function CartPage() {
   const router = useRouter()
-  const { items, removeItem, updateQuantity, clearCart, subtotal } = useCart()
+  const { items, removeItem, updateQuantity, clearCart } = useCart()
   const { formatPrice, convertPrice } = useCurrency()
   const [promoCode, setPromoCode] = useState("")
   const [promoApplied, setPromoApplied] = useState(false)
   const [promoDiscount, setPromoDiscount] = useState(0)
-  const [shippingMethod, setShippingMethod] = useState("standard")
+  const [shippingMethod, setShippingMethod] = useState<typeof shippingOptions[number]["id"]>("standard")
   const [shippingCost, setShippingCost] = useState(12)
   const [estimatedDelivery, setEstimatedDelivery] = useState("")
-
-  // Calculate tax rate based on subtotal (8%)
-  const taxRate = 0.08
-  const tax = subtotal * taxRate
-
+  const { data: variants } = useCartVariants(items.map((item) => item.variantId))
+  const [optimisticItems, setOptimisticItems] = useState(items)
+  const [optimisticVariants, setOptimisticVariants] = useState<VariantCart[] | undefined>(variants)
+  console.log(JSON.stringify(items, null, 2), "items")
   // Calculate discount if promo is applied
   const discount = promoApplied ? promoDiscount : 0
+  console.log(variants, "variants")
+  
+  // Update optimistic state when backend data changes
+  useEffect(() => {
+    setOptimisticItems(items)
+  }, [items])
 
-  // Calculate total
-  const total = subtotal + shippingCost + tax - discount
+  useEffect(() => {
+    setOptimisticVariants(variants)
+  }, [variants])
+
+  // Calculate subtotal using optimistic data
+  const subtotal = useMemo(() => {
+    return optimisticItems.reduce((total, item) => {
+      const variant = optimisticVariants?.find(v => v.id === item.variantId)
+      return total + ((variant?.price || 0) * item.quantity)
+    }, 0)
+  }, [optimisticItems, optimisticVariants])
+
+  const total = subtotal + shippingCost - (promoApplied ? promoDiscount : 0)
+  console.log(subtotal, "subtotal")
 
   // Update shipping cost when shipping method changes
   useEffect(() => {
     const selectedShipping = shippingOptions.find((option) => option.id === shippingMethod)
+    if (!selectedShipping) return
 
     // Check if free shipping applies (orders over $50)
     if (selectedShipping.id === "free" && subtotal < selectedShipping.minOrderValue) {
       setShippingMethod("standard")
-      setShippingCost(shippingOptions.find((option) => option.id === "standard").price)
+      setShippingCost(shippingOptions.find((option) => option.id === "standard")?.price || 0)
     } else {
       setShippingCost(selectedShipping.price)
     }
@@ -103,10 +128,88 @@ export default function CartPage() {
     }
   }
 
-  const handleQuantityChange = (id: number, newQuantity: number) => {
-    if (newQuantity >= 1) {
-      updateQuantity(id, newQuantity)
+  const handleQuantityChange = async (productId: string, variantId: string, newQuantity: number) => {
+    if (newQuantity < 1) return
+
+    const variant = optimisticVariants?.find(v => v.id === variantId)
+    if (!variant) return
+
+    // Check if new quantity exceeds available stock
+    if (newQuantity > variant.quantity) {
+      toast({
+        title: "Maximum stock reached",
+        description: `Only ${variant.quantity} items available`,
+        variant: "destructive"
+      })
+      // Set quantity to maximum available if trying to add more
+      newQuantity = variant.quantity
     }
+
+    // Optimistically update the UI
+    setOptimisticItems(prevItems => 
+      prevItems.map(item => 
+        item.productId === productId && item.variantId === variantId
+          ? { ...item, quantity: newQuantity }
+          : item
+      )
+    )
+
+    try {
+      // Update the backend
+      await updateQuantity(productId, variantId, newQuantity)
+    } catch (error) {
+      // Revert optimistic update on error
+      setOptimisticItems(items)
+      toast({
+        title: "Error updating quantity",
+        description: "Please try again",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleRemoveItem = async (productId: string, variantId: string) => {
+    // Optimistically update the UI
+    setOptimisticItems(prevItems => 
+      prevItems.filter(item => 
+        !(item.productId === productId && item.variantId === variantId)
+      )
+    )
+
+    try {
+      // Update the backend
+      await removeItem(productId, variantId)
+    } catch (error) {
+      // Revert optimistic update on error
+      setOptimisticItems(items)
+      toast({
+        title: "Error removing item",
+        description: "Please try again",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleClearCart = async () => {
+    // Optimistically update the UI
+    setOptimisticItems([])
+
+    try {
+      // Update the backend
+      await clearCart()
+    } catch (error) {
+      // Revert optimistic update on error
+      setOptimisticItems(items)
+      toast({
+        title: "Error clearing cart",
+        description: "Please try again",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleShippingMethodChange = (value: string) => {
+    setShippingMethod(value as typeof shippingOptions[number]["id"])
   }
 
   return (
@@ -119,13 +222,13 @@ export default function CartPage() {
           </Button>
           <h1 className="text-3xl font-bold mb-2 dark:text-white">Your Cart</h1>
           <p className="text-muted-foreground">
-            {items.length > 0
-              ? `You have ${items.length} item${items.length > 1 ? "s" : ""} in your cart`
+            {optimisticItems.length > 0
+              ? `You have ${optimisticItems.length} item${optimisticItems.length > 1 ? "s" : ""} in your cart`
               : "Your cart is empty"}
           </p>
         </div>
 
-        {items.length === 0 ? (
+        {optimisticItems.length === 0 ? (
           <div className="text-center py-16 space-y-6">
             <div className="mx-auto w-24 h-24 rounded-full bg-muted flex items-center justify-center">
               <ShoppingBag className="h-12 w-12 text-muted-foreground" />
@@ -149,65 +252,78 @@ export default function CartPage() {
                 <div className="col-span-2 text-right">Total</div>
               </div>
 
-              {items.map((item) => (
-                <div key={item.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-4 border-b">
-                  <div className="col-span-6 flex items-center gap-4">
-                    <div className="relative w-20 h-20 border dark:border-gray-800">
-                      <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
+              {optimisticItems.map((item) => {
+                const variant = optimisticVariants?.find(v => v.id === item.variantId)
+                const isMaxStock = item.quantity >= (variant?.quantity || 0)
+
+                return (
+                  <div key={item.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-4 border-b">
+                    <div className="col-span-6 flex items-center gap-4">
+                      <div className="relative w-20 h-20 border dark:border-gray-800">
+                        <Image src={getProductUrl(item.image) || "/placeholder.svg"} alt="Product" fill className="object-cover" />
+                      </div>
+                      <div className="flex-1">
+                        <Link href={`/products/${variant?.productSlug}`} className="font-medium hover:underline">
+                          {variant?.productName}
+                          <br />
+                          <span className="text-sm text-muted-foreground">{variant?.attributes.map(attribute => attribute.value).join(", ")}</span>
+                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-3 text-muted-foreground hover:text-destructive mt-1"
+                          onClick={() => handleRemoveItem(item.productId, item.variantId)}
+                        >
+                          <X className="h-3 w-3 mr-1" />
+                          Remove
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <Link href={`/products/${item.id}`} className="font-medium hover:underline">
-                        {item.name}
-                      </Link>
-                      {item.color && (
-                        <div className="flex items-center mt-1">
-                          <span className="text-sm text-muted-foreground mr-2">Color:</span>
-                          <span
-                            className={`w-4 h-4 rounded-full bg-${
-                              item.color === "black" ? "black" : item.color === "gray" ? "gray-400" : "blue-600"
-                            }`}
-                          ></span>
-                        </div>
+
+                    <div className="col-span-2 flex items-center justify-center">
+                      <div className="flex items-center border rounded-md">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-none"
+                          onClick={() => handleQuantityChange(item.productId, item.variantId, item.quantity - 1)}
+                          disabled={item.quantity <= 1}
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        <span className="w-10 text-center">{item.quantity}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-none"
+                          onClick={() => handleQuantityChange(item.productId, item.variantId, item.quantity + 1)}
+                          disabled={isMaxStock}
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
+                      {isMaxStock && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-4 w-4 ml-2 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Maximum stock reached</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 px-3 text-muted-foreground hover:text-destructive mt-1"
-                        onClick={() => removeItem(item.id)}
-                      >
-                        <X className="h-3 w-3 mr-1" />
-                        Remove
-                      </Button>
+                    </div>
+
+                    <div className="col-span-2 text-center">{formatPrice(variant?.price || 0)}</div>
+
+                    <div className="col-span-2 text-right font-medium">
+                      {formatPrice((variant?.price || 0) * item.quantity)}
                     </div>
                   </div>
-
-                  <div className="col-span-2 flex items-center justify-center">
-                    <div className="flex items-center border rounded-md">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 rounded-none"
-                        onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                      >
-                        <Minus className="h-3 w-3" />
-                      </Button>
-                      <span className="w-10 text-center">{item.quantity}</span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 rounded-none"
-                        onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                      >
-                        <Plus className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="col-span-2 text-center">{formatPrice(item.price)}</div>
-
-                  <div className="col-span-2 text-right font-medium">{formatPrice(item.price * item.quantity)}</div>
-                </div>
-              ))}
+                )
+              })}
 
               <div className="flex justify-between items-center pt-4">
                 <AlertDialog>
@@ -223,7 +339,7 @@ export default function CartPage() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={clearCart}>Clear Cart</AlertDialogAction>
+                      <AlertDialogAction onClick={handleClearCart}>Clear Cart</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -251,7 +367,7 @@ export default function CartPage() {
                       <span className="text-muted-foreground">Shipping</span>
                       <span>{formatPrice(shippingCost)}</span>
                     </div>
-                    <Select value={shippingMethod} onValueChange={setShippingMethod}>
+                    <Select value={shippingMethod} onValueChange={handleShippingMethodChange}>
                       <SelectTrigger className="w-full h-16">
                         <SelectValue placeholder="Select shipping method" />
                       </SelectTrigger>
@@ -283,25 +399,6 @@ export default function CartPage() {
                     {estimatedDelivery && (
                       <p className="text-xs text-muted-foreground">Estimated delivery: {estimatedDelivery}</p>
                     )}
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <span className="text-muted-foreground">Tax</span>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-4 w-4 p-0 ml-1">
-                              <Info className="h-3 w-3" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Tax calculated at {(taxRate * 100).toFixed(0)}%</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                    <span>{formatPrice(tax)}</span>
                   </div>
 
                   {promoApplied && (

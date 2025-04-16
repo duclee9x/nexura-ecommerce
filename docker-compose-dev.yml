@@ -44,8 +44,8 @@ services:
       user-service-db:
         condition: service_healthy
         restart: true
-      otel-collector:
-        condition: service_started
+      # otel-collector:
+      #   condition: service_started
     restart: unless-stopped
     ports:
       - "${USER_SERVICE_PORT}:${USER_SERVICE_PORT}"
@@ -53,9 +53,8 @@ services:
       - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
       - OTEL_EXPORTER_OTLP_TRACES_TEMPORALITY_PREFERENCE
       - OTEL_EXPORTER_OTLP_LOGS_TEMPORALITY_PREFERENCE
-      - OTEL_SERVICE_NAME=user-service
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-lgtm:4317
-      - OTEL_RESOURCE_ATTRIBUTES
+      - OTEL_RESOURCE_ATTRIBUTES="service.name=user-service,service.instance.id=localhost:50051"
       - OTEL_RESOURCE_NAMESPACE=nexura
       - DATABASE_URL=mysql://${USER_SERVICE_DB_USER}:${USER_SERVICE_DB_PASSWORD}@${USER_SERVICE_DB_HOST}:${USER_SERVICE_DB_PORT}/${USER_SERVICE_DB_NAME}
       - JWT_ACCESS_SECRET
@@ -324,4 +323,6 @@ services:
     environment:
       - OTEL_METRIC_EXPORT_INTERVAL=5000
       - ENABLE_LOGS_OTELCOL
+  
+  # orchestrator:
     

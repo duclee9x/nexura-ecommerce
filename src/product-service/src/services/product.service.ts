@@ -17,7 +17,8 @@ import { getProductBySlug } from './products/get-product-by-slug'
 import { getProductById } from './products/get-product-by-id'
 import { listProducts } from './products/list-products'
 import { getWarehouses } from './warehouses/get-warehouses'
-// import { createVariant } from './variants/create-variant'
+import { getVariantsForCart } from './products/get-variants-for-cart'
+
 export const productService: UntypedServiceImplementation = {
   newBrand: newBrand,
   removeBrand: deleteBrand,
@@ -34,6 +35,7 @@ export const productService: UntypedServiceImplementation = {
   getProductById: getProductById,
   getProductBySlug: getProductBySlug,
   listProducts: listProducts,
+  getVariantsForCart: getVariantsForCart,
 
   getProductAttributes: getProductAttributes,
   updateProductAttribute: updateProductAttribute,

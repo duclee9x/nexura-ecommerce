@@ -1,7 +1,7 @@
 'use server'
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAccount } from '@/gateway/gateway';
+import { verifyAccountGateway } from '@/gateway/gateway';
 
 export async function GET(request: NextRequest) {
     try {
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const response = await verifyAccount(token);
+        const response = await verifyAccountGateway(token);
 
         if (!response.success) {
             return NextResponse.json(

@@ -33,17 +33,47 @@ export default function InventoryManagementPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedCategory, setSelectedCategory] = useState("all")
-  const { formatPrice, convertPrice } = useCurrency()
+  const { formatPrice } = useCurrency()
   const queryClient = useQueryClient()
-  const { data: inventory } = useQuery({
+
+  const { 
+    data: inventory, 
+    isLoading: isInventoryLoading, 
+    isError: isInventoryError,
+    error: inventoryError 
+  } = useQuery({
     queryKey: ["inventory"],
-    queryFn: () => listProductsGateway().then((res) => res.products),
+    queryFn: async () => {
+      try {
+        const res = await listProductsGateway()
+        return res.products
+      } catch (error) {
+        console.error("Error fetching inventory:", error)
+        throw new Error("Failed to load inventory. Please try again later.")
+      }
+    },
+    retry: 1,
+    refetchOnWindowFocus: false
   })
 
-  const {data: categories} = useQuery({
+  const {
+    data: categories,
+    isLoading: isCategoriesLoading,
+  } = useQuery({
     queryKey: ["categories"],
-    queryFn: () => getAllCategoryGateway().then((res) => res.categories)
+    queryFn: async () => {
+      try {
+        const res = await getAllCategoryGateway()
+        return res.categories
+      } catch (error) {
+        console.error("Error fetching categories:", error)
+        throw new Error("Failed to load categories. Please try again later.")
+      }
+    },
+    retry: 1,
+    refetchOnWindowFocus: false
   })
+
   console.log(JSON.stringify(categories, null, 2), "categories")
   const [isPublishing, setIsPublishing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -88,11 +118,7 @@ export default function InventoryManagementPage() {
   const [showUploadResults, setShowUploadResults] = useState(false)
   const productCategories = inventory?.map((product) => product.categories).flat()
   // Handle form input changes
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setNewProduct((prev) => ({ ...prev, [name]: value }))
-  }
-
+ 
   // Handle select changes
   const handleSelectChange = (name: string, value: string) => {
     setNewProduct((prev) => ({ ...prev, [name]: value }))
@@ -337,156 +363,173 @@ export default function InventoryManagementPage() {
             <p className="text-muted-foreground">Add, edit, and manage your product inventory</p>
           </div>
 
-          {/* Inventory Tab */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Product Inventory</CardTitle>
-              <CardDescription>View and manage your product inventory</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col md:flex-row gap-4 mb-6">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by name or SKU..."
-                    className="pl-9"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-                
-                <div className="flex gap-4">
-                  <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                    <SelectTrigger className="w-[150px]">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
-                      <SelectItem value="archived">Archived</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-[150px]">
-                      <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Categories</SelectItem>
-                      {categories?.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+          {isInventoryError ? (
+            <div className="flex flex-col items-center justify-center p-6 space-y-4">
+              <div className="text-destructive text-lg font-semibold">
+                {inventoryError instanceof Error ? inventoryError.message : "Failed to load inventory"}
               </div>
+              <Button 
+                variant="outline" 
+                onClick={() => queryClient.invalidateQueries({ queryKey: ["inventory"] })}
+              >
+                Retry
+              </Button>
+            </div>
+          ) : (isInventoryLoading || isCategoriesLoading) ? (
+            <div className="flex justify-center items-center h-[50vh]">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Product Inventory</CardTitle>
+                <CardDescription>View and manage your product inventory</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by name or SKU..."
+                      className="pl-9"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="flex gap-4">
+                    <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                      <SelectTrigger className="w-[150px]">
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="draft">Draft</SelectItem>
+                        <SelectItem value="published">Published</SelectItem>
+                        <SelectItem value="archived">Archived</SelectItem>
+                      </SelectContent>
+                    </Select>
 
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>SKU</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead className="text-right">Min Price</TableHead>
-                      <TableHead className="text-right">Max Price</TableHead>
-                      <TableHead className="text-right">Stock</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredInventory?.length === 0 ? (
+                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                      <SelectTrigger className="w-[150px]">
+                        <SelectValue placeholder="Category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {categories?.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
-                          No products found
-                        </TableCell>
+                        <TableHead>SKU</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead className="text-right">Min Price</TableHead>
+                        <TableHead className="text-right">Max Price</TableHead>
+                        <TableHead className="text-right">Stock</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
-                    ) : (
-                      filteredInventory?.map((product) => (
-                        <TableRow key={product.id}>
-                          <TableCell className="font-medium">{product.sku}</TableCell>
-                          <TableCell>{product.name}</TableCell>
-                          <TableCell>
-                            {product.categories.map((category) => categories?.find((c) => c.id === category)?.name).join(", ")}
+                    </TableHeader>
+                    <TableBody>
+                      {!filteredInventory || filteredInventory.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={8} className="text-center py-6 text-muted-foreground">
+                            No products found
                           </TableCell>
-                          <TableCell className="text-right">{formatPrice(product.variants.reduce((prev, curr) => prev < curr.price ? prev : curr.price, 0))}</TableCell>
-                          <TableCell className="text-right">{formatPrice(product.variants.reduce((prev, curr) => prev > curr.price ? prev : curr.price, 0))}</TableCell>
-                          <TableCell className="text-right">{product.variants.reduce((prev, curr) => prev + curr.quantity, 0)}</TableCell>
-                          <TableCell>
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.status === "published"
-                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                                }`}
-                            >
-                              {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Link href={`/admin/inventory/edit/${product.id}`}>
-                                <Button variant="outline" size="sm">Edit</Button>
-                              </Link>
+                        </TableRow>
+                      ) : (
+                        filteredInventory.map((product) => (
+                          <TableRow key={product.id}>
+                            <TableCell className="font-medium">{product.sku}</TableCell>
+                            <TableCell>{product.name}</TableCell>
+                            <TableCell>
+                              {product.categories.map((category) => categories?.find((c) => c.id === category)?.name).join(", ")}
+                            </TableCell>
+                            <TableCell className="text-right">{formatPrice(product.variants.reduce((prev, curr) => prev < curr.price ? prev : curr.price, 0))}</TableCell>
+                            <TableCell className="text-right">{formatPrice(product.variants.reduce((prev, curr) => prev > curr.price ? prev : curr.price, 0))}</TableCell>
+                            <TableCell className="text-right">{product.variants.reduce((prev, curr) => prev + curr.quantity, 0)}</TableCell>
+                            <TableCell>
+                              <span
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.status === "published"
+                                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                                  : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                                  }`}
+                              >
+                                {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Link href={`/admin/inventory/edit/${product.id}`}>
+                                  <Button variant="outline" size="sm">Edit</Button>
+                                </Link>
 
-                              {product.status === "draft" && (
-                                isPublishing ? <Loader2 className="w-4 h-4 animate-spin" /> :
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handlePublishProduct(product.id)}
-                                >
-                                  Publish
-                                </Button>
-                              )}
-
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
+                                {product.status === "draft" && (
+                                  isPublishing ? <Loader2 className="w-4 h-4 animate-spin" /> :
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="text-destructive hover:text-destructive"
+                                    onClick={() => handlePublishProduct(product.id)}
                                   >
-                                    <Trash2 className="h-4 w-4" />
+                                    Publish
                                   </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      This will permanently delete this product from your inventory.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={() => handleDeleteProduct(product.id)}
-                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                )}
+
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-destructive hover:text-destructive"
                                     >
-                                      Delete
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <div>Showing {filteredInventory?.length} of {inventory?.length} products</div>
-              <Link href="/admin/inventory/add">
-                <Button className="button-primary">Add Product</Button>
-              </Link>
-            </CardFooter>
-          </Card>
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This will permanently delete this product from your inventory.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => handleDeleteProduct(product.id)}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      >
+                                        Delete
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <div>Showing {filteredInventory?.length || 0} of {inventory?.length || 0} products</div>
+                <Link href="/admin/inventory/add">
+                  <Button className="button-primary">Add Product</Button>
+                </Link>
+              </CardFooter>
+            </Card>
+          )}
         </main>
       </div>
     </div>

@@ -123,6 +123,204 @@ export function serviceNameToJSON(object: ServiceName): string {
   }
 }
 
+export enum OrderStatus {
+  ORDER_PENDING = 0,
+  ORDER_PROCESSING = 1,
+  ORDER_COMPLETED = 2,
+  ORDER_FAILED = 3,
+  ORDER_CANCELLED = 4,
+  ORDER_COMPENSATING = 5,
+  UNRECOGNIZED = -1,
+}
+
+export function orderStatusFromJSON(object: any): OrderStatus {
+  switch (object) {
+    case 0:
+    case "ORDER_PENDING":
+      return OrderStatus.ORDER_PENDING;
+    case 1:
+    case "ORDER_PROCESSING":
+      return OrderStatus.ORDER_PROCESSING;
+    case 2:
+    case "ORDER_COMPLETED":
+      return OrderStatus.ORDER_COMPLETED;
+    case 3:
+    case "ORDER_FAILED":
+      return OrderStatus.ORDER_FAILED;
+    case 4:
+    case "ORDER_CANCELLED":
+      return OrderStatus.ORDER_CANCELLED;
+    case 5:
+    case "ORDER_COMPENSATING":
+      return OrderStatus.ORDER_COMPENSATING;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return OrderStatus.UNRECOGNIZED;
+  }
+}
+
+export function orderStatusToJSON(object: OrderStatus): string {
+  switch (object) {
+    case OrderStatus.ORDER_PENDING:
+      return "ORDER_PENDING";
+    case OrderStatus.ORDER_PROCESSING:
+      return "ORDER_PROCESSING";
+    case OrderStatus.ORDER_COMPLETED:
+      return "ORDER_COMPLETED";
+    case OrderStatus.ORDER_FAILED:
+      return "ORDER_FAILED";
+    case OrderStatus.ORDER_CANCELLED:
+      return "ORDER_CANCELLED";
+    case OrderStatus.ORDER_COMPENSATING:
+      return "ORDER_COMPENSATING";
+    case OrderStatus.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
+export enum StepStatus {
+  STEP_PENDING = 0,
+  STEP_STARTED = 1,
+  STEP_COMPLETED = 2,
+  STEP_FAILED = 3,
+  STEP_COMPENSATED = 4,
+  UNRECOGNIZED = -1,
+}
+
+export function stepStatusFromJSON(object: any): StepStatus {
+  switch (object) {
+    case 0:
+    case "STEP_PENDING":
+      return StepStatus.STEP_PENDING;
+    case 1:
+    case "STEP_STARTED":
+      return StepStatus.STEP_STARTED;
+    case 2:
+    case "STEP_COMPLETED":
+      return StepStatus.STEP_COMPLETED;
+    case 3:
+    case "STEP_FAILED":
+      return StepStatus.STEP_FAILED;
+    case 4:
+    case "STEP_COMPENSATED":
+      return StepStatus.STEP_COMPENSATED;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return StepStatus.UNRECOGNIZED;
+  }
+}
+
+export function stepStatusToJSON(object: StepStatus): string {
+  switch (object) {
+    case StepStatus.STEP_PENDING:
+      return "STEP_PENDING";
+    case StepStatus.STEP_STARTED:
+      return "STEP_STARTED";
+    case StepStatus.STEP_COMPLETED:
+      return "STEP_COMPLETED";
+    case StepStatus.STEP_FAILED:
+      return "STEP_FAILED";
+    case StepStatus.STEP_COMPENSATED:
+      return "STEP_COMPENSATED";
+    case StepStatus.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
+export enum PaymentProvider {
+  STRIPE = 0,
+  PAYPAL = 1,
+  VNPAY = 2,
+  UNRECOGNIZED = -1,
+}
+
+export function paymentProviderFromJSON(object: any): PaymentProvider {
+  switch (object) {
+    case 0:
+    case "STRIPE":
+      return PaymentProvider.STRIPE;
+    case 1:
+    case "PAYPAL":
+      return PaymentProvider.PAYPAL;
+    case 2:
+    case "VNPAY":
+      return PaymentProvider.VNPAY;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return PaymentProvider.UNRECOGNIZED;
+  }
+}
+
+export function paymentProviderToJSON(object: PaymentProvider): string {
+  switch (object) {
+    case PaymentProvider.STRIPE:
+      return "STRIPE";
+    case PaymentProvider.PAYPAL:
+      return "PAYPAL";
+    case PaymentProvider.VNPAY:
+      return "VNPAY";
+    case PaymentProvider.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
+export enum PaymentStatus {
+  PENDING = 0,
+  PAID = 1,
+  FAILED = 2,
+  CANCELLED = 3,
+  REFUNDED = 4,
+  UNRECOGNIZED = -1,
+}
+
+export function paymentStatusFromJSON(object: any): PaymentStatus {
+  switch (object) {
+    case 0:
+    case "PENDING":
+      return PaymentStatus.PENDING;
+    case 1:
+    case "PAID":
+      return PaymentStatus.PAID;
+    case 2:
+    case "FAILED":
+      return PaymentStatus.FAILED;
+    case 3:
+    case "CANCELLED":
+      return PaymentStatus.CANCELLED;
+    case 4:
+    case "REFUNDED":
+      return PaymentStatus.REFUNDED;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return PaymentStatus.UNRECOGNIZED;
+  }
+}
+
+export function paymentStatusToJSON(object: PaymentStatus): string {
+  switch (object) {
+    case PaymentStatus.PENDING:
+      return "PENDING";
+    case PaymentStatus.PAID:
+      return "PAID";
+    case PaymentStatus.FAILED:
+      return "FAILED";
+    case PaymentStatus.CANCELLED:
+      return "CANCELLED";
+    case PaymentStatus.REFUNDED:
+      return "REFUNDED";
+    case PaymentStatus.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
 export interface GetAddressesRequest {
   userId: string;
 }
@@ -394,6 +592,8 @@ export interface AddItemRequest {
   productId: string;
   variantId: string;
   quantity: number;
+  image: string;
+  currencyCode: string;
 }
 
 export interface AddItemResponse {
@@ -405,6 +605,7 @@ export interface UpdateItemRequest {
   productId: string;
   variantId: string;
   quantity: number;
+  image: string;
 }
 
 export interface UpdateItemResponse {
@@ -435,15 +636,37 @@ export interface Cart {
   items: CartItem[];
   createdAt: string;
   updatedAt: string;
+  currencyCode: string;
 }
 
 export interface CartItem {
   id: string;
   productId: string;
   variantId: string;
+  image: string;
   quantity: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ReserveItemsRequest {
+  orderId: string;
+  items: CartItem[];
+}
+
+export interface ReserveItemsResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface ReleaseItemsRequest {
+  orderId: string;
+  items: CartItem[];
+}
+
+export interface ReleaseItemsResponse {
+  success: boolean;
+  message: string;
 }
 
 export interface ListRecommendationsRequest {
@@ -472,6 +695,9 @@ export interface VariantCart {
   price: number;
   image: string;
   quantity: number;
+  productName: string;
+  productSlug: string;
+  attributes: VariantAttribute[];
 }
 
 export interface GetProductAttributesRequest {
@@ -795,6 +1021,16 @@ export interface ShipOrderResponse {
   trackingId: string;
 }
 
+export interface CancelShipmentRequest {
+  orderId: string;
+  trackingId: string;
+}
+
+export interface CancelShipmentResponse {
+  success: boolean;
+  message: string;
+}
+
 /** Represents an amount of money with its currency type. */
 export interface Money {
   /** The 3-letter currency code defined in ISO 4217. */
@@ -826,22 +1062,6 @@ export interface CurrencyConversionRequest {
     | undefined;
   /** The 3-letter currency code defined in ISO 4217. */
   toCode: string;
-}
-
-export interface CreditCardInfo {
-  creditCardNumber: string;
-  creditCardCvv: number;
-  creditCardExpirationYear: number;
-  creditCardExpirationMonth: number;
-}
-
-export interface ChargeRequest {
-  amount: Money | undefined;
-  creditCard: CreditCardInfo | undefined;
-}
-
-export interface ChargeResponse {
-  transactionId: string;
 }
 
 export interface OrderItem {
@@ -883,18 +1103,6 @@ export interface SendWelcomeEmailResponse {
   message: string;
 }
 
-export interface PlaceOrderRequest {
-  userId: string;
-  userCurrency: string;
-  address: Address | undefined;
-  email: string;
-  creditCard: CreditCardInfo | undefined;
-}
-
-export interface PlaceOrderResponse {
-  order: OrderResult | undefined;
-}
-
 export interface AdRequest {
   /** List of important key words from the current page describing the context. */
   contextKeys: string[];
@@ -909,52 +1117,6 @@ export interface Ad {
   redirectUrl: string;
   /** short advertisement text to display. */
   text: string;
-}
-
-export interface Flag {
-  name: string;
-  description: string;
-  enabled: boolean;
-}
-
-export interface GetFlagRequest {
-  name: string;
-}
-
-export interface GetFlagResponse {
-  flag: Flag | undefined;
-}
-
-export interface CreateFlagRequest {
-  name: string;
-  description: string;
-  enabled: boolean;
-}
-
-export interface CreateFlagResponse {
-  flag: Flag | undefined;
-}
-
-export interface UpdateFlagRequest {
-  name: string;
-  enabled: boolean;
-}
-
-export interface UpdateFlagResponse {
-}
-
-export interface ListFlagsRequest {
-}
-
-export interface ListFlagsResponse {
-  flag: Flag[];
-}
-
-export interface DeleteFlagRequest {
-  name: string;
-}
-
-export interface DeleteFlagResponse {
 }
 
 export interface NewBrandRequest {
@@ -1035,6 +1197,112 @@ export function healthCheckResponse_ServingStatusToJSON(object: HealthCheckRespo
     default:
       return "UNRECOGNIZED";
   }
+}
+
+export interface CreateOrderRequest {
+  userId: string;
+  currencyCode: string;
+  items: CartItem[];
+  shippingAddress: Address | undefined;
+}
+
+export interface CreateOrderResponse {
+  orderId: string;
+  status: OrderStatus;
+  message: string;
+}
+
+export interface GetOrderStatusRequest {
+  orderId: string;
+}
+
+export interface GetOrderStatusResponse {
+  orderId: string;
+  status: OrderStatus;
+  steps: OrderStep[];
+  message: string;
+}
+
+export interface CancelOrderRequest {
+  orderId: string;
+}
+
+export interface CancelOrderResponse {
+  orderId: string;
+  status: OrderStatus;
+  message: string;
+}
+
+export interface OrderStep {
+  service: string;
+  status: StepStatus;
+  error: string;
+  timestamp: string;
+}
+
+export interface ReserveStockRequest {
+  orderId: string;
+  variants: ProductVariant[];
+}
+
+export interface ReserveStockResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface ReleaseStockRequest {
+  orderId: string;
+  variants: ProductVariant[];
+}
+
+export interface ReleaseStockResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface InitiatePaymentRequest {
+  orderId: string;
+  amount: number;
+  provider: PaymentProvider;
+  currency: string;
+}
+
+export interface InitiatePaymentResponse {
+  paymentId: string;
+  redirectUrl: string;
+  status: PaymentStatus;
+}
+
+export interface VerifyPaymentRequest {
+  paymentId: string;
+}
+
+export interface VerifyPaymentResponse {
+  status: PaymentStatus;
+}
+
+export interface CancelPaymentRequest {
+  paymentId: string;
+}
+
+export interface CancelPaymentResponse {
+  success: boolean;
+}
+
+export interface RefundPaymentRequest {
+  paymentId: string;
+}
+
+export interface RefundPaymentResponse {
+  success: boolean;
+}
+
+export interface GetPaymentStatusRequest {
+  paymentId: string;
+}
+
+export interface GetPaymentStatusResponse {
+  status: PaymentStatus;
 }
 
 function createBaseGetAddressesRequest(): GetAddressesRequest {
@@ -5185,7 +5453,7 @@ export const GetCartResponse: MessageFns<GetCartResponse> = {
 };
 
 function createBaseAddItemRequest(): AddItemRequest {
-  return { userId: "", productId: "", variantId: "", quantity: 0 };
+  return { userId: "", productId: "", variantId: "", quantity: 0, image: "", currencyCode: "" };
 }
 
 export const AddItemRequest: MessageFns<AddItemRequest> = {
@@ -5201,6 +5469,12 @@ export const AddItemRequest: MessageFns<AddItemRequest> = {
     }
     if (message.quantity !== 0) {
       writer.uint32(32).int32(message.quantity);
+    }
+    if (message.image !== "") {
+      writer.uint32(42).string(message.image);
+    }
+    if (message.currencyCode !== "") {
+      writer.uint32(50).string(message.currencyCode);
     }
     return writer;
   },
@@ -5244,6 +5518,22 @@ export const AddItemRequest: MessageFns<AddItemRequest> = {
           message.quantity = reader.int32();
           continue;
         }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.image = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.currencyCode = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -5259,6 +5549,8 @@ export const AddItemRequest: MessageFns<AddItemRequest> = {
       productId: isSet(object.productId) ? globalThis.String(object.productId) : "",
       variantId: isSet(object.variantId) ? globalThis.String(object.variantId) : "",
       quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
+      image: isSet(object.image) ? globalThis.String(object.image) : "",
+      currencyCode: isSet(object.currencyCode) ? globalThis.String(object.currencyCode) : "",
     };
   },
 
@@ -5276,6 +5568,12 @@ export const AddItemRequest: MessageFns<AddItemRequest> = {
     if (message.quantity !== 0) {
       obj.quantity = Math.round(message.quantity);
     }
+    if (message.image !== "") {
+      obj.image = message.image;
+    }
+    if (message.currencyCode !== "") {
+      obj.currencyCode = message.currencyCode;
+    }
     return obj;
   },
 
@@ -5288,6 +5586,8 @@ export const AddItemRequest: MessageFns<AddItemRequest> = {
     message.productId = object.productId ?? "";
     message.variantId = object.variantId ?? "";
     message.quantity = object.quantity ?? 0;
+    message.image = object.image ?? "";
+    message.currencyCode = object.currencyCode ?? "";
     return message;
   },
 };
@@ -5351,7 +5651,7 @@ export const AddItemResponse: MessageFns<AddItemResponse> = {
 };
 
 function createBaseUpdateItemRequest(): UpdateItemRequest {
-  return { userId: "", productId: "", variantId: "", quantity: 0 };
+  return { userId: "", productId: "", variantId: "", quantity: 0, image: "" };
 }
 
 export const UpdateItemRequest: MessageFns<UpdateItemRequest> = {
@@ -5367,6 +5667,9 @@ export const UpdateItemRequest: MessageFns<UpdateItemRequest> = {
     }
     if (message.quantity !== 0) {
       writer.uint32(32).int32(message.quantity);
+    }
+    if (message.image !== "") {
+      writer.uint32(42).string(message.image);
     }
     return writer;
   },
@@ -5410,6 +5713,14 @@ export const UpdateItemRequest: MessageFns<UpdateItemRequest> = {
           message.quantity = reader.int32();
           continue;
         }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.image = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -5425,6 +5736,7 @@ export const UpdateItemRequest: MessageFns<UpdateItemRequest> = {
       productId: isSet(object.productId) ? globalThis.String(object.productId) : "",
       variantId: isSet(object.variantId) ? globalThis.String(object.variantId) : "",
       quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
+      image: isSet(object.image) ? globalThis.String(object.image) : "",
     };
   },
 
@@ -5442,6 +5754,9 @@ export const UpdateItemRequest: MessageFns<UpdateItemRequest> = {
     if (message.quantity !== 0) {
       obj.quantity = Math.round(message.quantity);
     }
+    if (message.image !== "") {
+      obj.image = message.image;
+    }
     return obj;
   },
 
@@ -5454,6 +5769,7 @@ export const UpdateItemRequest: MessageFns<UpdateItemRequest> = {
     message.productId = object.productId ?? "";
     message.variantId = object.variantId ?? "";
     message.quantity = object.quantity ?? 0;
+    message.image = object.image ?? "";
     return message;
   },
 };
@@ -5783,7 +6099,7 @@ export const ClearCartResponse: MessageFns<ClearCartResponse> = {
 };
 
 function createBaseCart(): Cart {
-  return { id: "", userId: "", items: [], createdAt: "", updatedAt: "" };
+  return { id: "", userId: "", items: [], createdAt: "", updatedAt: "", currencyCode: "" };
 }
 
 export const Cart: MessageFns<Cart> = {
@@ -5802,6 +6118,9 @@ export const Cart: MessageFns<Cart> = {
     }
     if (message.updatedAt !== "") {
       writer.uint32(42).string(message.updatedAt);
+    }
+    if (message.currencyCode !== "") {
+      writer.uint32(50).string(message.currencyCode);
     }
     return writer;
   },
@@ -5853,6 +6172,14 @@ export const Cart: MessageFns<Cart> = {
           message.updatedAt = reader.string();
           continue;
         }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.currencyCode = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -5869,6 +6196,7 @@ export const Cart: MessageFns<Cart> = {
       items: globalThis.Array.isArray(object?.items) ? object.items.map((e: any) => CartItem.fromJSON(e)) : [],
       createdAt: isSet(object.createdAt) ? globalThis.String(object.createdAt) : "",
       updatedAt: isSet(object.updatedAt) ? globalThis.String(object.updatedAt) : "",
+      currencyCode: isSet(object.currencyCode) ? globalThis.String(object.currencyCode) : "",
     };
   },
 
@@ -5889,6 +6217,9 @@ export const Cart: MessageFns<Cart> = {
     if (message.updatedAt !== "") {
       obj.updatedAt = message.updatedAt;
     }
+    if (message.currencyCode !== "") {
+      obj.currencyCode = message.currencyCode;
+    }
     return obj;
   },
 
@@ -5902,12 +6233,13 @@ export const Cart: MessageFns<Cart> = {
     message.items = object.items?.map((e) => CartItem.fromPartial(e)) || [];
     message.createdAt = object.createdAt ?? "";
     message.updatedAt = object.updatedAt ?? "";
+    message.currencyCode = object.currencyCode ?? "";
     return message;
   },
 };
 
 function createBaseCartItem(): CartItem {
-  return { id: "", productId: "", variantId: "", quantity: 0, createdAt: "", updatedAt: "" };
+  return { id: "", productId: "", variantId: "", image: "", quantity: 0, createdAt: "", updatedAt: "" };
 }
 
 export const CartItem: MessageFns<CartItem> = {
@@ -5921,14 +6253,17 @@ export const CartItem: MessageFns<CartItem> = {
     if (message.variantId !== "") {
       writer.uint32(26).string(message.variantId);
     }
+    if (message.image !== "") {
+      writer.uint32(34).string(message.image);
+    }
     if (message.quantity !== 0) {
-      writer.uint32(32).int32(message.quantity);
+      writer.uint32(40).int32(message.quantity);
     }
     if (message.createdAt !== "") {
-      writer.uint32(42).string(message.createdAt);
+      writer.uint32(50).string(message.createdAt);
     }
     if (message.updatedAt !== "") {
-      writer.uint32(50).string(message.updatedAt);
+      writer.uint32(58).string(message.updatedAt);
     }
     return writer;
   },
@@ -5965,23 +6300,31 @@ export const CartItem: MessageFns<CartItem> = {
           continue;
         }
         case 4: {
-          if (tag !== 32) {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.image = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
             break;
           }
 
           message.quantity = reader.int32();
           continue;
         }
-        case 5: {
-          if (tag !== 42) {
+        case 6: {
+          if (tag !== 50) {
             break;
           }
 
           message.createdAt = reader.string();
           continue;
         }
-        case 6: {
-          if (tag !== 50) {
+        case 7: {
+          if (tag !== 58) {
             break;
           }
 
@@ -6002,6 +6345,7 @@ export const CartItem: MessageFns<CartItem> = {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
       productId: isSet(object.productId) ? globalThis.String(object.productId) : "",
       variantId: isSet(object.variantId) ? globalThis.String(object.variantId) : "",
+      image: isSet(object.image) ? globalThis.String(object.image) : "",
       quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
       createdAt: isSet(object.createdAt) ? globalThis.String(object.createdAt) : "",
       updatedAt: isSet(object.updatedAt) ? globalThis.String(object.updatedAt) : "",
@@ -6018,6 +6362,9 @@ export const CartItem: MessageFns<CartItem> = {
     }
     if (message.variantId !== "") {
       obj.variantId = message.variantId;
+    }
+    if (message.image !== "") {
+      obj.image = message.image;
     }
     if (message.quantity !== 0) {
       obj.quantity = Math.round(message.quantity);
@@ -6039,9 +6386,314 @@ export const CartItem: MessageFns<CartItem> = {
     message.id = object.id ?? "";
     message.productId = object.productId ?? "";
     message.variantId = object.variantId ?? "";
+    message.image = object.image ?? "";
     message.quantity = object.quantity ?? 0;
     message.createdAt = object.createdAt ?? "";
     message.updatedAt = object.updatedAt ?? "";
+    return message;
+  },
+};
+
+function createBaseReserveItemsRequest(): ReserveItemsRequest {
+  return { orderId: "", items: [] };
+}
+
+export const ReserveItemsRequest: MessageFns<ReserveItemsRequest> = {
+  encode(message: ReserveItemsRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    for (const v of message.items) {
+      CartItem.encode(v!, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ReserveItemsRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseReserveItemsRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.items.push(CartItem.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ReserveItemsRequest {
+    return {
+      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
+      items: globalThis.Array.isArray(object?.items) ? object.items.map((e: any) => CartItem.fromJSON(e)) : [],
+    };
+  },
+
+  toJSON(message: ReserveItemsRequest): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.items?.length) {
+      obj.items = message.items.map((e) => CartItem.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ReserveItemsRequest>, I>>(base?: I): ReserveItemsRequest {
+    return ReserveItemsRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ReserveItemsRequest>, I>>(object: I): ReserveItemsRequest {
+    const message = createBaseReserveItemsRequest();
+    message.orderId = object.orderId ?? "";
+    message.items = object.items?.map((e) => CartItem.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseReserveItemsResponse(): ReserveItemsResponse {
+  return { success: false, message: "" };
+}
+
+export const ReserveItemsResponse: MessageFns<ReserveItemsResponse> = {
+  encode(message: ReserveItemsResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    if (message.message !== "") {
+      writer.uint32(18).string(message.message);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ReserveItemsResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseReserveItemsResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.message = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ReserveItemsResponse {
+    return {
+      success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
+    };
+  },
+
+  toJSON(message: ReserveItemsResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ReserveItemsResponse>, I>>(base?: I): ReserveItemsResponse {
+    return ReserveItemsResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ReserveItemsResponse>, I>>(object: I): ReserveItemsResponse {
+    const message = createBaseReserveItemsResponse();
+    message.success = object.success ?? false;
+    message.message = object.message ?? "";
+    return message;
+  },
+};
+
+function createBaseReleaseItemsRequest(): ReleaseItemsRequest {
+  return { orderId: "", items: [] };
+}
+
+export const ReleaseItemsRequest: MessageFns<ReleaseItemsRequest> = {
+  encode(message: ReleaseItemsRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    for (const v of message.items) {
+      CartItem.encode(v!, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ReleaseItemsRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseReleaseItemsRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.items.push(CartItem.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ReleaseItemsRequest {
+    return {
+      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
+      items: globalThis.Array.isArray(object?.items) ? object.items.map((e: any) => CartItem.fromJSON(e)) : [],
+    };
+  },
+
+  toJSON(message: ReleaseItemsRequest): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.items?.length) {
+      obj.items = message.items.map((e) => CartItem.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ReleaseItemsRequest>, I>>(base?: I): ReleaseItemsRequest {
+    return ReleaseItemsRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ReleaseItemsRequest>, I>>(object: I): ReleaseItemsRequest {
+    const message = createBaseReleaseItemsRequest();
+    message.orderId = object.orderId ?? "";
+    message.items = object.items?.map((e) => CartItem.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseReleaseItemsResponse(): ReleaseItemsResponse {
+  return { success: false, message: "" };
+}
+
+export const ReleaseItemsResponse: MessageFns<ReleaseItemsResponse> = {
+  encode(message: ReleaseItemsResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    if (message.message !== "") {
+      writer.uint32(18).string(message.message);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ReleaseItemsResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseReleaseItemsResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.message = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ReleaseItemsResponse {
+    return {
+      success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
+    };
+  },
+
+  toJSON(message: ReleaseItemsResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ReleaseItemsResponse>, I>>(base?: I): ReleaseItemsResponse {
+    return ReleaseItemsResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ReleaseItemsResponse>, I>>(object: I): ReleaseItemsResponse {
+    const message = createBaseReleaseItemsResponse();
+    message.success = object.success ?? false;
+    message.message = object.message ?? "";
     return message;
   },
 };
@@ -6354,7 +7006,7 @@ export const GetVariantsForCartResponse: MessageFns<GetVariantsForCartResponse> 
 };
 
 function createBaseVariantCart(): VariantCart {
-  return { id: "", price: 0, image: "", quantity: 0 };
+  return { id: "", price: 0, image: "", quantity: 0, productName: "", productSlug: "", attributes: [] };
 }
 
 export const VariantCart: MessageFns<VariantCart> = {
@@ -6370,6 +7022,15 @@ export const VariantCart: MessageFns<VariantCart> = {
     }
     if (message.quantity !== 0) {
       writer.uint32(32).int32(message.quantity);
+    }
+    if (message.productName !== "") {
+      writer.uint32(42).string(message.productName);
+    }
+    if (message.productSlug !== "") {
+      writer.uint32(50).string(message.productSlug);
+    }
+    for (const v of message.attributes) {
+      VariantAttribute.encode(v!, writer.uint32(58).fork()).join();
     }
     return writer;
   },
@@ -6413,6 +7074,30 @@ export const VariantCart: MessageFns<VariantCart> = {
           message.quantity = reader.int32();
           continue;
         }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.productName = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.productSlug = reader.string();
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.attributes.push(VariantAttribute.decode(reader, reader.uint32()));
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -6428,6 +7113,11 @@ export const VariantCart: MessageFns<VariantCart> = {
       price: isSet(object.price) ? globalThis.Number(object.price) : 0,
       image: isSet(object.image) ? globalThis.String(object.image) : "",
       quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
+      productName: isSet(object.productName) ? globalThis.String(object.productName) : "",
+      productSlug: isSet(object.productSlug) ? globalThis.String(object.productSlug) : "",
+      attributes: globalThis.Array.isArray(object?.attributes)
+        ? object.attributes.map((e: any) => VariantAttribute.fromJSON(e))
+        : [],
     };
   },
 
@@ -6445,6 +7135,15 @@ export const VariantCart: MessageFns<VariantCart> = {
     if (message.quantity !== 0) {
       obj.quantity = Math.round(message.quantity);
     }
+    if (message.productName !== "") {
+      obj.productName = message.productName;
+    }
+    if (message.productSlug !== "") {
+      obj.productSlug = message.productSlug;
+    }
+    if (message.attributes?.length) {
+      obj.attributes = message.attributes.map((e) => VariantAttribute.toJSON(e));
+    }
     return obj;
   },
 
@@ -6457,6 +7156,9 @@ export const VariantCart: MessageFns<VariantCart> = {
     message.price = object.price ?? 0;
     message.image = object.image ?? "";
     message.quantity = object.quantity ?? 0;
+    message.productName = object.productName ?? "";
+    message.productSlug = object.productSlug ?? "";
+    message.attributes = object.attributes?.map((e) => VariantAttribute.fromPartial(e)) || [];
     return message;
   },
 };
@@ -11444,6 +12146,158 @@ export const ShipOrderResponse: MessageFns<ShipOrderResponse> = {
   },
 };
 
+function createBaseCancelShipmentRequest(): CancelShipmentRequest {
+  return { orderId: "", trackingId: "" };
+}
+
+export const CancelShipmentRequest: MessageFns<CancelShipmentRequest> = {
+  encode(message: CancelShipmentRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    if (message.trackingId !== "") {
+      writer.uint32(18).string(message.trackingId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): CancelShipmentRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCancelShipmentRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.trackingId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CancelShipmentRequest {
+    return {
+      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
+      trackingId: isSet(object.trackingId) ? globalThis.String(object.trackingId) : "",
+    };
+  },
+
+  toJSON(message: CancelShipmentRequest): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.trackingId !== "") {
+      obj.trackingId = message.trackingId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<CancelShipmentRequest>, I>>(base?: I): CancelShipmentRequest {
+    return CancelShipmentRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<CancelShipmentRequest>, I>>(object: I): CancelShipmentRequest {
+    const message = createBaseCancelShipmentRequest();
+    message.orderId = object.orderId ?? "";
+    message.trackingId = object.trackingId ?? "";
+    return message;
+  },
+};
+
+function createBaseCancelShipmentResponse(): CancelShipmentResponse {
+  return { success: false, message: "" };
+}
+
+export const CancelShipmentResponse: MessageFns<CancelShipmentResponse> = {
+  encode(message: CancelShipmentResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    if (message.message !== "") {
+      writer.uint32(18).string(message.message);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): CancelShipmentResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCancelShipmentResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.message = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CancelShipmentResponse {
+    return {
+      success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
+    };
+  },
+
+  toJSON(message: CancelShipmentResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<CancelShipmentResponse>, I>>(base?: I): CancelShipmentResponse {
+    return CancelShipmentResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<CancelShipmentResponse>, I>>(object: I): CancelShipmentResponse {
+    const message = createBaseCancelShipmentResponse();
+    message.success = object.success ?? false;
+    message.message = object.message ?? "";
+    return message;
+  },
+};
+
 function createBaseMoney(): Money {
   return { currencyCode: "", units: 0, nanos: 0 };
 }
@@ -11672,256 +12526,6 @@ export const CurrencyConversionRequest: MessageFns<CurrencyConversionRequest> = 
     const message = createBaseCurrencyConversionRequest();
     message.from = (object.from !== undefined && object.from !== null) ? Money.fromPartial(object.from) : undefined;
     message.toCode = object.toCode ?? "";
-    return message;
-  },
-};
-
-function createBaseCreditCardInfo(): CreditCardInfo {
-  return { creditCardNumber: "", creditCardCvv: 0, creditCardExpirationYear: 0, creditCardExpirationMonth: 0 };
-}
-
-export const CreditCardInfo: MessageFns<CreditCardInfo> = {
-  encode(message: CreditCardInfo, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.creditCardNumber !== "") {
-      writer.uint32(10).string(message.creditCardNumber);
-    }
-    if (message.creditCardCvv !== 0) {
-      writer.uint32(16).int32(message.creditCardCvv);
-    }
-    if (message.creditCardExpirationYear !== 0) {
-      writer.uint32(24).int32(message.creditCardExpirationYear);
-    }
-    if (message.creditCardExpirationMonth !== 0) {
-      writer.uint32(32).int32(message.creditCardExpirationMonth);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): CreditCardInfo {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseCreditCardInfo();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.creditCardNumber = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 16) {
-            break;
-          }
-
-          message.creditCardCvv = reader.int32();
-          continue;
-        }
-        case 3: {
-          if (tag !== 24) {
-            break;
-          }
-
-          message.creditCardExpirationYear = reader.int32();
-          continue;
-        }
-        case 4: {
-          if (tag !== 32) {
-            break;
-          }
-
-          message.creditCardExpirationMonth = reader.int32();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): CreditCardInfo {
-    return {
-      creditCardNumber: isSet(object.creditCardNumber) ? globalThis.String(object.creditCardNumber) : "",
-      creditCardCvv: isSet(object.creditCardCvv) ? globalThis.Number(object.creditCardCvv) : 0,
-      creditCardExpirationYear: isSet(object.creditCardExpirationYear)
-        ? globalThis.Number(object.creditCardExpirationYear)
-        : 0,
-      creditCardExpirationMonth: isSet(object.creditCardExpirationMonth)
-        ? globalThis.Number(object.creditCardExpirationMonth)
-        : 0,
-    };
-  },
-
-  toJSON(message: CreditCardInfo): unknown {
-    const obj: any = {};
-    if (message.creditCardNumber !== "") {
-      obj.creditCardNumber = message.creditCardNumber;
-    }
-    if (message.creditCardCvv !== 0) {
-      obj.creditCardCvv = Math.round(message.creditCardCvv);
-    }
-    if (message.creditCardExpirationYear !== 0) {
-      obj.creditCardExpirationYear = Math.round(message.creditCardExpirationYear);
-    }
-    if (message.creditCardExpirationMonth !== 0) {
-      obj.creditCardExpirationMonth = Math.round(message.creditCardExpirationMonth);
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<CreditCardInfo>, I>>(base?: I): CreditCardInfo {
-    return CreditCardInfo.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<CreditCardInfo>, I>>(object: I): CreditCardInfo {
-    const message = createBaseCreditCardInfo();
-    message.creditCardNumber = object.creditCardNumber ?? "";
-    message.creditCardCvv = object.creditCardCvv ?? 0;
-    message.creditCardExpirationYear = object.creditCardExpirationYear ?? 0;
-    message.creditCardExpirationMonth = object.creditCardExpirationMonth ?? 0;
-    return message;
-  },
-};
-
-function createBaseChargeRequest(): ChargeRequest {
-  return { amount: undefined, creditCard: undefined };
-}
-
-export const ChargeRequest: MessageFns<ChargeRequest> = {
-  encode(message: ChargeRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.amount !== undefined) {
-      Money.encode(message.amount, writer.uint32(10).fork()).join();
-    }
-    if (message.creditCard !== undefined) {
-      CreditCardInfo.encode(message.creditCard, writer.uint32(18).fork()).join();
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): ChargeRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseChargeRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.amount = Money.decode(reader, reader.uint32());
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.creditCard = CreditCardInfo.decode(reader, reader.uint32());
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): ChargeRequest {
-    return {
-      amount: isSet(object.amount) ? Money.fromJSON(object.amount) : undefined,
-      creditCard: isSet(object.creditCard) ? CreditCardInfo.fromJSON(object.creditCard) : undefined,
-    };
-  },
-
-  toJSON(message: ChargeRequest): unknown {
-    const obj: any = {};
-    if (message.amount !== undefined) {
-      obj.amount = Money.toJSON(message.amount);
-    }
-    if (message.creditCard !== undefined) {
-      obj.creditCard = CreditCardInfo.toJSON(message.creditCard);
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<ChargeRequest>, I>>(base?: I): ChargeRequest {
-    return ChargeRequest.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<ChargeRequest>, I>>(object: I): ChargeRequest {
-    const message = createBaseChargeRequest();
-    message.amount = (object.amount !== undefined && object.amount !== null)
-      ? Money.fromPartial(object.amount)
-      : undefined;
-    message.creditCard = (object.creditCard !== undefined && object.creditCard !== null)
-      ? CreditCardInfo.fromPartial(object.creditCard)
-      : undefined;
-    return message;
-  },
-};
-
-function createBaseChargeResponse(): ChargeResponse {
-  return { transactionId: "" };
-}
-
-export const ChargeResponse: MessageFns<ChargeResponse> = {
-  encode(message: ChargeResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.transactionId !== "") {
-      writer.uint32(10).string(message.transactionId);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): ChargeResponse {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseChargeResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.transactionId = reader.string();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): ChargeResponse {
-    return { transactionId: isSet(object.transactionId) ? globalThis.String(object.transactionId) : "" };
-  },
-
-  toJSON(message: ChargeResponse): unknown {
-    const obj: any = {};
-    if (message.transactionId !== "") {
-      obj.transactionId = message.transactionId;
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<ChargeResponse>, I>>(base?: I): ChargeResponse {
-    return ChargeResponse.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<ChargeResponse>, I>>(object: I): ChargeResponse {
-    const message = createBaseChargeResponse();
-    message.transactionId = object.transactionId ?? "";
     return message;
   },
 };
@@ -12528,194 +13132,6 @@ export const SendWelcomeEmailResponse: MessageFns<SendWelcomeEmailResponse> = {
   },
 };
 
-function createBasePlaceOrderRequest(): PlaceOrderRequest {
-  return { userId: "", userCurrency: "", address: undefined, email: "", creditCard: undefined };
-}
-
-export const PlaceOrderRequest: MessageFns<PlaceOrderRequest> = {
-  encode(message: PlaceOrderRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.userId !== "") {
-      writer.uint32(10).string(message.userId);
-    }
-    if (message.userCurrency !== "") {
-      writer.uint32(18).string(message.userCurrency);
-    }
-    if (message.address !== undefined) {
-      Address.encode(message.address, writer.uint32(26).fork()).join();
-    }
-    if (message.email !== "") {
-      writer.uint32(42).string(message.email);
-    }
-    if (message.creditCard !== undefined) {
-      CreditCardInfo.encode(message.creditCard, writer.uint32(50).fork()).join();
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): PlaceOrderRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBasePlaceOrderRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.userId = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.userCurrency = reader.string();
-          continue;
-        }
-        case 3: {
-          if (tag !== 26) {
-            break;
-          }
-
-          message.address = Address.decode(reader, reader.uint32());
-          continue;
-        }
-        case 5: {
-          if (tag !== 42) {
-            break;
-          }
-
-          message.email = reader.string();
-          continue;
-        }
-        case 6: {
-          if (tag !== 50) {
-            break;
-          }
-
-          message.creditCard = CreditCardInfo.decode(reader, reader.uint32());
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): PlaceOrderRequest {
-    return {
-      userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
-      userCurrency: isSet(object.userCurrency) ? globalThis.String(object.userCurrency) : "",
-      address: isSet(object.address) ? Address.fromJSON(object.address) : undefined,
-      email: isSet(object.email) ? globalThis.String(object.email) : "",
-      creditCard: isSet(object.creditCard) ? CreditCardInfo.fromJSON(object.creditCard) : undefined,
-    };
-  },
-
-  toJSON(message: PlaceOrderRequest): unknown {
-    const obj: any = {};
-    if (message.userId !== "") {
-      obj.userId = message.userId;
-    }
-    if (message.userCurrency !== "") {
-      obj.userCurrency = message.userCurrency;
-    }
-    if (message.address !== undefined) {
-      obj.address = Address.toJSON(message.address);
-    }
-    if (message.email !== "") {
-      obj.email = message.email;
-    }
-    if (message.creditCard !== undefined) {
-      obj.creditCard = CreditCardInfo.toJSON(message.creditCard);
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<PlaceOrderRequest>, I>>(base?: I): PlaceOrderRequest {
-    return PlaceOrderRequest.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<PlaceOrderRequest>, I>>(object: I): PlaceOrderRequest {
-    const message = createBasePlaceOrderRequest();
-    message.userId = object.userId ?? "";
-    message.userCurrency = object.userCurrency ?? "";
-    message.address = (object.address !== undefined && object.address !== null)
-      ? Address.fromPartial(object.address)
-      : undefined;
-    message.email = object.email ?? "";
-    message.creditCard = (object.creditCard !== undefined && object.creditCard !== null)
-      ? CreditCardInfo.fromPartial(object.creditCard)
-      : undefined;
-    return message;
-  },
-};
-
-function createBasePlaceOrderResponse(): PlaceOrderResponse {
-  return { order: undefined };
-}
-
-export const PlaceOrderResponse: MessageFns<PlaceOrderResponse> = {
-  encode(message: PlaceOrderResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.order !== undefined) {
-      OrderResult.encode(message.order, writer.uint32(10).fork()).join();
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): PlaceOrderResponse {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBasePlaceOrderResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.order = OrderResult.decode(reader, reader.uint32());
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): PlaceOrderResponse {
-    return { order: isSet(object.order) ? OrderResult.fromJSON(object.order) : undefined };
-  },
-
-  toJSON(message: PlaceOrderResponse): unknown {
-    const obj: any = {};
-    if (message.order !== undefined) {
-      obj.order = OrderResult.toJSON(message.order);
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<PlaceOrderResponse>, I>>(base?: I): PlaceOrderResponse {
-    return PlaceOrderResponse.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<PlaceOrderResponse>, I>>(object: I): PlaceOrderResponse {
-    const message = createBasePlaceOrderResponse();
-    message.order = (object.order !== undefined && object.order !== null)
-      ? OrderResult.fromPartial(object.order)
-      : undefined;
-    return message;
-  },
-};
-
 function createBaseAdRequest(): AdRequest {
   return { contextKeys: [] };
 }
@@ -12908,685 +13324,6 @@ export const Ad: MessageFns<Ad> = {
     const message = createBaseAd();
     message.redirectUrl = object.redirectUrl ?? "";
     message.text = object.text ?? "";
-    return message;
-  },
-};
-
-function createBaseFlag(): Flag {
-  return { name: "", description: "", enabled: false };
-}
-
-export const Flag: MessageFns<Flag> = {
-  encode(message: Flag, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.name !== "") {
-      writer.uint32(10).string(message.name);
-    }
-    if (message.description !== "") {
-      writer.uint32(18).string(message.description);
-    }
-    if (message.enabled !== false) {
-      writer.uint32(24).bool(message.enabled);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): Flag {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseFlag();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.name = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.description = reader.string();
-          continue;
-        }
-        case 3: {
-          if (tag !== 24) {
-            break;
-          }
-
-          message.enabled = reader.bool();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): Flag {
-    return {
-      name: isSet(object.name) ? globalThis.String(object.name) : "",
-      description: isSet(object.description) ? globalThis.String(object.description) : "",
-      enabled: isSet(object.enabled) ? globalThis.Boolean(object.enabled) : false,
-    };
-  },
-
-  toJSON(message: Flag): unknown {
-    const obj: any = {};
-    if (message.name !== "") {
-      obj.name = message.name;
-    }
-    if (message.description !== "") {
-      obj.description = message.description;
-    }
-    if (message.enabled !== false) {
-      obj.enabled = message.enabled;
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<Flag>, I>>(base?: I): Flag {
-    return Flag.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<Flag>, I>>(object: I): Flag {
-    const message = createBaseFlag();
-    message.name = object.name ?? "";
-    message.description = object.description ?? "";
-    message.enabled = object.enabled ?? false;
-    return message;
-  },
-};
-
-function createBaseGetFlagRequest(): GetFlagRequest {
-  return { name: "" };
-}
-
-export const GetFlagRequest: MessageFns<GetFlagRequest> = {
-  encode(message: GetFlagRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.name !== "") {
-      writer.uint32(10).string(message.name);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): GetFlagRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGetFlagRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.name = reader.string();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): GetFlagRequest {
-    return { name: isSet(object.name) ? globalThis.String(object.name) : "" };
-  },
-
-  toJSON(message: GetFlagRequest): unknown {
-    const obj: any = {};
-    if (message.name !== "") {
-      obj.name = message.name;
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<GetFlagRequest>, I>>(base?: I): GetFlagRequest {
-    return GetFlagRequest.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<GetFlagRequest>, I>>(object: I): GetFlagRequest {
-    const message = createBaseGetFlagRequest();
-    message.name = object.name ?? "";
-    return message;
-  },
-};
-
-function createBaseGetFlagResponse(): GetFlagResponse {
-  return { flag: undefined };
-}
-
-export const GetFlagResponse: MessageFns<GetFlagResponse> = {
-  encode(message: GetFlagResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.flag !== undefined) {
-      Flag.encode(message.flag, writer.uint32(10).fork()).join();
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): GetFlagResponse {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGetFlagResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.flag = Flag.decode(reader, reader.uint32());
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): GetFlagResponse {
-    return { flag: isSet(object.flag) ? Flag.fromJSON(object.flag) : undefined };
-  },
-
-  toJSON(message: GetFlagResponse): unknown {
-    const obj: any = {};
-    if (message.flag !== undefined) {
-      obj.flag = Flag.toJSON(message.flag);
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<GetFlagResponse>, I>>(base?: I): GetFlagResponse {
-    return GetFlagResponse.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<GetFlagResponse>, I>>(object: I): GetFlagResponse {
-    const message = createBaseGetFlagResponse();
-    message.flag = (object.flag !== undefined && object.flag !== null) ? Flag.fromPartial(object.flag) : undefined;
-    return message;
-  },
-};
-
-function createBaseCreateFlagRequest(): CreateFlagRequest {
-  return { name: "", description: "", enabled: false };
-}
-
-export const CreateFlagRequest: MessageFns<CreateFlagRequest> = {
-  encode(message: CreateFlagRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.name !== "") {
-      writer.uint32(10).string(message.name);
-    }
-    if (message.description !== "") {
-      writer.uint32(18).string(message.description);
-    }
-    if (message.enabled !== false) {
-      writer.uint32(24).bool(message.enabled);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): CreateFlagRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseCreateFlagRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.name = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.description = reader.string();
-          continue;
-        }
-        case 3: {
-          if (tag !== 24) {
-            break;
-          }
-
-          message.enabled = reader.bool();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): CreateFlagRequest {
-    return {
-      name: isSet(object.name) ? globalThis.String(object.name) : "",
-      description: isSet(object.description) ? globalThis.String(object.description) : "",
-      enabled: isSet(object.enabled) ? globalThis.Boolean(object.enabled) : false,
-    };
-  },
-
-  toJSON(message: CreateFlagRequest): unknown {
-    const obj: any = {};
-    if (message.name !== "") {
-      obj.name = message.name;
-    }
-    if (message.description !== "") {
-      obj.description = message.description;
-    }
-    if (message.enabled !== false) {
-      obj.enabled = message.enabled;
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<CreateFlagRequest>, I>>(base?: I): CreateFlagRequest {
-    return CreateFlagRequest.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<CreateFlagRequest>, I>>(object: I): CreateFlagRequest {
-    const message = createBaseCreateFlagRequest();
-    message.name = object.name ?? "";
-    message.description = object.description ?? "";
-    message.enabled = object.enabled ?? false;
-    return message;
-  },
-};
-
-function createBaseCreateFlagResponse(): CreateFlagResponse {
-  return { flag: undefined };
-}
-
-export const CreateFlagResponse: MessageFns<CreateFlagResponse> = {
-  encode(message: CreateFlagResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.flag !== undefined) {
-      Flag.encode(message.flag, writer.uint32(10).fork()).join();
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): CreateFlagResponse {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseCreateFlagResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.flag = Flag.decode(reader, reader.uint32());
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): CreateFlagResponse {
-    return { flag: isSet(object.flag) ? Flag.fromJSON(object.flag) : undefined };
-  },
-
-  toJSON(message: CreateFlagResponse): unknown {
-    const obj: any = {};
-    if (message.flag !== undefined) {
-      obj.flag = Flag.toJSON(message.flag);
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<CreateFlagResponse>, I>>(base?: I): CreateFlagResponse {
-    return CreateFlagResponse.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<CreateFlagResponse>, I>>(object: I): CreateFlagResponse {
-    const message = createBaseCreateFlagResponse();
-    message.flag = (object.flag !== undefined && object.flag !== null) ? Flag.fromPartial(object.flag) : undefined;
-    return message;
-  },
-};
-
-function createBaseUpdateFlagRequest(): UpdateFlagRequest {
-  return { name: "", enabled: false };
-}
-
-export const UpdateFlagRequest: MessageFns<UpdateFlagRequest> = {
-  encode(message: UpdateFlagRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.name !== "") {
-      writer.uint32(10).string(message.name);
-    }
-    if (message.enabled !== false) {
-      writer.uint32(16).bool(message.enabled);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): UpdateFlagRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseUpdateFlagRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.name = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 16) {
-            break;
-          }
-
-          message.enabled = reader.bool();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): UpdateFlagRequest {
-    return {
-      name: isSet(object.name) ? globalThis.String(object.name) : "",
-      enabled: isSet(object.enabled) ? globalThis.Boolean(object.enabled) : false,
-    };
-  },
-
-  toJSON(message: UpdateFlagRequest): unknown {
-    const obj: any = {};
-    if (message.name !== "") {
-      obj.name = message.name;
-    }
-    if (message.enabled !== false) {
-      obj.enabled = message.enabled;
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<UpdateFlagRequest>, I>>(base?: I): UpdateFlagRequest {
-    return UpdateFlagRequest.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<UpdateFlagRequest>, I>>(object: I): UpdateFlagRequest {
-    const message = createBaseUpdateFlagRequest();
-    message.name = object.name ?? "";
-    message.enabled = object.enabled ?? false;
-    return message;
-  },
-};
-
-function createBaseUpdateFlagResponse(): UpdateFlagResponse {
-  return {};
-}
-
-export const UpdateFlagResponse: MessageFns<UpdateFlagResponse> = {
-  encode(_: UpdateFlagResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): UpdateFlagResponse {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseUpdateFlagResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(_: any): UpdateFlagResponse {
-    return {};
-  },
-
-  toJSON(_: UpdateFlagResponse): unknown {
-    const obj: any = {};
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<UpdateFlagResponse>, I>>(base?: I): UpdateFlagResponse {
-    return UpdateFlagResponse.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<UpdateFlagResponse>, I>>(_: I): UpdateFlagResponse {
-    const message = createBaseUpdateFlagResponse();
-    return message;
-  },
-};
-
-function createBaseListFlagsRequest(): ListFlagsRequest {
-  return {};
-}
-
-export const ListFlagsRequest: MessageFns<ListFlagsRequest> = {
-  encode(_: ListFlagsRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): ListFlagsRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseListFlagsRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(_: any): ListFlagsRequest {
-    return {};
-  },
-
-  toJSON(_: ListFlagsRequest): unknown {
-    const obj: any = {};
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<ListFlagsRequest>, I>>(base?: I): ListFlagsRequest {
-    return ListFlagsRequest.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<ListFlagsRequest>, I>>(_: I): ListFlagsRequest {
-    const message = createBaseListFlagsRequest();
-    return message;
-  },
-};
-
-function createBaseListFlagsResponse(): ListFlagsResponse {
-  return { flag: [] };
-}
-
-export const ListFlagsResponse: MessageFns<ListFlagsResponse> = {
-  encode(message: ListFlagsResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    for (const v of message.flag) {
-      Flag.encode(v!, writer.uint32(10).fork()).join();
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): ListFlagsResponse {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseListFlagsResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.flag.push(Flag.decode(reader, reader.uint32()));
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): ListFlagsResponse {
-    return { flag: globalThis.Array.isArray(object?.flag) ? object.flag.map((e: any) => Flag.fromJSON(e)) : [] };
-  },
-
-  toJSON(message: ListFlagsResponse): unknown {
-    const obj: any = {};
-    if (message.flag?.length) {
-      obj.flag = message.flag.map((e) => Flag.toJSON(e));
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<ListFlagsResponse>, I>>(base?: I): ListFlagsResponse {
-    return ListFlagsResponse.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<ListFlagsResponse>, I>>(object: I): ListFlagsResponse {
-    const message = createBaseListFlagsResponse();
-    message.flag = object.flag?.map((e) => Flag.fromPartial(e)) || [];
-    return message;
-  },
-};
-
-function createBaseDeleteFlagRequest(): DeleteFlagRequest {
-  return { name: "" };
-}
-
-export const DeleteFlagRequest: MessageFns<DeleteFlagRequest> = {
-  encode(message: DeleteFlagRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.name !== "") {
-      writer.uint32(10).string(message.name);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): DeleteFlagRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseDeleteFlagRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.name = reader.string();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): DeleteFlagRequest {
-    return { name: isSet(object.name) ? globalThis.String(object.name) : "" };
-  },
-
-  toJSON(message: DeleteFlagRequest): unknown {
-    const obj: any = {};
-    if (message.name !== "") {
-      obj.name = message.name;
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<DeleteFlagRequest>, I>>(base?: I): DeleteFlagRequest {
-    return DeleteFlagRequest.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<DeleteFlagRequest>, I>>(object: I): DeleteFlagRequest {
-    const message = createBaseDeleteFlagRequest();
-    message.name = object.name ?? "";
-    return message;
-  },
-};
-
-function createBaseDeleteFlagResponse(): DeleteFlagResponse {
-  return {};
-}
-
-export const DeleteFlagResponse: MessageFns<DeleteFlagResponse> = {
-  encode(_: DeleteFlagResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): DeleteFlagResponse {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseDeleteFlagResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(_: any): DeleteFlagResponse {
-    return {};
-  },
-
-  toJSON(_: DeleteFlagResponse): unknown {
-    const obj: any = {};
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<DeleteFlagResponse>, I>>(base?: I): DeleteFlagResponse {
-    return DeleteFlagResponse.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<DeleteFlagResponse>, I>>(_: I): DeleteFlagResponse {
-    const message = createBaseDeleteFlagResponse();
     return message;
   },
 };
@@ -14078,6 +13815,1604 @@ export const HealthCheckResponse: MessageFns<HealthCheckResponse> = {
   },
   fromPartial<I extends Exact<DeepPartial<HealthCheckResponse>, I>>(object: I): HealthCheckResponse {
     const message = createBaseHealthCheckResponse();
+    message.status = object.status ?? 0;
+    return message;
+  },
+};
+
+function createBaseCreateOrderRequest(): CreateOrderRequest {
+  return { userId: "", currencyCode: "", items: [], shippingAddress: undefined };
+}
+
+export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
+  encode(message: CreateOrderRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
+    }
+    if (message.currencyCode !== "") {
+      writer.uint32(18).string(message.currencyCode);
+    }
+    for (const v of message.items) {
+      CartItem.encode(v!, writer.uint32(26).fork()).join();
+    }
+    if (message.shippingAddress !== undefined) {
+      Address.encode(message.shippingAddress, writer.uint32(34).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): CreateOrderRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCreateOrderRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.currencyCode = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.items.push(CartItem.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.shippingAddress = Address.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CreateOrderRequest {
+    return {
+      userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
+      currencyCode: isSet(object.currencyCode) ? globalThis.String(object.currencyCode) : "",
+      items: globalThis.Array.isArray(object?.items) ? object.items.map((e: any) => CartItem.fromJSON(e)) : [],
+      shippingAddress: isSet(object.shippingAddress) ? Address.fromJSON(object.shippingAddress) : undefined,
+    };
+  },
+
+  toJSON(message: CreateOrderRequest): unknown {
+    const obj: any = {};
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    if (message.currencyCode !== "") {
+      obj.currencyCode = message.currencyCode;
+    }
+    if (message.items?.length) {
+      obj.items = message.items.map((e) => CartItem.toJSON(e));
+    }
+    if (message.shippingAddress !== undefined) {
+      obj.shippingAddress = Address.toJSON(message.shippingAddress);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<CreateOrderRequest>, I>>(base?: I): CreateOrderRequest {
+    return CreateOrderRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<CreateOrderRequest>, I>>(object: I): CreateOrderRequest {
+    const message = createBaseCreateOrderRequest();
+    message.userId = object.userId ?? "";
+    message.currencyCode = object.currencyCode ?? "";
+    message.items = object.items?.map((e) => CartItem.fromPartial(e)) || [];
+    message.shippingAddress = (object.shippingAddress !== undefined && object.shippingAddress !== null)
+      ? Address.fromPartial(object.shippingAddress)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseCreateOrderResponse(): CreateOrderResponse {
+  return { orderId: "", status: 0, message: "" };
+}
+
+export const CreateOrderResponse: MessageFns<CreateOrderResponse> = {
+  encode(message: CreateOrderResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    if (message.status !== 0) {
+      writer.uint32(16).int32(message.status);
+    }
+    if (message.message !== "") {
+      writer.uint32(26).string(message.message);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): CreateOrderResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCreateOrderResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.status = reader.int32() as any;
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.message = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CreateOrderResponse {
+    return {
+      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
+      status: isSet(object.status) ? orderStatusFromJSON(object.status) : 0,
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
+    };
+  },
+
+  toJSON(message: CreateOrderResponse): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.status !== 0) {
+      obj.status = orderStatusToJSON(message.status);
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<CreateOrderResponse>, I>>(base?: I): CreateOrderResponse {
+    return CreateOrderResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<CreateOrderResponse>, I>>(object: I): CreateOrderResponse {
+    const message = createBaseCreateOrderResponse();
+    message.orderId = object.orderId ?? "";
+    message.status = object.status ?? 0;
+    message.message = object.message ?? "";
+    return message;
+  },
+};
+
+function createBaseGetOrderStatusRequest(): GetOrderStatusRequest {
+  return { orderId: "" };
+}
+
+export const GetOrderStatusRequest: MessageFns<GetOrderStatusRequest> = {
+  encode(message: GetOrderStatusRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetOrderStatusRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetOrderStatusRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetOrderStatusRequest {
+    return { orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "" };
+  },
+
+  toJSON(message: GetOrderStatusRequest): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetOrderStatusRequest>, I>>(base?: I): GetOrderStatusRequest {
+    return GetOrderStatusRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetOrderStatusRequest>, I>>(object: I): GetOrderStatusRequest {
+    const message = createBaseGetOrderStatusRequest();
+    message.orderId = object.orderId ?? "";
+    return message;
+  },
+};
+
+function createBaseGetOrderStatusResponse(): GetOrderStatusResponse {
+  return { orderId: "", status: 0, steps: [], message: "" };
+}
+
+export const GetOrderStatusResponse: MessageFns<GetOrderStatusResponse> = {
+  encode(message: GetOrderStatusResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    if (message.status !== 0) {
+      writer.uint32(16).int32(message.status);
+    }
+    for (const v of message.steps) {
+      OrderStep.encode(v!, writer.uint32(26).fork()).join();
+    }
+    if (message.message !== "") {
+      writer.uint32(34).string(message.message);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetOrderStatusResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetOrderStatusResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.status = reader.int32() as any;
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.steps.push(OrderStep.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.message = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetOrderStatusResponse {
+    return {
+      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
+      status: isSet(object.status) ? orderStatusFromJSON(object.status) : 0,
+      steps: globalThis.Array.isArray(object?.steps) ? object.steps.map((e: any) => OrderStep.fromJSON(e)) : [],
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
+    };
+  },
+
+  toJSON(message: GetOrderStatusResponse): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.status !== 0) {
+      obj.status = orderStatusToJSON(message.status);
+    }
+    if (message.steps?.length) {
+      obj.steps = message.steps.map((e) => OrderStep.toJSON(e));
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetOrderStatusResponse>, I>>(base?: I): GetOrderStatusResponse {
+    return GetOrderStatusResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetOrderStatusResponse>, I>>(object: I): GetOrderStatusResponse {
+    const message = createBaseGetOrderStatusResponse();
+    message.orderId = object.orderId ?? "";
+    message.status = object.status ?? 0;
+    message.steps = object.steps?.map((e) => OrderStep.fromPartial(e)) || [];
+    message.message = object.message ?? "";
+    return message;
+  },
+};
+
+function createBaseCancelOrderRequest(): CancelOrderRequest {
+  return { orderId: "" };
+}
+
+export const CancelOrderRequest: MessageFns<CancelOrderRequest> = {
+  encode(message: CancelOrderRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): CancelOrderRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCancelOrderRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CancelOrderRequest {
+    return { orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "" };
+  },
+
+  toJSON(message: CancelOrderRequest): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<CancelOrderRequest>, I>>(base?: I): CancelOrderRequest {
+    return CancelOrderRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<CancelOrderRequest>, I>>(object: I): CancelOrderRequest {
+    const message = createBaseCancelOrderRequest();
+    message.orderId = object.orderId ?? "";
+    return message;
+  },
+};
+
+function createBaseCancelOrderResponse(): CancelOrderResponse {
+  return { orderId: "", status: 0, message: "" };
+}
+
+export const CancelOrderResponse: MessageFns<CancelOrderResponse> = {
+  encode(message: CancelOrderResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    if (message.status !== 0) {
+      writer.uint32(16).int32(message.status);
+    }
+    if (message.message !== "") {
+      writer.uint32(26).string(message.message);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): CancelOrderResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCancelOrderResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.status = reader.int32() as any;
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.message = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CancelOrderResponse {
+    return {
+      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
+      status: isSet(object.status) ? orderStatusFromJSON(object.status) : 0,
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
+    };
+  },
+
+  toJSON(message: CancelOrderResponse): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.status !== 0) {
+      obj.status = orderStatusToJSON(message.status);
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<CancelOrderResponse>, I>>(base?: I): CancelOrderResponse {
+    return CancelOrderResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<CancelOrderResponse>, I>>(object: I): CancelOrderResponse {
+    const message = createBaseCancelOrderResponse();
+    message.orderId = object.orderId ?? "";
+    message.status = object.status ?? 0;
+    message.message = object.message ?? "";
+    return message;
+  },
+};
+
+function createBaseOrderStep(): OrderStep {
+  return { service: "", status: 0, error: "", timestamp: "" };
+}
+
+export const OrderStep: MessageFns<OrderStep> = {
+  encode(message: OrderStep, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.service !== "") {
+      writer.uint32(10).string(message.service);
+    }
+    if (message.status !== 0) {
+      writer.uint32(16).int32(message.status);
+    }
+    if (message.error !== "") {
+      writer.uint32(26).string(message.error);
+    }
+    if (message.timestamp !== "") {
+      writer.uint32(34).string(message.timestamp);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): OrderStep {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOrderStep();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.service = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.status = reader.int32() as any;
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.error = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.timestamp = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): OrderStep {
+    return {
+      service: isSet(object.service) ? globalThis.String(object.service) : "",
+      status: isSet(object.status) ? stepStatusFromJSON(object.status) : 0,
+      error: isSet(object.error) ? globalThis.String(object.error) : "",
+      timestamp: isSet(object.timestamp) ? globalThis.String(object.timestamp) : "",
+    };
+  },
+
+  toJSON(message: OrderStep): unknown {
+    const obj: any = {};
+    if (message.service !== "") {
+      obj.service = message.service;
+    }
+    if (message.status !== 0) {
+      obj.status = stepStatusToJSON(message.status);
+    }
+    if (message.error !== "") {
+      obj.error = message.error;
+    }
+    if (message.timestamp !== "") {
+      obj.timestamp = message.timestamp;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<OrderStep>, I>>(base?: I): OrderStep {
+    return OrderStep.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<OrderStep>, I>>(object: I): OrderStep {
+    const message = createBaseOrderStep();
+    message.service = object.service ?? "";
+    message.status = object.status ?? 0;
+    message.error = object.error ?? "";
+    message.timestamp = object.timestamp ?? "";
+    return message;
+  },
+};
+
+function createBaseReserveStockRequest(): ReserveStockRequest {
+  return { orderId: "", variants: [] };
+}
+
+export const ReserveStockRequest: MessageFns<ReserveStockRequest> = {
+  encode(message: ReserveStockRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    for (const v of message.variants) {
+      ProductVariant.encode(v!, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ReserveStockRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseReserveStockRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.variants.push(ProductVariant.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ReserveStockRequest {
+    return {
+      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
+      variants: globalThis.Array.isArray(object?.variants)
+        ? object.variants.map((e: any) => ProductVariant.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: ReserveStockRequest): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.variants?.length) {
+      obj.variants = message.variants.map((e) => ProductVariant.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ReserveStockRequest>, I>>(base?: I): ReserveStockRequest {
+    return ReserveStockRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ReserveStockRequest>, I>>(object: I): ReserveStockRequest {
+    const message = createBaseReserveStockRequest();
+    message.orderId = object.orderId ?? "";
+    message.variants = object.variants?.map((e) => ProductVariant.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseReserveStockResponse(): ReserveStockResponse {
+  return { success: false, message: "" };
+}
+
+export const ReserveStockResponse: MessageFns<ReserveStockResponse> = {
+  encode(message: ReserveStockResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    if (message.message !== "") {
+      writer.uint32(18).string(message.message);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ReserveStockResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseReserveStockResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.message = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ReserveStockResponse {
+    return {
+      success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
+    };
+  },
+
+  toJSON(message: ReserveStockResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ReserveStockResponse>, I>>(base?: I): ReserveStockResponse {
+    return ReserveStockResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ReserveStockResponse>, I>>(object: I): ReserveStockResponse {
+    const message = createBaseReserveStockResponse();
+    message.success = object.success ?? false;
+    message.message = object.message ?? "";
+    return message;
+  },
+};
+
+function createBaseReleaseStockRequest(): ReleaseStockRequest {
+  return { orderId: "", variants: [] };
+}
+
+export const ReleaseStockRequest: MessageFns<ReleaseStockRequest> = {
+  encode(message: ReleaseStockRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    for (const v of message.variants) {
+      ProductVariant.encode(v!, writer.uint32(18).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ReleaseStockRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseReleaseStockRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.variants.push(ProductVariant.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ReleaseStockRequest {
+    return {
+      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
+      variants: globalThis.Array.isArray(object?.variants)
+        ? object.variants.map((e: any) => ProductVariant.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: ReleaseStockRequest): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.variants?.length) {
+      obj.variants = message.variants.map((e) => ProductVariant.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ReleaseStockRequest>, I>>(base?: I): ReleaseStockRequest {
+    return ReleaseStockRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ReleaseStockRequest>, I>>(object: I): ReleaseStockRequest {
+    const message = createBaseReleaseStockRequest();
+    message.orderId = object.orderId ?? "";
+    message.variants = object.variants?.map((e) => ProductVariant.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseReleaseStockResponse(): ReleaseStockResponse {
+  return { success: false, message: "" };
+}
+
+export const ReleaseStockResponse: MessageFns<ReleaseStockResponse> = {
+  encode(message: ReleaseStockResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    if (message.message !== "") {
+      writer.uint32(18).string(message.message);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ReleaseStockResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseReleaseStockResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.message = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ReleaseStockResponse {
+    return {
+      success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
+    };
+  },
+
+  toJSON(message: ReleaseStockResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ReleaseStockResponse>, I>>(base?: I): ReleaseStockResponse {
+    return ReleaseStockResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ReleaseStockResponse>, I>>(object: I): ReleaseStockResponse {
+    const message = createBaseReleaseStockResponse();
+    message.success = object.success ?? false;
+    message.message = object.message ?? "";
+    return message;
+  },
+};
+
+function createBaseInitiatePaymentRequest(): InitiatePaymentRequest {
+  return { orderId: "", amount: 0, provider: 0, currency: "" };
+}
+
+export const InitiatePaymentRequest: MessageFns<InitiatePaymentRequest> = {
+  encode(message: InitiatePaymentRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    if (message.amount !== 0) {
+      writer.uint32(17).double(message.amount);
+    }
+    if (message.provider !== 0) {
+      writer.uint32(24).int32(message.provider);
+    }
+    if (message.currency !== "") {
+      writer.uint32(34).string(message.currency);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): InitiatePaymentRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseInitiatePaymentRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 17) {
+            break;
+          }
+
+          message.amount = reader.double();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.provider = reader.int32() as any;
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.currency = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): InitiatePaymentRequest {
+    return {
+      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
+      amount: isSet(object.amount) ? globalThis.Number(object.amount) : 0,
+      provider: isSet(object.provider) ? paymentProviderFromJSON(object.provider) : 0,
+      currency: isSet(object.currency) ? globalThis.String(object.currency) : "",
+    };
+  },
+
+  toJSON(message: InitiatePaymentRequest): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.amount !== 0) {
+      obj.amount = message.amount;
+    }
+    if (message.provider !== 0) {
+      obj.provider = paymentProviderToJSON(message.provider);
+    }
+    if (message.currency !== "") {
+      obj.currency = message.currency;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<InitiatePaymentRequest>, I>>(base?: I): InitiatePaymentRequest {
+    return InitiatePaymentRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<InitiatePaymentRequest>, I>>(object: I): InitiatePaymentRequest {
+    const message = createBaseInitiatePaymentRequest();
+    message.orderId = object.orderId ?? "";
+    message.amount = object.amount ?? 0;
+    message.provider = object.provider ?? 0;
+    message.currency = object.currency ?? "";
+    return message;
+  },
+};
+
+function createBaseInitiatePaymentResponse(): InitiatePaymentResponse {
+  return { paymentId: "", redirectUrl: "", status: 0 };
+}
+
+export const InitiatePaymentResponse: MessageFns<InitiatePaymentResponse> = {
+  encode(message: InitiatePaymentResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.paymentId !== "") {
+      writer.uint32(10).string(message.paymentId);
+    }
+    if (message.redirectUrl !== "") {
+      writer.uint32(18).string(message.redirectUrl);
+    }
+    if (message.status !== 0) {
+      writer.uint32(24).int32(message.status);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): InitiatePaymentResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseInitiatePaymentResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.paymentId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.redirectUrl = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.status = reader.int32() as any;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): InitiatePaymentResponse {
+    return {
+      paymentId: isSet(object.paymentId) ? globalThis.String(object.paymentId) : "",
+      redirectUrl: isSet(object.redirectUrl) ? globalThis.String(object.redirectUrl) : "",
+      status: isSet(object.status) ? paymentStatusFromJSON(object.status) : 0,
+    };
+  },
+
+  toJSON(message: InitiatePaymentResponse): unknown {
+    const obj: any = {};
+    if (message.paymentId !== "") {
+      obj.paymentId = message.paymentId;
+    }
+    if (message.redirectUrl !== "") {
+      obj.redirectUrl = message.redirectUrl;
+    }
+    if (message.status !== 0) {
+      obj.status = paymentStatusToJSON(message.status);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<InitiatePaymentResponse>, I>>(base?: I): InitiatePaymentResponse {
+    return InitiatePaymentResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<InitiatePaymentResponse>, I>>(object: I): InitiatePaymentResponse {
+    const message = createBaseInitiatePaymentResponse();
+    message.paymentId = object.paymentId ?? "";
+    message.redirectUrl = object.redirectUrl ?? "";
+    message.status = object.status ?? 0;
+    return message;
+  },
+};
+
+function createBaseVerifyPaymentRequest(): VerifyPaymentRequest {
+  return { paymentId: "" };
+}
+
+export const VerifyPaymentRequest: MessageFns<VerifyPaymentRequest> = {
+  encode(message: VerifyPaymentRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.paymentId !== "") {
+      writer.uint32(10).string(message.paymentId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): VerifyPaymentRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseVerifyPaymentRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.paymentId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): VerifyPaymentRequest {
+    return { paymentId: isSet(object.paymentId) ? globalThis.String(object.paymentId) : "" };
+  },
+
+  toJSON(message: VerifyPaymentRequest): unknown {
+    const obj: any = {};
+    if (message.paymentId !== "") {
+      obj.paymentId = message.paymentId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<VerifyPaymentRequest>, I>>(base?: I): VerifyPaymentRequest {
+    return VerifyPaymentRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<VerifyPaymentRequest>, I>>(object: I): VerifyPaymentRequest {
+    const message = createBaseVerifyPaymentRequest();
+    message.paymentId = object.paymentId ?? "";
+    return message;
+  },
+};
+
+function createBaseVerifyPaymentResponse(): VerifyPaymentResponse {
+  return { status: 0 };
+}
+
+export const VerifyPaymentResponse: MessageFns<VerifyPaymentResponse> = {
+  encode(message: VerifyPaymentResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.status !== 0) {
+      writer.uint32(8).int32(message.status);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): VerifyPaymentResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseVerifyPaymentResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.status = reader.int32() as any;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): VerifyPaymentResponse {
+    return { status: isSet(object.status) ? paymentStatusFromJSON(object.status) : 0 };
+  },
+
+  toJSON(message: VerifyPaymentResponse): unknown {
+    const obj: any = {};
+    if (message.status !== 0) {
+      obj.status = paymentStatusToJSON(message.status);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<VerifyPaymentResponse>, I>>(base?: I): VerifyPaymentResponse {
+    return VerifyPaymentResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<VerifyPaymentResponse>, I>>(object: I): VerifyPaymentResponse {
+    const message = createBaseVerifyPaymentResponse();
+    message.status = object.status ?? 0;
+    return message;
+  },
+};
+
+function createBaseCancelPaymentRequest(): CancelPaymentRequest {
+  return { paymentId: "" };
+}
+
+export const CancelPaymentRequest: MessageFns<CancelPaymentRequest> = {
+  encode(message: CancelPaymentRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.paymentId !== "") {
+      writer.uint32(10).string(message.paymentId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): CancelPaymentRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCancelPaymentRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.paymentId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CancelPaymentRequest {
+    return { paymentId: isSet(object.paymentId) ? globalThis.String(object.paymentId) : "" };
+  },
+
+  toJSON(message: CancelPaymentRequest): unknown {
+    const obj: any = {};
+    if (message.paymentId !== "") {
+      obj.paymentId = message.paymentId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<CancelPaymentRequest>, I>>(base?: I): CancelPaymentRequest {
+    return CancelPaymentRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<CancelPaymentRequest>, I>>(object: I): CancelPaymentRequest {
+    const message = createBaseCancelPaymentRequest();
+    message.paymentId = object.paymentId ?? "";
+    return message;
+  },
+};
+
+function createBaseCancelPaymentResponse(): CancelPaymentResponse {
+  return { success: false };
+}
+
+export const CancelPaymentResponse: MessageFns<CancelPaymentResponse> = {
+  encode(message: CancelPaymentResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): CancelPaymentResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCancelPaymentResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CancelPaymentResponse {
+    return { success: isSet(object.success) ? globalThis.Boolean(object.success) : false };
+  },
+
+  toJSON(message: CancelPaymentResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<CancelPaymentResponse>, I>>(base?: I): CancelPaymentResponse {
+    return CancelPaymentResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<CancelPaymentResponse>, I>>(object: I): CancelPaymentResponse {
+    const message = createBaseCancelPaymentResponse();
+    message.success = object.success ?? false;
+    return message;
+  },
+};
+
+function createBaseRefundPaymentRequest(): RefundPaymentRequest {
+  return { paymentId: "" };
+}
+
+export const RefundPaymentRequest: MessageFns<RefundPaymentRequest> = {
+  encode(message: RefundPaymentRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.paymentId !== "") {
+      writer.uint32(10).string(message.paymentId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RefundPaymentRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRefundPaymentRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.paymentId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RefundPaymentRequest {
+    return { paymentId: isSet(object.paymentId) ? globalThis.String(object.paymentId) : "" };
+  },
+
+  toJSON(message: RefundPaymentRequest): unknown {
+    const obj: any = {};
+    if (message.paymentId !== "") {
+      obj.paymentId = message.paymentId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<RefundPaymentRequest>, I>>(base?: I): RefundPaymentRequest {
+    return RefundPaymentRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<RefundPaymentRequest>, I>>(object: I): RefundPaymentRequest {
+    const message = createBaseRefundPaymentRequest();
+    message.paymentId = object.paymentId ?? "";
+    return message;
+  },
+};
+
+function createBaseRefundPaymentResponse(): RefundPaymentResponse {
+  return { success: false };
+}
+
+export const RefundPaymentResponse: MessageFns<RefundPaymentResponse> = {
+  encode(message: RefundPaymentResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RefundPaymentResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRefundPaymentResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RefundPaymentResponse {
+    return { success: isSet(object.success) ? globalThis.Boolean(object.success) : false };
+  },
+
+  toJSON(message: RefundPaymentResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<RefundPaymentResponse>, I>>(base?: I): RefundPaymentResponse {
+    return RefundPaymentResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<RefundPaymentResponse>, I>>(object: I): RefundPaymentResponse {
+    const message = createBaseRefundPaymentResponse();
+    message.success = object.success ?? false;
+    return message;
+  },
+};
+
+function createBaseGetPaymentStatusRequest(): GetPaymentStatusRequest {
+  return { paymentId: "" };
+}
+
+export const GetPaymentStatusRequest: MessageFns<GetPaymentStatusRequest> = {
+  encode(message: GetPaymentStatusRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.paymentId !== "") {
+      writer.uint32(10).string(message.paymentId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetPaymentStatusRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetPaymentStatusRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.paymentId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetPaymentStatusRequest {
+    return { paymentId: isSet(object.paymentId) ? globalThis.String(object.paymentId) : "" };
+  },
+
+  toJSON(message: GetPaymentStatusRequest): unknown {
+    const obj: any = {};
+    if (message.paymentId !== "") {
+      obj.paymentId = message.paymentId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetPaymentStatusRequest>, I>>(base?: I): GetPaymentStatusRequest {
+    return GetPaymentStatusRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetPaymentStatusRequest>, I>>(object: I): GetPaymentStatusRequest {
+    const message = createBaseGetPaymentStatusRequest();
+    message.paymentId = object.paymentId ?? "";
+    return message;
+  },
+};
+
+function createBaseGetPaymentStatusResponse(): GetPaymentStatusResponse {
+  return { status: 0 };
+}
+
+export const GetPaymentStatusResponse: MessageFns<GetPaymentStatusResponse> = {
+  encode(message: GetPaymentStatusResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.status !== 0) {
+      writer.uint32(8).int32(message.status);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetPaymentStatusResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetPaymentStatusResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.status = reader.int32() as any;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetPaymentStatusResponse {
+    return { status: isSet(object.status) ? paymentStatusFromJSON(object.status) : 0 };
+  },
+
+  toJSON(message: GetPaymentStatusResponse): unknown {
+    const obj: any = {};
+    if (message.status !== 0) {
+      obj.status = paymentStatusToJSON(message.status);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetPaymentStatusResponse>, I>>(base?: I): GetPaymentStatusResponse {
+    return GetPaymentStatusResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetPaymentStatusResponse>, I>>(object: I): GetPaymentStatusResponse {
+    const message = createBaseGetPaymentStatusResponse();
     message.status = object.status ?? 0;
     return message;
   },
@@ -14596,6 +15931,24 @@ export const CartServiceService = {
     responseSerialize: (value: ClearCartResponse) => Buffer.from(ClearCartResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => ClearCartResponse.decode(value),
   },
+  reserveItems: {
+    path: "/nexuraTelemetry.CartService/ReserveItems",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: ReserveItemsRequest) => Buffer.from(ReserveItemsRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => ReserveItemsRequest.decode(value),
+    responseSerialize: (value: ReserveItemsResponse) => Buffer.from(ReserveItemsResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => ReserveItemsResponse.decode(value),
+  },
+  releaseItems: {
+    path: "/nexuraTelemetry.CartService/ReleaseItems",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: ReleaseItemsRequest) => Buffer.from(ReleaseItemsRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => ReleaseItemsRequest.decode(value),
+    responseSerialize: (value: ReleaseItemsResponse) => Buffer.from(ReleaseItemsResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => ReleaseItemsResponse.decode(value),
+  },
 } as const;
 
 export interface CartServiceServer extends UntypedServiceImplementation {
@@ -14604,6 +15957,8 @@ export interface CartServiceServer extends UntypedServiceImplementation {
   updateItem: handleUnaryCall<UpdateItemRequest, UpdateItemResponse>;
   removeItem: handleUnaryCall<RemoveItemRequest, RemoveItemResponse>;
   clearCart: handleUnaryCall<ClearCartRequest, ClearCartResponse>;
+  reserveItems: handleUnaryCall<ReserveItemsRequest, ReserveItemsResponse>;
+  releaseItems: handleUnaryCall<ReleaseItemsRequest, ReleaseItemsResponse>;
 }
 
 export interface CartServiceClient extends Client {
@@ -14681,6 +16036,36 @@ export interface CartServiceClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: ClearCartResponse) => void,
+  ): ClientUnaryCall;
+  reserveItems(
+    request: ReserveItemsRequest,
+    callback: (error: ServiceError | null, response: ReserveItemsResponse) => void,
+  ): ClientUnaryCall;
+  reserveItems(
+    request: ReserveItemsRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: ReserveItemsResponse) => void,
+  ): ClientUnaryCall;
+  reserveItems(
+    request: ReserveItemsRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: ReserveItemsResponse) => void,
+  ): ClientUnaryCall;
+  releaseItems(
+    request: ReleaseItemsRequest,
+    callback: (error: ServiceError | null, response: ReleaseItemsResponse) => void,
+  ): ClientUnaryCall;
+  releaseItems(
+    request: ReleaseItemsRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: ReleaseItemsResponse) => void,
+  ): ClientUnaryCall;
+  releaseItems(
+    request: ReleaseItemsRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: ReleaseItemsResponse) => void,
   ): ClientUnaryCall;
 }
 
@@ -14940,6 +16325,24 @@ export const ProductCatalogServiceService = {
     responseSerialize: (value: GetWarehousesResponse) => Buffer.from(GetWarehousesResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => GetWarehousesResponse.decode(value),
   },
+  reserveStock: {
+    path: "/nexuraTelemetry.ProductCatalogService/ReserveStock",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: ReserveStockRequest) => Buffer.from(ReserveStockRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => ReserveStockRequest.decode(value),
+    responseSerialize: (value: ReserveStockResponse) => Buffer.from(ReserveStockResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => ReserveStockResponse.decode(value),
+  },
+  releaseStock: {
+    path: "/nexuraTelemetry.ProductCatalogService/ReleaseStock",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: ReleaseStockRequest) => Buffer.from(ReleaseStockRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => ReleaseStockRequest.decode(value),
+    responseSerialize: (value: ReleaseStockResponse) => Buffer.from(ReleaseStockResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => ReleaseStockResponse.decode(value),
+  },
 } as const;
 
 export interface ProductCatalogServiceServer extends UntypedServiceImplementation {
@@ -14964,6 +16367,8 @@ export interface ProductCatalogServiceServer extends UntypedServiceImplementatio
   deleteProductAttributes: handleUnaryCall<DeleteProductAttributesRequest, DeleteProductAttributesResponse>;
   createProductAttribute: handleUnaryCall<CreateProductAttributeRequest, CreateProductAttributeResponse>;
   getWarehouses: handleUnaryCall<Empty, GetWarehousesResponse>;
+  reserveStock: handleUnaryCall<ReserveStockRequest, ReserveStockResponse>;
+  releaseStock: handleUnaryCall<ReleaseStockRequest, ReleaseStockResponse>;
 }
 
 export interface ProductCatalogServiceClient extends Client {
@@ -15282,6 +16687,36 @@ export interface ProductCatalogServiceClient extends Client {
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: GetWarehousesResponse) => void,
   ): ClientUnaryCall;
+  reserveStock(
+    request: ReserveStockRequest,
+    callback: (error: ServiceError | null, response: ReserveStockResponse) => void,
+  ): ClientUnaryCall;
+  reserveStock(
+    request: ReserveStockRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: ReserveStockResponse) => void,
+  ): ClientUnaryCall;
+  reserveStock(
+    request: ReserveStockRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: ReserveStockResponse) => void,
+  ): ClientUnaryCall;
+  releaseStock(
+    request: ReleaseStockRequest,
+    callback: (error: ServiceError | null, response: ReleaseStockResponse) => void,
+  ): ClientUnaryCall;
+  releaseStock(
+    request: ReleaseStockRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: ReleaseStockResponse) => void,
+  ): ClientUnaryCall;
+  releaseStock(
+    request: ReleaseStockRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: ReleaseStockResponse) => void,
+  ): ClientUnaryCall;
 }
 
 export const ProductCatalogServiceClient = makeGenericClientConstructor(
@@ -15313,11 +16748,21 @@ export const ShippingServiceService = {
     responseSerialize: (value: ShipOrderResponse) => Buffer.from(ShipOrderResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => ShipOrderResponse.decode(value),
   },
+  cancelShipment: {
+    path: "/nexuraTelemetry.ShippingService/CancelShipment",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: CancelShipmentRequest) => Buffer.from(CancelShipmentRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => CancelShipmentRequest.decode(value),
+    responseSerialize: (value: CancelShipmentResponse) => Buffer.from(CancelShipmentResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => CancelShipmentResponse.decode(value),
+  },
 } as const;
 
 export interface ShippingServiceServer extends UntypedServiceImplementation {
   getQuote: handleUnaryCall<GetQuoteRequest, GetQuoteResponse>;
   shipOrder: handleUnaryCall<ShipOrderRequest, ShipOrderResponse>;
+  cancelShipment: handleUnaryCall<CancelShipmentRequest, CancelShipmentResponse>;
 }
 
 export interface ShippingServiceClient extends Client {
@@ -15350,6 +16795,21 @@ export interface ShippingServiceClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: ShipOrderResponse) => void,
+  ): ClientUnaryCall;
+  cancelShipment(
+    request: CancelShipmentRequest,
+    callback: (error: ServiceError | null, response: CancelShipmentResponse) => void,
+  ): ClientUnaryCall;
+  cancelShipment(
+    request: CancelShipmentRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: CancelShipmentResponse) => void,
+  ): ClientUnaryCall;
+  cancelShipment(
+    request: CancelShipmentRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: CancelShipmentResponse) => void,
   ): ClientUnaryCall;
 }
 
@@ -15430,50 +16890,6 @@ export const CurrencyServiceClient = makeGenericClientConstructor(
 ) as unknown as {
   new (address: string, credentials: ChannelCredentials, options?: Partial<ClientOptions>): CurrencyServiceClient;
   service: typeof CurrencyServiceService;
-  serviceName: string;
-};
-
-export type PaymentServiceService = typeof PaymentServiceService;
-export const PaymentServiceService = {
-  charge: {
-    path: "/nexuraTelemetry.PaymentService/Charge",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: ChargeRequest) => Buffer.from(ChargeRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => ChargeRequest.decode(value),
-    responseSerialize: (value: ChargeResponse) => Buffer.from(ChargeResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => ChargeResponse.decode(value),
-  },
-} as const;
-
-export interface PaymentServiceServer extends UntypedServiceImplementation {
-  charge: handleUnaryCall<ChargeRequest, ChargeResponse>;
-}
-
-export interface PaymentServiceClient extends Client {
-  charge(
-    request: ChargeRequest,
-    callback: (error: ServiceError | null, response: ChargeResponse) => void,
-  ): ClientUnaryCall;
-  charge(
-    request: ChargeRequest,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: ChargeResponse) => void,
-  ): ClientUnaryCall;
-  charge(
-    request: ChargeRequest,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: ChargeResponse) => void,
-  ): ClientUnaryCall;
-}
-
-export const PaymentServiceClient = makeGenericClientConstructor(
-  PaymentServiceService,
-  "nexuraTelemetry.PaymentService",
-) as unknown as {
-  new (address: string, credentials: ChannelCredentials, options?: Partial<ClientOptions>): PaymentServiceClient;
-  service: typeof PaymentServiceService;
   serviceName: string;
 };
 
@@ -15575,50 +16991,6 @@ export const EmailServiceClient = makeGenericClientConstructor(
   serviceName: string;
 };
 
-export type CheckoutServiceService = typeof CheckoutServiceService;
-export const CheckoutServiceService = {
-  placeOrder: {
-    path: "/nexuraTelemetry.CheckoutService/PlaceOrder",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: PlaceOrderRequest) => Buffer.from(PlaceOrderRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => PlaceOrderRequest.decode(value),
-    responseSerialize: (value: PlaceOrderResponse) => Buffer.from(PlaceOrderResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => PlaceOrderResponse.decode(value),
-  },
-} as const;
-
-export interface CheckoutServiceServer extends UntypedServiceImplementation {
-  placeOrder: handleUnaryCall<PlaceOrderRequest, PlaceOrderResponse>;
-}
-
-export interface CheckoutServiceClient extends Client {
-  placeOrder(
-    request: PlaceOrderRequest,
-    callback: (error: ServiceError | null, response: PlaceOrderResponse) => void,
-  ): ClientUnaryCall;
-  placeOrder(
-    request: PlaceOrderRequest,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: PlaceOrderResponse) => void,
-  ): ClientUnaryCall;
-  placeOrder(
-    request: PlaceOrderRequest,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: PlaceOrderResponse) => void,
-  ): ClientUnaryCall;
-}
-
-export const CheckoutServiceClient = makeGenericClientConstructor(
-  CheckoutServiceService,
-  "nexuraTelemetry.CheckoutService",
-) as unknown as {
-  new (address: string, credentials: ChannelCredentials, options?: Partial<ClientOptions>): CheckoutServiceClient;
-  service: typeof CheckoutServiceService;
-  serviceName: string;
-};
-
 export type AdServiceService = typeof AdServiceService;
 export const AdServiceService = {
   getAds: {
@@ -15657,150 +17029,6 @@ export const AdServiceClient = makeGenericClientConstructor(
 ) as unknown as {
   new (address: string, credentials: ChannelCredentials, options?: Partial<ClientOptions>): AdServiceClient;
   service: typeof AdServiceService;
-  serviceName: string;
-};
-
-export type FeatureFlagServiceService = typeof FeatureFlagServiceService;
-export const FeatureFlagServiceService = {
-  getFlag: {
-    path: "/nexuraTelemetry.FeatureFlagService/GetFlag",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: GetFlagRequest) => Buffer.from(GetFlagRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => GetFlagRequest.decode(value),
-    responseSerialize: (value: GetFlagResponse) => Buffer.from(GetFlagResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => GetFlagResponse.decode(value),
-  },
-  createFlag: {
-    path: "/nexuraTelemetry.FeatureFlagService/CreateFlag",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: CreateFlagRequest) => Buffer.from(CreateFlagRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => CreateFlagRequest.decode(value),
-    responseSerialize: (value: CreateFlagResponse) => Buffer.from(CreateFlagResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => CreateFlagResponse.decode(value),
-  },
-  updateFlag: {
-    path: "/nexuraTelemetry.FeatureFlagService/UpdateFlag",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: UpdateFlagRequest) => Buffer.from(UpdateFlagRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => UpdateFlagRequest.decode(value),
-    responseSerialize: (value: UpdateFlagResponse) => Buffer.from(UpdateFlagResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => UpdateFlagResponse.decode(value),
-  },
-  listFlags: {
-    path: "/nexuraTelemetry.FeatureFlagService/ListFlags",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: ListFlagsRequest) => Buffer.from(ListFlagsRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => ListFlagsRequest.decode(value),
-    responseSerialize: (value: ListFlagsResponse) => Buffer.from(ListFlagsResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => ListFlagsResponse.decode(value),
-  },
-  deleteFlag: {
-    path: "/nexuraTelemetry.FeatureFlagService/DeleteFlag",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: DeleteFlagRequest) => Buffer.from(DeleteFlagRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => DeleteFlagRequest.decode(value),
-    responseSerialize: (value: DeleteFlagResponse) => Buffer.from(DeleteFlagResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => DeleteFlagResponse.decode(value),
-  },
-} as const;
-
-export interface FeatureFlagServiceServer extends UntypedServiceImplementation {
-  getFlag: handleUnaryCall<GetFlagRequest, GetFlagResponse>;
-  createFlag: handleUnaryCall<CreateFlagRequest, CreateFlagResponse>;
-  updateFlag: handleUnaryCall<UpdateFlagRequest, UpdateFlagResponse>;
-  listFlags: handleUnaryCall<ListFlagsRequest, ListFlagsResponse>;
-  deleteFlag: handleUnaryCall<DeleteFlagRequest, DeleteFlagResponse>;
-}
-
-export interface FeatureFlagServiceClient extends Client {
-  getFlag(
-    request: GetFlagRequest,
-    callback: (error: ServiceError | null, response: GetFlagResponse) => void,
-  ): ClientUnaryCall;
-  getFlag(
-    request: GetFlagRequest,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: GetFlagResponse) => void,
-  ): ClientUnaryCall;
-  getFlag(
-    request: GetFlagRequest,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: GetFlagResponse) => void,
-  ): ClientUnaryCall;
-  createFlag(
-    request: CreateFlagRequest,
-    callback: (error: ServiceError | null, response: CreateFlagResponse) => void,
-  ): ClientUnaryCall;
-  createFlag(
-    request: CreateFlagRequest,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: CreateFlagResponse) => void,
-  ): ClientUnaryCall;
-  createFlag(
-    request: CreateFlagRequest,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: CreateFlagResponse) => void,
-  ): ClientUnaryCall;
-  updateFlag(
-    request: UpdateFlagRequest,
-    callback: (error: ServiceError | null, response: UpdateFlagResponse) => void,
-  ): ClientUnaryCall;
-  updateFlag(
-    request: UpdateFlagRequest,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: UpdateFlagResponse) => void,
-  ): ClientUnaryCall;
-  updateFlag(
-    request: UpdateFlagRequest,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: UpdateFlagResponse) => void,
-  ): ClientUnaryCall;
-  listFlags(
-    request: ListFlagsRequest,
-    callback: (error: ServiceError | null, response: ListFlagsResponse) => void,
-  ): ClientUnaryCall;
-  listFlags(
-    request: ListFlagsRequest,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: ListFlagsResponse) => void,
-  ): ClientUnaryCall;
-  listFlags(
-    request: ListFlagsRequest,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: ListFlagsResponse) => void,
-  ): ClientUnaryCall;
-  deleteFlag(
-    request: DeleteFlagRequest,
-    callback: (error: ServiceError | null, response: DeleteFlagResponse) => void,
-  ): ClientUnaryCall;
-  deleteFlag(
-    request: DeleteFlagRequest,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: DeleteFlagResponse) => void,
-  ): ClientUnaryCall;
-  deleteFlag(
-    request: DeleteFlagRequest,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: DeleteFlagResponse) => void,
-  ): ClientUnaryCall;
-}
-
-export const FeatureFlagServiceClient = makeGenericClientConstructor(
-  FeatureFlagServiceService,
-  "nexuraTelemetry.FeatureFlagService",
-) as unknown as {
-  new (address: string, credentials: ChannelCredentials, options?: Partial<ClientOptions>): FeatureFlagServiceClient;
-  service: typeof FeatureFlagServiceService;
   serviceName: string;
 };
 
@@ -15868,6 +17096,245 @@ export const HealthServiceClient = makeGenericClientConstructor(
 ) as unknown as {
   new (address: string, credentials: ChannelCredentials, options?: Partial<ClientOptions>): HealthServiceClient;
   service: typeof HealthServiceService;
+  serviceName: string;
+};
+
+export type OrderServiceService = typeof OrderServiceService;
+export const OrderServiceService = {
+  createOrder: {
+    path: "/nexuraTelemetry.OrderService/CreateOrder",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: CreateOrderRequest) => Buffer.from(CreateOrderRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => CreateOrderRequest.decode(value),
+    responseSerialize: (value: CreateOrderResponse) => Buffer.from(CreateOrderResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => CreateOrderResponse.decode(value),
+  },
+  getOrderStatus: {
+    path: "/nexuraTelemetry.OrderService/GetOrderStatus",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: GetOrderStatusRequest) => Buffer.from(GetOrderStatusRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetOrderStatusRequest.decode(value),
+    responseSerialize: (value: GetOrderStatusResponse) => Buffer.from(GetOrderStatusResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetOrderStatusResponse.decode(value),
+  },
+  cancelOrder: {
+    path: "/nexuraTelemetry.OrderService/CancelOrder",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: CancelOrderRequest) => Buffer.from(CancelOrderRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => CancelOrderRequest.decode(value),
+    responseSerialize: (value: CancelOrderResponse) => Buffer.from(CancelOrderResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => CancelOrderResponse.decode(value),
+  },
+} as const;
+
+export interface OrderServiceServer extends UntypedServiceImplementation {
+  createOrder: handleUnaryCall<CreateOrderRequest, CreateOrderResponse>;
+  getOrderStatus: handleUnaryCall<GetOrderStatusRequest, GetOrderStatusResponse>;
+  cancelOrder: handleUnaryCall<CancelOrderRequest, CancelOrderResponse>;
+}
+
+export interface OrderServiceClient extends Client {
+  createOrder(
+    request: CreateOrderRequest,
+    callback: (error: ServiceError | null, response: CreateOrderResponse) => void,
+  ): ClientUnaryCall;
+  createOrder(
+    request: CreateOrderRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: CreateOrderResponse) => void,
+  ): ClientUnaryCall;
+  createOrder(
+    request: CreateOrderRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: CreateOrderResponse) => void,
+  ): ClientUnaryCall;
+  getOrderStatus(
+    request: GetOrderStatusRequest,
+    callback: (error: ServiceError | null, response: GetOrderStatusResponse) => void,
+  ): ClientUnaryCall;
+  getOrderStatus(
+    request: GetOrderStatusRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: GetOrderStatusResponse) => void,
+  ): ClientUnaryCall;
+  getOrderStatus(
+    request: GetOrderStatusRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: GetOrderStatusResponse) => void,
+  ): ClientUnaryCall;
+  cancelOrder(
+    request: CancelOrderRequest,
+    callback: (error: ServiceError | null, response: CancelOrderResponse) => void,
+  ): ClientUnaryCall;
+  cancelOrder(
+    request: CancelOrderRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: CancelOrderResponse) => void,
+  ): ClientUnaryCall;
+  cancelOrder(
+    request: CancelOrderRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: CancelOrderResponse) => void,
+  ): ClientUnaryCall;
+}
+
+export const OrderServiceClient = makeGenericClientConstructor(
+  OrderServiceService,
+  "nexuraTelemetry.OrderService",
+) as unknown as {
+  new (address: string, credentials: ChannelCredentials, options?: Partial<ClientOptions>): OrderServiceClient;
+  service: typeof OrderServiceService;
+  serviceName: string;
+};
+
+export type PaymentServiceService = typeof PaymentServiceService;
+export const PaymentServiceService = {
+  initiatePayment: {
+    path: "/nexuraTelemetry.PaymentService/InitiatePayment",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: InitiatePaymentRequest) => Buffer.from(InitiatePaymentRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => InitiatePaymentRequest.decode(value),
+    responseSerialize: (value: InitiatePaymentResponse) => Buffer.from(InitiatePaymentResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => InitiatePaymentResponse.decode(value),
+  },
+  verifyPayment: {
+    path: "/nexuraTelemetry.PaymentService/VerifyPayment",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: VerifyPaymentRequest) => Buffer.from(VerifyPaymentRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => VerifyPaymentRequest.decode(value),
+    responseSerialize: (value: VerifyPaymentResponse) => Buffer.from(VerifyPaymentResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => VerifyPaymentResponse.decode(value),
+  },
+  cancelPayment: {
+    path: "/nexuraTelemetry.PaymentService/CancelPayment",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: CancelPaymentRequest) => Buffer.from(CancelPaymentRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => CancelPaymentRequest.decode(value),
+    responseSerialize: (value: CancelPaymentResponse) => Buffer.from(CancelPaymentResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => CancelPaymentResponse.decode(value),
+  },
+  refundPayment: {
+    path: "/nexuraTelemetry.PaymentService/RefundPayment",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: RefundPaymentRequest) => Buffer.from(RefundPaymentRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => RefundPaymentRequest.decode(value),
+    responseSerialize: (value: RefundPaymentResponse) => Buffer.from(RefundPaymentResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => RefundPaymentResponse.decode(value),
+  },
+  getPaymentStatus: {
+    path: "/nexuraTelemetry.PaymentService/GetPaymentStatus",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: GetPaymentStatusRequest) => Buffer.from(GetPaymentStatusRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetPaymentStatusRequest.decode(value),
+    responseSerialize: (value: GetPaymentStatusResponse) =>
+      Buffer.from(GetPaymentStatusResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetPaymentStatusResponse.decode(value),
+  },
+} as const;
+
+export interface PaymentServiceServer extends UntypedServiceImplementation {
+  initiatePayment: handleUnaryCall<InitiatePaymentRequest, InitiatePaymentResponse>;
+  verifyPayment: handleUnaryCall<VerifyPaymentRequest, VerifyPaymentResponse>;
+  cancelPayment: handleUnaryCall<CancelPaymentRequest, CancelPaymentResponse>;
+  refundPayment: handleUnaryCall<RefundPaymentRequest, RefundPaymentResponse>;
+  getPaymentStatus: handleUnaryCall<GetPaymentStatusRequest, GetPaymentStatusResponse>;
+}
+
+export interface PaymentServiceClient extends Client {
+  initiatePayment(
+    request: InitiatePaymentRequest,
+    callback: (error: ServiceError | null, response: InitiatePaymentResponse) => void,
+  ): ClientUnaryCall;
+  initiatePayment(
+    request: InitiatePaymentRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: InitiatePaymentResponse) => void,
+  ): ClientUnaryCall;
+  initiatePayment(
+    request: InitiatePaymentRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: InitiatePaymentResponse) => void,
+  ): ClientUnaryCall;
+  verifyPayment(
+    request: VerifyPaymentRequest,
+    callback: (error: ServiceError | null, response: VerifyPaymentResponse) => void,
+  ): ClientUnaryCall;
+  verifyPayment(
+    request: VerifyPaymentRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: VerifyPaymentResponse) => void,
+  ): ClientUnaryCall;
+  verifyPayment(
+    request: VerifyPaymentRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: VerifyPaymentResponse) => void,
+  ): ClientUnaryCall;
+  cancelPayment(
+    request: CancelPaymentRequest,
+    callback: (error: ServiceError | null, response: CancelPaymentResponse) => void,
+  ): ClientUnaryCall;
+  cancelPayment(
+    request: CancelPaymentRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: CancelPaymentResponse) => void,
+  ): ClientUnaryCall;
+  cancelPayment(
+    request: CancelPaymentRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: CancelPaymentResponse) => void,
+  ): ClientUnaryCall;
+  refundPayment(
+    request: RefundPaymentRequest,
+    callback: (error: ServiceError | null, response: RefundPaymentResponse) => void,
+  ): ClientUnaryCall;
+  refundPayment(
+    request: RefundPaymentRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: RefundPaymentResponse) => void,
+  ): ClientUnaryCall;
+  refundPayment(
+    request: RefundPaymentRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: RefundPaymentResponse) => void,
+  ): ClientUnaryCall;
+  getPaymentStatus(
+    request: GetPaymentStatusRequest,
+    callback: (error: ServiceError | null, response: GetPaymentStatusResponse) => void,
+  ): ClientUnaryCall;
+  getPaymentStatus(
+    request: GetPaymentStatusRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: GetPaymentStatusResponse) => void,
+  ): ClientUnaryCall;
+  getPaymentStatus(
+    request: GetPaymentStatusRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: GetPaymentStatusResponse) => void,
+  ): ClientUnaryCall;
+}
+
+export const PaymentServiceClient = makeGenericClientConstructor(
+  PaymentServiceService,
+  "nexuraTelemetry.PaymentService",
+) as unknown as {
+  new (address: string, credentials: ChannelCredentials, options?: Partial<ClientOptions>): PaymentServiceClient;
+  service: typeof PaymentServiceService;
   serviceName: string;
 };
 

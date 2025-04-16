@@ -22,6 +22,7 @@ import {
   Plus,
   Minus,
   ChevronRight,
+  Loader2,
 } from "lucide-react"
 import NextImage from "next/image"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
@@ -39,7 +40,10 @@ import { cn } from "@/lib/utils"
 import { useCurrency } from "@/contexts/currency-context"
 // import { useCart } from "@/hooks/use-cart"
 import { ReviewImageViewer } from "@/components/review-image-viewer"
-
+import { useProducts, useCategories, useFilteredProducts, useQueryUtils } from "@/hooks/use-query"
+import { useAddToCart } from "@/hooks/use-mutation"
+import { useSession } from "@/contexts/session-context"
+import { ProductDetailsSection } from "@/components/product-details-section"
 // Add mock review data
 const mockReviews = [
   {
@@ -139,11 +143,43 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0)
   const [currentReviewImageIndex, setCurrentReviewImageIndex] = useState(0)
   const [isReviewImageViewerOpen, setIsReviewImageViewerOpen] = useState(false)
-
-  const { data: product, isLoading } = useQuery<Product>({
+  const { currency } = useCurrency()
+  const { 
+    data: product, 
+    isLoading, 
+    isError,
+    error 
+  } = useQuery<Product>({
     queryKey: ['product', slug],
     queryFn: () => getProductBySlugGateway(slug).then(res=>res.product),
     enabled: !!slug,
+  })
+  const { user } = useSession()
+  const { invalidateQueries } = useQueryUtils()
+
+  // Initialize selectedVariant with the first variant when product loads
+  useEffect(() => {
+    if (product?.variants.length) {
+      setSelectedVariant(product.variants[0])
+    }
+  }, [product])
+
+  // Get variant name for display
+  const getVariantName = (variant: ProductVariant) => {
+    return variant.attributes
+      .map((attr) => {
+        if (attr.name.toLowerCase() === "color") {
+          return attr.value
+        }
+        return attr.value
+      })
+      .filter(Boolean)
+      .join(" / ")
+  }
+
+  const { mutate: addToCart } = useAddToCart({
+    successMessage: `${quantity} × ${product?.name} ${selectedVariant ? `(${getVariantName(selectedVariant)})` : ""} added to your cart.`,
+    errorMessage: "Failed to add item to cart. Please try again."
   })
 
   // Sync main and thumb carousels
@@ -179,52 +215,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   }
 
   // Handle add to cart
-  // const handleAddToCart = () => {
-  //   if (!product) return
+  const handleAddToCart = () => {
+    if (!product || !selectedVariant) return
 
-  //   // Check if a variant is selected for products with variants
-  //   if (product.variants.length > 0 && !selectedVariant) {
-  //     toast({
-  //       title: "Please select options",
-  //       description: "Please select all required options before adding to cart.",
-  //       variant: "destructive",
-  //     })
-  //     return
-  //   }
-
-  //   setIsAddingToCart(true)
-
-  //   const currentVariant = selectedVariant || product.variants[0]
-
-  //   addItem({
-  //     id: product.id,
-  //     name: product.name,
-  //     price: currentVariant.price,
-  //     quantity,
-  //     variant: currentVariant,
-  //     image: product.images[0]?.url
-  //   })
-
-  //   setTimeout(() => {
-  //     setIsAddingToCart(false)
-  //     toast({
-  //       title: "Added to cart",
-  //       description: `${quantity} × ${product.name} ${selectedVariant ? `(${getVariantName(selectedVariant)})` : ""} added to your cart.`,
-  //     })
-  //   }, 1000)
-  // }
-
-  // Get variant name for display
-  const getVariantName = (variant: ProductVariant) => {
-    return variant.attributes
-      .map((attr) => {
-        if (attr.name.toLowerCase() === "color") {
-          return attr.value
-        }
-        return attr.value
-      })
-      .filter(Boolean)
-      .join(" / ")
+    setIsAddingToCart(true)
+    addToCart({
+      productId: product.id,
+      variantId: selectedVariant.id,
+      userId: user?.id || "",
+      quantity,
+      image: product.images[0]?.url,
+      currencyCode: currency
+    })
   }
 
   const getCurrentPrice = (): string => {
@@ -262,12 +264,32 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     })
   }
 
-  if (isLoading || !product) {
+  if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen">
         <main className="flex-1 container py-8">
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <div className="flex items-center justify-center h-[50vh]">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  if (isError || !product) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <main className="flex-1 container py-8">
+          <div className="flex flex-col items-center justify-center h-[50vh] space-y-4">
+            <div className="text-destructive text-lg font-semibold">
+              {"Failed to load product, please try again later"}
+            </div>
+            <Button 
+              variant="outline" 
+              onClick={() => invalidateQueries(['product', slug])}
+            >
+              Retry
+            </Button>
           </div>
         </main>
       </div>
@@ -286,246 +308,23 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-          {/* Product Images Carousel */}
-          <div className="space-y-4">
-            {/* Main Carousel */}
-            <div className="relative overflow-hidden" ref={mainCarouselRef}>
-              <div className="flex">
-                {product.images.map((image, index) => (
-                  <div key={image.url} className="relative flex-[0_0_100%] min-w-0">
-                    <div className="relative aspect-square">
-                      <NextImage
-                        src={getProductUrl(image.url) || "/placeholder.svg"}
-                        alt={`${product.name} ${index + 1}`}
-                        fill
-                        priority={index === 0}
-                        className="object-contain cursor-pointer"
-                        onClick={() => {
-                          setCurrentImageIndex(index)
-                          setIsImageViewerOpen(true)
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {/* Navigation Buttons */}
-              <Button
-                variant="outline"
-                size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 z-10"
-                onClick={scrollPrev}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 z-10"
-                onClick={scrollNext}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Thumbnail Carousel */}
-            <div className="relative overflow-hidden" ref={thumbCarouselRef}>
-              <div className="flex gap-2 -mx-2">
-                {product.images.map((image, index) => (
-                  <button
-                    key={image.url}
-                    onClick={() => {
-                      mainEmbla?.scrollTo(index)
-                      setCurrentImageIndex(index)
-                    }}
-                    onMouseEnter={() => {
-                      setCurrentImageIndex(index) 
-                    }}
-                    className={`relative flex-[0_0_23%] min-w-0 aspect-square border rounded-md overflow-hidden 
-                      ${index === currentImageIndex ? "ring-2 ring-primary" : ""}`}
-                  >
-                    <NextImage
-                      src={getProductUrl(image.url) || "/placeholder.svg"}
-                      alt={`${product.name} thumbnail ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Product Info */}
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold">{product.name}</h1>
-              <div className="flex items-center gap-2 mt-2">
-                <div className="flex items-center">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`h-5 w-5 ${star <= 4 ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"}`}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-muted-foreground">(24 reviews)</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold">{formatPrice(parseFloat(getCurrentPrice()))}</span>
-              {product.basePrice && selectedVariant?.price != product.basePrice && (
-                <span className="text-lg text-muted-foreground line-through">{formatPrice(product.basePrice)}</span>
-              )}
-
-              {selectedVariant && (
-                <Badge
-                  variant={
-                    stockStatus.color === "success"
-                      ? "default"
-                      : stockStatus.color === "warning"
-                        ? "outline"
-                        : "destructive"
-                  }
-                  className="ml-2"
-                >
-                  {stockStatus.status}
-                </Badge>
-              )}
-            </div>
-
-            <Separator />
-
-            {/* Variant Selection */}
-            {product.variants.length > 0 && (
-              <Card>
-                <CardContent className="p-4">
-                  <ProductVariantSelector
-                    variants={product.variants}
-                    onVariantSelect={setSelectedVariant}
-                    selectedVariant={selectedVariant}
-                    disableOutOfStock={true}
-                  />
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Quantity and Add to Cart */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Quantity</label>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleQuantityChange(quantity - 1)}
-                      disabled={quantity <= 1}
-                    >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <Input
-                      type="number"
-                      value={quantity}
-                      onChange={(e) => handleQuantityChange(Number(e.target.value))}
-                      min={1}
-                      max={selectedVariant?.quantity || 0}
-                      className="w-20 text-center"
-                    />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleQuantityChange(quantity + 1)}
-                      disabled={quantity >= (selectedVariant?.quantity || 0)}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  {selectedVariant && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedVariant(null)
-                      }}
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Reset Selection
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  className="flex-1"
-                  size="lg"
-                  disabled={isAddingToCart || stockStatus.color === "destructive"}
-                >
-                  {isAddingToCart ? (
-                    <>
-                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                      Adding...
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                      Add to Cart
-                    </>
-                  )}
-                </Button>
-                <Button variant="outline" size="icon" className="h-11 w-11">
-                  <Heart className="h-5 w-5" />
-                </Button>
-                <Button variant="outline" size="icon" className="h-11 w-11">
-                  <Share2 className="h-5 w-5" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Selected Variant Summary */}
-            {selectedVariant && (
-              <div className="bg-muted/30 p-3 rounded-md">
-                <h4 className="text-sm font-medium mb-2">Selected Configuration</h4>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                  {selectedVariant.attributes.map((attr) => (
-                    <div key={attr.id} className="flex justify-between">
-                      <span className="text-muted-foreground">{attr.name}:</span>
-                      <span className="font-medium">{attr.value}</span>
-                    </div>
-                  ))}
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">SKU:</span>
-                    <span className="font-medium">{selectedVariant.sku}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Product Highlights */}
-            <div className="grid grid-cols-2 gap-4 pt-4">
-              <div className="flex items-center gap-2">
-                <Truck className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm">Free shipping over $50</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <RefreshCw className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm">30-day returns</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm">2-year warranty</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm">In stock & ready to ship</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        {product && (
+          <ProductDetailsSection
+            product={product}
+            selectedVariant={selectedVariant}
+            isAddingToCart={isAddingToCart}
+            quantity={quantity}
+            currentImageIndex={currentImageIndex}
+            onImageClick={(index) => {
+              setCurrentImageIndex(index)
+              setIsImageViewerOpen(true)
+            }}
+            onVariantSelect={setSelectedVariant}
+            onAddToCart={handleAddToCart}
+            onQuantityChange={handleQuantityChange}
+            onImageIndexChange={setCurrentImageIndex}
+          />
+        )}
 
         {/* Product Details Tabs */}
         <div className="mb-12">

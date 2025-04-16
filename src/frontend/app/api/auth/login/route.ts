@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const session = await getIronSession<SessionData>(cookieStore, sessionOptions)
     const { email, password } = await request.json()
 
-    const { success, message, accessToken, refreshToken, user } = await loginUserGateway(email, password)
+    const { success, message, user } = await loginUserGateway(email, password)
 
     if (!success || !user) {
       return NextResponse.json(
@@ -20,8 +20,6 @@ export async function POST(request: NextRequest) {
     }
 
     session.user = user
-    session.accessToken = accessToken
-    session.refreshToken = refreshToken
     session.isLoggedIn = true
     await session.save()
     cookieStore.set("isAuthenticated", "true")

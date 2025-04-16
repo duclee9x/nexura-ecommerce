@@ -285,6 +285,8 @@ service CartService {
   rpc UpdateItem(UpdateItemRequest) returns (UpdateItemResponse) {}
   rpc RemoveItem(RemoveItemRequest) returns (RemoveItemResponse) {}
   rpc ClearCart(ClearCartRequest) returns (ClearCartResponse) {}
+  rpc ReserveItems(ReserveItemsRequest) returns (ReserveItemsResponse) {}
+  rpc ReleaseItems(ReleaseItemsRequest) returns (ReleaseItemsResponse) {}
 }
 
 message GetCartRequest {
@@ -300,6 +302,8 @@ message AddItemRequest {
   string product_id = 2;
   string variant_id = 3;
   int32 quantity = 4;
+  string image = 5;
+  string currency_code = 6;
 }
 
 message AddItemResponse {
@@ -311,6 +315,7 @@ message UpdateItemRequest {
   string product_id = 2;
   string variant_id = 3;
   int32 quantity = 4;
+  string image = 5;
 }
 
 message UpdateItemResponse {
@@ -341,16 +346,38 @@ message Cart {
   repeated CartItem items = 3;
   string created_at = 4;
   string updated_at = 5;
+  string currency_code = 6;
 }
 
 message CartItem {
   string id = 1;
   string product_id = 2;
   string variant_id = 3;
-  int32 quantity = 4;
-  string created_at = 5;
-  string updated_at = 6;
-} 
+  string image = 4;
+  int32 quantity = 5;
+  string created_at = 6;
+  string updated_at = 7;
+}
+
+message ReserveItemsRequest {
+  string order_id = 1;
+  repeated CartItem items = 2;
+}
+
+message ReserveItemsResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ReleaseItemsRequest {
+  string order_id = 1;
+  repeated CartItem items = 2;
+}
+
+message ReleaseItemsResponse {
+  bool success = 1;
+  string message = 2;
+}
 
 // ---------------Recommendation service----------
 
@@ -396,22 +423,27 @@ service ProductCatalogService {
     rpc CreateProductAttribute(CreateProductAttributeRequest) returns (CreateProductAttributeResponse) {}
 
     rpc GetWarehouses(Empty) returns (GetWarehousesResponse) {}
-  }
+    rpc ReserveStock(ReserveStockRequest) returns (ReserveStockResponse) {}
+    rpc ReleaseStock(ReleaseStockRequest) returns (ReleaseStockResponse) {}
+}
 
-  message GetVariantsForCartRequest {
-    repeated string variant_ids = 1;
-  }
+message GetVariantsForCartRequest {
+  repeated string variant_ids = 1;
+}
 
-  message GetVariantsForCartResponse {
-    repeated VariantCart variants = 1;
-  }
+message GetVariantsForCartResponse {
+  repeated VariantCart variants = 1;
+}
 
-  message VariantCart {
-    string id = 1;
-    float price = 2;
-    string image = 3;
-    int32 quantity = 4;
-  }
+message VariantCart {
+  string id = 1;
+  float price = 2;
+  string image = 3;
+  int32 quantity = 4;
+  string product_name = 5;
+  string product_slug = 6;
+  repeated VariantAttribute attributes = 7;
+}
 message GetProductAttributesRequest {
     string product_id = 1;
 }
@@ -719,6 +751,7 @@ message SearchProductsResponse {
 service ShippingService {
     rpc GetQuote(GetQuoteRequest) returns (GetQuoteResponse) {}
     rpc ShipOrder(ShipOrderRequest) returns (ShipOrderResponse) {}
+    rpc CancelShipment(CancelShipmentRequest) returns (CancelShipmentResponse) {}
 }
 
 message GetQuoteRequest {
@@ -739,7 +772,15 @@ message ShipOrderResponse {
     string tracking_id = 1;
 }
 
+message CancelShipmentRequest {
+  string order_id = 1;
+  string tracking_id = 2;
+}
 
+message CancelShipmentResponse {
+  bool success = 1;
+  string message = 2;
+}
 
 // -----------------Currency service-----------------
 
@@ -776,28 +817,6 @@ message CurrencyConversionRequest {
 
     // The 3-letter currency code defined in ISO 4217.
     string to_code = 2;
-}
-
-// -------------Payment service-----------------
-
-service PaymentService {
-    rpc Charge(ChargeRequest) returns (ChargeResponse) {}
-}
-
-message CreditCardInfo {
-    string credit_card_number = 1;
-    int32 credit_card_cvv = 2;
-    int32 credit_card_expiration_year = 3;
-    int32 credit_card_expiration_month = 4;
-}
-
-message ChargeRequest {
-    Money amount = 1;
-    CreditCardInfo credit_card = 2;
-}
-
-message ChargeResponse {
-    string transaction_id = 1;
 }
 
 // -------------Email service-----------------
@@ -846,24 +865,6 @@ message SendOTPResetPasswordRequest {
     bool success = 1;
     string message = 2;
   } 
-// -------------Checkout service-----------------
-
-service CheckoutService {
-    rpc PlaceOrder(PlaceOrderRequest) returns (PlaceOrderResponse) {}
-}
-
-message PlaceOrderRequest {
-    string user_id = 1;
-    string user_currency = 2;
-
-    Address address = 3;
-    string email = 5;
-    CreditCardInfo credit_card = 6;
-}
-
-message PlaceOrderResponse {
-    OrderResult order = 1;
-}
 
 // ------------Ad service------------------
 
@@ -888,58 +889,6 @@ message Ad {
     string text = 2;
 }
 
-// ------------Feature flag service------------------
-
-service FeatureFlagService {
-  rpc GetFlag(GetFlagRequest) returns (GetFlagResponse) {}
-  rpc CreateFlag(CreateFlagRequest) returns (CreateFlagResponse) {}
-  rpc UpdateFlag(UpdateFlagRequest) returns (UpdateFlagResponse) {}
-  rpc ListFlags(ListFlagsRequest) returns (ListFlagsResponse) {}
-  rpc DeleteFlag(DeleteFlagRequest) returns (DeleteFlagResponse) {}
-}
-
-message Flag {
-  string name = 1;
-  string description = 2;
-  bool enabled = 3;
-}
-
-message GetFlagRequest {
-  string name = 1;
-}
-
-message GetFlagResponse {
-  Flag flag = 1;
-}
-
-message CreateFlagRequest {
-  string name = 1;
-  string description = 2;
-  bool enabled = 3;
-}
-
-message CreateFlagResponse {
-  Flag flag = 1;
-}
-
-message UpdateFlagRequest {
-  string name = 1;
-  bool enabled = 2;
-}
-
-message UpdateFlagResponse {}
-
-message ListFlagsRequest {}
-
-message ListFlagsResponse {
-  repeated Flag flag = 1;
-}
-
-message DeleteFlagRequest {
-  string name = 1;
-}
-
-message DeleteFlagResponse {}
 
 message NewBrandRequest {
     Brand brand = 1;
@@ -1004,4 +953,159 @@ enum ServiceName {
   AD_SERVICE = 10;
   FEATURE_FLAG_SERVICE = 11;
   ADDRESS_SERVICE = 12;
+}
+
+// ---------------Order service-----------------
+
+service OrderService {
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {}
+  rpc GetOrderStatus(GetOrderStatusRequest) returns (GetOrderStatusResponse) {}
+  rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse) {}
+}
+
+message CreateOrderRequest {
+  string user_id = 1;
+  string currency_code = 2;
+  repeated CartItem items = 3;
+  Address shipping_address = 4;
+}
+
+message CreateOrderResponse {
+  string order_id = 1;
+  OrderStatus status = 2;
+  string message = 3;
+}
+
+message GetOrderStatusRequest {
+  string order_id = 1;
+}
+
+message GetOrderStatusResponse {
+  string order_id = 1;
+  OrderStatus status = 2;
+  repeated OrderStep steps = 3;
+  string message = 4;
+}
+
+message CancelOrderRequest {
+  string order_id = 1;
+}
+
+message CancelOrderResponse {
+  string order_id = 1;
+  OrderStatus status = 2;
+  string message = 3;
+}
+
+message OrderStep {
+  string service = 1;
+  StepStatus status = 2;
+  string error = 3;
+  string timestamp = 4;
+}
+
+enum OrderStatus {
+  ORDER_PENDING = 0;
+  ORDER_PROCESSING = 1;
+  ORDER_COMPLETED = 2;
+  ORDER_FAILED = 3;
+  ORDER_CANCELLED = 4;
+  ORDER_COMPENSATING = 5;
+}
+
+enum StepStatus {
+  STEP_PENDING = 0;
+  STEP_STARTED = 1;
+  STEP_COMPLETED = 2;
+  STEP_FAILED = 3;
+  STEP_COMPENSATED = 4;
+}
+
+message ReserveStockRequest {
+  string order_id = 1;
+  repeated ProductVariant variants = 2;
+}
+
+message ReserveStockResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ReleaseStockRequest {
+  string order_id = 1;
+  repeated ProductVariant variants = 2;
+}
+
+message ReleaseStockResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// ---------------Payment service-----------------
+
+service PaymentService {
+  rpc InitiatePayment(InitiatePaymentRequest) returns (InitiatePaymentResponse);
+  rpc VerifyPayment(VerifyPaymentRequest) returns (VerifyPaymentResponse);
+  rpc CancelPayment(CancelPaymentRequest) returns (CancelPaymentResponse);
+  rpc RefundPayment(RefundPaymentRequest) returns (RefundPaymentResponse);
+  rpc GetPaymentStatus(GetPaymentStatusRequest) returns (GetPaymentStatusResponse);
+}
+
+enum PaymentProvider {
+  STRIPE = 0;
+  PAYPAL = 1;
+  VNPAY = 2;
+}
+
+enum PaymentStatus {
+  PENDING = 0;
+  PAID = 1;
+  FAILED = 2;
+  CANCELLED = 3;
+  REFUNDED = 4;
+}
+
+message InitiatePaymentRequest {
+  string orderId = 1;
+  double amount = 2;
+  PaymentProvider provider = 3;
+  string currency = 4;
+}
+
+message InitiatePaymentResponse {
+  string paymentId = 1;
+  string redirectUrl = 2;
+  PaymentStatus status = 3;
+}
+
+message VerifyPaymentRequest {
+  string paymentId = 1;
+}
+
+message VerifyPaymentResponse {
+  PaymentStatus status = 1;
+}
+
+message CancelPaymentRequest {
+  string paymentId = 1;
+}
+
+message CancelPaymentResponse {
+  bool success = 1;
+}
+
+message RefundPaymentRequest {
+  string paymentId = 1;
+}
+
+message RefundPaymentResponse {
+  bool success = 1;
+}
+
+message GetPaymentStatusRequest {
+  string paymentId = 1;
+}
+
+message GetPaymentStatusResponse {
+  PaymentStatus status = 1;
 }

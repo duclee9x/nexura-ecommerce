@@ -2,47 +2,42 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
-import { useCurrency, type CurrencyCode } from "@/contexts/currency-context"
-import { VariantCart } from "@/protos/nexura"
+import { useCurrency } from "@/contexts/currency-context"
+import { VariantCart, CartItem } from "@/protos/nexura"
+import { useCart as useCartQuery, useCartActions } from "@/hooks/use-query"
+import { useSession } from "./session-context"
+import { getVariantsForCartGateway } from "@/gateway/gateway"
 
-export type CartItem = {
-  id: string
-  product_id: string
-  variant_id: string
-  quantity: number
-  created_at: string
-  updated_at: string
-  variant?: VariantCart
-}
 
 export type CartContextType = {
   items: CartItem[]
-  addItem: (item: Omit<CartItem, "id" | "created_at" | "updated_at" | "variant">) => void
-  removeItem: (productId: string, variantId: string) => void
-  updateQuantity: (productId: string, variantId: string, quantity: number) => void
-  clearCart: () => void
+  addItem: (item: Omit<CartItem, "id" | "created_at" | "updated_at" | "variant">, currencyCode: string) => Promise<void>
+  removeItem: (productId: string, variantId: string) => Promise<void>
+  updateQuantity: (productId: string, variantId: string, quantity: number) => Promise<void>
+  clearCart: () => Promise<void>
   itemCount: number
-  subtotal: number
-  isReady: boolean
   updateVariantInfo: (variantId: string, variant: VariantCart) => void
+  isLoading: boolean
 }
 
 // Create context with a default value that matches the shape but is obviously not functional
 const defaultCartContext: CartContextType = {
   items: [],
-  addItem: () => {},
-  removeItem: () => {},
-  updateQuantity: () => {},
-  clearCart: () => {},
+  addItem: async () => {},
+  removeItem: async () => {},
+  updateQuantity: async () => {},
+  clearCart: async () => {},
   itemCount: 0,
-  subtotal: 0,
-  isReady: false,
   updateVariantInfo: () => {},
+  isLoading: false
 }
 
 export const CartContext = createContext<CartContextType>(defaultCartContext)
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useSession()
+  const { data: cart, isLoading } = useCartQuery(user?.id || "")
+  const { addItem: addItemToCart, updateItem, removeItem: removeItemFromCart, clearCart: clearCartItems } = useCartActions()
   const [items, setItems] = useState<CartItem[]>([])
   const [isReady, setIsReady] = useState(false)
   const { currency, convertPrice } = useCurrency()
@@ -69,73 +64,100 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, isReady])
 
-  const addItem = (newItem: Omit<CartItem, "id" | "created_at" | "updated_at" | "variant">) => {
-    setItems((prevItems: CartItem[]) => {
-      const existingItemIndex = prevItems.findIndex(
-        (item) => item.product_id === newItem.product_id && item.variant_id === newItem.variant_id
-      )
+  useEffect(() => {
+    if (cart?.items) {
+      const mappedItems: CartItem[] = cart.items.map(item => ({
+        id: item.id,
+        productId: item.productId,
+        variantId: item.variantId,
+        quantity: item.quantity,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        image: item.image || "",
+      }))
+      setItems(mappedItems)
+      setIsReady(true)
+    }
+  }, [cart])
 
-      if (existingItemIndex >= 0) {
-        // Item already exists, update quantity
-        const updatedItems = [...prevItems]
-        updatedItems[existingItemIndex].quantity += newItem.quantity
-        updatedItems[existingItemIndex].updated_at = new Date().toISOString()
-        return updatedItems
-      } else {
-        // Item doesn't exist, add it
-        const itemWithMetadata: CartItem = {
-          ...newItem,
-          id: crypto.randomUUID(),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }
-        return [...prevItems, itemWithMetadata]
-      }
-    })
+  const addItem = async (newItem: Omit<CartItem, "id" | "created_at" | "updated_at" | "variant">, currencyCode: string) => {
+    if (!user?.id) return
+
+    try {
+      await addItemToCart({
+        userId: user.id,
+        productId: newItem.productId,
+        variantId: newItem.variantId,
+        quantity: newItem.quantity,
+        image: newItem.image || "",
+        currencyCode: currencyCode
+      })
+    } catch (error) {
+      console.error("Failed to add item to cart:", error)
+      throw error
+    }
   }
 
-  const removeItem = (productId: string, variantId: string) => {
-    setItems((prevItems) => 
-      prevItems.filter((item) => !(item.product_id === productId && item.variant_id === variantId))
-    )
+  const removeItem = async (productId: string, variantId: string) => {
+    if (!user?.id) return
+
+    try {
+      await removeItemFromCart({
+        userId: user.id,
+        productId,
+        variantId
+      })
+    } catch (error) {
+      console.error("Failed to remove item from cart:", error)
+      throw error
+    }
   }
 
-  const updateQuantity = (productId: string, variantId: string, quantity: number) => {
+  const updateQuantity = async (productId: string, variantId: string, quantity: number) => {
+    if (!user?.id) return
+
     if (quantity <= 0) {
-      removeItem(productId, variantId)
+      await removeItem(productId, variantId)
       return
     }
 
-    setItems((prevItems) => 
-      prevItems.map((item) => 
-        item.product_id === productId && item.variant_id === variantId 
-          ? { ...item, quantity, updated_at: new Date().toISOString() } 
-          : item
-      )
-    )
+    try {
+      const item = items.find(i => i.productId === productId && i.variantId === variantId)
+      if (!item) return
+
+      await updateItem({
+        userId: user.id,
+        productId,
+        variantId,
+        quantity,
+        image: item.image || "",
+      })
+    } catch (error) {
+      console.error("Failed to update item quantity:", error)
+      throw error
+    }
   }
 
   const updateVariantInfo = (variantId: string, variant: VariantCart) => {
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.variant_id === variantId ? { ...item, variant } : item
+    setItems(prevItems =>
+      prevItems.map(item =>
+        item.variantId === variantId ? { ...item, variant } : item
       )
     )
   }
 
-  const clearCart = () => {
-    setItems([])
+  const clearCart = async () => {
+    if (!user?.id) return
+
+    try {
+      await clearCartItems({ userId: user.id })
+    } catch (error) {
+      console.error("Failed to clear cart:", error)
+      throw error
+    }
   }
 
-  const itemCount = items.reduce((total, item) => total + item.quantity, 0)
-
-  // Calculate subtotal in the current currency
-  const subtotal = items.reduce((total, item) => {
-    if (!item.variant) return total
-    const itemPrice = item.variant.price
-    return total + itemPrice * item.quantity
-  }, 0)
-
+  
   return (
     <CartContext.Provider
       value={{
@@ -144,10 +166,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         removeItem,
         updateQuantity,
         clearCart,
-        itemCount,
-        subtotal,
-        isReady,
+        itemCount: items.reduce((total, item) => total + item.quantity, 0),
         updateVariantInfo,
+        isLoading
       }}
     >
       {children}
