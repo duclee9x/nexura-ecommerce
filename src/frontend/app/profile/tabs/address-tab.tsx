@@ -17,6 +17,9 @@ import { set, z } from "zod"
 import { DefaultResponse } from "@/lib/types";
 import { AddressSkeleton } from "../skeleton";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, CustomInput, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Label, Switch, DialogFooter } from "@/components/ui/custom-dialog";
+import { useAddresses, useCountries, useProvinces, useDistricts, useWards } from "@/hooks/use-query"
+import { useAddAddress, useUpdateAddress, useDeleteAddress } from "@/hooks/use-mutation"
+
 type SelectedAddress = {
     country: Country | null;
     province: Province | null;
@@ -86,21 +89,25 @@ type GetWardsResponse = DefaultResponse & {
     }>;
 }
 
+interface AddressTabProps {
+    user: User | null;
+    type: "profile" | "checkout";
+    setAddress: (address: ExtendedAddress) => void;
+    currentAddress?: ExtendedAddress | null;
+}
 
 // Main component
-export default function AddressTab({ user, refresh }: { user: User | null, refresh: () => void }) {
+export default function AddressTab({ 
+    user, 
+    type, 
+    setAddress,
+    currentAddress 
+}: AddressTabProps) {
     if (!user) {
         return <AddressSkeleton />;
     }
 
-    const queryClient = useQueryClient();
-    const { data: addressResponse } = useQuery<AddressResponse>({
-        queryKey: ['address', user.id],
-        queryFn: async () => {
-            const response = await getAddresses(user.id) as AddressResponse;
-            return response;
-        }
-    });
+    const { data: addressResponse, isLoading: isAddressesLoading } = useAddresses(user.id);
     const [isAddressLoading, setIsAddressLoading] = useState(false);
     const [addressDialogOpen, setAddressDialogOpen] = useState<"add" | "edit" | null>(null);
     const [editingAddress, setEditingAddress] = useState<Address>({
@@ -117,61 +124,46 @@ export default function AddressTab({ user, refresh }: { user: User | null, refre
         vnWardId: "",
         createdAt: "",
         updatedAt: "",
-    })
+    });
 
     const [selectedAddress, setSelectedAddress] = useState<SelectedAddress>({
         country: null,
         province: null,
         district: null,
         ward: null,
-    })
-
-    const { data: countryResponse, isLoading: isCountryLoading } = useQuery<CountryResponse>({
-        queryKey: ['countries'],
-        queryFn: async () => {
-            const response = await getCountries() as CountryResponse;
-            if (response?.success && response.countries) {
-                const vietnamCountry = response.countries.find((country: Country) => country.name === "Vietnam");
-                setSelectedAddress((prev) => ({ ...prev, country: vietnamCountry || null }));
-            }
-            return response;
-        }
     });
 
-    const countries = countryResponse?.countries || []
+    const { data: countryResponse, isLoading: isCountryLoading } = useCountries();
+    const countries = countryResponse?.countries || [];
 
-    const { data: provinceResponse, isLoading: isProvinceLoading } = useQuery<ProvinceResponse>({
-        queryKey: ['provinces', selectedAddress.country],
-        queryFn: async () => getProvincesByCountry(selectedAddress.country?.id || "") as Promise<ProvinceResponse>,
-        enabled: !!selectedAddress.country,
-    });
+    const { data: provinceResponse, isLoading: isProvinceLoading } = useProvinces(selectedAddress.country?.id || "");
+    const provinces = provinceResponse?.provinces || [];
 
-    const provinces = provinceResponse?.provinces || []
+    const { data: districtResponse, isLoading: isDistrictLoading } = useDistricts(selectedAddress.province?.id || "");
+    const districts = districtResponse?.districts || [];
 
-    const { data: districtResponse, isLoading: isDistrictLoading } = useQuery<DistrictResponse>({
-        queryKey: ['districts', selectedAddress.province],
-        queryFn: async () => getDistrictsByProvince(selectedAddress.province?.id || "") as Promise<DistrictResponse>,
-        enabled: !!selectedAddress.province,
-    });
-
-    const districts = districtResponse?.districts || []
-
-    const { data: wardResponse, isLoading: isWardLoading } = useQuery<GetWardsResponse>({
-        queryKey: ['wards', selectedAddress.district],
-        queryFn: async () => {
-            const rawResponse = await getWardsByDistrict(selectedAddress.district?.id || "");
-            const response = rawResponse as unknown as GetWardsResponse;
-            return response;
-        },
-        enabled: !!selectedAddress.district,
-    });
-
+    const { data: wardResponse, isLoading: isWardLoading } = useWards(selectedAddress.district?.id || "");
     const wards = wardResponse?.wards || [];
 
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-    const [addressToDelete, setAddressToDelete] = useState<ExtendedAddress | null>(null)
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [addressToDelete, setAddressToDelete] = useState<ExtendedAddress | null>(null);
     const [addressType, setAddressType] = useState<"VietNam" | "Global">("VietNam");
-    const [formErrors, setFormErrors] = useState<FormErrors>({})
+    const [formErrors, setFormErrors] = useState<FormErrors>({});
+
+    const addAddressMutation = useAddAddress({
+        successMessage: "Address added successfully",
+        errorMessage: "Failed to add address"
+    });
+
+    const updateAddressMutation = useUpdateAddress({
+        successMessage: "Address updated successfully",
+        errorMessage: "Failed to update address"
+    });
+
+    const deleteAddressMutation = useDeleteAddress({
+        successMessage: "Address deleted successfully",
+        errorMessage: "Failed to delete address"
+    });
 
     const handleEditAddress = useCallback((address: ExtendedAddress) => {
         const country = countries.find((c: Country) => c.id.toString() === address.countryId);
@@ -249,9 +241,7 @@ export default function AddressTab({ user, refresh }: { user: User | null, refre
     }, [editingAddress, selectedAddress])
 
     const handleAddAddress = useCallback(async () => {
-        if (!validateForm()) {
-            return;
-        }
+        if (!validateForm()) return
         setIsAddressLoading(true)
         try {
             const updatedAddress: Address = {
@@ -260,48 +250,41 @@ export default function AddressTab({ user, refresh }: { user: User | null, refre
                 vnProvinceId: selectedAddress.province?.id.toString() || "",
                 vnDistrictId: selectedAddress.district?.id.toString() || "",
                 vnWardId: selectedAddress.ward?.id.toString() || "",
-            };
-            const result = await addAddress(updatedAddress, user.id);
-            if (result.success) {
-                await queryClient.invalidateQueries({ queryKey: ['address', user.id] });
-                setAddressDialogOpen(null);
-                setFormErrors({});
-                setSelectedAddress((prev) => ({
-                    ...prev,
-                    province: null,
-                    district: null,
-                    ward: null,
-                }));
-                setEditingAddress({
-                    id: "",
-                    name: "",
-                    street: "",
-                    city: "",
-                    state: "",
-                    zip: "",
-                    countryId: "",
-                    isDefault: false,
-                    vnProvinceId: "",
-                    vnDistrictId: "",
-                    vnWardId: "",
-                    createdAt: "",
-                    updatedAt: "",
-                });
-            } else {
-                console.error("Failed to add address:", result.message);
             }
+            await addAddressMutation.mutateAsync({ address: updatedAddress, userId: user.id })
+            setAddressDialogOpen(null)
+            setFormErrors({})
+            setSelectedAddress((prev) => ({
+                ...prev,
+                province: null,
+                district: null,
+                ward: null,
+            }))
+            setEditingAddress({
+                id: "",
+                name: "",
+                street: "",
+                city: "",
+                state: "",
+                zip: "",
+                countryId: "",
+                isDefault: false,
+                vnProvinceId: "",
+                vnDistrictId: "",
+                vnWardId: "",
+                createdAt: "",
+                updatedAt: "",
+            })
         } catch (error) {
-            console.error("Error adding address:", error);
+            console.error("Error adding address:", error)
         } finally {
             setIsAddressLoading(false)
         }
-    }, [editingAddress, selectedAddress, user.id, queryClient, validateForm]);
+    }, [editingAddress, selectedAddress, user.id, addAddressMutation, validateForm])
 
     const handleUpdateAddress = useCallback(async () => {
-        if (!validateForm()) {
-            return;
-        }
-
+        if (!validateForm()) return
+        setIsAddressLoading(true)
         try {
             const updatedAddress: Address = {
                 ...editingAddress,
@@ -309,86 +292,83 @@ export default function AddressTab({ user, refresh }: { user: User | null, refre
                 vnProvinceId: selectedAddress.province?.id.toString() || "",
                 vnDistrictId: selectedAddress.district?.id.toString() || "",
                 vnWardId: selectedAddress.ward?.id.toString() || "",
-            };
-
-            const result = await updateAddress(updatedAddress as ExtendedAddress, user.id);
-            if (result.success) {
-                await queryClient.invalidateQueries({ queryKey: ['address', user.id] });
-                setAddressDialogOpen(null);
-                setFormErrors({});
-                setEditingAddress({
-                    id: "",
-                    name: "",
-                    street: "",
-                    city: "",
-                    state: "",
-                    zip: "",
-                    countryId: "",
-                    isDefault: false,
-                    vnProvinceId: "",
-                    vnDistrictId: "",
-                    vnWardId: "",
-                    createdAt: "",
-                    updatedAt: "",
-                });
-                setSelectedAddress((prev) => ({
-                    ...prev,
-                    province: null,
-                    district: null,
-                    ward: null,
-                }));
-            } else {
-                console.error("Failed to update address:", result.message);
             }
+            await updateAddressMutation.mutateAsync({ address: updatedAddress, userId: user.id })
+            setAddressDialogOpen(null)
+            setFormErrors({})
+            setEditingAddress({
+                id: "",
+                name: "",
+                street: "",
+                city: "",
+                state: "",
+                zip: "",
+                countryId: "",
+                isDefault: false,
+                vnProvinceId: "",
+                vnDistrictId: "",
+                vnWardId: "",
+                createdAt: "",
+                updatedAt: "",
+            })
+            setSelectedAddress((prev) => ({
+                ...prev,
+                province: null,
+                district: null,
+                ward: null,
+            }))
         } catch (error) {
-            console.error("Error updating address:", error);
-        }
-    }, [editingAddress, selectedAddress, user.id, queryClient, validateForm]);
-
-    const handleDeleteConfirm = useCallback(async () => {
-        if (!addressToDelete) return;
-        setIsDeleteDialogOpen(false);
-        setIsAddressLoading(true)
-        try {
-            const result = await deleteAddress(addressToDelete.id, user.id);
-            if (result.success) {
-                await queryClient.invalidateQueries({ queryKey: ['address'] });
-                setAddressToDelete(null);
-            } else {
-                console.error("Failed to delete address:", result.message);
-            }
-        } catch (error) {
-            console.error("Error deleting address:", error);
+            console.error("Error updating address:", error)
         } finally {
             setIsAddressLoading(false)
         }
-    }, [addressToDelete, user.id, queryClient]);
+    }, [editingAddress, selectedAddress, user.id, updateAddressMutation, validateForm])
+
+    const handleDeleteConfirm = useCallback(async () => {
+        if (!addressToDelete) return
+        setIsDeleteDialogOpen(false)
+        setIsAddressLoading(true)
+        try {
+            await deleteAddressMutation.mutateAsync({ 
+                addressId: addressToDelete.id, 
+                userId: user.id 
+            })
+            setAddressToDelete(null)
+        } catch (error) {
+            console.error("Error deleting address:", error)
+        } finally {
+            setIsAddressLoading(false)
+        }
+    }, [addressToDelete, user.id, deleteAddressMutation])
 
     const handleSetDefaultAddress = useCallback(async (id: string) => {
         if (!addressResponse) {
-            console.error("Error: No address data available");
-            return;
+            console.error("Error: No address data available")
+            return
         }
         setIsAddressLoading(true)
-        const addressToSetDefault = addressResponse.addresses.find((addr: ExtendedAddress) => addr.id === id);
+        const addressToSetDefault = addressResponse.addresses.find((addr: ExtendedAddress) => addr.id === id)
         if (!addressToSetDefault) {
-            console.error("Error: Address not found");
-            return;
+            console.error("Error: Address not found")
+            return
         }
 
         const updatedAddress = {
             ...addressToSetDefault,
             isDefault: true,
-        };
-
-        const result = await updateAddress(updatedAddress, user.id);
-        if (result.success) {
-            await queryClient.invalidateQueries({ queryKey: ['address'] });
-        } else {
-            console.error("Failed to set default address:", result.message);
         }
-        setIsAddressLoading(false)
-    }, [addressResponse, user.id, queryClient]);
+
+        try {
+            await updateAddressMutation.mutateAsync({ 
+                address: updatedAddress, 
+                userId: user.id 
+            })
+        } catch (error) {
+            console.error("Error setting default address:", error)
+        } finally {
+            setIsAddressLoading(false)
+        }
+    }, [addressResponse, user.id, updateAddressMutation])
 
     const handleCancelDialog = useCallback(() => {
         if (addressDialogOpen === "edit") {
@@ -429,8 +409,8 @@ export default function AddressTab({ user, refresh }: { user: User | null, refre
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
                         <div>
-                        <CardTitle>Delivery Addresses</CardTitle>
-                        <CardDescription>Manage your delivery addresses</CardDescription>
+                        <CardTitle>{type === "profile" ? "Delivery Addresses" : "Select Delivery Address"}</CardTitle>
+                        <CardDescription>{type === "profile" ? "Manage your delivery addresses" : "Select a delivery address"}</CardDescription>
                     </div>
                     <DialogTrigger onClick={() => setAddressDialogOpen("add")}>
                         <Button>
@@ -639,7 +619,18 @@ export default function AddressTab({ user, refresh }: { user: User | null, refre
                         addressResponse.addresses.map((addr: ExtendedAddress) => (
                             <div
                                 key={addr.id}
-                                className={`border rounded-lg p-4 ${addr.isDefault ? "border-primary" : "border-border"}`}
+                                className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                                    type === "checkout" && currentAddress?.id === addr.id 
+                                        ? "border-primary bg-primary/5" 
+                                        : addr.isDefault 
+                                            ? "border-primary" 
+                                            : "border-border hover:border-primary/50"
+                                }`}
+                                onClick={() => {
+                                    if (type === "checkout") {
+                                        setAddress(addr);
+                                    }
+                                }}
                             >
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="flex items-center gap-2">
@@ -648,35 +639,46 @@ export default function AddressTab({ user, refresh }: { user: User | null, refre
                                             <span className="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full">Default</span>
                                         )}
                                     </div>
-                                    <div className="flex gap-2">
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            className="h-8 w-8"
-                                            onClick={() => handleEditAddress(addr)}
-                                        >
-                                            <Edit className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            className="h-8 w-8 text-destructive"
-                                            onClick={() => handleDeleteClick(addr)}
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </div>
+                                    {type === "profile" && (
+                                        <div className="flex gap-2">
+                                            <Button
+                                                size="icon"
+                                                variant="ghost"
+                                                className="h-8 w-8"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleEditAddress(addr);
+                                                }}
+                                            >
+                                                <Edit className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                size="icon"
+                                                variant="ghost"
+                                                className="h-8 w-8 text-destructive"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteClick(addr);
+                                                }}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    )}
                                 </div>
                                 <p className="text-muted-foreground text-sm">
                                     {`${addr.street}, 
-                          ${addr.city ? `${addr.city}, ${addr.state} ${addr.zip}, ${addr.countryName}`
-                                            : `${addr.vnWardName}, ${addr.vnDistrictName}, ${addr.vnProvinceName}`}`}
+                                    ${addr.city ? `${addr.city}, ${addr.state} ${addr.zip}, ${addr.countryName}`
+                                        : `${addr.vnWardName}, ${addr.vnDistrictName}, ${addr.vnProvinceName}`}`}
                                 </p>
-                                {!addr.isDefault && (
+                                {type === "profile" && !addr.isDefault && (
                                     <Button
                                         variant="link"
                                         className="p-0 h-auto mt-2 text-sm"
-                                        onClick={() => handleSetDefaultAddress(addr.id)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleSetDefaultAddress(addr.id);
+                                        }}
                                     >
                                         Set as default
                                     </Button>

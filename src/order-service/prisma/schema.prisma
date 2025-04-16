@@ -6,38 +6,52 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "mysql"
+  url      = env("ORDER_SERVICE_DB_URL")
 }
 
 model Order {
-  id            String      @id @default(uuid())
-  userId        String
-  status        OrderStatus @default(PENDING)
-  totalAmount   Float
-  currencyCode  String      @default("USD")
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  items         OrderItem[]
+  id              String    @id @default(uuid())
+  userId          String
+  status          String    @default("pending")
+  totalAmount     Float
+  shippingAddressId String
+  items           OrderItem[]
+  paymentId       String?   // Reference to payment service
+  shipping        Shipping?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([shippingAddressId])
+  @@index([paymentId])
 }
 
 model OrderItem {
-  id           String   @id @default(uuid())
-  orderId      String
-  productId    String
-  quantity     Int
-  price        Float
-  currencyCode String   @default("USD")
-  imageUrl     String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id          String   @id @default(uuid())
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId     String
+  variantId   String
+  quantity    Int
+  productId   String
+  price       Float
+  image       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([variantId])
 }
 
-enum OrderStatus {
-  PENDING
-  PROCESSING
-  COMPLETED
-  CANCELLED
-  FAILED
-} 
+model Shipping {
+  id          String   @id @default(uuid())
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId     String   @unique
+  method      String
+  trackingNumber String?
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+

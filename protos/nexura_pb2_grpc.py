@@ -662,15 +662,10 @@ class CartServiceStub(object):
                 request_serializer=nexura__pb2.ClearCartRequest.SerializeToString,
                 response_deserializer=nexura__pb2.ClearCartResponse.FromString,
                 )
-        self.ReserveItems = channel.unary_unary(
-                '/nexuraTelemetry.CartService/ReserveItems',
-                request_serializer=nexura__pb2.ReserveItemsRequest.SerializeToString,
-                response_deserializer=nexura__pb2.ReserveItemsResponse.FromString,
-                )
-        self.ReleaseItems = channel.unary_unary(
-                '/nexuraTelemetry.CartService/ReleaseItems',
-                request_serializer=nexura__pb2.ReleaseItemsRequest.SerializeToString,
-                response_deserializer=nexura__pb2.ReleaseItemsResponse.FromString,
+        self.ValidateCart = channel.unary_unary(
+                '/nexuraTelemetry.CartService/ValidateCart',
+                request_serializer=nexura__pb2.ValidateCartRequest.SerializeToString,
+                response_deserializer=nexura__pb2.ValidateCartResponse.FromString,
                 )
 
 
@@ -707,13 +702,7 @@ class CartServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def ReserveItems(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def ReleaseItems(self, request, context):
+    def ValidateCart(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -747,15 +736,10 @@ def add_CartServiceServicer_to_server(servicer, server):
                     request_deserializer=nexura__pb2.ClearCartRequest.FromString,
                     response_serializer=nexura__pb2.ClearCartResponse.SerializeToString,
             ),
-            'ReserveItems': grpc.unary_unary_rpc_method_handler(
-                    servicer.ReserveItems,
-                    request_deserializer=nexura__pb2.ReserveItemsRequest.FromString,
-                    response_serializer=nexura__pb2.ReserveItemsResponse.SerializeToString,
-            ),
-            'ReleaseItems': grpc.unary_unary_rpc_method_handler(
-                    servicer.ReleaseItems,
-                    request_deserializer=nexura__pb2.ReleaseItemsRequest.FromString,
-                    response_serializer=nexura__pb2.ReleaseItemsResponse.SerializeToString,
+            'ValidateCart': grpc.unary_unary_rpc_method_handler(
+                    servicer.ValidateCart,
+                    request_deserializer=nexura__pb2.ValidateCartRequest.FromString,
+                    response_serializer=nexura__pb2.ValidateCartResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -853,7 +837,7 @@ class CartService(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def ReserveItems(request,
+    def ValidateCart(request,
             target,
             options=(),
             channel_credentials=None,
@@ -863,26 +847,9 @@ class CartService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/nexuraTelemetry.CartService/ReserveItems',
-            nexura__pb2.ReserveItemsRequest.SerializeToString,
-            nexura__pb2.ReserveItemsResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def ReleaseItems(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/nexuraTelemetry.CartService/ReleaseItems',
-            nexura__pb2.ReleaseItemsRequest.SerializeToString,
-            nexura__pb2.ReleaseItemsResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/nexuraTelemetry.CartService/ValidateCart',
+            nexura__pb2.ValidateCartRequest.SerializeToString,
+            nexura__pb2.ValidateCartResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -1068,15 +1035,20 @@ class ProductCatalogServiceStub(object):
                 request_serializer=nexura__pb2.Empty.SerializeToString,
                 response_deserializer=nexura__pb2.GetWarehousesResponse.FromString,
                 )
-        self.ReserveStock = channel.unary_unary(
-                '/nexuraTelemetry.ProductCatalogService/ReserveStock',
-                request_serializer=nexura__pb2.ReserveStockRequest.SerializeToString,
-                response_deserializer=nexura__pb2.ReserveStockResponse.FromString,
+        self.ValidateAndReserve = channel.unary_unary(
+                '/nexuraTelemetry.ProductCatalogService/ValidateAndReserve',
+                request_serializer=nexura__pb2.ValidateAndReserveRequest.SerializeToString,
+                response_deserializer=nexura__pb2.ValidateAndReserveResponse.FromString,
                 )
-        self.ReleaseStock = channel.unary_unary(
-                '/nexuraTelemetry.ProductCatalogService/ReleaseStock',
-                request_serializer=nexura__pb2.ReleaseStockRequest.SerializeToString,
-                response_deserializer=nexura__pb2.ReleaseStockResponse.FromString,
+        self.ReleaseReservation = channel.unary_unary(
+                '/nexuraTelemetry.ProductCatalogService/ReleaseReservation',
+                request_serializer=nexura__pb2.ReleaseReservationRequest.SerializeToString,
+                response_deserializer=nexura__pb2.ReleaseReservationResponse.FromString,
+                )
+        self.CommitReservation = channel.unary_unary(
+                '/nexuraTelemetry.ProductCatalogService/CommitReservation',
+                request_serializer=nexura__pb2.CommitReservationRequest.SerializeToString,
+                response_deserializer=nexura__pb2.CommitReservationResponse.FromString,
                 )
 
 
@@ -1209,13 +1181,19 @@ class ProductCatalogServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def ReserveStock(self, request, context):
+    def ValidateAndReserve(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def ReleaseStock(self, request, context):
+    def ReleaseReservation(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CommitReservation(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -1329,15 +1307,20 @@ def add_ProductCatalogServiceServicer_to_server(servicer, server):
                     request_deserializer=nexura__pb2.Empty.FromString,
                     response_serializer=nexura__pb2.GetWarehousesResponse.SerializeToString,
             ),
-            'ReserveStock': grpc.unary_unary_rpc_method_handler(
-                    servicer.ReserveStock,
-                    request_deserializer=nexura__pb2.ReserveStockRequest.FromString,
-                    response_serializer=nexura__pb2.ReserveStockResponse.SerializeToString,
+            'ValidateAndReserve': grpc.unary_unary_rpc_method_handler(
+                    servicer.ValidateAndReserve,
+                    request_deserializer=nexura__pb2.ValidateAndReserveRequest.FromString,
+                    response_serializer=nexura__pb2.ValidateAndReserveResponse.SerializeToString,
             ),
-            'ReleaseStock': grpc.unary_unary_rpc_method_handler(
-                    servicer.ReleaseStock,
-                    request_deserializer=nexura__pb2.ReleaseStockRequest.FromString,
-                    response_serializer=nexura__pb2.ReleaseStockResponse.SerializeToString,
+            'ReleaseReservation': grpc.unary_unary_rpc_method_handler(
+                    servicer.ReleaseReservation,
+                    request_deserializer=nexura__pb2.ReleaseReservationRequest.FromString,
+                    response_serializer=nexura__pb2.ReleaseReservationResponse.SerializeToString,
+            ),
+            'CommitReservation': grpc.unary_unary_rpc_method_handler(
+                    servicer.CommitReservation,
+                    request_deserializer=nexura__pb2.CommitReservationRequest.FromString,
+                    response_serializer=nexura__pb2.CommitReservationResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -1707,7 +1690,7 @@ class ProductCatalogService(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def ReserveStock(request,
+    def ValidateAndReserve(request,
             target,
             options=(),
             channel_credentials=None,
@@ -1717,14 +1700,14 @@ class ProductCatalogService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/nexuraTelemetry.ProductCatalogService/ReserveStock',
-            nexura__pb2.ReserveStockRequest.SerializeToString,
-            nexura__pb2.ReserveStockResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/nexuraTelemetry.ProductCatalogService/ValidateAndReserve',
+            nexura__pb2.ValidateAndReserveRequest.SerializeToString,
+            nexura__pb2.ValidateAndReserveResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def ReleaseStock(request,
+    def ReleaseReservation(request,
             target,
             options=(),
             channel_credentials=None,
@@ -1734,9 +1717,26 @@ class ProductCatalogService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/nexuraTelemetry.ProductCatalogService/ReleaseStock',
-            nexura__pb2.ReleaseStockRequest.SerializeToString,
-            nexura__pb2.ReleaseStockResponse.FromString,
+        return grpc.experimental.unary_unary(request, target, '/nexuraTelemetry.ProductCatalogService/ReleaseReservation',
+            nexura__pb2.ReleaseReservationRequest.SerializeToString,
+            nexura__pb2.ReleaseReservationResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def CommitReservation(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/nexuraTelemetry.ProductCatalogService/CommitReservation',
+            nexura__pb2.CommitReservationRequest.SerializeToString,
+            nexura__pb2.CommitReservationResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -1985,11 +1985,6 @@ class EmailServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.SendOrderConfirmation = channel.unary_unary(
-                '/nexuraTelemetry.EmailService/SendOrderConfirmation',
-                request_serializer=nexura__pb2.SendOrderConfirmationRequest.SerializeToString,
-                response_deserializer=nexura__pb2.Empty.FromString,
-                )
         self.SendOTPResetPassword = channel.unary_unary(
                 '/nexuraTelemetry.EmailService/SendOTPResetPassword',
                 request_serializer=nexura__pb2.SendOTPResetPasswordRequest.SerializeToString,
@@ -2007,14 +2002,9 @@ class EmailServiceServicer(object):
 
     """
 
-    def SendOrderConfirmation(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
     def SendOTPResetPassword(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """rpc SendOrderConfirmation(SendOrderConfirmationRequest) returns (Empty) {}
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -2028,11 +2018,6 @@ class EmailServiceServicer(object):
 
 def add_EmailServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'SendOrderConfirmation': grpc.unary_unary_rpc_method_handler(
-                    servicer.SendOrderConfirmation,
-                    request_deserializer=nexura__pb2.SendOrderConfirmationRequest.FromString,
-                    response_serializer=nexura__pb2.Empty.SerializeToString,
-            ),
             'SendOTPResetPassword': grpc.unary_unary_rpc_method_handler(
                     servicer.SendOTPResetPassword,
                     request_deserializer=nexura__pb2.SendOTPResetPasswordRequest.FromString,
@@ -2054,23 +2039,6 @@ class EmailService(object):
     """-------------Email service-----------------
 
     """
-
-    @staticmethod
-    def SendOrderConfirmation(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/nexuraTelemetry.EmailService/SendOrderConfirmation',
-            nexura__pb2.SendOrderConfirmationRequest.SerializeToString,
-            nexura__pb2.Empty.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def SendOTPResetPassword(request,
@@ -2294,10 +2262,20 @@ class OrderServiceStub(object):
                 request_serializer=nexura__pb2.GetOrderStatusRequest.SerializeToString,
                 response_deserializer=nexura__pb2.GetOrderStatusResponse.FromString,
                 )
+        self.GetOrder = channel.unary_unary(
+                '/nexuraTelemetry.OrderService/GetOrder',
+                request_serializer=nexura__pb2.GetOrderRequest.SerializeToString,
+                response_deserializer=nexura__pb2.GetOrderResponse.FromString,
+                )
         self.CancelOrder = channel.unary_unary(
                 '/nexuraTelemetry.OrderService/CancelOrder',
                 request_serializer=nexura__pb2.CancelOrderRequest.SerializeToString,
                 response_deserializer=nexura__pb2.CancelOrderResponse.FromString,
+                )
+        self.UpdateOrderStatus = channel.unary_unary(
+                '/nexuraTelemetry.OrderService/UpdateOrderStatus',
+                request_serializer=nexura__pb2.UpdateOrderStatusRequest.SerializeToString,
+                response_deserializer=nexura__pb2.UpdateOrderStatusResponse.FromString,
                 )
 
 
@@ -2318,7 +2296,19 @@ class OrderServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetOrder(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def CancelOrder(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UpdateOrderStatus(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -2337,10 +2327,20 @@ def add_OrderServiceServicer_to_server(servicer, server):
                     request_deserializer=nexura__pb2.GetOrderStatusRequest.FromString,
                     response_serializer=nexura__pb2.GetOrderStatusResponse.SerializeToString,
             ),
+            'GetOrder': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetOrder,
+                    request_deserializer=nexura__pb2.GetOrderRequest.FromString,
+                    response_serializer=nexura__pb2.GetOrderResponse.SerializeToString,
+            ),
             'CancelOrder': grpc.unary_unary_rpc_method_handler(
                     servicer.CancelOrder,
                     request_deserializer=nexura__pb2.CancelOrderRequest.FromString,
                     response_serializer=nexura__pb2.CancelOrderResponse.SerializeToString,
+            ),
+            'UpdateOrderStatus': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateOrderStatus,
+                    request_deserializer=nexura__pb2.UpdateOrderStatusRequest.FromString,
+                    response_serializer=nexura__pb2.UpdateOrderStatusResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -2389,6 +2389,23 @@ class OrderService(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
+    def GetOrder(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/nexuraTelemetry.OrderService/GetOrder',
+            nexura__pb2.GetOrderRequest.SerializeToString,
+            nexura__pb2.GetOrderResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
     def CancelOrder(request,
             target,
             options=(),
@@ -2402,6 +2419,23 @@ class OrderService(object):
         return grpc.experimental.unary_unary(request, target, '/nexuraTelemetry.OrderService/CancelOrder',
             nexura__pb2.CancelOrderRequest.SerializeToString,
             nexura__pb2.CancelOrderResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def UpdateOrderStatus(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/nexuraTelemetry.OrderService/UpdateOrderStatus',
+            nexura__pb2.UpdateOrderStatusRequest.SerializeToString,
+            nexura__pb2.UpdateOrderStatusResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

@@ -28,6 +28,7 @@ export const listProducts = async (call: ServerUnaryCall<ListProductsRequest, Li
           include: {
             attributes: true,
             warehouse: true,
+            stock: true
           }
         },
         dimensions: true,
@@ -108,8 +109,14 @@ export const listProducts = async (call: ServerUnaryCall<ListProductsRequest, Li
         variants: product.variants.map(variant => ({
           id: variant.id,
           sku: variant.sku,
-          quantity: variant.quantity,
           lowStockThreshold: variant.lowStockThreshold,
+          stock: variant.stock ? {
+            quantity: variant.stock.quantity,
+            reserved: variant.stock.reserved,
+          } : {
+            quantity: 0,
+            reserved: 0
+          },
           colorValue: variant.colorValue || "",
           colorName: variant.colorName || "",
           price: variant.price,

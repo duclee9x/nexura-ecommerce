@@ -259,7 +259,7 @@ export default function CartPage() {
                   <div key={item.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-4 border-b">
                     <div className="col-span-6 flex items-center gap-4">
                       <div className="relative w-20 h-20 border dark:border-gray-800">
-                        <Image src={item.image || "/placeholder.svg"} alt="Product" fill className="object-cover" />
+                        <Image src={item.image || "/no-image-placeholder.webp"} alt="Product" fill className="object-cover" />
                       </div>
                       <div className="flex-1">
                         <Link href={`/products/${variant?.productSlug}`} className="font-medium hover:underline">
@@ -359,81 +359,7 @@ export default function CartPage() {
                     <span className="text-muted-foreground">Subtotal</span>
                     <span>{formatPrice(subtotal)}</span>
                   </div>
-
-                  {/* Shipping Method Selection */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground">Shipping</span>
-                      <span>{formatPrice(shippingCost)}</span>
-                    </div>
-                    <Select value={shippingMethod} onValueChange={handleShippingMethodChange}>
-                      <SelectTrigger className="w-full h-16">
-                        <SelectValue placeholder="Select shipping method" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {shippingOptions.map((option) => (
-                          <SelectItem
-                            key={option.id}
-                            value={option.id}
-                            disabled={option.id === "free" && !isFreeShippingAvailable && !promoApplied}
-                          >
-                            <div className="flex justify-between items-center gap-5 h-5">
-                              <span>{option.name}</span>
-                              <span className="text-muted-foreground text-sm">
-                                {option.price === 0 ? "Free" : formatPrice(option.price)}
-                              </span>
-                            </div>
-                            <p className="text-xs text-muted-foreground text-left">{option.description}</p>
-                            {option.id === "free" && option.minOrderValue > 0 && !promoApplied && (
-                              <p className="text-xs text-muted-foreground text-left">
-                                {isFreeShippingAvailable
-                                  ? "Eligible for free shipping"
-                                  : `Spend ${formatPrice(option.minOrderValue - subtotal)} more for free shipping`}
-                              </p>
-                            )}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {estimatedDelivery && (
-                      <p className="text-xs text-muted-foreground">Estimated delivery: {estimatedDelivery}</p>
-                    )}
-                  </div>
-
-                  {promoApplied && (
-                    <div className="flex justify-between text-green-600 dark:text-green-500">
-                      <span>Discount</span>
-                      <span>-{formatPrice(discount)}</span>
-                    </div>
-                  )}
-
-                  <Separator />
-
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Total</span>
-                    <span>{formatPrice(total)}</span>
-                  </div>
                 </div>
-
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <Input placeholder="Promo code" value={promoCode} onChange={(e) => setPromoCode(e.target.value)} />
-                    <Button variant="outline" onClick={handleApplyPromo}>
-                      Apply
-                    </Button>
-                  </div>
-                  {promoApplied && (
-                    <p className="text-sm text-green-600 dark:text-green-500">
-                      {promoCode.toLowerCase() === "nexura10"
-                        ? "Promo code applied: 10% discount"
-                        : "Promo code applied: Free shipping"}
-                    </p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Try promo codes: NEXURA10 for 10% off, FREESHIP for free shipping
-                  </p>
-                </div>
-
                 <div className="space-y-2">
                   <Button
                     className="w-full flex items-center justify-center gap-2"
@@ -444,17 +370,16 @@ export default function CartPage() {
                   </Button>
 
                   <div className="text-center text-sm text-muted-foreground">
-                    Taxes and shipping calculated at checkout
+                    Total cost and shipping calculated at checkout
                   </div>
                 </div>
 
                 <div className="pt-4 space-y-4">
-                  <h3 className="font-medium">We Accept</h3>
-                  <div className="flex gap-2">
-                    <div className="w-12 h-8 bg-muted rounded flex items-center justify-center text-xs">Visa</div>
-                    <div className="w-12 h-8 bg-muted rounded flex items-center justify-center text-xs">MC</div>
-                    <div className="w-12 h-8 bg-muted rounded flex items-center justify-center text-xs">Amex</div>
-                    <div className="w-12 h-8 bg-muted rounded flex items-center justify-center text-xs">PayPal</div>
+                  <h3 className="font-medium">We process payment with</h3>
+                  <div className="flex gap-6">
+                    <div className="h-6 w-full bg-muted rounded flex items-center justify-center text-xs">Stripe</div>
+                    <div className="h-6 w-full bg-muted rounded flex items-center justify-center text-xs">VNPay</div>
+                    <div className="h-6 w-full bg-muted rounded flex items-center justify-center text-xs">Cash on Delivery</div>
                   </div>
                 </div>
               </div>

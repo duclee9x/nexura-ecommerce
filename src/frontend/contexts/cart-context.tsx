@@ -6,7 +6,6 @@ import { useCurrency } from "@/contexts/currency-context"
 import { VariantCart, CartItem } from "@/protos/nexura"
 import { useCart as useCartQuery, useCartActions } from "@/hooks/use-query"
 import { useSession } from "./session-context"
-import { getVariantsForCartGateway } from "@/gateway/gateway"
 
 
 export type CartContextType = {
@@ -112,7 +111,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       throw error
     }
   }
-
+  
   const updateQuantity = async (productId: string, variantId: string, quantity: number) => {
     if (!user?.id) return
 

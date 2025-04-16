@@ -14,6 +14,7 @@ import { useState } from "react";
 import { AvatarCropperModal } from "@/components/ui/avatar-cropper-modal";
 import { User } from "@/protos/nexura";
 import { PersonalSkeleton } from "../skeleton";
+import { uploadToImageKit } from "@/lib/imagekit"
 
 const initialState: FormState = {
     message: "",
@@ -30,7 +31,7 @@ export default function PersonalTab({ user, refresh }: { user: User | null, refr
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isCropperOpen, setIsCropperOpen] = useState(false);
 
-    const profilePictureUrl = getAvatarUrl(user.profilePictureUrl)
+    console.log(user, 'user')
     const { isPending, error, mutate } = useMutation({
         mutationFn: async (request: {
             id: string;
@@ -146,29 +147,8 @@ export default function PersonalTab({ user, refresh }: { user: User | null, refr
             // Handle avatar upload if exists
             if (avatarFile) {
                 try {
-                    const fileName = `${user.id}.jpeg`
-                    // Get presigned URL for avatar upload
-                    const response = await fetch(`/api/presignedPut?name=${fileName}&bucket=avatar`)
-                    if (!response.ok) {
-                        throw new Error("Failed to get upload URL")
-                    }
-                    const { urls } = await response.json()
-                    
-                    if (!urls?.[0]) {
-                        throw new Error("Invalid upload URL received")
-                    }
-
-                    // Upload to S3
-                    const uploadResponse = await fetch(urls[0], {
-                        method: 'PUT',
-                        body: avatarFile,
-                    })
-
-                    if (!uploadResponse.ok) {
-                        throw new Error("Failed to upload image")
-                    }
-
-                    updatedFields.profilePictureUrl = fileName
+                    const { url, fileId } = await uploadToImageKit(avatarFile, "avatars")
+                    updatedFields.profilePictureUrl = url
                 } catch (error) {
                     console.error("Error uploading avatar:", error)
                     toast.error("Failed to upload profile picture")
@@ -248,7 +228,7 @@ export default function PersonalTab({ user, refresh }: { user: User | null, refr
                     <div className="relative">
                         <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                             <Image
-                                src={previewUrl || profilePictureUrl+"?v="+Date.now() || generateAvatar(user?.firstName || "")}
+                                src={previewUrl || user.profilePictureUrl || generateAvatar(user?.firstName || "")}
                                 alt="Profile picture"
                                 width={96}
                                 height={96}

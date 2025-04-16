@@ -2,6 +2,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "@/hooks/use-toast"
 import * as gateway from "@/gateway/gateway"
 import { ProductVariant } from "@/protos/nexura"
+import { addAddress, updateAddress, deleteAddress } from "@/actions/address"
+import { Address, ExtendedAddress } from "@/protos/nexura"
 
 interface MutationConfig {
   onSuccess?: (data: any) => void
@@ -234,6 +236,99 @@ export const useDeleteProduct = (config: Partial<MutationConfig> = {}) => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["productsCatalog"] })
+      toast({
+        title: "Success",
+        description: finalConfig.successMessage,
+      })
+      finalConfig.onSuccess?.(data)
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || finalConfig.errorMessage,
+        variant: "destructive",
+      })
+      finalConfig.onError?.(error)
+    },
+  })
+}
+
+export const useAddAddress = (config: Partial<MutationConfig> = {}) => {
+  const queryClient = useQueryClient()
+  const finalConfig = { ...defaultConfig, ...config }
+
+  return useMutation({
+    mutationFn: async ({ address, userId }: { address: Address; userId: string }) => {
+      try {
+        return await addAddress(address, userId)
+      } catch (error) {
+        throw new Error(error instanceof Error ? error.message : "Failed to add address")
+      }
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["addresses"] })
+      toast({
+        title: "Success",
+        description: finalConfig.successMessage,
+      })
+      finalConfig.onSuccess?.(data)
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || finalConfig.errorMessage,
+        variant: "destructive",
+      })
+      finalConfig.onError?.(error)
+    },
+  })
+}
+
+export const useUpdateAddress = (config: Partial<MutationConfig> = {}) => {
+  const queryClient = useQueryClient()
+  const finalConfig = { ...defaultConfig, ...config }
+
+  return useMutation({
+    mutationFn: async ({ address, userId }: { address: Address; userId: string }) => {
+      try {
+        return await updateAddress(address as ExtendedAddress, userId)
+      } catch (error) {
+        throw new Error(error instanceof Error ? error.message : "Failed to update address")
+      }
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["addresses"] })
+      toast({
+        title: "Success",
+        description: finalConfig.successMessage,
+      })
+      finalConfig.onSuccess?.(data)
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message || finalConfig.errorMessage,
+        variant: "destructive",
+      })
+      finalConfig.onError?.(error)
+    },
+  })
+}
+
+export const useDeleteAddress = (config: Partial<MutationConfig> = {}) => {
+  const queryClient = useQueryClient()
+  const finalConfig = { ...defaultConfig, ...config }
+
+  return useMutation({
+    mutationFn: async ({ addressId, userId }: { addressId: string; userId: string }) => {
+      try {
+        return await deleteAddress(addressId, userId)
+      } catch (error) {
+        throw new Error(error instanceof Error ? error.message : "Failed to delete address")
+      }
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["addresses"] })
       toast({
         title: "Success",
         description: finalConfig.successMessage,

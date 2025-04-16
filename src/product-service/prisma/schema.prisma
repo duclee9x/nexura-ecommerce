@@ -57,11 +57,33 @@ model ProductImage {
   @@index([productId])
 }
 
+model Stock {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  quantity  Int      @default(0)
+  reserved  Int      @default(0)
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variantId String   @db.ObjectId @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Reservation {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  quantity  Int
+  userId    String   @db.ObjectId
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variantId String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([variantId])
+  @@index([userId])
+}
+
 model ProductVariant {
   id               String   @id @default(auto()) @map("_id") @db.ObjectId
   sku              String   @unique
   price            Float
-  quantity         Int
   lowStockThreshold Int
   colorValue       String?
   colorName        String?
@@ -72,6 +94,8 @@ model ProductVariant {
   productId        String   @db.ObjectId
   warehouse        Warehouse @relation(fields: [warehouseId], references: [id])
   warehouseId      String   @db.ObjectId
+  stock            Stock?
+  reservations     Reservation[]
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -86,7 +110,6 @@ model VariantAttribute {
   variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
   variantId String   @db.ObjectId
 }
-
 
 model ProductAttribute {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId

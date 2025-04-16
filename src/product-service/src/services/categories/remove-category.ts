@@ -7,7 +7,7 @@ import { DeleteCategoryRequest } from '@/src/proto/nexura'
 
 const prisma = new PrismaClient()
 
-export const deleteCategory = async (call: ServerUnaryCall<DeleteCategoryRequest, DeleteCategoryResponse>, callback: sendUnaryData<DeleteCategoryResponse>) => {
+export const removeCategory = async (call: ServerUnaryCall<DeleteCategoryRequest, DeleteCategoryResponse>, callback: sendUnaryData<DeleteCategoryResponse>) => {
   try {
     const request = call.request
     const categoryId = request.id

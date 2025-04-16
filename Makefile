@@ -317,6 +317,10 @@ proto2:
 	cp ./protos/nexura.proto ./src/email-service/protos/nexura.proto
 	echo "Proto files generated successfully"
 
+	cp -r ./protos/nexura.ts ./src/order-service/src/proto/nexura.ts
+	cp -r ./protos/nexura.proto ./src/order-service/src/proto/nexura.proto
+	cp -r ./src/order-service/src/proto/ ./src/order-service/dist/
+
 	cp -r ./protos/nexura.ts ./src/payment-service/proto/nexura.ts
 	cp -r ./protos/nexura.proto ./src/payment-service/proto/nexura.proto
 	cp -r ./src/payment-service/proto/ ./src/payment-service/dist/

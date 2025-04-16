@@ -618,7 +618,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
 
         {/* Full Screen Image Viewer */}
         <ImageViewer
-          images={product.images.map(img => img.url || "/placeholder.svg")}
+          images={product.images?.length > 0 
+            ? product.images.map(img => img.url || "/no-image-placeholder.webp")
+            : ["/no-image-placeholder.webp"]}
           currentIndex={currentImageIndex}
           isOpen={isImageViewerOpen}
           onClose={() => setIsImageViewerOpen(false)}

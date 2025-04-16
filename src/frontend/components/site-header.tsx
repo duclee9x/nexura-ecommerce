@@ -18,7 +18,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { generateAvatar, getAvatarUrl } from "@/lib/utils"
 import { useSession } from "@/contexts/session-context"
 export function SiteHeader() {
@@ -28,7 +27,7 @@ export function SiteHeader() {
   const [cartItemCount, setCartItemCount] = useState(0)
   const [searchOpen, setSearchOpen] = useState(false)
   const { user } = useSession()
-  const profilePictureUrl = user?.profilePictureUrl ? getAvatarUrl(user.profilePictureUrl) : generateAvatar(user?.firstName || "User")
+  const profilePictureUrl = user?.profilePictureUrl ? user.profilePictureUrl : generateAvatar(user?.firstName || "User")
   // Safe cart access with error handling
   useEffect(() => {
     setIsMounted(true)

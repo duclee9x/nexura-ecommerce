@@ -22,13 +22,16 @@ const nextConfig = {
         hostname: 'picsum.photos',
       },
       {
+        protocol: 'https',
+        hostname: 'ik.imagekit.io',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
       },
     ],
     minimumCacheTTL: 60,
-    loader: 'custom',
-    loaderFile: './imageLoader.ts',
+
   },
   eslint: {
     ignoreDuringBuilds: true,

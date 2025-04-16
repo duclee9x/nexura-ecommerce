@@ -1,7 +1,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { getAllCategoryGateway, getUserGateway, listProductsGateway, getCartGateway, addItemGateway, updateItemGateway, removeItemGateway, clearCartGateway, getVariantsForCartGateway } from "@/gateway/gateway"
+import { getAllCategoryGateway, getUserGateway, listProductsGateway, getCartGateway, addItemGateway, updateItemGateway, removeItemGateway, clearCartGateway, getVariantsForCartGateway, getAddressesGateway } from "@/gateway/gateway"
 import { Product, User } from "@/protos/nexura"
 import { useRouter } from "next/navigation"
+import { getCountries, getProvincesByCountry, getDistrictsByProvince, getWardsByDistrict } from "@/actions/address"
+import { Address, Country, Province, District, Ward } from "@/protos/nexura"
 
 interface QueryConfig {
   retry?: number
@@ -304,4 +306,92 @@ export const useCartActions = () => {
     removeItem,
     clearCart
   }
+}
+
+export const useAddresses = (userId: string, config: Partial<QueryConfig> = {}) => {
+  return useQuery({
+    queryKey: ["addresses", userId],
+    queryFn: async () => {
+      try {
+        const response = await getAddressesGateway(userId)
+        return response
+      } catch (error) {
+        console.error("Error fetching addresses:", error)
+        throw error
+      }
+    },
+    ...defaultConfig,
+    ...config
+  })
+}
+
+export const useCountries = (config: Partial<QueryConfig> = {}) => {
+  return useQuery({
+    queryKey: ["countries"],
+    queryFn: async () => {
+      try {
+        const response = await getCountries()
+        return response
+      } catch (error) {
+        console.error("Error fetching countries:", error)
+        throw error
+      }
+    },
+    ...defaultConfig,
+    ...config
+  })
+}
+
+export const useProvinces = (countryId: string, config: Partial<QueryConfig> = {}) => {
+  return useQuery({
+    queryKey: ["provinces", countryId],
+    queryFn: async () => {
+      try {
+        const response = await getProvincesByCountry(countryId)
+        return response
+      } catch (error) {
+        console.error("Error fetching provinces:", error)
+        throw error
+      }
+    },
+    enabled: !!countryId,
+    ...defaultConfig,
+    ...config
+  })
+}
+
+export const useDistricts = (provinceId: string, config: Partial<QueryConfig> = {}) => {
+  return useQuery({
+    queryKey: ["districts", provinceId],
+    queryFn: async () => {
+      try {
+        const response = await getDistrictsByProvince(provinceId)
+        return response
+      } catch (error) {
+        console.error("Error fetching districts:", error)
+        throw error
+      }
+    },
+    enabled: !!provinceId,
+    ...defaultConfig,
+    ...config
+  })
+}
+
+export const useWards = (districtId: string, config: Partial<QueryConfig> = {}) => {
+  return useQuery({
+    queryKey: ["wards", districtId],
+    queryFn: async () => {
+      try {
+        const response = await getWardsByDistrict(districtId)
+        return response
+      } catch (error) {
+        console.error("Error fetching wards:", error)
+        throw error
+      }
+    },
+    enabled: !!districtId,
+    ...defaultConfig,
+    ...config
+  })
 }

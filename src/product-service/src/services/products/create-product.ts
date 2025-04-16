@@ -72,7 +72,6 @@ export const createProduct: UntypedHandleCall = async (call: ServerUnaryCall<Cre
       const variantData = {
         sku: variant.sku,
         price: variant.price,
-        quantity: variant.quantity,
         lowStockThreshold: variant.lowStockThreshold,
         imageIds: variant.imageIds || [],
         attributes: {
@@ -86,13 +85,19 @@ export const createProduct: UntypedHandleCall = async (call: ServerUnaryCall<Cre
           connect: {
             id: variant.warehouseId || defaultWarehouse.id
           }
+        },
+        stock: {
+          create: {
+            quantity: variant.stock?.quantity || 0,
+            reserved: variant.stock?.reserved || 0
+          }
         }
       }
 
       return variantData
     }) || []
 
-    const newProduct = {
+    const product = await prisma.product.create({
       data: {
         name: productData.name,
         slug: productData.slug,
@@ -148,19 +153,20 @@ export const createProduct: UntypedHandleCall = async (call: ServerUnaryCall<Cre
         shippable: productData.shippable,
       },
       include: {
-        sizeCharts: {
-          include: {
-            images: true,
-            columns: true,
-            rows: true,
-          }
-        },
         images: true,
         attributes: true,
         variants: {
           include: {
             attributes: true,
             warehouse: true,
+            stock: true
+          }
+        },
+        sizeCharts: {
+          include: {
+            images: true,
+            columns: true,
+            rows: true
           }
         },
         dimensions: true,
@@ -171,9 +177,8 @@ export const createProduct: UntypedHandleCall = async (call: ServerUnaryCall<Cre
           }
         }
       }
-    }
-    console.log(JSON.stringify(newProduct, null, 2), "newProduct")
-    const product = await prisma.product.create(newProduct)
+    })
+
     const response: CreateProductResponse = {
       product: {
         id: product.id,
@@ -207,7 +212,7 @@ export const createProduct: UntypedHandleCall = async (call: ServerUnaryCall<Cre
           description: sizeChart.description || "",
           category: sizeChart.category,
           productId: sizeChart.productId,
-          images: sizeChart.images.map(img => ({
+          images: sizeChart.images.map((img) => ({
             id: img.id,
             url: img.url,
             name: img.name,
@@ -224,7 +229,7 @@ export const createProduct: UntypedHandleCall = async (call: ServerUnaryCall<Cre
             sizeChartId: column.sizeChartId,
             createdAt: column.createdAt.toISOString(),
           })),
-          rows: sizeChart.rows.map(row => ({
+          rows: sizeChart.rows.map((row) => ({
             id: row.id,
             name: row.name,
             cells: row.values as any,
@@ -248,7 +253,6 @@ export const createProduct: UntypedHandleCall = async (call: ServerUnaryCall<Cre
           id: variant.id,
           sku: variant.sku,
           price: variant.price,
-          quantity: variant.quantity,
           lowStockThreshold: variant.lowStockThreshold,
           warehouseId: variant.warehouseId,
           imageIds: variant.imageIds,
@@ -258,6 +262,13 @@ export const createProduct: UntypedHandleCall = async (call: ServerUnaryCall<Cre
             value: attr.value,
             extraValue: attr.extraValue || "",
           })),
+          stock: variant.stock ? {
+            quantity: variant.stock.quantity,
+            reserved: variant.stock.reserved
+          } : {
+            quantity: 0,
+            reserved: 0
+          }
         })),
         brandId: product.brandId || "",
         featured: product.featured,

@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  order-service:
+    build: .
+    ports:
+      - "50052:50052"
+    environment:
+      - NODE_ENV=development
+      - ORDER_SERVICE_DB_URL=mysql://root:password@order-service-db:3306/order_service
+    depends_on:
+      - order-service-db
+    networks:
+      - nexura-network
+
+  order-service-db:
+    image: mariadb:latest
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=order_service
+    volumes:
+      - order-service-db-data:/var/lib/mysql
+    networks:
+      - nexura-network
+
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"
+    networks:
+      - nexura-network
+
+networks:
+  nexura-network:
+    driver: bridge
+
+volumes:
+  order-service-db-data: 

@@ -52,6 +52,7 @@ export const getVariantsForCart = async (call: ServerUnaryCall<GetVariantsForCar
         price: variant.price,
         image: imageMap.get(firstImageId) ?? "",
         quantity: variant.quantity,
+        variantName: variant.attributes.map(attribute => attribute.name + ": " + attribute.value).join(", "),
         productName: variant.product.name,
         productSlug: variant.product.slug,
         attributes: variant.attributes.map(attribute => ({

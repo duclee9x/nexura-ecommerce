@@ -87,7 +87,6 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
           create: request.product.variants?.map((variant) => ({
             sku: variant.sku,
             price: variant.price,
-            quantity: variant.quantity,
             lowStockThreshold: variant.lowStockThreshold,
             imageIds: variant.imageIds,
             attributes: {
@@ -97,7 +96,13 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
                 extraValue: attr.extraValue || "",
               })) || [],
             },
-            warehouseId: variant.warehouseId || defaultWarehouse.id
+            warehouseId: variant.warehouseId || defaultWarehouse.id,
+            stock: {
+              create: {
+                quantity: variant.stock?.quantity ?? undefined,
+                reserved: variant.stock?.reserved ?? undefined
+              }
+            }
           })) || [],
         },
         productTags: {
@@ -154,6 +159,7 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
           include: {
             attributes: true,
             warehouse: true,
+            stock: true
           }
         },
         sizeCharts: {
@@ -248,7 +254,6 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
           id: variant.id,
           sku: variant.sku,
           price: variant.price,
-          quantity: variant.quantity,
           lowStockThreshold: variant.lowStockThreshold,
           warehouseId: variant.warehouseId,
           imageIds: variant.imageIds,
@@ -258,6 +263,10 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
             value: attr.value,
             extraValue: attr.extraValue || "",
           })),
+          stock: {
+            quantity: variant.stock?.quantity ?? 0,
+            reserved: variant.stock?.reserved ?? 0
+          }
         })),
         brandId: updatedProduct.brandId || "",
         featured: updatedProduct.featured,

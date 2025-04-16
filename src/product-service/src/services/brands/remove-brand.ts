@@ -3,7 +3,7 @@ import { handleError } from '../../utils/error'
 
 const prisma = new PrismaClient()
 
-export const deleteBrand = async (call: any, callback: any) => {
+export const removeBrand = async (call: any, callback: any) => {
   try {
     const request = call.request
     const brandId = request.id

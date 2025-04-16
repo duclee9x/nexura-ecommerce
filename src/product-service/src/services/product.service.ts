@@ -1,9 +1,9 @@
 import { UntypedServiceImplementation } from '@grpc/grpc-js'
 import { newBrand } from './brands/new-brand'
 import { getAllBrand } from './brands/get-all-brand'
-import { deleteBrand } from './brands/delete-brand'
+import { removeBrand } from './brands/remove-brand'
 import { createCategory } from './categories/create-category'
-import { deleteCategory } from './categories/delete-category'
+import { removeCategory } from './categories/remove-category'
 import { getAllCategory } from './categories/get-all-category'
 import { updateCategory } from './categories/update-category'
 import { getProductAttributes } from './attributes/get-product-attributes'
@@ -18,31 +18,37 @@ import { getProductById } from './products/get-product-by-id'
 import { listProducts } from './products/list-products'
 import { getWarehouses } from './warehouses/get-warehouses'
 import { getVariantsForCart } from './products/get-variants-for-cart'
+import { validateAndReserve } from "./products/validate-and-reserve"
+import { releaseReservation } from "./products/release-reservation"
+import { commitReservation } from "./products/commit-reservation"
 
 export const productService: UntypedServiceImplementation = {
-  newBrand: newBrand,
-  removeBrand: deleteBrand,
-  getAllBrand: getAllBrand,
+  newBrand,
+  removeBrand,
+  getAllBrand,
 
-  createCategory: createCategory,
-  removeCategory: deleteCategory,
-  getAllCategory: getAllCategory,
-  updateCategory: updateCategory,
+  createCategory,
+  removeCategory,
+  getAllCategory,
+  updateCategory,
 
-  createProduct: createProduct,
-  updateProduct: updateProduct,
-  deleteProduct: deleteProduct,
-  getProductById: getProductById,
-  getProductBySlug: getProductBySlug,
-  listProducts: listProducts,
-  getVariantsForCart: getVariantsForCart,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  getProductById,
+  getProductBySlug,
+  listProducts,
+  getVariantsForCart,
 
-  getProductAttributes: getProductAttributes,
-  updateProductAttribute: updateProductAttribute,
-  deleteProductAttribute: deleteProductAttribute,
-  createProductAttribute: createProductAttribute,
+  getProductAttributes,
+  updateProductAttribute,
+  deleteProductAttribute,
+  createProductAttribute,
 
   // createVariant: createVariant,
-  getWarehouses: getWarehouses,
-  
+  getWarehouses,
+ 
+  validateAndReserve,
+  releaseReservation,
+  commitReservation
 } 

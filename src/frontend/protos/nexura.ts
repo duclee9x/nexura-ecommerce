@@ -644,29 +644,21 @@ export interface CartItem {
   productId: string;
   variantId: string;
   image: string;
+  price: number;
   quantity: number;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface ReserveItemsRequest {
-  orderId: string;
-  items: CartItem[];
+export interface ValidateCartRequest {
+  userId: string;
 }
 
-export interface ReserveItemsResponse {
-  success: boolean;
+export interface ValidateCartResponse {
+  valid: boolean;
   message: string;
-}
-
-export interface ReleaseItemsRequest {
-  orderId: string;
   items: CartItem[];
-}
-
-export interface ReleaseItemsResponse {
-  success: boolean;
-  message: string;
+  issues: string[];
 }
 
 export interface ListRecommendationsRequest {
@@ -695,6 +687,7 @@ export interface VariantCart {
   price: number;
   image: string;
   quantity: number;
+  variantName: string;
   productName: string;
   productSlug: string;
   attributes: VariantAttribute[];
@@ -842,11 +835,16 @@ export interface ProductVariant {
   id: string;
   sku: string;
   price: number;
-  quantity: number;
   lowStockThreshold: number;
+  stock: Stock | undefined;
   warehouseId: string;
   imageIds: string[];
   attributes: VariantAttribute[];
+}
+
+export interface Stock {
+  quantity: number;
+  reserved: number;
 }
 
 export interface VariantAttribute {
@@ -1064,24 +1062,6 @@ export interface CurrencyConversionRequest {
   toCode: string;
 }
 
-export interface OrderItem {
-  item: CartItem | undefined;
-  cost: Money | undefined;
-}
-
-export interface OrderResult {
-  orderId: string;
-  shippingTrackingId: string;
-  shippingCost: Money | undefined;
-  shippingAddress: Address | undefined;
-  items: OrderItem[];
-}
-
-export interface SendOrderConfirmationRequest {
-  email: string;
-  order: OrderResult | undefined;
-}
-
 export interface SendOTPResetPasswordRequest {
   email: string;
   verificationCode: string;
@@ -1202,14 +1182,14 @@ export function healthCheckResponse_ServingStatusToJSON(object: HealthCheckRespo
 export interface CreateOrderRequest {
   userId: string;
   currencyCode: string;
+  totalAmount: number;
   items: CartItem[];
-  shippingAddress: Address | undefined;
+  shippingAddressId: string;
 }
 
 export interface CreateOrderResponse {
   orderId: string;
   status: OrderStatus;
-  message: string;
 }
 
 export interface GetOrderStatusRequest {
@@ -1217,6 +1197,46 @@ export interface GetOrderStatusRequest {
 }
 
 export interface GetOrderStatusResponse {
+  status: OrderStatus;
+}
+
+export interface GetOrderRequest {
+  orderId: string;
+}
+
+export interface GetOrderResponse {
+  order: Order | undefined;
+}
+
+export interface Order {
+  id: string;
+  userId: string;
+  status: string;
+  totalAmount: number;
+  shippingAddressId: string;
+  items: OrderItem[];
+  paymentId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrderItem {
+  id: string;
+  variantId: string;
+  quantity: number;
+  price: number;
+  name: string;
+  sku: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateOrderStatusRequest {
+  orderId: string;
+  status: OrderStatus;
+}
+
+export interface UpdateOrderStatusResponse {
   orderId: string;
   status: OrderStatus;
   steps: OrderStep[];
@@ -1240,22 +1260,36 @@ export interface OrderStep {
   timestamp: string;
 }
 
-export interface ReserveStockRequest {
-  orderId: string;
+export interface ValidateAndReserveRequest {
+  userId: string;
   variants: ProductVariant[];
 }
 
-export interface ReserveStockResponse {
+export interface ValidateAndReserveResponse {
+  success: boolean;
+  reservationId: string;
+  validationErrors: ValidationError[];
+}
+
+export interface ValidationError {
+  variantId: string;
+  error: string;
+}
+
+export interface ReleaseReservationRequest {
+  reservationId: string;
+}
+
+export interface ReleaseReservationResponse {
   success: boolean;
   message: string;
 }
 
-export interface ReleaseStockRequest {
-  orderId: string;
-  variants: ProductVariant[];
+export interface CommitReservationRequest {
+  reservationId: string;
 }
 
-export interface ReleaseStockResponse {
+export interface CommitReservationResponse {
   success: boolean;
   message: string;
 }
@@ -6239,7 +6273,7 @@ export const Cart: MessageFns<Cart> = {
 };
 
 function createBaseCartItem(): CartItem {
-  return { id: "", productId: "", variantId: "", image: "", quantity: 0, createdAt: "", updatedAt: "" };
+  return { id: "", productId: "", variantId: "", image: "", price: 0, quantity: 0, createdAt: "", updatedAt: "" };
 }
 
 export const CartItem: MessageFns<CartItem> = {
@@ -6256,14 +6290,17 @@ export const CartItem: MessageFns<CartItem> = {
     if (message.image !== "") {
       writer.uint32(34).string(message.image);
     }
+    if (message.price !== 0) {
+      writer.uint32(41).double(message.price);
+    }
     if (message.quantity !== 0) {
-      writer.uint32(40).int32(message.quantity);
+      writer.uint32(48).int32(message.quantity);
     }
     if (message.createdAt !== "") {
-      writer.uint32(50).string(message.createdAt);
+      writer.uint32(58).string(message.createdAt);
     }
     if (message.updatedAt !== "") {
-      writer.uint32(58).string(message.updatedAt);
+      writer.uint32(66).string(message.updatedAt);
     }
     return writer;
   },
@@ -6308,23 +6345,31 @@ export const CartItem: MessageFns<CartItem> = {
           continue;
         }
         case 5: {
-          if (tag !== 40) {
+          if (tag !== 41) {
+            break;
+          }
+
+          message.price = reader.double();
+          continue;
+        }
+        case 6: {
+          if (tag !== 48) {
             break;
           }
 
           message.quantity = reader.int32();
           continue;
         }
-        case 6: {
-          if (tag !== 50) {
+        case 7: {
+          if (tag !== 58) {
             break;
           }
 
           message.createdAt = reader.string();
           continue;
         }
-        case 7: {
-          if (tag !== 58) {
+        case 8: {
+          if (tag !== 66) {
             break;
           }
 
@@ -6346,6 +6391,7 @@ export const CartItem: MessageFns<CartItem> = {
       productId: isSet(object.productId) ? globalThis.String(object.productId) : "",
       variantId: isSet(object.variantId) ? globalThis.String(object.variantId) : "",
       image: isSet(object.image) ? globalThis.String(object.image) : "",
+      price: isSet(object.price) ? globalThis.Number(object.price) : 0,
       quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
       createdAt: isSet(object.createdAt) ? globalThis.String(object.createdAt) : "",
       updatedAt: isSet(object.updatedAt) ? globalThis.String(object.updatedAt) : "",
@@ -6365,6 +6411,9 @@ export const CartItem: MessageFns<CartItem> = {
     }
     if (message.image !== "") {
       obj.image = message.image;
+    }
+    if (message.price !== 0) {
+      obj.price = message.price;
     }
     if (message.quantity !== 0) {
       obj.quantity = Math.round(message.quantity);
@@ -6387,6 +6436,7 @@ export const CartItem: MessageFns<CartItem> = {
     message.productId = object.productId ?? "";
     message.variantId = object.variantId ?? "";
     message.image = object.image ?? "";
+    message.price = object.price ?? 0;
     message.quantity = object.quantity ?? 0;
     message.createdAt = object.createdAt ?? "";
     message.updatedAt = object.updatedAt ?? "";
@@ -6394,25 +6444,22 @@ export const CartItem: MessageFns<CartItem> = {
   },
 };
 
-function createBaseReserveItemsRequest(): ReserveItemsRequest {
-  return { orderId: "", items: [] };
+function createBaseValidateCartRequest(): ValidateCartRequest {
+  return { userId: "" };
 }
 
-export const ReserveItemsRequest: MessageFns<ReserveItemsRequest> = {
-  encode(message: ReserveItemsRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.orderId !== "") {
-      writer.uint32(10).string(message.orderId);
-    }
-    for (const v of message.items) {
-      CartItem.encode(v!, writer.uint32(18).fork()).join();
+export const ValidateCartRequest: MessageFns<ValidateCartRequest> = {
+  encode(message: ValidateCartRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): ReserveItemsRequest {
+  decode(input: BinaryReader | Uint8Array, length?: number): ValidateCartRequest {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseReserveItemsRequest();
+    const message = createBaseValidateCartRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -6421,15 +6468,7 @@ export const ReserveItemsRequest: MessageFns<ReserveItemsRequest> = {
             break;
           }
 
-          message.orderId = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.items.push(CartItem.decode(reader, reader.uint32()));
+          message.userId = reader.string();
           continue;
         }
       }
@@ -6441,54 +6480,53 @@ export const ReserveItemsRequest: MessageFns<ReserveItemsRequest> = {
     return message;
   },
 
-  fromJSON(object: any): ReserveItemsRequest {
-    return {
-      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
-      items: globalThis.Array.isArray(object?.items) ? object.items.map((e: any) => CartItem.fromJSON(e)) : [],
-    };
+  fromJSON(object: any): ValidateCartRequest {
+    return { userId: isSet(object.userId) ? globalThis.String(object.userId) : "" };
   },
 
-  toJSON(message: ReserveItemsRequest): unknown {
+  toJSON(message: ValidateCartRequest): unknown {
     const obj: any = {};
-    if (message.orderId !== "") {
-      obj.orderId = message.orderId;
-    }
-    if (message.items?.length) {
-      obj.items = message.items.map((e) => CartItem.toJSON(e));
+    if (message.userId !== "") {
+      obj.userId = message.userId;
     }
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<ReserveItemsRequest>, I>>(base?: I): ReserveItemsRequest {
-    return ReserveItemsRequest.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<ValidateCartRequest>, I>>(base?: I): ValidateCartRequest {
+    return ValidateCartRequest.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<ReserveItemsRequest>, I>>(object: I): ReserveItemsRequest {
-    const message = createBaseReserveItemsRequest();
-    message.orderId = object.orderId ?? "";
-    message.items = object.items?.map((e) => CartItem.fromPartial(e)) || [];
+  fromPartial<I extends Exact<DeepPartial<ValidateCartRequest>, I>>(object: I): ValidateCartRequest {
+    const message = createBaseValidateCartRequest();
+    message.userId = object.userId ?? "";
     return message;
   },
 };
 
-function createBaseReserveItemsResponse(): ReserveItemsResponse {
-  return { success: false, message: "" };
+function createBaseValidateCartResponse(): ValidateCartResponse {
+  return { valid: false, message: "", items: [], issues: [] };
 }
 
-export const ReserveItemsResponse: MessageFns<ReserveItemsResponse> = {
-  encode(message: ReserveItemsResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.success !== false) {
-      writer.uint32(8).bool(message.success);
+export const ValidateCartResponse: MessageFns<ValidateCartResponse> = {
+  encode(message: ValidateCartResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.valid !== false) {
+      writer.uint32(8).bool(message.valid);
     }
     if (message.message !== "") {
       writer.uint32(18).string(message.message);
     }
+    for (const v of message.items) {
+      CartItem.encode(v!, writer.uint32(26).fork()).join();
+    }
+    for (const v of message.issues) {
+      writer.uint32(34).string(v!);
+    }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): ReserveItemsResponse {
+  decode(input: BinaryReader | Uint8Array, length?: number): ValidateCartResponse {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseReserveItemsResponse();
+    const message = createBaseValidateCartResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -6497,7 +6535,7 @@ export const ReserveItemsResponse: MessageFns<ReserveItemsResponse> = {
             break;
           }
 
-          message.success = reader.bool();
+          message.valid = reader.bool();
           continue;
         }
         case 2: {
@@ -6508,156 +6546,20 @@ export const ReserveItemsResponse: MessageFns<ReserveItemsResponse> = {
           message.message = reader.string();
           continue;
         }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): ReserveItemsResponse {
-    return {
-      success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
-      message: isSet(object.message) ? globalThis.String(object.message) : "",
-    };
-  },
-
-  toJSON(message: ReserveItemsResponse): unknown {
-    const obj: any = {};
-    if (message.success !== false) {
-      obj.success = message.success;
-    }
-    if (message.message !== "") {
-      obj.message = message.message;
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<ReserveItemsResponse>, I>>(base?: I): ReserveItemsResponse {
-    return ReserveItemsResponse.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<ReserveItemsResponse>, I>>(object: I): ReserveItemsResponse {
-    const message = createBaseReserveItemsResponse();
-    message.success = object.success ?? false;
-    message.message = object.message ?? "";
-    return message;
-  },
-};
-
-function createBaseReleaseItemsRequest(): ReleaseItemsRequest {
-  return { orderId: "", items: [] };
-}
-
-export const ReleaseItemsRequest: MessageFns<ReleaseItemsRequest> = {
-  encode(message: ReleaseItemsRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.orderId !== "") {
-      writer.uint32(10).string(message.orderId);
-    }
-    for (const v of message.items) {
-      CartItem.encode(v!, writer.uint32(18).fork()).join();
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): ReleaseItemsRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseReleaseItemsRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.orderId = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
+        case 3: {
+          if (tag !== 26) {
             break;
           }
 
           message.items.push(CartItem.decode(reader, reader.uint32()));
           continue;
         }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): ReleaseItemsRequest {
-    return {
-      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
-      items: globalThis.Array.isArray(object?.items) ? object.items.map((e: any) => CartItem.fromJSON(e)) : [],
-    };
-  },
-
-  toJSON(message: ReleaseItemsRequest): unknown {
-    const obj: any = {};
-    if (message.orderId !== "") {
-      obj.orderId = message.orderId;
-    }
-    if (message.items?.length) {
-      obj.items = message.items.map((e) => CartItem.toJSON(e));
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<ReleaseItemsRequest>, I>>(base?: I): ReleaseItemsRequest {
-    return ReleaseItemsRequest.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<ReleaseItemsRequest>, I>>(object: I): ReleaseItemsRequest {
-    const message = createBaseReleaseItemsRequest();
-    message.orderId = object.orderId ?? "";
-    message.items = object.items?.map((e) => CartItem.fromPartial(e)) || [];
-    return message;
-  },
-};
-
-function createBaseReleaseItemsResponse(): ReleaseItemsResponse {
-  return { success: false, message: "" };
-}
-
-export const ReleaseItemsResponse: MessageFns<ReleaseItemsResponse> = {
-  encode(message: ReleaseItemsResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.success !== false) {
-      writer.uint32(8).bool(message.success);
-    }
-    if (message.message !== "") {
-      writer.uint32(18).string(message.message);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): ReleaseItemsResponse {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseReleaseItemsResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 8) {
+        case 4: {
+          if (tag !== 34) {
             break;
           }
 
-          message.success = reader.bool();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.message = reader.string();
+          message.issues.push(reader.string());
           continue;
         }
       }
@@ -6669,31 +6571,41 @@ export const ReleaseItemsResponse: MessageFns<ReleaseItemsResponse> = {
     return message;
   },
 
-  fromJSON(object: any): ReleaseItemsResponse {
+  fromJSON(object: any): ValidateCartResponse {
     return {
-      success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
+      valid: isSet(object.valid) ? globalThis.Boolean(object.valid) : false,
       message: isSet(object.message) ? globalThis.String(object.message) : "",
+      items: globalThis.Array.isArray(object?.items) ? object.items.map((e: any) => CartItem.fromJSON(e)) : [],
+      issues: globalThis.Array.isArray(object?.issues) ? object.issues.map((e: any) => globalThis.String(e)) : [],
     };
   },
 
-  toJSON(message: ReleaseItemsResponse): unknown {
+  toJSON(message: ValidateCartResponse): unknown {
     const obj: any = {};
-    if (message.success !== false) {
-      obj.success = message.success;
+    if (message.valid !== false) {
+      obj.valid = message.valid;
     }
     if (message.message !== "") {
       obj.message = message.message;
     }
+    if (message.items?.length) {
+      obj.items = message.items.map((e) => CartItem.toJSON(e));
+    }
+    if (message.issues?.length) {
+      obj.issues = message.issues;
+    }
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<ReleaseItemsResponse>, I>>(base?: I): ReleaseItemsResponse {
-    return ReleaseItemsResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<ValidateCartResponse>, I>>(base?: I): ValidateCartResponse {
+    return ValidateCartResponse.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<ReleaseItemsResponse>, I>>(object: I): ReleaseItemsResponse {
-    const message = createBaseReleaseItemsResponse();
-    message.success = object.success ?? false;
+  fromPartial<I extends Exact<DeepPartial<ValidateCartResponse>, I>>(object: I): ValidateCartResponse {
+    const message = createBaseValidateCartResponse();
+    message.valid = object.valid ?? false;
     message.message = object.message ?? "";
+    message.items = object.items?.map((e) => CartItem.fromPartial(e)) || [];
+    message.issues = object.issues?.map((e) => e) || [];
     return message;
   },
 };
@@ -7006,7 +6918,16 @@ export const GetVariantsForCartResponse: MessageFns<GetVariantsForCartResponse> 
 };
 
 function createBaseVariantCart(): VariantCart {
-  return { id: "", price: 0, image: "", quantity: 0, productName: "", productSlug: "", attributes: [] };
+  return {
+    id: "",
+    price: 0,
+    image: "",
+    quantity: 0,
+    variantName: "",
+    productName: "",
+    productSlug: "",
+    attributes: [],
+  };
 }
 
 export const VariantCart: MessageFns<VariantCart> = {
@@ -7023,14 +6944,17 @@ export const VariantCart: MessageFns<VariantCart> = {
     if (message.quantity !== 0) {
       writer.uint32(32).int32(message.quantity);
     }
+    if (message.variantName !== "") {
+      writer.uint32(42).string(message.variantName);
+    }
     if (message.productName !== "") {
-      writer.uint32(42).string(message.productName);
+      writer.uint32(50).string(message.productName);
     }
     if (message.productSlug !== "") {
-      writer.uint32(50).string(message.productSlug);
+      writer.uint32(58).string(message.productSlug);
     }
     for (const v of message.attributes) {
-      VariantAttribute.encode(v!, writer.uint32(58).fork()).join();
+      VariantAttribute.encode(v!, writer.uint32(66).fork()).join();
     }
     return writer;
   },
@@ -7079,7 +7003,7 @@ export const VariantCart: MessageFns<VariantCart> = {
             break;
           }
 
-          message.productName = reader.string();
+          message.variantName = reader.string();
           continue;
         }
         case 6: {
@@ -7087,11 +7011,19 @@ export const VariantCart: MessageFns<VariantCart> = {
             break;
           }
 
-          message.productSlug = reader.string();
+          message.productName = reader.string();
           continue;
         }
         case 7: {
           if (tag !== 58) {
+            break;
+          }
+
+          message.productSlug = reader.string();
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
             break;
           }
 
@@ -7113,6 +7045,7 @@ export const VariantCart: MessageFns<VariantCart> = {
       price: isSet(object.price) ? globalThis.Number(object.price) : 0,
       image: isSet(object.image) ? globalThis.String(object.image) : "",
       quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
+      variantName: isSet(object.variantName) ? globalThis.String(object.variantName) : "",
       productName: isSet(object.productName) ? globalThis.String(object.productName) : "",
       productSlug: isSet(object.productSlug) ? globalThis.String(object.productSlug) : "",
       attributes: globalThis.Array.isArray(object?.attributes)
@@ -7135,6 +7068,9 @@ export const VariantCart: MessageFns<VariantCart> = {
     if (message.quantity !== 0) {
       obj.quantity = Math.round(message.quantity);
     }
+    if (message.variantName !== "") {
+      obj.variantName = message.variantName;
+    }
     if (message.productName !== "") {
       obj.productName = message.productName;
     }
@@ -7156,6 +7092,7 @@ export const VariantCart: MessageFns<VariantCart> = {
     message.price = object.price ?? 0;
     message.image = object.image ?? "";
     message.quantity = object.quantity ?? 0;
+    message.variantName = object.variantName ?? "";
     message.productName = object.productName ?? "";
     message.productSlug = object.productSlug ?? "";
     message.attributes = object.attributes?.map((e) => VariantAttribute.fromPartial(e)) || [];
@@ -9368,8 +9305,8 @@ function createBaseProductVariant(): ProductVariant {
     id: "",
     sku: "",
     price: 0,
-    quantity: 0,
     lowStockThreshold: 0,
+    stock: undefined,
     warehouseId: "",
     imageIds: [],
     attributes: [],
@@ -9387,11 +9324,11 @@ export const ProductVariant: MessageFns<ProductVariant> = {
     if (message.price !== 0) {
       writer.uint32(29).float(message.price);
     }
-    if (message.quantity !== 0) {
-      writer.uint32(32).int32(message.quantity);
-    }
     if (message.lowStockThreshold !== 0) {
-      writer.uint32(45).float(message.lowStockThreshold);
+      writer.uint32(37).float(message.lowStockThreshold);
+    }
+    if (message.stock !== undefined) {
+      Stock.encode(message.stock, writer.uint32(42).fork()).join();
     }
     if (message.warehouseId !== "") {
       writer.uint32(50).string(message.warehouseId);
@@ -9437,19 +9374,19 @@ export const ProductVariant: MessageFns<ProductVariant> = {
           continue;
         }
         case 4: {
-          if (tag !== 32) {
-            break;
-          }
-
-          message.quantity = reader.int32();
-          continue;
-        }
-        case 5: {
-          if (tag !== 45) {
+          if (tag !== 37) {
             break;
           }
 
           message.lowStockThreshold = reader.float();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.stock = Stock.decode(reader, reader.uint32());
           continue;
         }
         case 6: {
@@ -9490,8 +9427,8 @@ export const ProductVariant: MessageFns<ProductVariant> = {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
       sku: isSet(object.sku) ? globalThis.String(object.sku) : "",
       price: isSet(object.price) ? globalThis.Number(object.price) : 0,
-      quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
       lowStockThreshold: isSet(object.lowStockThreshold) ? globalThis.Number(object.lowStockThreshold) : 0,
+      stock: isSet(object.stock) ? Stock.fromJSON(object.stock) : undefined,
       warehouseId: isSet(object.warehouseId) ? globalThis.String(object.warehouseId) : "",
       imageIds: globalThis.Array.isArray(object?.imageIds) ? object.imageIds.map((e: any) => globalThis.String(e)) : [],
       attributes: globalThis.Array.isArray(object?.attributes)
@@ -9511,11 +9448,11 @@ export const ProductVariant: MessageFns<ProductVariant> = {
     if (message.price !== 0) {
       obj.price = message.price;
     }
-    if (message.quantity !== 0) {
-      obj.quantity = Math.round(message.quantity);
-    }
     if (message.lowStockThreshold !== 0) {
       obj.lowStockThreshold = message.lowStockThreshold;
+    }
+    if (message.stock !== undefined) {
+      obj.stock = Stock.toJSON(message.stock);
     }
     if (message.warehouseId !== "") {
       obj.warehouseId = message.warehouseId;
@@ -9537,11 +9474,87 @@ export const ProductVariant: MessageFns<ProductVariant> = {
     message.id = object.id ?? "";
     message.sku = object.sku ?? "";
     message.price = object.price ?? 0;
-    message.quantity = object.quantity ?? 0;
     message.lowStockThreshold = object.lowStockThreshold ?? 0;
+    message.stock = (object.stock !== undefined && object.stock !== null) ? Stock.fromPartial(object.stock) : undefined;
     message.warehouseId = object.warehouseId ?? "";
     message.imageIds = object.imageIds?.map((e) => e) || [];
     message.attributes = object.attributes?.map((e) => VariantAttribute.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseStock(): Stock {
+  return { quantity: 0, reserved: 0 };
+}
+
+export const Stock: MessageFns<Stock> = {
+  encode(message: Stock, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.quantity !== 0) {
+      writer.uint32(8).int32(message.quantity);
+    }
+    if (message.reserved !== 0) {
+      writer.uint32(16).int32(message.reserved);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Stock {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseStock();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.quantity = reader.int32();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.reserved = reader.int32();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Stock {
+    return {
+      quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
+      reserved: isSet(object.reserved) ? globalThis.Number(object.reserved) : 0,
+    };
+  },
+
+  toJSON(message: Stock): unknown {
+    const obj: any = {};
+    if (message.quantity !== 0) {
+      obj.quantity = Math.round(message.quantity);
+    }
+    if (message.reserved !== 0) {
+      obj.reserved = Math.round(message.reserved);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Stock>, I>>(base?: I): Stock {
+    return Stock.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Stock>, I>>(object: I): Stock {
+    const message = createBaseStock();
+    message.quantity = object.quantity ?? 0;
+    message.reserved = object.reserved ?? 0;
     return message;
   },
 };
@@ -12530,288 +12543,6 @@ export const CurrencyConversionRequest: MessageFns<CurrencyConversionRequest> = 
   },
 };
 
-function createBaseOrderItem(): OrderItem {
-  return { item: undefined, cost: undefined };
-}
-
-export const OrderItem: MessageFns<OrderItem> = {
-  encode(message: OrderItem, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.item !== undefined) {
-      CartItem.encode(message.item, writer.uint32(10).fork()).join();
-    }
-    if (message.cost !== undefined) {
-      Money.encode(message.cost, writer.uint32(18).fork()).join();
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): OrderItem {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseOrderItem();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.item = CartItem.decode(reader, reader.uint32());
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.cost = Money.decode(reader, reader.uint32());
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): OrderItem {
-    return {
-      item: isSet(object.item) ? CartItem.fromJSON(object.item) : undefined,
-      cost: isSet(object.cost) ? Money.fromJSON(object.cost) : undefined,
-    };
-  },
-
-  toJSON(message: OrderItem): unknown {
-    const obj: any = {};
-    if (message.item !== undefined) {
-      obj.item = CartItem.toJSON(message.item);
-    }
-    if (message.cost !== undefined) {
-      obj.cost = Money.toJSON(message.cost);
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<OrderItem>, I>>(base?: I): OrderItem {
-    return OrderItem.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<OrderItem>, I>>(object: I): OrderItem {
-    const message = createBaseOrderItem();
-    message.item = (object.item !== undefined && object.item !== null) ? CartItem.fromPartial(object.item) : undefined;
-    message.cost = (object.cost !== undefined && object.cost !== null) ? Money.fromPartial(object.cost) : undefined;
-    return message;
-  },
-};
-
-function createBaseOrderResult(): OrderResult {
-  return { orderId: "", shippingTrackingId: "", shippingCost: undefined, shippingAddress: undefined, items: [] };
-}
-
-export const OrderResult: MessageFns<OrderResult> = {
-  encode(message: OrderResult, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.orderId !== "") {
-      writer.uint32(10).string(message.orderId);
-    }
-    if (message.shippingTrackingId !== "") {
-      writer.uint32(18).string(message.shippingTrackingId);
-    }
-    if (message.shippingCost !== undefined) {
-      Money.encode(message.shippingCost, writer.uint32(26).fork()).join();
-    }
-    if (message.shippingAddress !== undefined) {
-      Address.encode(message.shippingAddress, writer.uint32(34).fork()).join();
-    }
-    for (const v of message.items) {
-      OrderItem.encode(v!, writer.uint32(42).fork()).join();
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): OrderResult {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseOrderResult();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.orderId = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.shippingTrackingId = reader.string();
-          continue;
-        }
-        case 3: {
-          if (tag !== 26) {
-            break;
-          }
-
-          message.shippingCost = Money.decode(reader, reader.uint32());
-          continue;
-        }
-        case 4: {
-          if (tag !== 34) {
-            break;
-          }
-
-          message.shippingAddress = Address.decode(reader, reader.uint32());
-          continue;
-        }
-        case 5: {
-          if (tag !== 42) {
-            break;
-          }
-
-          message.items.push(OrderItem.decode(reader, reader.uint32()));
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): OrderResult {
-    return {
-      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
-      shippingTrackingId: isSet(object.shippingTrackingId) ? globalThis.String(object.shippingTrackingId) : "",
-      shippingCost: isSet(object.shippingCost) ? Money.fromJSON(object.shippingCost) : undefined,
-      shippingAddress: isSet(object.shippingAddress) ? Address.fromJSON(object.shippingAddress) : undefined,
-      items: globalThis.Array.isArray(object?.items) ? object.items.map((e: any) => OrderItem.fromJSON(e)) : [],
-    };
-  },
-
-  toJSON(message: OrderResult): unknown {
-    const obj: any = {};
-    if (message.orderId !== "") {
-      obj.orderId = message.orderId;
-    }
-    if (message.shippingTrackingId !== "") {
-      obj.shippingTrackingId = message.shippingTrackingId;
-    }
-    if (message.shippingCost !== undefined) {
-      obj.shippingCost = Money.toJSON(message.shippingCost);
-    }
-    if (message.shippingAddress !== undefined) {
-      obj.shippingAddress = Address.toJSON(message.shippingAddress);
-    }
-    if (message.items?.length) {
-      obj.items = message.items.map((e) => OrderItem.toJSON(e));
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<OrderResult>, I>>(base?: I): OrderResult {
-    return OrderResult.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<OrderResult>, I>>(object: I): OrderResult {
-    const message = createBaseOrderResult();
-    message.orderId = object.orderId ?? "";
-    message.shippingTrackingId = object.shippingTrackingId ?? "";
-    message.shippingCost = (object.shippingCost !== undefined && object.shippingCost !== null)
-      ? Money.fromPartial(object.shippingCost)
-      : undefined;
-    message.shippingAddress = (object.shippingAddress !== undefined && object.shippingAddress !== null)
-      ? Address.fromPartial(object.shippingAddress)
-      : undefined;
-    message.items = object.items?.map((e) => OrderItem.fromPartial(e)) || [];
-    return message;
-  },
-};
-
-function createBaseSendOrderConfirmationRequest(): SendOrderConfirmationRequest {
-  return { email: "", order: undefined };
-}
-
-export const SendOrderConfirmationRequest: MessageFns<SendOrderConfirmationRequest> = {
-  encode(message: SendOrderConfirmationRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.email !== "") {
-      writer.uint32(10).string(message.email);
-    }
-    if (message.order !== undefined) {
-      OrderResult.encode(message.order, writer.uint32(18).fork()).join();
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): SendOrderConfirmationRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseSendOrderConfirmationRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.email = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.order = OrderResult.decode(reader, reader.uint32());
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): SendOrderConfirmationRequest {
-    return {
-      email: isSet(object.email) ? globalThis.String(object.email) : "",
-      order: isSet(object.order) ? OrderResult.fromJSON(object.order) : undefined,
-    };
-  },
-
-  toJSON(message: SendOrderConfirmationRequest): unknown {
-    const obj: any = {};
-    if (message.email !== "") {
-      obj.email = message.email;
-    }
-    if (message.order !== undefined) {
-      obj.order = OrderResult.toJSON(message.order);
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<SendOrderConfirmationRequest>, I>>(base?: I): SendOrderConfirmationRequest {
-    return SendOrderConfirmationRequest.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<SendOrderConfirmationRequest>, I>>(object: I): SendOrderConfirmationRequest {
-    const message = createBaseSendOrderConfirmationRequest();
-    message.email = object.email ?? "";
-    message.order = (object.order !== undefined && object.order !== null)
-      ? OrderResult.fromPartial(object.order)
-      : undefined;
-    return message;
-  },
-};
-
 function createBaseSendOTPResetPasswordRequest(): SendOTPResetPasswordRequest {
   return { email: "", verificationCode: "" };
 }
@@ -13821,7 +13552,7 @@ export const HealthCheckResponse: MessageFns<HealthCheckResponse> = {
 };
 
 function createBaseCreateOrderRequest(): CreateOrderRequest {
-  return { userId: "", currencyCode: "", items: [], shippingAddress: undefined };
+  return { userId: "", currencyCode: "", totalAmount: 0, items: [], shippingAddressId: "" };
 }
 
 export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
@@ -13832,11 +13563,14 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
     if (message.currencyCode !== "") {
       writer.uint32(18).string(message.currencyCode);
     }
-    for (const v of message.items) {
-      CartItem.encode(v!, writer.uint32(26).fork()).join();
+    if (message.totalAmount !== 0) {
+      writer.uint32(25).double(message.totalAmount);
     }
-    if (message.shippingAddress !== undefined) {
-      Address.encode(message.shippingAddress, writer.uint32(34).fork()).join();
+    for (const v of message.items) {
+      CartItem.encode(v!, writer.uint32(34).fork()).join();
+    }
+    if (message.shippingAddressId !== "") {
+      writer.uint32(42).string(message.shippingAddressId);
     }
     return writer;
   },
@@ -13865,11 +13599,11 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
           continue;
         }
         case 3: {
-          if (tag !== 26) {
+          if (tag !== 25) {
             break;
           }
 
-          message.items.push(CartItem.decode(reader, reader.uint32()));
+          message.totalAmount = reader.double();
           continue;
         }
         case 4: {
@@ -13877,7 +13611,15 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
             break;
           }
 
-          message.shippingAddress = Address.decode(reader, reader.uint32());
+          message.items.push(CartItem.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.shippingAddressId = reader.string();
           continue;
         }
       }
@@ -13893,8 +13635,9 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
     return {
       userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
       currencyCode: isSet(object.currencyCode) ? globalThis.String(object.currencyCode) : "",
+      totalAmount: isSet(object.totalAmount) ? globalThis.Number(object.totalAmount) : 0,
       items: globalThis.Array.isArray(object?.items) ? object.items.map((e: any) => CartItem.fromJSON(e)) : [],
-      shippingAddress: isSet(object.shippingAddress) ? Address.fromJSON(object.shippingAddress) : undefined,
+      shippingAddressId: isSet(object.shippingAddressId) ? globalThis.String(object.shippingAddressId) : "",
     };
   },
 
@@ -13906,11 +13649,14 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
     if (message.currencyCode !== "") {
       obj.currencyCode = message.currencyCode;
     }
+    if (message.totalAmount !== 0) {
+      obj.totalAmount = message.totalAmount;
+    }
     if (message.items?.length) {
       obj.items = message.items.map((e) => CartItem.toJSON(e));
     }
-    if (message.shippingAddress !== undefined) {
-      obj.shippingAddress = Address.toJSON(message.shippingAddress);
+    if (message.shippingAddressId !== "") {
+      obj.shippingAddressId = message.shippingAddressId;
     }
     return obj;
   },
@@ -13922,16 +13668,15 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
     const message = createBaseCreateOrderRequest();
     message.userId = object.userId ?? "";
     message.currencyCode = object.currencyCode ?? "";
+    message.totalAmount = object.totalAmount ?? 0;
     message.items = object.items?.map((e) => CartItem.fromPartial(e)) || [];
-    message.shippingAddress = (object.shippingAddress !== undefined && object.shippingAddress !== null)
-      ? Address.fromPartial(object.shippingAddress)
-      : undefined;
+    message.shippingAddressId = object.shippingAddressId ?? "";
     return message;
   },
 };
 
 function createBaseCreateOrderResponse(): CreateOrderResponse {
-  return { orderId: "", status: 0, message: "" };
+  return { orderId: "", status: 0 };
 }
 
 export const CreateOrderResponse: MessageFns<CreateOrderResponse> = {
@@ -13941,9 +13686,6 @@ export const CreateOrderResponse: MessageFns<CreateOrderResponse> = {
     }
     if (message.status !== 0) {
       writer.uint32(16).int32(message.status);
-    }
-    if (message.message !== "") {
-      writer.uint32(26).string(message.message);
     }
     return writer;
   },
@@ -13971,14 +13713,6 @@ export const CreateOrderResponse: MessageFns<CreateOrderResponse> = {
           message.status = reader.int32() as any;
           continue;
         }
-        case 3: {
-          if (tag !== 26) {
-            break;
-          }
-
-          message.message = reader.string();
-          continue;
-        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -13992,7 +13726,6 @@ export const CreateOrderResponse: MessageFns<CreateOrderResponse> = {
     return {
       orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
       status: isSet(object.status) ? orderStatusFromJSON(object.status) : 0,
-      message: isSet(object.message) ? globalThis.String(object.message) : "",
     };
   },
 
@@ -14004,9 +13737,6 @@ export const CreateOrderResponse: MessageFns<CreateOrderResponse> = {
     if (message.status !== 0) {
       obj.status = orderStatusToJSON(message.status);
     }
-    if (message.message !== "") {
-      obj.message = message.message;
-    }
     return obj;
   },
 
@@ -14017,7 +13747,6 @@ export const CreateOrderResponse: MessageFns<CreateOrderResponse> = {
     const message = createBaseCreateOrderResponse();
     message.orderId = object.orderId ?? "";
     message.status = object.status ?? 0;
-    message.message = object.message ?? "";
     return message;
   },
 };
@@ -14081,11 +13810,631 @@ export const GetOrderStatusRequest: MessageFns<GetOrderStatusRequest> = {
 };
 
 function createBaseGetOrderStatusResponse(): GetOrderStatusResponse {
-  return { orderId: "", status: 0, steps: [], message: "" };
+  return { status: 0 };
 }
 
 export const GetOrderStatusResponse: MessageFns<GetOrderStatusResponse> = {
   encode(message: GetOrderStatusResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.status !== 0) {
+      writer.uint32(8).int32(message.status);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetOrderStatusResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetOrderStatusResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.status = reader.int32() as any;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetOrderStatusResponse {
+    return { status: isSet(object.status) ? orderStatusFromJSON(object.status) : 0 };
+  },
+
+  toJSON(message: GetOrderStatusResponse): unknown {
+    const obj: any = {};
+    if (message.status !== 0) {
+      obj.status = orderStatusToJSON(message.status);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetOrderStatusResponse>, I>>(base?: I): GetOrderStatusResponse {
+    return GetOrderStatusResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetOrderStatusResponse>, I>>(object: I): GetOrderStatusResponse {
+    const message = createBaseGetOrderStatusResponse();
+    message.status = object.status ?? 0;
+    return message;
+  },
+};
+
+function createBaseGetOrderRequest(): GetOrderRequest {
+  return { orderId: "" };
+}
+
+export const GetOrderRequest: MessageFns<GetOrderRequest> = {
+  encode(message: GetOrderRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetOrderRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetOrderRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetOrderRequest {
+    return { orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "" };
+  },
+
+  toJSON(message: GetOrderRequest): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetOrderRequest>, I>>(base?: I): GetOrderRequest {
+    return GetOrderRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetOrderRequest>, I>>(object: I): GetOrderRequest {
+    const message = createBaseGetOrderRequest();
+    message.orderId = object.orderId ?? "";
+    return message;
+  },
+};
+
+function createBaseGetOrderResponse(): GetOrderResponse {
+  return { order: undefined };
+}
+
+export const GetOrderResponse: MessageFns<GetOrderResponse> = {
+  encode(message: GetOrderResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.order !== undefined) {
+      Order.encode(message.order, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetOrderResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetOrderResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.order = Order.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetOrderResponse {
+    return { order: isSet(object.order) ? Order.fromJSON(object.order) : undefined };
+  },
+
+  toJSON(message: GetOrderResponse): unknown {
+    const obj: any = {};
+    if (message.order !== undefined) {
+      obj.order = Order.toJSON(message.order);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetOrderResponse>, I>>(base?: I): GetOrderResponse {
+    return GetOrderResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetOrderResponse>, I>>(object: I): GetOrderResponse {
+    const message = createBaseGetOrderResponse();
+    message.order = (object.order !== undefined && object.order !== null) ? Order.fromPartial(object.order) : undefined;
+    return message;
+  },
+};
+
+function createBaseOrder(): Order {
+  return {
+    id: "",
+    userId: "",
+    status: "",
+    totalAmount: 0,
+    shippingAddressId: "",
+    items: [],
+    paymentId: "",
+    createdAt: "",
+    updatedAt: "",
+  };
+}
+
+export const Order: MessageFns<Order> = {
+  encode(message: Order, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.userId !== "") {
+      writer.uint32(18).string(message.userId);
+    }
+    if (message.status !== "") {
+      writer.uint32(26).string(message.status);
+    }
+    if (message.totalAmount !== 0) {
+      writer.uint32(33).double(message.totalAmount);
+    }
+    if (message.shippingAddressId !== "") {
+      writer.uint32(42).string(message.shippingAddressId);
+    }
+    for (const v of message.items) {
+      OrderItem.encode(v!, writer.uint32(50).fork()).join();
+    }
+    if (message.paymentId !== "") {
+      writer.uint32(58).string(message.paymentId);
+    }
+    if (message.createdAt !== "") {
+      writer.uint32(66).string(message.createdAt);
+    }
+    if (message.updatedAt !== "") {
+      writer.uint32(74).string(message.updatedAt);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Order {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOrder();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.status = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 33) {
+            break;
+          }
+
+          message.totalAmount = reader.double();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.shippingAddressId = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.items.push(OrderItem.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.paymentId = reader.string();
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.createdAt = reader.string();
+          continue;
+        }
+        case 9: {
+          if (tag !== 74) {
+            break;
+          }
+
+          message.updatedAt = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Order {
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
+      status: isSet(object.status) ? globalThis.String(object.status) : "",
+      totalAmount: isSet(object.totalAmount) ? globalThis.Number(object.totalAmount) : 0,
+      shippingAddressId: isSet(object.shippingAddressId) ? globalThis.String(object.shippingAddressId) : "",
+      items: globalThis.Array.isArray(object?.items) ? object.items.map((e: any) => OrderItem.fromJSON(e)) : [],
+      paymentId: isSet(object.paymentId) ? globalThis.String(object.paymentId) : "",
+      createdAt: isSet(object.createdAt) ? globalThis.String(object.createdAt) : "",
+      updatedAt: isSet(object.updatedAt) ? globalThis.String(object.updatedAt) : "",
+    };
+  },
+
+  toJSON(message: Order): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    if (message.status !== "") {
+      obj.status = message.status;
+    }
+    if (message.totalAmount !== 0) {
+      obj.totalAmount = message.totalAmount;
+    }
+    if (message.shippingAddressId !== "") {
+      obj.shippingAddressId = message.shippingAddressId;
+    }
+    if (message.items?.length) {
+      obj.items = message.items.map((e) => OrderItem.toJSON(e));
+    }
+    if (message.paymentId !== "") {
+      obj.paymentId = message.paymentId;
+    }
+    if (message.createdAt !== "") {
+      obj.createdAt = message.createdAt;
+    }
+    if (message.updatedAt !== "") {
+      obj.updatedAt = message.updatedAt;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Order>, I>>(base?: I): Order {
+    return Order.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Order>, I>>(object: I): Order {
+    const message = createBaseOrder();
+    message.id = object.id ?? "";
+    message.userId = object.userId ?? "";
+    message.status = object.status ?? "";
+    message.totalAmount = object.totalAmount ?? 0;
+    message.shippingAddressId = object.shippingAddressId ?? "";
+    message.items = object.items?.map((e) => OrderItem.fromPartial(e)) || [];
+    message.paymentId = object.paymentId ?? "";
+    message.createdAt = object.createdAt ?? "";
+    message.updatedAt = object.updatedAt ?? "";
+    return message;
+  },
+};
+
+function createBaseOrderItem(): OrderItem {
+  return { id: "", variantId: "", quantity: 0, price: 0, name: "", sku: "", createdAt: "", updatedAt: "" };
+}
+
+export const OrderItem: MessageFns<OrderItem> = {
+  encode(message: OrderItem, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.variantId !== "") {
+      writer.uint32(18).string(message.variantId);
+    }
+    if (message.quantity !== 0) {
+      writer.uint32(24).int32(message.quantity);
+    }
+    if (message.price !== 0) {
+      writer.uint32(33).double(message.price);
+    }
+    if (message.name !== "") {
+      writer.uint32(42).string(message.name);
+    }
+    if (message.sku !== "") {
+      writer.uint32(50).string(message.sku);
+    }
+    if (message.createdAt !== "") {
+      writer.uint32(58).string(message.createdAt);
+    }
+    if (message.updatedAt !== "") {
+      writer.uint32(66).string(message.updatedAt);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): OrderItem {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOrderItem();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.variantId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.quantity = reader.int32();
+          continue;
+        }
+        case 4: {
+          if (tag !== 33) {
+            break;
+          }
+
+          message.price = reader.double();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.sku = reader.string();
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.createdAt = reader.string();
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.updatedAt = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): OrderItem {
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      variantId: isSet(object.variantId) ? globalThis.String(object.variantId) : "",
+      quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
+      price: isSet(object.price) ? globalThis.Number(object.price) : 0,
+      name: isSet(object.name) ? globalThis.String(object.name) : "",
+      sku: isSet(object.sku) ? globalThis.String(object.sku) : "",
+      createdAt: isSet(object.createdAt) ? globalThis.String(object.createdAt) : "",
+      updatedAt: isSet(object.updatedAt) ? globalThis.String(object.updatedAt) : "",
+    };
+  },
+
+  toJSON(message: OrderItem): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.variantId !== "") {
+      obj.variantId = message.variantId;
+    }
+    if (message.quantity !== 0) {
+      obj.quantity = Math.round(message.quantity);
+    }
+    if (message.price !== 0) {
+      obj.price = message.price;
+    }
+    if (message.name !== "") {
+      obj.name = message.name;
+    }
+    if (message.sku !== "") {
+      obj.sku = message.sku;
+    }
+    if (message.createdAt !== "") {
+      obj.createdAt = message.createdAt;
+    }
+    if (message.updatedAt !== "") {
+      obj.updatedAt = message.updatedAt;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<OrderItem>, I>>(base?: I): OrderItem {
+    return OrderItem.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<OrderItem>, I>>(object: I): OrderItem {
+    const message = createBaseOrderItem();
+    message.id = object.id ?? "";
+    message.variantId = object.variantId ?? "";
+    message.quantity = object.quantity ?? 0;
+    message.price = object.price ?? 0;
+    message.name = object.name ?? "";
+    message.sku = object.sku ?? "";
+    message.createdAt = object.createdAt ?? "";
+    message.updatedAt = object.updatedAt ?? "";
+    return message;
+  },
+};
+
+function createBaseUpdateOrderStatusRequest(): UpdateOrderStatusRequest {
+  return { orderId: "", status: 0 };
+}
+
+export const UpdateOrderStatusRequest: MessageFns<UpdateOrderStatusRequest> = {
+  encode(message: UpdateOrderStatusRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    if (message.status !== 0) {
+      writer.uint32(16).int32(message.status);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): UpdateOrderStatusRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUpdateOrderStatusRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.status = reader.int32() as any;
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): UpdateOrderStatusRequest {
+    return {
+      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
+      status: isSet(object.status) ? orderStatusFromJSON(object.status) : 0,
+    };
+  },
+
+  toJSON(message: UpdateOrderStatusRequest): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.status !== 0) {
+      obj.status = orderStatusToJSON(message.status);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<UpdateOrderStatusRequest>, I>>(base?: I): UpdateOrderStatusRequest {
+    return UpdateOrderStatusRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<UpdateOrderStatusRequest>, I>>(object: I): UpdateOrderStatusRequest {
+    const message = createBaseUpdateOrderStatusRequest();
+    message.orderId = object.orderId ?? "";
+    message.status = object.status ?? 0;
+    return message;
+  },
+};
+
+function createBaseUpdateOrderStatusResponse(): UpdateOrderStatusResponse {
+  return { orderId: "", status: 0, steps: [], message: "" };
+}
+
+export const UpdateOrderStatusResponse: MessageFns<UpdateOrderStatusResponse> = {
+  encode(message: UpdateOrderStatusResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.orderId !== "") {
       writer.uint32(10).string(message.orderId);
     }
@@ -14101,10 +14450,10 @@ export const GetOrderStatusResponse: MessageFns<GetOrderStatusResponse> = {
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): GetOrderStatusResponse {
+  decode(input: BinaryReader | Uint8Array, length?: number): UpdateOrderStatusResponse {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGetOrderStatusResponse();
+    const message = createBaseUpdateOrderStatusResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -14149,7 +14498,7 @@ export const GetOrderStatusResponse: MessageFns<GetOrderStatusResponse> = {
     return message;
   },
 
-  fromJSON(object: any): GetOrderStatusResponse {
+  fromJSON(object: any): UpdateOrderStatusResponse {
     return {
       orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
       status: isSet(object.status) ? orderStatusFromJSON(object.status) : 0,
@@ -14158,7 +14507,7 @@ export const GetOrderStatusResponse: MessageFns<GetOrderStatusResponse> = {
     };
   },
 
-  toJSON(message: GetOrderStatusResponse): unknown {
+  toJSON(message: UpdateOrderStatusResponse): unknown {
     const obj: any = {};
     if (message.orderId !== "") {
       obj.orderId = message.orderId;
@@ -14175,11 +14524,11 @@ export const GetOrderStatusResponse: MessageFns<GetOrderStatusResponse> = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<GetOrderStatusResponse>, I>>(base?: I): GetOrderStatusResponse {
-    return GetOrderStatusResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<UpdateOrderStatusResponse>, I>>(base?: I): UpdateOrderStatusResponse {
+    return UpdateOrderStatusResponse.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<GetOrderStatusResponse>, I>>(object: I): GetOrderStatusResponse {
-    const message = createBaseGetOrderStatusResponse();
+  fromPartial<I extends Exact<DeepPartial<UpdateOrderStatusResponse>, I>>(object: I): UpdateOrderStatusResponse {
+    const message = createBaseUpdateOrderStatusResponse();
     message.orderId = object.orderId ?? "";
     message.status = object.status ?? 0;
     message.steps = object.steps?.map((e) => OrderStep.fromPartial(e)) || [];
@@ -14446,14 +14795,14 @@ export const OrderStep: MessageFns<OrderStep> = {
   },
 };
 
-function createBaseReserveStockRequest(): ReserveStockRequest {
-  return { orderId: "", variants: [] };
+function createBaseValidateAndReserveRequest(): ValidateAndReserveRequest {
+  return { userId: "", variants: [] };
 }
 
-export const ReserveStockRequest: MessageFns<ReserveStockRequest> = {
-  encode(message: ReserveStockRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.orderId !== "") {
-      writer.uint32(10).string(message.orderId);
+export const ValidateAndReserveRequest: MessageFns<ValidateAndReserveRequest> = {
+  encode(message: ValidateAndReserveRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
     }
     for (const v of message.variants) {
       ProductVariant.encode(v!, writer.uint32(18).fork()).join();
@@ -14461,10 +14810,10 @@ export const ReserveStockRequest: MessageFns<ReserveStockRequest> = {
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): ReserveStockRequest {
+  decode(input: BinaryReader | Uint8Array, length?: number): ValidateAndReserveRequest {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseReserveStockRequest();
+    const message = createBaseValidateAndReserveRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -14473,7 +14822,7 @@ export const ReserveStockRequest: MessageFns<ReserveStockRequest> = {
             break;
           }
 
-          message.orderId = reader.string();
+          message.userId = reader.string();
           continue;
         }
         case 2: {
@@ -14493,19 +14842,19 @@ export const ReserveStockRequest: MessageFns<ReserveStockRequest> = {
     return message;
   },
 
-  fromJSON(object: any): ReserveStockRequest {
+  fromJSON(object: any): ValidateAndReserveRequest {
     return {
-      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
+      userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
       variants: globalThis.Array.isArray(object?.variants)
         ? object.variants.map((e: any) => ProductVariant.fromJSON(e))
         : [],
     };
   },
 
-  toJSON(message: ReserveStockRequest): unknown {
+  toJSON(message: ValidateAndReserveRequest): unknown {
     const obj: any = {};
-    if (message.orderId !== "") {
-      obj.orderId = message.orderId;
+    if (message.userId !== "") {
+      obj.userId = message.userId;
     }
     if (message.variants?.length) {
       obj.variants = message.variants.map((e) => ProductVariant.toJSON(e));
@@ -14513,23 +14862,251 @@ export const ReserveStockRequest: MessageFns<ReserveStockRequest> = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<ReserveStockRequest>, I>>(base?: I): ReserveStockRequest {
-    return ReserveStockRequest.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<ValidateAndReserveRequest>, I>>(base?: I): ValidateAndReserveRequest {
+    return ValidateAndReserveRequest.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<ReserveStockRequest>, I>>(object: I): ReserveStockRequest {
-    const message = createBaseReserveStockRequest();
-    message.orderId = object.orderId ?? "";
+  fromPartial<I extends Exact<DeepPartial<ValidateAndReserveRequest>, I>>(object: I): ValidateAndReserveRequest {
+    const message = createBaseValidateAndReserveRequest();
+    message.userId = object.userId ?? "";
     message.variants = object.variants?.map((e) => ProductVariant.fromPartial(e)) || [];
     return message;
   },
 };
 
-function createBaseReserveStockResponse(): ReserveStockResponse {
+function createBaseValidateAndReserveResponse(): ValidateAndReserveResponse {
+  return { success: false, reservationId: "", validationErrors: [] };
+}
+
+export const ValidateAndReserveResponse: MessageFns<ValidateAndReserveResponse> = {
+  encode(message: ValidateAndReserveResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    if (message.reservationId !== "") {
+      writer.uint32(18).string(message.reservationId);
+    }
+    for (const v of message.validationErrors) {
+      ValidationError.encode(v!, writer.uint32(26).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ValidateAndReserveResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseValidateAndReserveResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.reservationId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.validationErrors.push(ValidationError.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ValidateAndReserveResponse {
+    return {
+      success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
+      reservationId: isSet(object.reservationId) ? globalThis.String(object.reservationId) : "",
+      validationErrors: globalThis.Array.isArray(object?.validationErrors)
+        ? object.validationErrors.map((e: any) => ValidationError.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: ValidateAndReserveResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    if (message.reservationId !== "") {
+      obj.reservationId = message.reservationId;
+    }
+    if (message.validationErrors?.length) {
+      obj.validationErrors = message.validationErrors.map((e) => ValidationError.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ValidateAndReserveResponse>, I>>(base?: I): ValidateAndReserveResponse {
+    return ValidateAndReserveResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ValidateAndReserveResponse>, I>>(object: I): ValidateAndReserveResponse {
+    const message = createBaseValidateAndReserveResponse();
+    message.success = object.success ?? false;
+    message.reservationId = object.reservationId ?? "";
+    message.validationErrors = object.validationErrors?.map((e) => ValidationError.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseValidationError(): ValidationError {
+  return { variantId: "", error: "" };
+}
+
+export const ValidationError: MessageFns<ValidationError> = {
+  encode(message: ValidationError, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.variantId !== "") {
+      writer.uint32(10).string(message.variantId);
+    }
+    if (message.error !== "") {
+      writer.uint32(18).string(message.error);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ValidationError {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseValidationError();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.variantId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.error = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ValidationError {
+    return {
+      variantId: isSet(object.variantId) ? globalThis.String(object.variantId) : "",
+      error: isSet(object.error) ? globalThis.String(object.error) : "",
+    };
+  },
+
+  toJSON(message: ValidationError): unknown {
+    const obj: any = {};
+    if (message.variantId !== "") {
+      obj.variantId = message.variantId;
+    }
+    if (message.error !== "") {
+      obj.error = message.error;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ValidationError>, I>>(base?: I): ValidationError {
+    return ValidationError.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ValidationError>, I>>(object: I): ValidationError {
+    const message = createBaseValidationError();
+    message.variantId = object.variantId ?? "";
+    message.error = object.error ?? "";
+    return message;
+  },
+};
+
+function createBaseReleaseReservationRequest(): ReleaseReservationRequest {
+  return { reservationId: "" };
+}
+
+export const ReleaseReservationRequest: MessageFns<ReleaseReservationRequest> = {
+  encode(message: ReleaseReservationRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.reservationId !== "") {
+      writer.uint32(10).string(message.reservationId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ReleaseReservationRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseReleaseReservationRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.reservationId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ReleaseReservationRequest {
+    return { reservationId: isSet(object.reservationId) ? globalThis.String(object.reservationId) : "" };
+  },
+
+  toJSON(message: ReleaseReservationRequest): unknown {
+    const obj: any = {};
+    if (message.reservationId !== "") {
+      obj.reservationId = message.reservationId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ReleaseReservationRequest>, I>>(base?: I): ReleaseReservationRequest {
+    return ReleaseReservationRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ReleaseReservationRequest>, I>>(object: I): ReleaseReservationRequest {
+    const message = createBaseReleaseReservationRequest();
+    message.reservationId = object.reservationId ?? "";
+    return message;
+  },
+};
+
+function createBaseReleaseReservationResponse(): ReleaseReservationResponse {
   return { success: false, message: "" };
 }
 
-export const ReserveStockResponse: MessageFns<ReserveStockResponse> = {
-  encode(message: ReserveStockResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const ReleaseReservationResponse: MessageFns<ReleaseReservationResponse> = {
+  encode(message: ReleaseReservationResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.success !== false) {
       writer.uint32(8).bool(message.success);
     }
@@ -14539,10 +15116,10 @@ export const ReserveStockResponse: MessageFns<ReserveStockResponse> = {
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): ReserveStockResponse {
+  decode(input: BinaryReader | Uint8Array, length?: number): ReleaseReservationResponse {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseReserveStockResponse();
+    const message = createBaseReleaseReservationResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -14571,14 +15148,14 @@ export const ReserveStockResponse: MessageFns<ReserveStockResponse> = {
     return message;
   },
 
-  fromJSON(object: any): ReserveStockResponse {
+  fromJSON(object: any): ReleaseReservationResponse {
     return {
       success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
       message: isSet(object.message) ? globalThis.String(object.message) : "",
     };
   },
 
-  toJSON(message: ReserveStockResponse): unknown {
+  toJSON(message: ReleaseReservationResponse): unknown {
     const obj: any = {};
     if (message.success !== false) {
       obj.success = message.success;
@@ -14589,36 +15166,33 @@ export const ReserveStockResponse: MessageFns<ReserveStockResponse> = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<ReserveStockResponse>, I>>(base?: I): ReserveStockResponse {
-    return ReserveStockResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<ReleaseReservationResponse>, I>>(base?: I): ReleaseReservationResponse {
+    return ReleaseReservationResponse.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<ReserveStockResponse>, I>>(object: I): ReserveStockResponse {
-    const message = createBaseReserveStockResponse();
+  fromPartial<I extends Exact<DeepPartial<ReleaseReservationResponse>, I>>(object: I): ReleaseReservationResponse {
+    const message = createBaseReleaseReservationResponse();
     message.success = object.success ?? false;
     message.message = object.message ?? "";
     return message;
   },
 };
 
-function createBaseReleaseStockRequest(): ReleaseStockRequest {
-  return { orderId: "", variants: [] };
+function createBaseCommitReservationRequest(): CommitReservationRequest {
+  return { reservationId: "" };
 }
 
-export const ReleaseStockRequest: MessageFns<ReleaseStockRequest> = {
-  encode(message: ReleaseStockRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.orderId !== "") {
-      writer.uint32(10).string(message.orderId);
-    }
-    for (const v of message.variants) {
-      ProductVariant.encode(v!, writer.uint32(18).fork()).join();
+export const CommitReservationRequest: MessageFns<CommitReservationRequest> = {
+  encode(message: CommitReservationRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.reservationId !== "") {
+      writer.uint32(10).string(message.reservationId);
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): ReleaseStockRequest {
+  decode(input: BinaryReader | Uint8Array, length?: number): CommitReservationRequest {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseReleaseStockRequest();
+    const message = createBaseCommitReservationRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -14627,15 +15201,7 @@ export const ReleaseStockRequest: MessageFns<ReleaseStockRequest> = {
             break;
           }
 
-          message.orderId = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.variants.push(ProductVariant.decode(reader, reader.uint32()));
+          message.reservationId = reader.string();
           continue;
         }
       }
@@ -14647,43 +15213,34 @@ export const ReleaseStockRequest: MessageFns<ReleaseStockRequest> = {
     return message;
   },
 
-  fromJSON(object: any): ReleaseStockRequest {
-    return {
-      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
-      variants: globalThis.Array.isArray(object?.variants)
-        ? object.variants.map((e: any) => ProductVariant.fromJSON(e))
-        : [],
-    };
+  fromJSON(object: any): CommitReservationRequest {
+    return { reservationId: isSet(object.reservationId) ? globalThis.String(object.reservationId) : "" };
   },
 
-  toJSON(message: ReleaseStockRequest): unknown {
+  toJSON(message: CommitReservationRequest): unknown {
     const obj: any = {};
-    if (message.orderId !== "") {
-      obj.orderId = message.orderId;
-    }
-    if (message.variants?.length) {
-      obj.variants = message.variants.map((e) => ProductVariant.toJSON(e));
+    if (message.reservationId !== "") {
+      obj.reservationId = message.reservationId;
     }
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<ReleaseStockRequest>, I>>(base?: I): ReleaseStockRequest {
-    return ReleaseStockRequest.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<CommitReservationRequest>, I>>(base?: I): CommitReservationRequest {
+    return CommitReservationRequest.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<ReleaseStockRequest>, I>>(object: I): ReleaseStockRequest {
-    const message = createBaseReleaseStockRequest();
-    message.orderId = object.orderId ?? "";
-    message.variants = object.variants?.map((e) => ProductVariant.fromPartial(e)) || [];
+  fromPartial<I extends Exact<DeepPartial<CommitReservationRequest>, I>>(object: I): CommitReservationRequest {
+    const message = createBaseCommitReservationRequest();
+    message.reservationId = object.reservationId ?? "";
     return message;
   },
 };
 
-function createBaseReleaseStockResponse(): ReleaseStockResponse {
+function createBaseCommitReservationResponse(): CommitReservationResponse {
   return { success: false, message: "" };
 }
 
-export const ReleaseStockResponse: MessageFns<ReleaseStockResponse> = {
-  encode(message: ReleaseStockResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const CommitReservationResponse: MessageFns<CommitReservationResponse> = {
+  encode(message: CommitReservationResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.success !== false) {
       writer.uint32(8).bool(message.success);
     }
@@ -14693,10 +15250,10 @@ export const ReleaseStockResponse: MessageFns<ReleaseStockResponse> = {
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): ReleaseStockResponse {
+  decode(input: BinaryReader | Uint8Array, length?: number): CommitReservationResponse {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseReleaseStockResponse();
+    const message = createBaseCommitReservationResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -14725,14 +15282,14 @@ export const ReleaseStockResponse: MessageFns<ReleaseStockResponse> = {
     return message;
   },
 
-  fromJSON(object: any): ReleaseStockResponse {
+  fromJSON(object: any): CommitReservationResponse {
     return {
       success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
       message: isSet(object.message) ? globalThis.String(object.message) : "",
     };
   },
 
-  toJSON(message: ReleaseStockResponse): unknown {
+  toJSON(message: CommitReservationResponse): unknown {
     const obj: any = {};
     if (message.success !== false) {
       obj.success = message.success;
@@ -14743,11 +15300,11 @@ export const ReleaseStockResponse: MessageFns<ReleaseStockResponse> = {
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<ReleaseStockResponse>, I>>(base?: I): ReleaseStockResponse {
-    return ReleaseStockResponse.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<CommitReservationResponse>, I>>(base?: I): CommitReservationResponse {
+    return CommitReservationResponse.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<ReleaseStockResponse>, I>>(object: I): ReleaseStockResponse {
-    const message = createBaseReleaseStockResponse();
+  fromPartial<I extends Exact<DeepPartial<CommitReservationResponse>, I>>(object: I): CommitReservationResponse {
+    const message = createBaseCommitReservationResponse();
     message.success = object.success ?? false;
     message.message = object.message ?? "";
     return message;
@@ -15931,23 +16488,14 @@ export const CartServiceService = {
     responseSerialize: (value: ClearCartResponse) => Buffer.from(ClearCartResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => ClearCartResponse.decode(value),
   },
-  reserveItems: {
-    path: "/nexuraTelemetry.CartService/ReserveItems",
+  validateCart: {
+    path: "/nexuraTelemetry.CartService/ValidateCart",
     requestStream: false,
     responseStream: false,
-    requestSerialize: (value: ReserveItemsRequest) => Buffer.from(ReserveItemsRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => ReserveItemsRequest.decode(value),
-    responseSerialize: (value: ReserveItemsResponse) => Buffer.from(ReserveItemsResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => ReserveItemsResponse.decode(value),
-  },
-  releaseItems: {
-    path: "/nexuraTelemetry.CartService/ReleaseItems",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: ReleaseItemsRequest) => Buffer.from(ReleaseItemsRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => ReleaseItemsRequest.decode(value),
-    responseSerialize: (value: ReleaseItemsResponse) => Buffer.from(ReleaseItemsResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => ReleaseItemsResponse.decode(value),
+    requestSerialize: (value: ValidateCartRequest) => Buffer.from(ValidateCartRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => ValidateCartRequest.decode(value),
+    responseSerialize: (value: ValidateCartResponse) => Buffer.from(ValidateCartResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => ValidateCartResponse.decode(value),
   },
 } as const;
 
@@ -15957,8 +16505,7 @@ export interface CartServiceServer extends UntypedServiceImplementation {
   updateItem: handleUnaryCall<UpdateItemRequest, UpdateItemResponse>;
   removeItem: handleUnaryCall<RemoveItemRequest, RemoveItemResponse>;
   clearCart: handleUnaryCall<ClearCartRequest, ClearCartResponse>;
-  reserveItems: handleUnaryCall<ReserveItemsRequest, ReserveItemsResponse>;
-  releaseItems: handleUnaryCall<ReleaseItemsRequest, ReleaseItemsResponse>;
+  validateCart: handleUnaryCall<ValidateCartRequest, ValidateCartResponse>;
 }
 
 export interface CartServiceClient extends Client {
@@ -16037,35 +16584,20 @@ export interface CartServiceClient extends Client {
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: ClearCartResponse) => void,
   ): ClientUnaryCall;
-  reserveItems(
-    request: ReserveItemsRequest,
-    callback: (error: ServiceError | null, response: ReserveItemsResponse) => void,
+  validateCart(
+    request: ValidateCartRequest,
+    callback: (error: ServiceError | null, response: ValidateCartResponse) => void,
   ): ClientUnaryCall;
-  reserveItems(
-    request: ReserveItemsRequest,
+  validateCart(
+    request: ValidateCartRequest,
     metadata: Metadata,
-    callback: (error: ServiceError | null, response: ReserveItemsResponse) => void,
+    callback: (error: ServiceError | null, response: ValidateCartResponse) => void,
   ): ClientUnaryCall;
-  reserveItems(
-    request: ReserveItemsRequest,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: ReserveItemsResponse) => void,
-  ): ClientUnaryCall;
-  releaseItems(
-    request: ReleaseItemsRequest,
-    callback: (error: ServiceError | null, response: ReleaseItemsResponse) => void,
-  ): ClientUnaryCall;
-  releaseItems(
-    request: ReleaseItemsRequest,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: ReleaseItemsResponse) => void,
-  ): ClientUnaryCall;
-  releaseItems(
-    request: ReleaseItemsRequest,
+  validateCart(
+    request: ValidateCartRequest,
     metadata: Metadata,
     options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: ReleaseItemsResponse) => void,
+    callback: (error: ServiceError | null, response: ValidateCartResponse) => void,
   ): ClientUnaryCall;
 }
 
@@ -16325,23 +16857,37 @@ export const ProductCatalogServiceService = {
     responseSerialize: (value: GetWarehousesResponse) => Buffer.from(GetWarehousesResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => GetWarehousesResponse.decode(value),
   },
-  reserveStock: {
-    path: "/nexuraTelemetry.ProductCatalogService/ReserveStock",
+  validateAndReserve: {
+    path: "/nexuraTelemetry.ProductCatalogService/ValidateAndReserve",
     requestStream: false,
     responseStream: false,
-    requestSerialize: (value: ReserveStockRequest) => Buffer.from(ReserveStockRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => ReserveStockRequest.decode(value),
-    responseSerialize: (value: ReserveStockResponse) => Buffer.from(ReserveStockResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => ReserveStockResponse.decode(value),
+    requestSerialize: (value: ValidateAndReserveRequest) =>
+      Buffer.from(ValidateAndReserveRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => ValidateAndReserveRequest.decode(value),
+    responseSerialize: (value: ValidateAndReserveResponse) =>
+      Buffer.from(ValidateAndReserveResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => ValidateAndReserveResponse.decode(value),
   },
-  releaseStock: {
-    path: "/nexuraTelemetry.ProductCatalogService/ReleaseStock",
+  releaseReservation: {
+    path: "/nexuraTelemetry.ProductCatalogService/ReleaseReservation",
     requestStream: false,
     responseStream: false,
-    requestSerialize: (value: ReleaseStockRequest) => Buffer.from(ReleaseStockRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => ReleaseStockRequest.decode(value),
-    responseSerialize: (value: ReleaseStockResponse) => Buffer.from(ReleaseStockResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => ReleaseStockResponse.decode(value),
+    requestSerialize: (value: ReleaseReservationRequest) =>
+      Buffer.from(ReleaseReservationRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => ReleaseReservationRequest.decode(value),
+    responseSerialize: (value: ReleaseReservationResponse) =>
+      Buffer.from(ReleaseReservationResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => ReleaseReservationResponse.decode(value),
+  },
+  commitReservation: {
+    path: "/nexuraTelemetry.ProductCatalogService/CommitReservation",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: CommitReservationRequest) => Buffer.from(CommitReservationRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => CommitReservationRequest.decode(value),
+    responseSerialize: (value: CommitReservationResponse) =>
+      Buffer.from(CommitReservationResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => CommitReservationResponse.decode(value),
   },
 } as const;
 
@@ -16367,8 +16913,9 @@ export interface ProductCatalogServiceServer extends UntypedServiceImplementatio
   deleteProductAttributes: handleUnaryCall<DeleteProductAttributesRequest, DeleteProductAttributesResponse>;
   createProductAttribute: handleUnaryCall<CreateProductAttributeRequest, CreateProductAttributeResponse>;
   getWarehouses: handleUnaryCall<Empty, GetWarehousesResponse>;
-  reserveStock: handleUnaryCall<ReserveStockRequest, ReserveStockResponse>;
-  releaseStock: handleUnaryCall<ReleaseStockRequest, ReleaseStockResponse>;
+  validateAndReserve: handleUnaryCall<ValidateAndReserveRequest, ValidateAndReserveResponse>;
+  releaseReservation: handleUnaryCall<ReleaseReservationRequest, ReleaseReservationResponse>;
+  commitReservation: handleUnaryCall<CommitReservationRequest, CommitReservationResponse>;
 }
 
 export interface ProductCatalogServiceClient extends Client {
@@ -16687,35 +17234,50 @@ export interface ProductCatalogServiceClient extends Client {
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: GetWarehousesResponse) => void,
   ): ClientUnaryCall;
-  reserveStock(
-    request: ReserveStockRequest,
-    callback: (error: ServiceError | null, response: ReserveStockResponse) => void,
+  validateAndReserve(
+    request: ValidateAndReserveRequest,
+    callback: (error: ServiceError | null, response: ValidateAndReserveResponse) => void,
   ): ClientUnaryCall;
-  reserveStock(
-    request: ReserveStockRequest,
+  validateAndReserve(
+    request: ValidateAndReserveRequest,
     metadata: Metadata,
-    callback: (error: ServiceError | null, response: ReserveStockResponse) => void,
+    callback: (error: ServiceError | null, response: ValidateAndReserveResponse) => void,
   ): ClientUnaryCall;
-  reserveStock(
-    request: ReserveStockRequest,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: ReserveStockResponse) => void,
-  ): ClientUnaryCall;
-  releaseStock(
-    request: ReleaseStockRequest,
-    callback: (error: ServiceError | null, response: ReleaseStockResponse) => void,
-  ): ClientUnaryCall;
-  releaseStock(
-    request: ReleaseStockRequest,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: ReleaseStockResponse) => void,
-  ): ClientUnaryCall;
-  releaseStock(
-    request: ReleaseStockRequest,
+  validateAndReserve(
+    request: ValidateAndReserveRequest,
     metadata: Metadata,
     options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: ReleaseStockResponse) => void,
+    callback: (error: ServiceError | null, response: ValidateAndReserveResponse) => void,
+  ): ClientUnaryCall;
+  releaseReservation(
+    request: ReleaseReservationRequest,
+    callback: (error: ServiceError | null, response: ReleaseReservationResponse) => void,
+  ): ClientUnaryCall;
+  releaseReservation(
+    request: ReleaseReservationRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: ReleaseReservationResponse) => void,
+  ): ClientUnaryCall;
+  releaseReservation(
+    request: ReleaseReservationRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: ReleaseReservationResponse) => void,
+  ): ClientUnaryCall;
+  commitReservation(
+    request: CommitReservationRequest,
+    callback: (error: ServiceError | null, response: CommitReservationResponse) => void,
+  ): ClientUnaryCall;
+  commitReservation(
+    request: CommitReservationRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: CommitReservationResponse) => void,
+  ): ClientUnaryCall;
+  commitReservation(
+    request: CommitReservationRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: CommitReservationResponse) => void,
   ): ClientUnaryCall;
 }
 
@@ -16895,16 +17457,7 @@ export const CurrencyServiceClient = makeGenericClientConstructor(
 
 export type EmailServiceService = typeof EmailServiceService;
 export const EmailServiceService = {
-  sendOrderConfirmation: {
-    path: "/nexuraTelemetry.EmailService/SendOrderConfirmation",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: SendOrderConfirmationRequest) =>
-      Buffer.from(SendOrderConfirmationRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => SendOrderConfirmationRequest.decode(value),
-    responseSerialize: (value: Empty) => Buffer.from(Empty.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => Empty.decode(value),
-  },
+  /** rpc SendOrderConfirmation(SendOrderConfirmationRequest) returns (Empty) {} */
   sendOtpResetPassword: {
     path: "/nexuraTelemetry.EmailService/SendOTPResetPassword",
     requestStream: false,
@@ -16929,27 +17482,13 @@ export const EmailServiceService = {
 } as const;
 
 export interface EmailServiceServer extends UntypedServiceImplementation {
-  sendOrderConfirmation: handleUnaryCall<SendOrderConfirmationRequest, Empty>;
+  /** rpc SendOrderConfirmation(SendOrderConfirmationRequest) returns (Empty) {} */
   sendOtpResetPassword: handleUnaryCall<SendOTPResetPasswordRequest, SendOTPResetPasswordResponse>;
   sendWelcomeEmail: handleUnaryCall<SendWelcomeEmailRequest, SendWelcomeEmailResponse>;
 }
 
 export interface EmailServiceClient extends Client {
-  sendOrderConfirmation(
-    request: SendOrderConfirmationRequest,
-    callback: (error: ServiceError | null, response: Empty) => void,
-  ): ClientUnaryCall;
-  sendOrderConfirmation(
-    request: SendOrderConfirmationRequest,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: Empty) => void,
-  ): ClientUnaryCall;
-  sendOrderConfirmation(
-    request: SendOrderConfirmationRequest,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: Empty) => void,
-  ): ClientUnaryCall;
+  /** rpc SendOrderConfirmation(SendOrderConfirmationRequest) returns (Empty) {} */
   sendOtpResetPassword(
     request: SendOTPResetPasswordRequest,
     callback: (error: ServiceError | null, response: SendOTPResetPasswordResponse) => void,
@@ -17119,6 +17658,15 @@ export const OrderServiceService = {
     responseSerialize: (value: GetOrderStatusResponse) => Buffer.from(GetOrderStatusResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => GetOrderStatusResponse.decode(value),
   },
+  getOrder: {
+    path: "/nexuraTelemetry.OrderService/GetOrder",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: GetOrderRequest) => Buffer.from(GetOrderRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetOrderRequest.decode(value),
+    responseSerialize: (value: GetOrderResponse) => Buffer.from(GetOrderResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetOrderResponse.decode(value),
+  },
   cancelOrder: {
     path: "/nexuraTelemetry.OrderService/CancelOrder",
     requestStream: false,
@@ -17128,12 +17676,24 @@ export const OrderServiceService = {
     responseSerialize: (value: CancelOrderResponse) => Buffer.from(CancelOrderResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => CancelOrderResponse.decode(value),
   },
+  updateOrderStatus: {
+    path: "/nexuraTelemetry.OrderService/UpdateOrderStatus",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: UpdateOrderStatusRequest) => Buffer.from(UpdateOrderStatusRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => UpdateOrderStatusRequest.decode(value),
+    responseSerialize: (value: UpdateOrderStatusResponse) =>
+      Buffer.from(UpdateOrderStatusResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => UpdateOrderStatusResponse.decode(value),
+  },
 } as const;
 
 export interface OrderServiceServer extends UntypedServiceImplementation {
   createOrder: handleUnaryCall<CreateOrderRequest, CreateOrderResponse>;
   getOrderStatus: handleUnaryCall<GetOrderStatusRequest, GetOrderStatusResponse>;
+  getOrder: handleUnaryCall<GetOrderRequest, GetOrderResponse>;
   cancelOrder: handleUnaryCall<CancelOrderRequest, CancelOrderResponse>;
+  updateOrderStatus: handleUnaryCall<UpdateOrderStatusRequest, UpdateOrderStatusResponse>;
 }
 
 export interface OrderServiceClient extends Client {
@@ -17167,6 +17727,21 @@ export interface OrderServiceClient extends Client {
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: GetOrderStatusResponse) => void,
   ): ClientUnaryCall;
+  getOrder(
+    request: GetOrderRequest,
+    callback: (error: ServiceError | null, response: GetOrderResponse) => void,
+  ): ClientUnaryCall;
+  getOrder(
+    request: GetOrderRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: GetOrderResponse) => void,
+  ): ClientUnaryCall;
+  getOrder(
+    request: GetOrderRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: GetOrderResponse) => void,
+  ): ClientUnaryCall;
   cancelOrder(
     request: CancelOrderRequest,
     callback: (error: ServiceError | null, response: CancelOrderResponse) => void,
@@ -17181,6 +17756,21 @@ export interface OrderServiceClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: CancelOrderResponse) => void,
+  ): ClientUnaryCall;
+  updateOrderStatus(
+    request: UpdateOrderStatusRequest,
+    callback: (error: ServiceError | null, response: UpdateOrderStatusResponse) => void,
+  ): ClientUnaryCall;
+  updateOrderStatus(
+    request: UpdateOrderStatusRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: UpdateOrderStatusResponse) => void,
+  ): ClientUnaryCall;
+  updateOrderStatus(
+    request: UpdateOrderStatusRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: UpdateOrderStatusResponse) => void,
   ): ClientUnaryCall;
 }
 

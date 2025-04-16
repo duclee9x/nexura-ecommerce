@@ -84,7 +84,7 @@ export function ImageViewer({
                     </Button>
                     <div className="relative w-full h-full min-h-[80vh]">
                         <NextImage
-                            src={images[currentIndex]}
+                            src={images.length > 0 ? images[currentIndex] : "/no-image-placeholder.webp"}
                             alt={`Product image ${currentIndex + 1}`}
                             fill
                             className={cn(

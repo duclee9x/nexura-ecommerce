@@ -38,7 +38,7 @@ export default function ProfilePage() {
             <PersonalTab user={user || null} refresh={refresh} />
 
             {/* Addresses Tab */}
-            <AddressTab user={user || null} refresh={refresh} />
+            <AddressTab type="profile" user={user || null} setAddress={() => {}} />
 
             {/* Security Tab */}
             <SecurityTab user={user || null} refresh={refresh} />

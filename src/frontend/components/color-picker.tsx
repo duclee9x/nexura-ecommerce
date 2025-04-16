@@ -71,9 +71,10 @@ interface ColorPickerProps {
   colorName?: string
   onColorNameChange?: (name: string) => void
   showFavorites?: boolean
+  onColorUpdate?: (color: string, colorName: string) => void
 }
 
-export function ColorPicker({ value, onChange, colorName = "", onColorNameChange, showFavorites = true }: ColorPickerProps) {
+export function ColorPicker({ value, onChange, colorName = "", onColorNameChange, showFavorites = true, onColorUpdate }: ColorPickerProps) {
   const [selectedColor, setSelectedColor] = useState(value || "#000000")
   const [customColor, setCustomColor] = useState(value || "#000000")
   const [favoriteColors, setFavoriteColors] = useState<NamedColor[]>([])
@@ -115,6 +116,11 @@ export function ColorPicker({ value, onChange, colorName = "", onColorNameChange
     setSelectedColor(color)
     setCustomColor(color)
     onChange(color)
+    
+    // If onColorUpdate is provided, update all variants with the same color name
+    if (onColorUpdate && colorName) {
+      onColorUpdate(color, colorName)
+    }
   }
 
   const handleCustomColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,6 +130,11 @@ export function ColorPicker({ value, onChange, colorName = "", onColorNameChange
   const handleCustomColorApply = () => {
     setSelectedColor(customColor)
     onChange(customColor)
+    
+    // If onColorUpdate is provided, update all variants with the same color name
+    if (onColorUpdate && colorName) {
+      onColorUpdate(customColor, colorName)
+    }
   }
 
   const handleColorNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
