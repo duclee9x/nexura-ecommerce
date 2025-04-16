@@ -6,9 +6,7 @@ import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ImageIcon, X, Star, StarOff, Loader2 } from "lucide-react"
-import { toast } from "@/hooks/use-toast"
 import NextImage from "next/image"
-import { getProductUrl } from "@/lib/utils"
 import {
   DndContext,
   closestCenter,
@@ -30,6 +28,7 @@ import { encode } from "blurhash"
 import { useToast } from "@/hooks/use-toast"
 import path from "path"
 import { ObjectId } from 'bson'
+import { uploadToImageKit, deleteFromImageKit } from "@/lib/imagekit"
 
 export interface ProductImage {
   id: string
@@ -38,6 +37,7 @@ export interface ProductImage {
   blurhash: string
   isUploading?: boolean
   uploadProgress?: number
+  fileId?: string
 }
 
 interface ImageGalleryProps {
@@ -72,7 +72,7 @@ const SortableImage = ({
     >
       <div {...listeners} className="absolute inset-0 cursor-move" />
       <NextImage 
-        src={getProductUrl(image.url)} 
+        src={image.url} 
         alt="Product image" 
         fill 
         objectFit="contain" 
@@ -203,35 +203,20 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
     onChange(currentImages)
     setUploadingFiles(prev => [...prev, ...newUploads.map(upload => ({ id: upload.id, progress: 0 }))])
 
-    // Upload each file
+    // Upload each file to ImageKit
     for (const upload of newUploads) {
       try {
-        const formData = new FormData()
-        formData.append('files', upload.file)
-
-        const response = await fetch('/api/presignedPut', {
-          method: 'POST',
-          body: formData
-        })
-
-        if (!response.ok) {
-          throw new Error('Upload failed')
-        }
-
-        const result = await response.json()
-        if (!result.success || !result.results?.[0]) {
-          throw new Error(result.error || 'Upload failed')
-        }
-
-        // Since we're uploading one file at a time, use the first result
-        const uploadedFile = result.results[0]
+        const { url, fileId } = await uploadToImageKit(upload.file)
+        const blurhash = await generateBlurhash(url)
 
         // Update image with final URL while preserving the rest of the images
         currentImages = currentImages.map(img => 
           img.id === upload.id 
             ? { 
                 ...img, 
-                url: uploadedFile.url,
+                url,
+                fileId, // Store ImageKit fileId for future deletion
+                blurhash,
                 isUploading: false,
                 uploadProgress: undefined
               }
@@ -262,7 +247,10 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
     e.target.value = ""
   }
 
-  const handleRemoveImage = (id: string) => {
+  const handleRemoveImage = async (id: string) => {
+    const imageToRemove = images.find(img => img.id === id)
+    if (!imageToRemove) return
+
     const index = images.findIndex((img) => img.id === id)
     const isMain = images[index].isMain
     const newImages = images.filter((img) => img.id !== id)
@@ -270,6 +258,20 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
     // If we removed the main image, set the first image as main
     if (isMain && newImages.length > 0) {
       newImages[0].isMain = true
+    }
+
+    // Delete from ImageKit if fileId exists
+    if (imageToRemove.fileId) {
+      try {
+        await deleteFromImageKit(imageToRemove.fileId)
+      } catch (error) {
+        console.error('Error deleting image from ImageKit:', error)
+        toast({
+          title: "Delete Failed",
+          description: "Failed to delete image from storage. Please try again.",
+          variant: "destructive",
+        })
+      }
     }
 
     onChange(newImages)
@@ -304,7 +306,7 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
           {images.length > 0 ? (
             <div className="relative w-full h-full">
               <NextImage
-                src={getProductUrl(images[currentImageIndex]?.url || "")}
+                src={images[currentImageIndex]?.url || ""}
                 fill
                 priority
                 sizes="(max-width: 768px) 100vw, 50vw"

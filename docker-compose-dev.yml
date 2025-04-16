@@ -199,27 +199,27 @@ services:
       - ./src/frontend/node_modules/@bufbuild:/protoc/node_modules/@bufbuild
       - ./src/frontend/node_modules/.bin/protoc-gen-ts_proto:/protoc/node_modules/.bin/protoc-gen-ts_proto
 
-  image-proxy:
-    container_name: image-proxy
-    image: ghcr.io/willnorris/imageproxy:latest
-    ports:
-      - "${IMAGE_PROXY_PORT}:${IMAGE_PROXY_PORT}"
-    command: ["-addr", "0.0.0.0:${IMAGE_PROXY_PORT}"]  
+  # image-proxy:
+  #   container_name: image-proxy
+  #   image: ghcr.io/willnorris/imageproxy:latest
+  #   ports:
+  #     - "${IMAGE_PROXY_PORT}:${IMAGE_PROXY_PORT}"
+  #   command: ["-addr", "0.0.0.0:${IMAGE_PROXY_PORT}"]  
 
-  image-provider:
-    image: ${IMAGE_PROVIDER_IMAGE}
-    container_name: image-provider
-    ports:
-      - "${IMAGE_PROVIDER_API_PORT}:${IMAGE_PROVIDER_API_PORT}"
-      - "${IMAGE_PROVIDER_CONSOLE_PORT}:${IMAGE_PROVIDER_CONSOLE_PORT}"
-    environment:
-      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
-      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
-      - MINIO_BUCKET_ACCESS_KEY=${MINIO_BUCKET_ACCESS_KEY}
-      - MINIO_BUCKET_SECRET_KEY=${MINIO_BUCKET_SECRET_KEY}
-    command: ["server","/data","--console-address", ":${IMAGE_PROVIDER_CONSOLE_PORT}"]
-    volumes:
-      - nexura-ecommerce_minio-data:/data
+  # image-provider:
+  #   image: ${IMAGE_PROVIDER_IMAGE}
+  #   container_name: image-provider
+  #   ports:
+  #     - "${IMAGE_PROVIDER_API_PORT}:${IMAGE_PROVIDER_API_PORT}"
+  #     - "${IMAGE_PROVIDER_CONSOLE_PORT}:${IMAGE_PROVIDER_CONSOLE_PORT}"
+  #   environment:
+  #     - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+  #     - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+  #     - MINIO_BUCKET_ACCESS_KEY=${MINIO_BUCKET_ACCESS_KEY}
+  #     - MINIO_BUCKET_SECRET_KEY=${MINIO_BUCKET_SECRET_KEY}
+  #   command: ["server","/data","--console-address", ":${IMAGE_PROVIDER_CONSOLE_PORT}"]
+  #   volumes:
+  #     - nexura-ecommerce_minio-data:/data
     # logging: *logging
 
   # Prometheus

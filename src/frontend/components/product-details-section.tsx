@@ -25,7 +25,6 @@ import NextImage from "next/image"
 import { ProductVariantSelector } from "@/components/product-variant-selector"
 import { Input } from "@/components/ui/input"
 import { Product, ProductVariant } from "@/protos/nexura"
-import { getProductUrl } from "@/lib/utils"
 import { useCurrency } from "@/contexts/currency-context"
 import { useAddToCart } from "@/hooks/use-mutation"
 import { useSession } from "@/contexts/session-context"
@@ -171,7 +170,7 @@ export function ProductDetailsSection({
               <div key={image.url} className="relative flex-[0_0_100%] min-w-0">
                 <div className="relative aspect-square">
                   <NextImage
-                    src={getProductUrl(image.url) || "/placeholder.svg"}
+                    src={image.url || "/placeholder.svg"}
                     alt={`${product.name} ${index + 1}`}
                     fill
                     priority={index === 0}
@@ -228,7 +227,7 @@ export function ProductDetailsSection({
                   ${index === currentImageIndex ? "ring-2 ring-primary" : ""}`}
               >
                 <NextImage
-                  src={getProductUrl(image.url) || "/placeholder.svg"}
+                  src={image.url || "/placeholder.svg"}
                   alt={`${product.name} thumbnail ${index + 1}`}
                   fill
                   className="object-cover"
@@ -414,7 +413,7 @@ export function ProductDetailsSection({
 
       {/* Full Screen Image Viewer */}
       <ImageViewer
-        images={product.images.map(img => getProductUrl(img.url) || "/placeholder.svg")}
+        images={product.images.map(img => img.url || "/placeholder.svg")}
         currentIndex={currentImageIndex}
         isOpen={isImageViewerOpen}
         onClose={() => setIsImageViewerOpen(false)}

@@ -32,7 +32,6 @@ import { getProductBySlugGateway } from "@/gateway/gateway"
 // import { formatPrice } from "@/utils/format"
 import { Input } from "@/components/ui/input"
 import { Product, ProductVariant } from "@/protos/nexura"
-import { getProductUrl} from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { ImageViewer } from "@/components/image-viewer"
@@ -619,7 +618,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
 
         {/* Full Screen Image Viewer */}
         <ImageViewer
-          images={product.images.map(img => getProductUrl(img.url) || "/placeholder.svg")}
+          images={product.images.map(img => img.url || "/placeholder.svg")}
           currentIndex={currentImageIndex}
           isOpen={isImageViewerOpen}
           onClose={() => setIsImageViewerOpen(false)}

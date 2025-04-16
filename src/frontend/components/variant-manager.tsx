@@ -25,7 +25,7 @@ import {
 import NextImage from "next/image"
 import { toast } from "@/hooks/use-toast"
 import { ColorPicker } from "@/components/color-picker"
-import { cn, getProductUrl } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import {
   Dialog,
   DialogContent,
@@ -1286,7 +1286,7 @@ export function VariantManager({
                         onClick={() => handleImageSelect(image.id)}
                       >
                         <NextImage
-                          src={getProductUrl(image.url)}
+                          src={image.url}
                           objectFit="contain"
                           blurDataURL={image.blurhash}
                           fill

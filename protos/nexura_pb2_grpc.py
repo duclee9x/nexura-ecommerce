@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import src.proto.nexura_pb2 as nexura__pb2
+import nexura_pb2 as nexura__pb2
 
 
 class AddressServiceStub(object):

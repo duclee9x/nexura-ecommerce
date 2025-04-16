@@ -27,7 +27,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { getProductUrl } from "@/lib/utils"
 
 // Shipping options
 const shippingOptions = [
@@ -260,7 +259,7 @@ export default function CartPage() {
                   <div key={item.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-4 border-b">
                     <div className="col-span-6 flex items-center gap-4">
                       <div className="relative w-20 h-20 border dark:border-gray-800">
-                        <Image src={getProductUrl(item.image) || "/placeholder.svg"} alt="Product" fill className="object-cover" />
+                        <Image src={item.image || "/placeholder.svg"} alt="Product" fill className="object-cover" />
                       </div>
                       <div className="flex-1">
                         <Link href={`/products/${variant?.productSlug}`} className="font-medium hover:underline">

@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge"
 import { useCart } from "@/contexts/cart-context"
 import { useCurrency } from "@/contexts/currency-context"
 import { toast } from "@/hooks/use-toast"
-import { getProductUrl } from "@/lib/utils"
 import { Category, Product, ProductVariant, CartItem } from "@/protos/nexura"
 import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -82,7 +81,7 @@ export function ProductCard({ product, viewMode = "grid", categories }: ProductC
       <Link className="flex flex-col sm:flex-row border border-border-base rounded-lg overflow-hidden group hover:shadow-md transition-shadow duration-300" href={`/products/${product.slug}`}>
           <div className="relative w-full sm:w-48 h-48">
             <Image
-              src={getProductUrl(mainImage?.url) || "/placeholder.svg"}
+              src={mainImage?.url || "/placeholder.svg"}
               alt={product.name}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -147,10 +146,11 @@ export function ProductCard({ product, viewMode = "grid", categories }: ProductC
         <div className="border border-border-base rounded-lg overflow-hidden group hover:shadow-md transition-shadow duration-300">
           <div className="relative aspect-square">
             <Image
-              src={getProductUrl(mainImage?.url) || "/placeholder.svg"}
+              src={mainImage?.url || "/placeholder.svg"}
               alt={product.name}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
+
+              className="object-contain group-hover:scale-105 transition-transform duration-300"
             />
             {product.featured && (
               <Badge className="absolute top-2 left-2 bg-status-info hover:bg-status-info text-text-inverted">Featured</Badge>
