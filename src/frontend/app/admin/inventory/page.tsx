@@ -87,7 +87,7 @@ export default function InventoryManagementPage() {
   })
 
   const { mutate: deleteProduct } = useMutation({
-    mutationFn: (product: Product) => deleteProductGateway(product.id),
+    mutationFn: (productId: string) => deleteProductGateway(productId),
     onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ["inventory"] })
       await queryClient.prefetchQuery({ queryKey: ["inventory"], queryFn: ()=>listProductsGateway().then((res) => res.products) });
@@ -342,7 +342,7 @@ export default function InventoryManagementPage() {
       })
       return
     }
-    deleteProduct(deletedProduct)
+    deleteProduct(deletedProduct.id)
     toast({
       title: "Product Deleted",
       description: "Product has been removed from inventory.",
@@ -457,7 +457,7 @@ export default function InventoryManagementPage() {
                             </TableCell>
                             <TableCell className="text-right">{formatPrice(product.variants.reduce((prev, curr) => prev < curr.price ? prev : curr.price, 0))}</TableCell>
                             <TableCell className="text-right">{formatPrice(product.variants.reduce((prev, curr) => prev > curr.price ? prev : curr.price, 0))}</TableCell>
-                            <TableCell className="text-right">{product.variants.reduce((prev, curr) => prev + curr.quantity, 0)}</TableCell>
+                            <TableCell className="text-right">{product.variants.reduce((prev, curr) => prev + (curr.stock?.quantity || 0), 0)}</TableCell>
                             <TableCell>
                               <span
                                 className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.status === "published"

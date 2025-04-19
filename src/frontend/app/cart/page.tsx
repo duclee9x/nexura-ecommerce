@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import { ChevronLeft, Minus, Plus, X, ShoppingBag, ArrowRight, Info } from "lucide-react"
 import { useCart } from "@/contexts/cart-context"
 import { useCurrency } from "@/contexts/currency-context"
-import { useCartVariants } from "@/hooks/use-query"
+import { useCartActions } from "@/hooks/use-cart"
 import { VariantCart } from "@/protos/nexura"
 import { toast } from "@/hooks/use-toast"
 
@@ -27,6 +27,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useSession } from "@/contexts/session-context"
 
 // Shipping options
 const shippingOptions = [
@@ -40,125 +41,105 @@ const TAX_RATE = 0.1 // 10% tax rate
 export default function CartPage() {
   const router = useRouter()
   const { items, removeItem, updateQuantity, clearCart } = useCart()
-  const { formatPrice, convertPrice } = useCurrency()
-  const [promoCode, setPromoCode] = useState("")
-  const [promoApplied, setPromoApplied] = useState(false)
-  const [promoDiscount, setPromoDiscount] = useState(0)
-  const [shippingMethod, setShippingMethod] = useState<typeof shippingOptions[number]["id"]>("standard")
-  const [shippingCost, setShippingCost] = useState(12)
-  const [estimatedDelivery, setEstimatedDelivery] = useState("")
-  const { data: variants } = useCartVariants(items.map((item) => item.variantId))
-  const [optimisticItems, setOptimisticItems] = useState(items)
-  const [optimisticVariants, setOptimisticVariants] = useState<VariantCart[] | undefined>(variants)
-  console.log(JSON.stringify(items, null, 2), "items")
-  // Calculate discount if promo is applied
-  const discount = promoApplied ? promoDiscount : 0
-  console.log(variants, "variants")
+  const { formatPrice } = useCurrency()
+  // const [promoCode, setPromoCode] = useState("")
+
+  const { getVariantsForCart } = useCartActions()
+  const { data: variants } = getVariantsForCart(items.map((item) => item.variantId))
+ 
   
-  // Update optimistic state when backend data changes
-  useEffect(() => {
-    setOptimisticItems(items)
-  }, [items])
-
-  useEffect(() => {
-    setOptimisticVariants(variants)
-  }, [variants])
-
+  // Up
   // Calculate subtotal using optimistic data
   const subtotal = useMemo(() => {
-    return optimisticItems.reduce((total, item) => {
-      const variant = optimisticVariants?.find(v => v.id === item.variantId)
+    return items.reduce((total, item) => {
+      const variant = variants?.find(v => v.id === item.variantId)
       return total + ((variant?.price || 0) * item.quantity)
     }, 0)
-  }, [optimisticItems, optimisticVariants])
+  }, [items, variants])
 
-  const total = subtotal + shippingCost - (promoApplied ? promoDiscount : 0)
-  console.log(subtotal, "subtotal")
+
+  const { user } = useSession()
 
   // Update shipping cost when shipping method changes
-  useEffect(() => {
-    const selectedShipping = shippingOptions.find((option) => option.id === shippingMethod)
-    if (!selectedShipping) return
+  // useEffect(() => {
+  //   const selectedShipping = shippingOptions.find((option) => option.id === shippingMethod)
+  //   if (!selectedShipping) return
 
-    // Check if free shipping applies (orders over $50)
-    if (selectedShipping.id === "free" && subtotal < selectedShipping.minOrderValue) {
-      setShippingMethod("standard")
-      setShippingCost(shippingOptions.find((option) => option.id === "standard")?.price || 0)
-    } else {
-      setShippingCost(selectedShipping.price)
-    }
+  //   // Check if free shipping applies (orders over $50)
+  //   if (selectedShipping.id === "free" && subtotal < selectedShipping.minOrderValue) {
+  //     setShippingMethod("standard")
+  //     setShippingCost(shippingOptions.find((option) => option.id === "standard")?.price || 0)
+  //   } else {
+  //     setShippingCost(selectedShipping.price)
+  //   }
 
-    // Calculate estimated delivery date
-    const today = new Date()
-    const deliveryDate = new Date(today)
+  //   // Calculate estimated delivery date
+  //   const today = new Date()
+  //   const deliveryDate = new Date(today)
 
-    if (selectedShipping.id === "free") {
-      deliveryDate.setDate(today.getDate() + 10) // 10 business days
-    } else if (selectedShipping.id === "standard") {
-      deliveryDate.setDate(today.getDate() + 5) // 5 business days
-    } else if (selectedShipping.id === "express") {
-      deliveryDate.setDate(today.getDate() + 2) // 2 business days
-    }
+  //   if (selectedShipping.id === "free") {
+  //     deliveryDate.setDate(today.getDate() + 10) // 10 business days
+  //   } else if (selectedShipping.id === "standard") {
+  //     deliveryDate.setDate(today.getDate() + 5) // 5 business days
+  //   } else if (selectedShipping.id === "express") {
+  //     deliveryDate.setDate(today.getDate() + 2) // 2 business days
+  //   }
 
-    setEstimatedDelivery(
-      deliveryDate.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
-    )
-  }, [shippingMethod, subtotal])
+  //   setEstimatedDelivery(
+  //     deliveryDate.toLocaleDateString("en-US", {
+  //       year: "numeric",
+  //       month: "long",
+  //       day: "numeric",
+  //     }),
+  //   )
+  // }, [shippingMethod, subtotal])
 
   // Check if free shipping is available
   const isFreeShippingAvailable = subtotal >= 50
 
-  const handleApplyPromo = () => {
-    if (promoCode.toLowerCase() === "nexura10") {
-      setPromoApplied(true)
-      setPromoDiscount(subtotal * 0.1) // 10% discount
-    } else if (promoCode.toLowerCase() === "freeship") {
-      setPromoApplied(true)
-      setShippingMethod("free")
-      setShippingCost(0)
-      setPromoDiscount(0) // No additional discount
-    } else {
-      setPromoApplied(false)
-      setPromoDiscount(0)
-    }
-  }
+  // const handleApplyPromo = () => {
+  //   if (promoCode.toLowerCase() === "nexura10") {
+  //     setPromoApplied(true)
+  //     setPromoDiscount(subtotal * 0.1) // 10% discount
+  //   } else if (promoCode.toLowerCase() === "freeship") {
+  //     setPromoApplied(true)
+  //     setShippingMethod("free")
+  //     setShippingCost(0)
+  //     setPromoDiscount(0) // No additional discount
+  //   } else {
+  //     setPromoApplied(false)
+  //     setPromoDiscount(0)
+  //   }
+  // }
 
   const handleQuantityChange = async (productId: string, variantId: string, newQuantity: number) => {
     if (newQuantity < 1) return
-
-    const variant = optimisticVariants?.find(v => v.id === variantId)
+    if (!user || !user.id) return
+    const variant = variants?.find(v => v.id === variantId)
     if (!variant) return
 
     // Check if new quantity exceeds available stock
-    if (newQuantity > variant.quantity) {
+    if (variant.stock && newQuantity > variant.stock.quantity) {
       toast({
         title: "Maximum stock reached",
-        description: `Only ${variant.quantity} items available`,
+        description: `Only ${variant.stock.quantity} items available`,
         variant: "destructive"
       })
       // Set quantity to maximum available if trying to add more
-      newQuantity = variant.quantity
+      newQuantity = variant.stock.quantity
     }
 
-    // Optimistically update the UI
-    setOptimisticItems(prevItems => 
-      prevItems.map(item => 
-        item.productId === productId && item.variantId === variantId
-          ? { ...item, quantity: newQuantity }
-          : item
-      )
-    )
 
     try {
       // Update the backend
-      await updateQuantity(productId, variantId, newQuantity)
+      await updateQuantity({
+        productId,
+        variantId,
+        quantity: newQuantity,
+        userId: user.id,
+        image: ""
+      })
     } catch (error) {
-      // Revert optimistic update on error
-      setOptimisticItems(items)
       toast({
         title: "Error updating quantity",
         description: "Please try again",
@@ -169,18 +150,11 @@ export default function CartPage() {
 
   const handleRemoveItem = async (productId: string, variantId: string) => {
     // Optimistically update the UI
-    setOptimisticItems(prevItems => 
-      prevItems.filter(item => 
-        !(item.productId === productId && item.variantId === variantId)
-      )
-    )
-
     try {
       // Update the backend
       await removeItem(productId, variantId)
     } catch (error) {
       // Revert optimistic update on error
-      setOptimisticItems(items)
       toast({
         title: "Error removing item",
         description: "Please try again",
@@ -190,15 +164,12 @@ export default function CartPage() {
   }
 
   const handleClearCart = async () => {
-    // Optimistically update the UI
-    setOptimisticItems([])
 
     try {
       // Update the backend
       await clearCart()
     } catch (error) {
       // Revert optimistic update on error
-      setOptimisticItems(items)
       toast({
         title: "Error clearing cart",
         description: "Please try again",
@@ -207,9 +178,9 @@ export default function CartPage() {
     }
   }
 
-  const handleShippingMethodChange = (value: string) => {
-    setShippingMethod(value as typeof shippingOptions[number]["id"])
-  }
+  // const handleShippingMethodChange = (value: string) => {
+  //   setShippingMethod(value as typeof shippingOptions[number]["id"])
+  // }
 
   return (
     <>
@@ -221,13 +192,13 @@ export default function CartPage() {
           </Button>
           <h1 className="text-3xl font-bold mb-2 dark:text-white">Your Cart</h1>
           <p className="text-muted-foreground">
-            {optimisticItems.length > 0
-              ? `You have ${optimisticItems.length} item${optimisticItems.length > 1 ? "s" : ""} in your cart`
+            {items.length > 0
+              ? `You have ${items.length} item${items.length > 1 ? "s" : ""} in your cart`
               : "Your cart is empty"}
           </p>
         </div>
 
-        {optimisticItems.length === 0 ? (
+        {items.length === 0 ? (
           <div className="text-center py-16 space-y-6">
             <div className="mx-auto w-24 h-24 rounded-full bg-muted flex items-center justify-center">
               <ShoppingBag className="h-12 w-12 text-muted-foreground" />
@@ -251,9 +222,9 @@ export default function CartPage() {
                 <div className="col-span-2 text-right">Total</div>
               </div>
 
-              {optimisticItems.map((item) => {
-                const variant = optimisticVariants?.find(v => v.id === item.variantId)
-                const isMaxStock = item.quantity >= (variant?.quantity || 0)
+              {items.map((item) => {
+                const variant = variants?.find(v => v.id === item.variantId)
+                const isMaxStock = item.quantity >= (variant?.stock?.quantity || 0)
 
                 return (
                   <div key={item.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center py-4 border-b">
@@ -267,7 +238,10 @@ export default function CartPage() {
                           <br />
                           <span className="text-sm text-muted-foreground">{variant?.attributes.map(attribute => attribute.value).join(", ")}</span>
                         </Link>
-                        <Button
+                        
+                      </div>
+                      <div>
+                      <Button
                           variant="ghost"
                           size="sm"
                           className="h-8 px-3 text-muted-foreground hover:text-destructive mt-1"

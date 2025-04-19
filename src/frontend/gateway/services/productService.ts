@@ -1,4 +1,4 @@
-import { ProductCatalogServiceClient, Product, Brand, Category, ProductAttribute, Warehouse, Cart, CartItem, VariantCart } from '../../protos/nexura';
+import { ProductCatalogServiceClient, Product, Brand, Category, ProductAttribute, Warehouse, Cart, CartItem, VariantCart, DeleteProductRequest } from '../../protos/nexura';
 import { DefaultResponse } from '../../lib/types';
 import { createServiceConfig, createClient, promisifyGrpcCall } from './baseAdapter';
 
@@ -29,8 +29,8 @@ export const productService = {
         return promisifyGrpcCall(productClient, 'updateProduct', { product });
     },
 
-    deleteProduct: async (id: string): Promise<DefaultResponse> => {
-        return promisifyGrpcCall(productClient, 'deleteProduct', { id });
+    deleteProduct: async (productId: string): Promise<DefaultResponse> => {
+        return promisifyGrpcCall(productClient, 'deleteProduct', { productId });
     },
 
     newBrand: async (brand: Brand): Promise<DefaultResponse & { brand: Brand }> => {

@@ -25,7 +25,6 @@ import { createCategoryGateway, getProductByIdGateway, newBrandGateway, updateCa
 import { Product, ProductAttribute, ProductVariant, VariantAttribute } from "@/protos/nexura"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Skeleton } from "@/components/ui/skeleton"
-import { encode } from "blurhash"
 
 interface ProductFormProps {
   productId?: string
@@ -93,7 +92,7 @@ export function ProductForm({
   const [selectedTag, setSelectedTag] = useState("")
   const [isSaving, setIsSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  console.log(JSON.stringify(product, null, 2), "product")
+  // console.log(JSON.stringify(product, null, 2), "product")
   const { data: productData, isLoading: isLoadingProduct } = useQuery({
     queryKey: ["product", productId],
     queryFn: () => getProductByIdGateway(productId || "").then((res) => res.product),
@@ -333,7 +332,10 @@ export function ProductForm({
           id: variant.id || "",
           sku: variant.sku || "",
           price: variant.price || 0,
-          quantity: variant.quantity || 0,
+          stock: variant.stock ? {
+            ...variant.stock,
+            quantity: variant.stock.quantity || 0,
+          } : undefined,
           lowStockThreshold: variant.lowStockThreshold || 0,
           warehouseId: variant.warehouseId || "",
           images: variant.imageIds.map((imageId) => ({
@@ -397,7 +399,7 @@ export function ProductForm({
   }
 
   const calculateTotalStock = () => {
-    return product.variants.reduce((total, variant) => total + variant.quantity, 0)
+    return product.variants.reduce((total, variant) => total + (variant.stock?.quantity || 0), 0)
   }
 
   const getPriceRange = () => {
@@ -466,7 +468,7 @@ export function ProductForm({
     variants.forEach((variant, index) => {
       if (!variant.sku) errors[`variants.${index}.sku`] = "Variant SKU is required"
       if (variant.price <= 0) errors[`variants.${index}.price`] = "Variant price must be greater than 0"
-      if (variant.quantity < 0) errors[`variants.${index}.quantity`] = "Variant quantity must be greater than or equal to 0"
+      if (variant.stock?.quantity && variant.stock.quantity < 0) errors[`variants.${index}.stock.quantity`] = "Variant quantity must be greater than or equal to 0"
     })
 
     return errors

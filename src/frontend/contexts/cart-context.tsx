@@ -2,95 +2,68 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
-import { useCurrency } from "@/contexts/currency-context"
-import { VariantCart, CartItem } from "@/protos/nexura"
-import { useCart as useCartQuery, useCartActions } from "@/hooks/use-query"
+import { CartItem, Product, ProductVariant, UpdateItemRequest } from "@/protos/nexura"
+import { useCartActions } from "@/hooks/use-cart"
 import { useSession } from "./session-context"
-
+import { toast } from "sonner"
 
 export type CartContextType = {
   items: CartItem[]
-  addItem: (item: Omit<CartItem, "id" | "created_at" | "updated_at" | "variant">, currencyCode: string) => Promise<void>
+ addItem: (item: Omit<CartItem, "id" | "created_at" | "updated_at" | "variant">, currencyCode: string) => Promise<void>
   removeItem: (productId: string, variantId: string) => Promise<void>
-  updateQuantity: (productId: string, variantId: string, quantity: number) => Promise<void>
   clearCart: () => Promise<void>
+  setTotalItem: (total: number) => void
   itemCount: number
-  updateVariantInfo: (variantId: string, variant: VariantCart) => void
+  // updateVariantInfo: (variantId: string, variant: VariantCart) => void
   isLoading: boolean
+  updateQuantity: (updateItemRequest: UpdateItemRequest) => Promise<void>
 }
 
 // Create context with a default value that matches the shape but is obviously not functional
 const defaultCartContext: CartContextType = {
   items: [],
+  setTotalItem: () => {},
   addItem: async () => {},
   removeItem: async () => {},
-  updateQuantity: async () => {},
   clearCart: async () => {},
   itemCount: 0,
-  updateVariantInfo: () => {},
-  isLoading: false
+  // updateVariantInfo: () => {},
+  isLoading: false,
+  updateQuantity: async () => {}
 }
 
 export const CartContext = createContext<CartContextType>(defaultCartContext)
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { user } = useSession()
-  const { data: cart, isLoading } = useCartQuery(user?.id || "")
-  const { addItem: addItemToCart, updateItem, removeItem: removeItemFromCart, clearCart: clearCartItems } = useCartActions()
+  const { getCart, addItem: addItemToCart, updateItem, removeItem: removeItemFromCart, clearCart: clearCartItems } = useCartActions()
+  const { data: cart, isLoading, refetch } = getCart(user?.id || "")
   const [items, setItems] = useState<CartItem[]>([])
   const [isReady, setIsReady] = useState(false)
-  const { currency, convertPrice } = useCurrency()
+  const [totalItem, setTotalItem] = useState(0)
 
-  // Initialize cart from localStorage when component mounts
   useEffect(() => {
-    try {
-      const storedCart = localStorage.getItem("nexura-cart")
-      if (storedCart) {
-        setItems(JSON.parse(storedCart))
-      }
-    } catch (error) {
-      console.error("Failed to parse cart from localStorage:", error)
-      setItems([])
-    } finally {
-      setIsReady(true)
-    }
+    setIsReady(true)
   }, [])
-
-  // Update localStorage when cart changes
-  useEffect(() => {
-    if (isReady) {
-      localStorage.setItem("nexura-cart", JSON.stringify(items))
-    }
-  }, [items, isReady])
 
   useEffect(() => {
     if (cart?.items) {
-      const mappedItems: CartItem[] = cart.items.map(item => ({
-        id: item.id,
-        productId: item.productId,
-        variantId: item.variantId,
-        quantity: item.quantity,
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-        image: item.image || "",
-      }))
+      const mappedItems: CartItem[] = cart.items.map((item: CartItem) => ({...item}))
       setItems(mappedItems)
-      setIsReady(true)
     }
   }, [cart])
 
   const addItem = async (newItem: Omit<CartItem, "id" | "created_at" | "updated_at" | "variant">, currencyCode: string) => {
-    if (!user?.id) return
-
+    if (!user || !user.id) {
+      throw new Error("User must be logged in to add items to cart.");
+    }
     try {
-      await addItemToCart({
+      await addItemToCart.mutate({
         userId: user.id,
-        productId: newItem.productId,
-        variantId: newItem.variantId,
-        quantity: newItem.quantity,
-        image: newItem.image || "",
+        ...newItem,
         currencyCode: currencyCode
       })
+      refetch()
     } catch (error) {
       console.error("Failed to add item to cart:", error)
       throw error
@@ -98,58 +71,46 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   const removeItem = async (productId: string, variantId: string) => {
-    if (!user?.id) return
-
+    if (!user || !user.id) {
+      throw new Error("User must be logged in to remove items from cart.");
+    }
     try {
-      await removeItemFromCart({
+      await removeItemFromCart.mutate ({
         userId: user.id,
         productId,
         variantId
       })
+      refetch()
     } catch (error) {
       console.error("Failed to remove item from cart:", error)
       throw error
     }
   }
-  
-  const updateQuantity = async (productId: string, variantId: string, quantity: number) => {
-    if (!user?.id) return
 
-    if (quantity <= 0) {
-      await removeItem(productId, variantId)
-      return
+  const updateQuantity = async (updateItemRequest: UpdateItemRequest) => {
+    if (!user || !user.id) {
+      throw new Error("User must be logged in to update cart item quantity.");
     }
-
     try {
-      const item = items.find(i => i.productId === productId && i.variantId === variantId)
-      if (!item) return
-
-      await updateItem({
-        userId: user.id,
-        productId,
-        variantId,
-        quantity,
-        image: item.image || "",
+      await updateItem.mutate({
+        ...updateItemRequest,
+        userId: user.id
       })
+      refetch()
     } catch (error) {
-      console.error("Failed to update item quantity:", error)
+      console.error("Failed to update cart item quantity:", error)
       throw error
     }
   }
 
-  const updateVariantInfo = (variantId: string, variant: VariantCart) => {
-    setItems(prevItems =>
-      prevItems.map(item =>
-        item.variantId === variantId ? { ...item, variant } : item
-      )
-    )
-  }
-
+  // Hybrid clearCart
   const clearCart = async () => {
-    if (!user?.id) return
-
+    if (!user || !user.id) {
+      throw new Error("User must be logged in to clear cart.");
+    }
     try {
-      await clearCartItems({ userId: user.id })
+      await clearCartItems.mutate(user.id)
+      refetch()
     } catch (error) {
       console.error("Failed to clear cart:", error)
       throw error
@@ -163,11 +124,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         items,
         addItem,
         removeItem,
-        updateQuantity,
         clearCart,
-        itemCount: items.reduce((total, item) => total + item.quantity, 0),
-        updateVariantInfo,
-        isLoading
+        itemCount: totalItem,
+        setTotalItem,
+        // updateVariantInfo,
+        isLoading,
+        updateQuantity
       }}
     >
       {children}

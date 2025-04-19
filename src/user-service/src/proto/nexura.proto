@@ -354,10 +354,9 @@ message CartItem {
   string product_id = 2;
   string variant_id = 3;
   string image = 4;
-  double price = 5;
-  int32 quantity = 6;
-  string created_at = 7;
-  string updated_at = 8;
+  int32 quantity = 5;
+  string created_at = 6;
+  string updated_at = 7;
 }
 
 message ValidateCartRequest {
@@ -432,7 +431,7 @@ message VariantCart {
   string id = 1;
   float price = 2;
   string image = 3;
-  int32 quantity = 4;
+  optional Stock stock = 4;
   string variant_name = 5;
   string product_name = 6;
   string product_slug = 7;
@@ -826,23 +825,8 @@ service EmailService {
     rpc SendWelcomeEmail (SendWelcomeEmailRequest) returns (SendWelcomeEmailResponse) {}
 }
 
-// message OrderItem {
-//     CartItem item = 1;
-//     Money cost = 2;
-// }
 
-// message OrderResult {
-//     string   order_id = 1;
-//     string   shipping_tracking_id = 2;
-//     Money shipping_cost = 3;
-//     Address  shipping_address = 4;
-//     repeated OrderItem items = 5;
-// }
 
-// message SendOrderConfirmationRequest {
-//     string email = 1;
-//     OrderResult order = 2;
-// }
 
 message SendOTPResetPasswordRequest {
     string email = 1;
@@ -968,8 +952,17 @@ message CreateOrderRequest {
   string user_id = 1;
   string currency_code = 2;
   double total_amount = 3;
-  repeated CartItem items = 4;
+  repeated OrderItem items = 4;
   string shipping_address_id = 5;
+  string payment_id = 6;
+  PaymentStatus payment_status = 7;
+}
+
+message OrderItem {
+  string product_id = 1;
+  string variant_id = 2;
+  int32 quantity = 3;
+  Money price = 4;
 }
 
 message CreateOrderResponse {
@@ -1002,17 +995,6 @@ message Order {
   string paymentId = 7;
   string createdAt = 8;
   string updatedAt = 9;
-}
-
-message OrderItem {
-  string id = 1;
-  string variantId = 2;
-  int32 quantity = 3;
-  double price = 4;
-  string name = 5;
-  string sku = 6;
-  string createdAt = 7;
-  string updatedAt = 8;
 }
 
 message UpdateOrderStatusRequest {

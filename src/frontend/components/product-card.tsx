@@ -112,7 +112,7 @@ export function ProductCard({ product, viewMode = "grid", categories }: ProductC
               <p className="text-sm text-text-muted mt-1 line-clamp-2">{product.description}</p>
             </div>
             <div className="flex items-center justify-between mt-4">
-              <span className="font-semibold text-text-base">{formatPrice(defaultVariant.price)}</span>
+              <span className="font-semibold text-text-base">{formatPrice(selectedVariant?.price || 0)}</span>
               <Button
                 size="sm"
                 onClick={(e) => {
@@ -173,7 +173,7 @@ export function ProductCard({ product, viewMode = "grid", categories }: ProductC
             </div>
             <h3 className="font-medium hover:underline text-text-base">{product.name}</h3>
             <div className="flex items-center justify-between mt-2">
-              <span className="font-semibold text-text-base">{formatPrice(defaultVariant.price)}</span>
+              <span className="font-semibold text-text-base">{formatPrice(selectedVariant?.price || 0)}</span>
               <Button
                 size="sm"
                 variant="ghost"

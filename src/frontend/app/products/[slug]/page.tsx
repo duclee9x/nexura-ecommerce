@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -11,38 +11,27 @@ import { toast } from "@/hooks/use-toast"
 import useEmblaCarousel from 'embla-carousel-react'
 import {
   ChevronLeft,
-  ShoppingCart,
   Heart,
-  Share2,
-  Star,
-  Truck,
-  RefreshCw,
-  Shield,
-  Check,
-  Plus,
-  Minus,
-  ChevronRight,
   Loader2,
+  Star,
 } from "lucide-react"
 import NextImage from "next/image"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { ProductVariantSelector } from "@/components/product-variant-selector"
 import { useQuery } from "@tanstack/react-query"
 import { getProductBySlugGateway } from "@/gateway/gateway"
 // import { formatPrice } from "@/utils/format"
-import { Input } from "@/components/ui/input"
-import { Product, ProductVariant } from "@/protos/nexura"
+import { Product, ProductVariant, CartItem } from "@/protos/nexura"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { ImageViewer } from "@/components/image-viewer"
-import { cn } from "@/lib/utils"
 import { useCurrency } from "@/contexts/currency-context"
 // import { useCart } from "@/hooks/use-cart"
 import { ReviewImageViewer } from "@/components/review-image-viewer"
-import { useProducts, useCategories, useFilteredProducts, useQueryUtils } from "@/hooks/use-query"
-import { useAddToCart } from "@/hooks/use-mutation"
+import { useQueryUtils } from "@/hooks/use-query"
+import { useCart, useCart as useCartContext } from "@/contexts/cart-context"
 import { useSession } from "@/contexts/session-context"
 import { ProductDetailsSection } from "@/components/product-details-section"
+import { useCartActions } from "@/hooks/use-cart"
 // Add mock review data
 const mockReviews = [
   {
@@ -125,6 +114,7 @@ const ratingDistribution = {
 export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
   const router = useRouter()
+  const { addItem } = useCartContext()
   // const { addItem } = useCart()
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState("description")
@@ -132,7 +122,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
-  const {formatPrice} = useCurrency()
+  const { formatPrice } = useCurrency()
   // Embla carousel setup
   const [mainCarouselRef, mainEmbla] = useEmblaCarousel()
   const [thumbCarouselRef, thumbEmbla] = useEmblaCarousel({
@@ -143,26 +133,26 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const [currentReviewImageIndex, setCurrentReviewImageIndex] = useState(0)
   const [isReviewImageViewerOpen, setIsReviewImageViewerOpen] = useState(false)
   const { currency } = useCurrency()
-  const { 
-    data: product, 
-    isLoading, 
+  const {
+    data: product,
+    isLoading,
     isError,
-    error 
+    error
   } = useQuery<Product>({
     queryKey: ['product', slug],
-    queryFn: () => getProductBySlugGateway(slug).then(res=>res.product),
+    queryFn: () => getProductBySlugGateway(slug).then(res => res.product),
     enabled: !!slug,
   })
   const { user } = useSession()
   const { invalidateQueries } = useQueryUtils()
-
+  const { getCart } = useCartActions()
+  const { data: cart } = getCart(user?.id || '')
   // Initialize selectedVariant with the first variant when product loads
   useEffect(() => {
     if (product?.variants.length) {
       setSelectedVariant(product.variants[0])
     }
   }, [product])
-
   // Get variant name for display
   const getVariantName = (variant: ProductVariant) => {
     return variant.attributes
@@ -176,11 +166,17 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       .join(" / ")
   }
 
-  const { mutate: addToCart } = useAddToCart({
-    successMessage: `${quantity} × ${product?.name} ${selectedVariant ? `(${getVariantName(selectedVariant)})` : ""} added to your cart.`,
-    errorMessage: "Failed to add item to cart. Please try again."
-  })
+  // const { mutate: addToCart } = useAddToCart({
+  //   successMessage: `${quantity} × ${product?.name} ${selectedVariant ? `(${getVariantName(selectedVariant)})` : ""} added to your cart.`,
+  //   errorMessage: "Failed to add item to cart. Please try again.",
+  //   onSuccess: () => {
+  //     // Optionally refetch product data to get latest stock
+  //     invalidateQueries(['product', slug]);
+  //     invalidateQueries(['cart']);
+  //   }
+  // });
 
+    
   // Sync main and thumb carousels
   useEffect(() => {
     if (!mainEmbla || !thumbEmbla) return
@@ -207,26 +203,50 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const scrollNext = () => mainEmbla?.scrollNext()
 
   // Handle quantity change
+  // Robust quantity change handler
   const handleQuantityChange = (value: number) => {
-    if (value < 1) return
-    if (value > (selectedVariant ? selectedVariant.quantity : 0)) return
-    setQuantity(value)
-  }
+    const maxQuantity = selectedVariant?.stock?.quantity ?? 0;
+    if (value < 1) return;
+    if (value > maxQuantity) return;
+    setQuantity(value);
+  };
 
-  // Handle add to cart
-  const handleAddToCart = () => {
-    if (!product || !selectedVariant) return
-
-    setIsAddingToCart(true)
-    addToCart({
-      productId: product.id,
-      variantId: selectedVariant.id,
-      userId: user?.id || "",
-      quantity,
-      image: product.images[0]?.url,
-      currencyCode: currency
-    })
-  }
+  // Reset quantity when changing variants
+  useEffect(() => {
+    setQuantity(1);
+  }, [selectedVariant]);
+  console.log(quantity, "quantity")
+  console.log(JSON.stringify(selectedVariant), "selectedVariant")
+  // Handle add to cart with stock check and user feedback
+  const handleAddToCart = async () => {
+    if (!product || !selectedVariant || !cart) return;
+    const currentItemOnCart = cart.items.find(item => item.productId === product.id && item.variantId === selectedVariant.id);
+    if (quantity + (currentItemOnCart?.quantity || 0) > (selectedVariant.stock?.quantity || 0)) {
+      toast({
+        title: "Not enough stock",
+        description: "You cannot add more items than are available in stock.",
+        variant: "destructive"
+      });
+      return;
+    }
+    setIsAddingToCart(true);
+    try {
+      await addItem({
+        productId: product.id,
+        variantId: selectedVariant.id,
+        image: product.images[0]?.url || "",
+        quantity,
+      } as Omit<CartItem, 'id' | 'created_at' | 'updated_at' | 'variant'>, currency);
+    } catch (error) {
+      toast({
+        title: "Failed to add to cart",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
 
   const getCurrentPrice = (): string => {
     if (selectedVariant) {
@@ -235,20 +255,21 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     return product?.basePrice?.toFixed(2) || "0.00"
   }
 
+  // Robust stock status calculation
   const getStockStatus = () => {
-    const currentStock = selectedVariant ? selectedVariant.quantity : 0
-
+    console.log(selectedVariant, 'selected variant')
+    if (!selectedVariant || typeof selectedVariant.stock?.quantity !== 'number') {
+      return { status: "Out of Stock", color: "destructive", stock: 0 };
+    }
+    const currentStock = selectedVariant.stock.quantity;
+    const lowThreshold = typeof selectedVariant.lowStockThreshold === 'number' ? selectedVariant.lowStockThreshold : 5;
     if (currentStock <= 0) {
-      return { status: "Out of Stock", color: "destructive" }
+      return { status: "Out of Stock", color: "destructive", stock: 0 };
     }
-
-    const lowThreshold = selectedVariant?.lowStockThreshold || 5
-
     if (currentStock <= lowThreshold) {
-      return { status: `Low Stock (${currentStock} left)`, color: "warning" }
+      return { status: `Low Stock (${currentStock} left)`, color: "warning", stock: currentStock };
     }
-
-    return { status: "In Stock", color: "success" }
+    return { status: "In Stock", color: "success", stock: currentStock };
   }
 
   // Calculate average rating
@@ -283,8 +304,8 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
             <div className="text-destructive text-lg font-semibold">
               {"Failed to load product, please try again later"}
             </div>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => invalidateQueries(['product', slug])}
             >
               Retry
@@ -308,21 +329,27 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         </div>
 
         {product && (
-          <ProductDetailsSection
-            product={product}
-            selectedVariant={selectedVariant}
-            isAddingToCart={isAddingToCart}
-            quantity={quantity}
-            currentImageIndex={currentImageIndex}
-            onImageClick={(index) => {
-              setCurrentImageIndex(index)
-              setIsImageViewerOpen(true)
-            }}
-            onVariantSelect={setSelectedVariant}
-            onAddToCart={handleAddToCart}
-            onQuantityChange={handleQuantityChange}
-            onImageIndexChange={setCurrentImageIndex}
-          />
+          <>
+            <ProductDetailsSection
+              product={product}
+              selectedVariant={selectedVariant}
+              isAddingToCart={isAddingToCart}
+              quantity={quantity}
+              currentImageIndex={currentImageIndex}
+              onImageClick={(index) => {
+                setCurrentImageIndex(index)
+                setIsImageViewerOpen(true)
+              }}
+              onVariantSelect={setSelectedVariant}
+              onAddToCart={handleAddToCart}
+              onQuantityChange={handleQuantityChange}
+              onImageIndexChange={setCurrentImageIndex}
+              // Pass in computed stock status and stock for explicit control
+              stockStatus={getStockStatus()}
+              maxQuantity={selectedVariant?.stock?.quantity ?? 0}
+              quantityDisabled={!selectedVariant || (selectedVariant.stock?.quantity ?? 0) <= 0}
+            />
+          </>
         )}
 
         {/* Product Details Tabs */}
@@ -456,11 +483,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                           {[1, 2, 3, 4, 5].map((star) => (
                             <Star
                               key={star}
-                              className={`h-5 w-5 ${
-                                star <= Math.round(averageRating) 
-                                  ? "text-yellow-400 fill-yellow-400" 
+                              className={`h-5 w-5 ${star <= Math.round(averageRating)
+                                  ? "text-yellow-400 fill-yellow-400"
                                   : "text-muted-foreground"
-                              }`}
+                                }`}
                             />
                           ))}
                         </div>
@@ -518,11 +544,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                                   {[1, 2, 3, 4, 5].map((star) => (
                                     <Star
                                       key={star}
-                                      className={`h-4 w-4 ${
-                                        star <= review.rating 
-                                          ? "text-yellow-400 fill-yellow-400" 
+                                      className={`h-4 w-4 ${star <= review.rating
+                                          ? "text-yellow-400 fill-yellow-400"
                                           : "text-muted-foreground"
-                                      }`}
+                                        }`}
                                     />
                                   ))}
                                 </div>
@@ -618,7 +643,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
 
         {/* Full Screen Image Viewer */}
         <ImageViewer
-          images={product.images?.length > 0 
+          images={product.images?.length > 0
             ? product.images.map(img => img.url || "/no-image-placeholder.webp")
             : ["/no-image-placeholder.webp"]}
           currentIndex={currentImageIndex}

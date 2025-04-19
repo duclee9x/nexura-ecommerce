@@ -4,7 +4,7 @@ import { userService } from './services/userService';
 import { cartService } from './services/cartService';
 import { productService } from './services/productService';
 import { addressService } from './services/addressService';
-import { AddItemRequest, ClearCartRequest, GetCartRequest, Product, RemoveItemRequest, UpdateItemRequest } from '@/protos/nexura';
+import { AddItemRequest, ClearCartRequest, DeleteAddressRequest, DeleteProductRequest, GetCartRequest, Product, RemoveItemRequest, UpdateItemRequest } from '@/protos/nexura';
 
 export const validateOTPGateway = async (email: string, otp: string) => {
     return userService.validateOTP(email, otp);
@@ -75,8 +75,8 @@ export const updateAddressGateway = async (userId: string, address: any) => {
     return addressService.updateAddress(userId, address);
 };
 
-export const deleteAddressGateway = async (userId: string, addressId: string) => {
-    return addressService.deleteAddress(userId, addressId);
+export const deleteAddressGateway = async (deleteAddressRequest: DeleteAddressRequest) => {
+    return addressService.deleteAddress(deleteAddressRequest);
 };
 
 export const getAddressesGateway = async (userId: string) => {
@@ -132,8 +132,8 @@ export const updateProductGateway = async (product: Product) => {
     return productService.updateProduct(product);
 };
 
-export const deleteProductGateway = async (id: string) => {
-    return productService.deleteProduct(id);
+export const deleteProductGateway = async (productId: string) => {
+    return productService.deleteProduct(productId);
 };
 
 export const createProductGateway = async (product: any) => {

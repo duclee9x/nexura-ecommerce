@@ -1,8 +1,8 @@
 "use client"
 
-import type React from "react"
+import { memo } from "react"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -59,7 +59,7 @@ interface VariantManagerProps {
   productImages: ProductImage[]
 }
 
-export function VariantManager({
+export const VariantManager = memo(function VariantManager({
   variants,
   onVariantUpdate,
   basePrice,
@@ -69,14 +69,16 @@ export function VariantManager({
   attributes = [],
   productImages,
 }: VariantManagerProps) {
-
   const [productVariants, setProductVariants] = useState<ProductVariant[]>(variants)
   const [isAddingVariant, setIsAddingVariant] = useState(false)
   const [newVariant, setNewVariant] = useState<ProductVariant>({
     id: "",
     sku: "",
     price: basePrice,
-    quantity: 0,
+    stock: {
+      quantity: 0,
+      reserved: 0,
+    },
     lowStockThreshold: 5,
     imageIds: [],
     attributes: [],
@@ -106,18 +108,18 @@ export function VariantManager({
     return attributes.filter((attr) => attr.variantable)
   }, [attributes])
   // Get attribute options for a specific attribute
-  const getAttributeOptions = (attributeId: string) => {
+  const getAttributeOptions = useCallback((attributeId: string) => {
     const attribute = attributes.find((attr) => attr.id === attributeId)
     if (!attribute) return []
 
     return attribute.values
-  }
-
+  }, [attributes])
+  console.log(variants, "variants")
   // Get attribute name by ID
-  const getAttributeName = (attributeId: string) => {
+  const getAttributeName = useCallback((attributeId: string) => {
     const attribute = attributes.find((attr) => attr.id === attributeId)
     return attribute ? attribute.name : attributeId
-  }
+  }, [attributes])
 
   
   // Update variants when props change
@@ -131,7 +133,10 @@ export function VariantManager({
       id: "",
       sku: `${baseSku}-${productVariants.length + 1}`,
       price: basePrice,
-      quantity: 0,
+      stock: {
+        quantity: 0,
+        reserved: 0,
+      },
       lowStockThreshold: 5,
       imageIds: [],
       attributes: attributes.map((attr) => ({
@@ -153,7 +158,7 @@ export function VariantManager({
     // Basic validation
     if (!variant.sku) errors.sku = "SKU is required"
     if (variant.price <= 0) errors.price = "Price must be greater than 0"
-    if (variant.quantity < 0 || isNaN(variant.quantity)) errors.quantity = "Quantity must be a positive number"
+    if (variant.stock?.quantity && (variant.stock.quantity < 0 || isNaN(variant.stock.quantity))) errors.stock = "Stock must be a positive number"
     if (variant.lowStockThreshold !== undefined && variant.lowStockThreshold < 0) {
       errors.lowStockThreshold = "Low stock threshold must be a positive number"
     }
@@ -185,7 +190,7 @@ export function VariantManager({
   }
 
   // Handle adding a new variant
-  const handleAddVariant = () => {
+  const handleAddVariant = useCallback(() => {
     const validationErrors = validateVariant(newVariant)
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors)
@@ -202,7 +207,7 @@ export function VariantManager({
       title: "Variant Added",
       description: "The variant has been added successfully.",
     })
-  }
+  }, [newVariant, productVariants, onVariantUpdate])
 
   // Handle editing a variant
   const startEditingVariant = (variantId: string) => {
@@ -252,7 +257,7 @@ export function VariantManager({
   }
 
   // Handle deleting a variant
-  const handleDeleteVariant = (variantId: string) => {
+  const handleDeleteVariant = useCallback((variantId: string) => {
     const updatedVariants = productVariants.filter((variant) => variant.id !== variantId)
     setProductVariants(updatedVariants)
     onVariantUpdate(updatedVariants, "delete")
@@ -262,7 +267,7 @@ export function VariantManager({
       title: "Variant Deleted",
       description: "The variant has been removed.",
     })
-  }
+  }, [productVariants, onVariantUpdate, selectedVariants])
 
   // Handle bulk delete of variants
   const handleBulkDeleteVariants = () => {
@@ -289,16 +294,28 @@ export function VariantManager({
 
   // Handle input change for new variant
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
-    const value = e.target.type === "number" ? Number(e.target.value) : e.target.value
-    setNewVariant((prev) => ({ ...prev, [field]: value }))
+    const value = e.target.type === "number" ? Number(e.target.value) : e.target.value;
+
+    if (field === "stock") {
+      setNewVariant((prev) => ({
+        ...prev,
+        stock: {
+          ...prev.stock,
+          quantity: typeof value === 'number' ? value : Number(value) || 0,
+          reserved: typeof prev.stock?.reserved === 'number' ? prev.stock.reserved : 0,
+        },
+      }));
+    } else {
+      setNewVariant((prev) => ({ ...prev, [field]: value }));
+    }
 
     // Clear error for this field if it exists
     if (errors[field]) {
       setErrors((prev) => {
-        const updated = { ...prev }
-        delete updated[field]
-        return updated
-      })
+        const updated = { ...prev };
+        delete updated[field];
+        return updated;
+      });
     }
   }
 
@@ -319,45 +336,74 @@ export function VariantManager({
     }
   }
   // Handle attribute value change for a variant
-  const handleAttributeValueChange = (attributeId: string, value: string, isColorName: boolean = false) => {
-    setNewVariant((prev) => ({
-      ...prev,
-      attributes: prev.attributes?.map((attr) => {
-        const attributeDefinition = attributes.find((a) => a.id === attributeId)
-        if (attributeDefinition?.name.toLowerCase() === "color") {
-          if (attr.name.toLowerCase() === "color") {
-            if (isColorName) {
-              // Check if the entered name matches any available color value
-              const matchingColor = attributeDefinition.values.find(
-                (attrValue) => attrValue.toLowerCase() === value.toLowerCase()
-              )
-              if (matchingColor) {
-                // If it matches, update both name and color value
-                const colorValue = attributeDefinition.values.find(
-                  (attrValue) => attrValue.toLowerCase() === value.toLowerCase()
-                )
-                return {
-                  ...attr,
-                  value: value,
-                  extraValue: colorValue || value
-                }
-              }
-              // If no match, just update the name
+  const handleAttributeValueChange = useCallback((attributeId: string, value: string, isColorName: boolean = false) => {
+    
+    const attributeDefinition = attributes.find((a) => a.id === attributeId)
+    if (attributeDefinition?.name.toLowerCase() === "color") {
+      if (isColorName) {
+        // Only update the color name, preserve the hex value
+        setNewVariant((prev) => ({
+          ...prev,
+          attributes: prev.attributes?.map((attr) => {
+            if (attr.name.toLowerCase() === "color") {
               return { ...attr, value }
-            } else {
+            }
+            return attr
+          }) || []
+        }))
+      } else {
+        // Update hex color for all variants with the same color name
+        const currentColorName = newVariant.attributes?.find(attr => attr.name.toLowerCase() === "color")?.value || ""
+        
+        // Update the current variant
+        setNewVariant((prev) => ({
+          ...prev,
+          attributes: prev.attributes?.map((attr) => {
+            if (attr.name.toLowerCase() === "color") {
               return {
                 ...attr,
-                value: value.startsWith("#") ? value : attr.value,
                 extraValue: value.startsWith("#") ? value : attr.extraValue
               }
             }
+            return attr
+          }) || []
+        }))
+
+        // Update all other variants with the same color name
+        const updatedVariants = productVariants.map(variant => {
+          const colorAttr = variant.attributes?.find(attr => attr.name.toLowerCase() === "color")
+          if (colorAttr?.value === currentColorName) {
+            return {
+              ...variant,
+              attributes: variant.attributes?.map(attr => {
+                if (attr.name.toLowerCase() === "color") {
+                  return {
+                    ...attr,
+                    extraValue: value.startsWith("#") ? value : attr.extraValue
+                  }
+                }
+                return attr
+              }) || []
+            }
           }
-        } else if (attr.name.toLowerCase() === attributeDefinition?.name.toLowerCase()) {
-          return { ...attr, value }
-        }
-        return attr
-      }) || []
-    }))
+          return variant
+        })
+
+        setProductVariants(updatedVariants)
+        onVariantUpdate(updatedVariants, "update")
+      }
+    } else {
+      // Handle non-color attributes
+      setNewVariant((prev) => ({
+        ...prev,
+        attributes: prev.attributes?.map((attr) => {
+          if (attr.name.toLowerCase() === attributeDefinition?.name.toLowerCase()) {
+            return { ...attr, value }
+          }
+          return attr
+        }) || []
+      }))
+    }
 
     // Clear error for this attribute if it exists
     if (errors[`attribute_${attributeId}`]) {
@@ -367,7 +413,7 @@ export function VariantManager({
         return updated
       })
     }
-  }
+  }, [attributes, newVariant, productVariants, onVariantUpdate, errors])
 
   // Handle color change
   const handleColorChange = (color: string) => {
@@ -444,11 +490,11 @@ export function VariantManager({
   }
 
   // Get warehouse name by ID
-  const getWarehouseName = (warehouseId: string | undefined) => {
+  const getWarehouseName = useCallback((warehouseId: string | undefined) => {
     if (!warehouseId) return "Not assigned"
     const warehouse = warehouses?.find((w) => w.id === warehouseId)
     return warehouse ? warehouse.name : "Unknown"
-  }
+  }, [warehouses])
 
   // Toggle variant selection for bulk actions
   const toggleVariantSelection = (variantId: string) => {
@@ -479,32 +525,37 @@ export function VariantManager({
     }
 
     const updatedVariants = productVariants.map((variant) => {
-      if (selectedVariants.includes(variant.id)) {
-        const updates: Partial<ProductVariant> = {}
-        if (bulkPrice !== null) updates.price = bulkPrice
-        if (bulkQuantity !== null) updates.quantity = bulkQuantity
-        if (bulkLowStockThreshold !== null) updates.lowStockThreshold = bulkLowStockThreshold
-        if (bulkWarehouseId !== null) updates.warehouseId = bulkWarehouseId
+      if (!selectedVariants.includes(variant.id)) return variant;
+      // Update fields as needed
+      return {
+        ...variant,
+        price: bulkPrice !== null ? bulkPrice : variant.price,
+        stock: {
+          ...variant.stock,
+          quantity: bulkQuantity !== null ? bulkQuantity : (variant.stock?.quantity ?? 0),
+          reserved: typeof variant.stock?.reserved === 'number' ? variant.stock.reserved : 0,
+        },
+        lowStockThreshold: bulkLowStockThreshold !== null ? bulkLowStockThreshold : variant.lowStockThreshold,
+        warehouseId: bulkWarehouseId && bulkWarehouseId !== 'keep' ? bulkWarehouseId : variant.warehouseId,
+      };
+    });
 
-        return { ...variant, ...updates }
-      }
-      return variant
-    })
-
-    setProductVariants(updatedVariants)
-    onVariantUpdate(updatedVariants, "update")
+    setProductVariants(updatedVariants);
+    onVariantUpdate(updatedVariants, "update");
 
     // Reset bulk edit values
-    setBulkPrice(null)
-    setBulkQuantity(null)
-    setBulkLowStockThreshold(null)
-    setBulkWarehouseId(null)
-    setBulkEditMode(false)
+    setBulkPrice(null);
+    setBulkQuantity(null);
+    setBulkLowStockThreshold(null);
+    setBulkWarehouseId(null);
+    setBulkEditMode(false);
+    setSelectedVariants([]);
+    setSelectAllVariants(false);
 
     toast({
       title: "Bulk Edit Applied",
-      description: `Updated ${selectedVariants.length} variants.`,
-    })
+      description: `Bulk changes have been applied to ${selectedVariants.length} variants.`,
+    });
   }
 
   // Generate variants based on selected attributes
@@ -552,7 +603,10 @@ export function VariantManager({
         name: variantName,
         sku,
         price: basePrice,
-        quantity: 0,
+        stock: {
+          quantity: 0,
+          reserved: 0,
+        },
         lowStockThreshold: 5,
         imageIds: [],
         attributes: combination,
@@ -644,27 +698,24 @@ export function VariantManager({
     return value
   }
 
-  // Get filtered variants based on selected attribute and value
-  const getFilteredVariants = () => {
+  // Memoize filtered variants
+  const filteredVariants = useMemo<ProductVariant[]>(() => {
     if (!filterAttribute || !filterValue) return productVariants
-
     return productVariants.filter((variant) => {
       if (!variant.attributes) return false
       return variant.attributes.find((attr) => attr.id === filterAttribute)?.value === filterValue
     })
-  }
+  }, [productVariants, filterAttribute, filterValue])
 
-  const renderVariantAttribute = (variant: ProductVariant, attrId: string) => {
-    // Check if attributes exist and find the matching attribute
+  // Memoize variant attribute renderer with proper typing
+  const renderVariantAttribute = useCallback((variant: ProductVariant, attrId: string): React.ReactNode => {
     if (!variant.attributes || !Array.isArray(variant.attributes)) {
       return "-"
     }
 
-    // Get the attribute definition first
     const attributeDefinition = attributes.find((attr) => attr.id === attrId)
     if (!attributeDefinition) return "-"
 
-    // Find the attribute by name instead of ID
     const attribute = variant.attributes.find((attr) => attr.name.toLowerCase() === attributeDefinition.name.toLowerCase())
     if (!attribute) return "-"
 
@@ -681,7 +732,7 @@ export function VariantManager({
     }
 
     return attribute.value || "-"
-  }
+  }, [attributes])
 
   // Effect to update selectAllVariants state when selectedVariants changes
   useEffect(() => {
@@ -703,7 +754,6 @@ export function VariantManager({
     }))
   }
 
-  const filteredVariants = getFilteredVariants()
   return (
     <div className="variant-manager space-y-4">
       <div className="flex justify-between items-center">
@@ -812,6 +862,7 @@ export function VariantManager({
                         <TableHead>SKU</TableHead>
                         <TableHead>Price</TableHead>
                         <TableHead>Exists</TableHead>
+                        <TableHead>Add</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -844,6 +895,25 @@ export function VariantManager({
                                   New
                                 </Badge>
                               )}
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                size="sm"
+                                variant="default"
+                                onClick={() => {
+                                  if (exists) return;
+                                  const updatedVariants = [...productVariants, variant];
+                                  setProductVariants(updatedVariants);
+                                  onVariantUpdate(updatedVariants, "update");
+                                  toast({
+                                    title: "Variant Added",
+                                    description: `Variant ${variant.sku} has been added successfully.`,
+                                  });
+                                }}
+                                disabled={exists}
+                              >
+                                <Plus className="h-4 w-4 mr-1" /> Add
+                              </Button>
                             </TableCell>
                           </TableRow>
                         )
@@ -947,9 +1017,9 @@ export function VariantManager({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="bulk-quantity">Quantity</Label>
+                    <Label htmlFor="bulk-stock">Stock</Label>
                     <Input
-                      id="bulk-quantity"
+                      id="bulk-stock"
                       type="number"
                       value={bulkQuantity === null ? "" : bulkQuantity}
                       onChange={(e) => setBulkQuantity(e.target.value ? Number(e.target.value) : null)}
@@ -1020,7 +1090,7 @@ export function VariantManager({
                     ))}
                     <TableHead>SKU</TableHead>
                     <TableHead>Price</TableHead>
-                    <TableHead>Quantity</TableHead>
+                    <TableHead>Stock</TableHead>
                     <TableHead>Warehouse</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -1033,7 +1103,7 @@ export function VariantManager({
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredVariants.map((variant) => (
+                    filteredVariants.map((variant: ProductVariant) => (
                       <TableRow key={variant.id}>
                         <TableCell>
                           <Checkbox
@@ -1050,8 +1120,8 @@ export function VariantManager({
                         <TableCell>{variant.sku}</TableCell>
                         <TableCell>${variant.price.toFixed(2)}</TableCell>
                         <TableCell>
-                          {variant.quantity}
-                          {variant.lowStockThreshold && variant.quantity <= variant.lowStockThreshold && (
+                          {typeof variant.stock?.quantity === 'number' ? variant.stock.quantity : 0}
+                          {variant.lowStockThreshold && typeof variant.stock?.quantity === 'number' && variant.stock.quantity <= variant.lowStockThreshold && (
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -1060,7 +1130,7 @@ export function VariantManager({
                                   </span>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>Low stock alert! Quantity is below threshold of {variant.lowStockThreshold}</p>
+                                  <p>Low stock alert! Stock is below threshold of {variant.lowStockThreshold}</p>
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
@@ -1110,7 +1180,7 @@ export function VariantManager({
             </DialogDescription>
           </DialogHeader>
 
-          <Tabs defaultValue="attributes" className="mt-4">
+          <Tabs defaultValue="details" className="mt-4">
             <TabsList className="grid grid-cols-3">
               <TabsTrigger value="details">Details</TabsTrigger>
               <TabsTrigger value="attributes">Attributes</TabsTrigger>
@@ -1169,14 +1239,14 @@ export function VariantManager({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="variant-quantity">
-                    Quantity <span className="text-destructive">*</span>
+                  <Label htmlFor="variant-stock">
+                    Stock <span className="text-destructive">*</span>
                   </Label>
                   <Input
-                    id="variant-quantity"
+                    id="variant-stock"
                     type="number"
-                    value={newVariant.quantity}
-                    onChange={(e) => handleInputChange(e, "quantity")}
+                    value={newVariant.stock?.quantity}
+                    onChange={(e) => handleInputChange(e, "stock")}
                     className={cn(errors.quantity && "border-destructive")}
                     min="0"
                     step="1"
@@ -1273,9 +1343,7 @@ export function VariantManager({
                     // Ensure imageIds is always an array
                     const currentImageIds = Array.isArray(newVariant.imageIds) ? newVariant.imageIds : []
                     const isSelected = currentImageIds.includes(image.id)
-                    console.log(isSelected, "isSelected")
-                    console.log(JSON.stringify(newVariant, null, 2), "newVariant")
-                    console.log(JSON.stringify(productImages, null, 2), "productImages")
+
                     return (
                       <div
                         key={image.id}
@@ -1344,4 +1412,4 @@ export function VariantManager({
       </Dialog>
     </div>
   )
-}
+})

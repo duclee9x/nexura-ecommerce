@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { ChevronLeft, ChevronRight, Filter, X, Grid3X3, List, Loader2 } from "lucide-react"
+import { ChevronLeft, ChevronRight, Filter, X, Grid3X3, List, Loader2, RefreshCw } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,10 +24,7 @@ import {
 } from "@/components/ui/sheet"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { useCurrency } from "@/contexts/currency-context"
-import { useQuery } from "@tanstack/react-query"
-import { getAllCategoryGateway, listProductsGateway } from "@/gateway/gateway"
-import { useQueryClient } from "@tanstack/react-query"
-import { useProducts, useCategories, useFilteredProducts, useQueryUtils } from "@/hooks/use-query"
+  import { useProducts, useCategories, useFilteredProducts, useQueryUtils } from "@/hooks/use-query"
 
 
 interface filterType {
@@ -38,7 +35,6 @@ interface filterType {
 }
 
 export default function ProductCatalogPage() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const categoryParam = searchParams.get("category")
   const { formatPrice } = useCurrency()
@@ -52,7 +48,6 @@ export default function ProductCatalogPage() {
     features: [],
   })
   const [searchQuery, setSearchQuery] = useState("")
-  const queryClient = useQueryClient()
 
   const { data: categories, isLoading: isCategoriesLoading } = useCategories()
   const { 
@@ -61,7 +56,6 @@ export default function ProductCatalogPage() {
     isError: isProductsError,
     error: productsError
   } = useProducts()
-
   const { invalidateQueries } = useQueryUtils()
 
   const filteredProducts = useFilteredProducts(products, {
@@ -131,12 +125,32 @@ export default function ProductCatalogPage() {
       {isProductsError ? (
         <div className="flex flex-col items-center justify-center p-6 space-y-4">
           <div className="text-destructive text-lg font-semibold">
-            {productsError instanceof Error ? productsError.message : "Failed to load products"}
+            {(() => {
+              if (productsError instanceof Error) {
+                // Handle gRPC errors
+                if (productsError.message.includes('NOT_FOUND')) {
+                  return "Products not found. Please try again later.";
+                } else if (productsError.message.includes('INVALID_ARGUMENT')) {
+                  return "Invalid request. Please check your filters and try again.";
+                } else if (productsError.message.includes('INTERNAL')) {
+                  return "Server error. Our team has been notified. Please try again later.";
+                } else if (productsError.message.includes('UNAVAILABLE')) {
+                  return "Service temporarily unavailable. Please try again later.";
+                }
+                return productsError.message;
+              }
+              return "Failed to load products. Please try again later.";
+            })()}
+          </div>
+          <div className="text-sm text-muted-foreground">
+            If the problem persists, please contact support.
           </div>
           <Button 
             variant="outline" 
             onClick={() => invalidateQueries(["productsCatalog"])}
+            className="mt-2"
           >
+            <RefreshCw className="mr-2 h-4 w-4" />
             Retry
           </Button>
         </div>

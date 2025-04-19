@@ -131,27 +131,35 @@ export function ProductVariantSelector({
     }
 
     const isValueAvailable = (attributeName: string, value: string) => {
-        const availableValues = getAvailableValues(attributeName)
-        if (!availableValues.includes(value)) {
-            return false
-        }
-
-        if (disableOutOfStock) {
-            const matchingVariants = variants.filter((variant) => {
+        // Find variants that have this attribute value
+        const matchingVariants = variants.filter((variant) => {
+            // Check if this variant has the current attribute value
+            const hasAttributeValue = variant.attributes.some(
+                (attr) => attr.name === attributeName && attr.value === value
+            );
+            // Check if this variant matches all other selected values
+            const matchesOtherSelections = Object.entries(selectedValues).every(([attrName, selectedValue]) => {
+                if (attrName === attributeName) return true; // skip the attribute being checked
                 return variant.attributes.some(
-                    (attr) => attr.name === attributeName && attr.value === value
-                ) && Object.entries(selectedValues).every(([attrName, selectedValue]) => {
-                    if (attrName === attributeName) return true
-                    return variant.attributes.some(
-                        (attr) => attr.name === attrName && attr.value === selectedValue
-                    )
-                })
-            })
-            return matchingVariants.some((variant) => variant.quantity > 0)
+                    (attr) => attr.name === attrName && attr.value === selectedValue
+                );
+            });
+            return hasAttributeValue && matchesOtherSelections;
+        });
+    
+        if (matchingVariants.length === 0) {
+            return false;
         }
-
-        return true
-    }
+    
+        if (disableOutOfStock) {
+            // At least one matching variant must be in stock
+            return matchingVariants.some(
+                (variant) => variant.stock && variant.stock.quantity > 0
+            );
+        }
+    
+        return true;
+    };
 
     return (
         <div className="space-y-6">

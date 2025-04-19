@@ -1,8 +1,8 @@
 'use server'
 
-import { getGateway, getCountriesGateway, getProvincesByCountryGateway, getWardsByDistrictGateway, getDistrictsByProvinceGateway, addAddressGateway, updateAddressGateway, deleteAddressGateway } from "@/gateway/gateway"
+import { getCountriesGateway, getProvincesByCountryGateway, getWardsByDistrictGateway, getDistrictsByProvinceGateway, addAddressGateway, updateAddressGateway, deleteAddressGateway } from "@/gateway/gateway"
 import { getCurrentUserId } from "./auth"
-import { Address, ExtendedAddress } from "@/protos/nexura"
+import { Address, DeleteAddressRequest, ExtendedAddress } from "@/protos/nexura"
 
 export async function getCountries() {
     const countries = await getCountriesGateway()
@@ -50,13 +50,13 @@ export async function updateAddress(address: ExtendedAddress, userId: string | u
     }
 }
 
-export async function deleteAddress(addressId: string, userId: string | undefined) {
+export async function deleteAddress(deleteAddressRequest: DeleteAddressRequest) {
     try {
-        if (!userId) {
+        if (!deleteAddressRequest.userId) {
             return { success: false, message: "User not authenticated", addressId: "" }
         }
         
-        const result = await deleteAddressGateway(userId, addressId)
+        const result = await deleteAddressGateway(deleteAddressRequest)
         return result
     } catch (error) {
         console.error("Error deleting address:", error)

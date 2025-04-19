@@ -1,4 +1,4 @@
-import { AddressServiceClient, Address, ExtendedAddress, Country, Province, District } from '../../protos/nexura';
+import { AddressServiceClient, Address, ExtendedAddress, Country, Province, District, DeleteAddressRequest } from '../../protos/nexura';
 import { DefaultResponse } from '../../lib/types';
 import { createServiceConfig, createClient, promisifyGrpcCall } from './baseAdapter';
 
@@ -30,8 +30,8 @@ export const addressService = {
         return promisifyGrpcCall(addressClient, 'updateAddress', { userId, address });
     },
 
-    deleteAddress: async (userId: string, addressId: string): Promise<DefaultResponse> => {
-        return promisifyGrpcCall(addressClient, 'deleteAddress', { userId, addressId });
+    deleteAddress: async (deleteAddressRequest: DeleteAddressRequest): Promise<DefaultResponse> => {
+        return promisifyGrpcCall(addressClient, 'deleteAddress', { deleteAddressRequest });
     },
 
     getAddresses: async (userId: string): Promise<DefaultResponse & { addresses: ExtendedAddress[] }> => {

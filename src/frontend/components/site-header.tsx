@@ -20,68 +20,17 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { generateAvatar, getAvatarUrl } from "@/lib/utils"
 import { useSession } from "@/contexts/session-context"
+import { useCart } from "@/contexts/cart-context"
 export function SiteHeader() {
   const pathname = usePathname()
   const [isMounted, setIsMounted] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [cartItemCount, setCartItemCount] = useState(0)
+  const { itemCount: cartItemCount } = useCart()
   const [searchOpen, setSearchOpen] = useState(false)
   const { user } = useSession()
   const profilePictureUrl = user?.profilePictureUrl ? user.profilePictureUrl : generateAvatar(user?.firstName || "User")
-  // Safe cart access with error handling
   useEffect(() => {
     setIsMounted(true)
-    // Check if current path is admin path
-    setIsAdmin(pathname?.startsWith("/admin") || false)
-
-    // Safely get cart count
-    try {
-      const cartData = localStorage.getItem("nexura-cart")
-      if (cartData) {
-        const cartItems = JSON.parse(cartData)
-        const count = cartItems.reduce((total: number, item: any) => total + (item.quantity || 0), 0)
-        setCartItemCount(count)
-      }
-    } catch (error) {
-      console.error("Error accessing cart data:", error)
-    }
   }, [pathname])
-
-  // Use the cart context safely with error handling
-  useEffect(() => {
-    if (!isMounted) return
-
-    try {
-      // This is a safer approach to update cart count when the cart context changes
-      const handleStorageChange = () => {
-        try {
-          const cartData = localStorage.getItem("nexura-cart")
-          if (cartData) {
-            const cartItems = JSON.parse(cartData)
-            const count = cartItems.reduce((total: number, item: any) => total + (item.quantity || 0), 0)
-            setCartItemCount(count)
-          } else {
-            setCartItemCount(0)
-          }
-        } catch (error) {
-          console.error("Error processing cart data:", error)
-          setCartItemCount(0)
-        }
-      }
-
-      // Listen for storage events to update cart count
-      window.addEventListener("storage", handleStorageChange)
-
-      // Initial load
-      handleStorageChange()
-
-      return () => {
-        window.removeEventListener("storage", handleStorageChange)
-      }
-    } catch (error) {
-      console.error("Error setting up cart listeners:", error)
-    }
-  }, [isMounted])
 
   const navigation = [
     { name: "Latest Products", href: "/products" },
