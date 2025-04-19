@@ -1,10 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "@/hooks/use-toast"
 import * as gateway from "@/gateway/gateway"
-import { ProductVariant } from "@/protos/nexura"
+import { CreateProductRequest, DeleteAddressRequest, DeleteProductRequest, Product, ProductVariant, RemoveItemRequest, UpdateItemRequest, UpdateProductRequest } from "@/protos/nexura"
 import { addAddress, updateAddress, deleteAddress } from "@/actions/address"
 import { Address, ExtendedAddress } from "@/protos/nexura"
-
 interface MutationConfig {
   onSuccess?: (data: any) => void
   onError?: (error: Error) => void
@@ -12,159 +11,18 @@ interface MutationConfig {
   errorMessage?: string
 }
 
-const defaultConfig: MutationConfig = {
-  onSuccess: () => {},
-  onError: (error) => {
-    console.error("Mutation error:", error)
-  },
-  successMessage: "Operation completed successfully",
-  errorMessage: "An error occurred. Please try again."
-}
+import { AddItemRequest } from "@/protos/nexura"
 
-export const useAddToCart = (config: Partial<MutationConfig> = {}) => {
-  const queryClient = useQueryClient()
-  const finalConfig = { ...defaultConfig, ...config }
 
-  return useMutation({
-    mutationFn: async (item: {
-      productId: string
-      variantId: string
-      userId: string
-      quantity: number
-      image?: string
-      currencyCode: string
-    }) => {
-      try {
-        return await gateway.addItemGateway({userId: item.userId, productId: item.productId, variantId: item.variantId, quantity: item.quantity, image: item.image || "", currencyCode: item.currencyCode})
-      } catch (error) {
-        throw new Error(error instanceof Error ? error.message : "Failed to add item to cart")
-      }
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] })
-      toast({
-        title: "Success",
-        description: finalConfig.successMessage,
-      })
-      finalConfig.onSuccess?.(data)
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message || finalConfig.errorMessage,
-        variant: "destructive",
-      })
-      finalConfig.onError?.(error)
-    },
-  })
-}
 
-export const useUpdateCartItem = (config: Partial<MutationConfig> = {}) => {
-  const queryClient = useQueryClient()
-  const finalConfig = { ...defaultConfig, ...config }
 
-  return useMutation({
-    mutationFn: async (item: {
-      productId: string
-      quantity: number
-      image?: string
-      variantId: string
-      currencyCode: string
-      userId: string
-    }) => {
-      try {
-        return await gateway.updateItemGateway({userId: item.userId, productId: item.productId, variantId: item.variantId, quantity: item.quantity, image: item.image || ""})
-      } catch (error) {
-        throw new Error(error instanceof Error ? error.message : "Failed to update cart item")
-      }
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] })
-      toast({
-        title: "Success",
-        description: finalConfig.successMessage,
-      })
-      finalConfig.onSuccess?.(data)
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message || finalConfig.errorMessage,
-        variant: "destructive",
-      })
-      finalConfig.onError?.(error)
-    },
-  })
-}
 
-export const useRemoveCartItem = (config: Partial<MutationConfig> = {}) => {
-  const queryClient = useQueryClient()
-  const finalConfig = { ...defaultConfig, ...config }
-
-  return useMutation({
-    mutationFn: async (item: { productId: string, variantId: string, userId: string }) => {
-      try {
-        return await gateway.removeItemGateway({userId: item.userId, productId: item.productId, variantId: item.variantId})
-      } catch (error) {
-        throw new Error(error instanceof Error ? error.message : "Failed to remove item from cart")
-      }
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] })
-      toast({
-        title: "Success",
-        description: finalConfig.successMessage,
-      })
-      finalConfig.onSuccess?.(data)
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message || finalConfig.errorMessage,
-        variant: "destructive",
-      })
-      finalConfig.onError?.(error)
-    },
-  })
-}
-
-export const useClearCart = (config: Partial<MutationConfig> = {}) => {
-  const queryClient = useQueryClient()
-  const finalConfig = { ...defaultConfig, ...config }
-
-  return useMutation({
-    mutationFn: async ({userId}: {userId: string}) => {
-      try {
-        return await gateway.clearCartGateway({userId})
-      } catch (error) {
-        throw new Error(error instanceof Error ? error.message : "Failed to clear cart")
-      }
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["cart"] })
-      toast({
-        title: "Success",
-        description: finalConfig.successMessage,
-      })
-      finalConfig.onSuccess?.(data)
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message || finalConfig.errorMessage,
-        variant: "destructive",
-      })
-      finalConfig.onError?.(error)
-    },
-  })
-}
 
 export const useCreateProduct = (config: Partial<MutationConfig> = {}) => {
   const queryClient = useQueryClient()
-  const finalConfig = { ...defaultConfig, ...config }
 
   return useMutation({
-    mutationFn: async (product: any) => {
+    mutationFn: async (product: CreateProductRequest) => {
       try {
         return await gateway.createProductGateway(product)
       } catch (error) {
@@ -174,30 +32,27 @@ export const useCreateProduct = (config: Partial<MutationConfig> = {}) => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["productsCatalog"] })
       toast({
-        title: "Success",
-        description: finalConfig.successMessage,
+        title: "SUCCESS",
+        description: "Product created successfully",
       })
-      finalConfig.onSuccess?.(data)
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || finalConfig.errorMessage,
+        title: "ERROR",
+        description: error.message,
         variant: "destructive",
       })
-      finalConfig.onError?.(error)
     },
   })
 }
 
 export const useUpdateProduct = (config: Partial<MutationConfig> = {}) => {
   const queryClient = useQueryClient()
-  const finalConfig = { ...defaultConfig, ...config }
 
   return useMutation({
-    mutationFn: async (product: any) => {
+    mutationFn: async (product: UpdateProductRequest) => {
       try {
-        return await gateway.updateProductGateway(product)
+        return await gateway.updateProductGateway(product as unknown as Product)
       } catch (error) {
         throw new Error(error instanceof Error ? error.message : "Failed to update product")
       }
@@ -206,30 +61,27 @@ export const useUpdateProduct = (config: Partial<MutationConfig> = {}) => {
       queryClient.invalidateQueries({ queryKey: ["productsCatalog"] })
       queryClient.invalidateQueries({ queryKey: ["product"] })
       toast({
-        title: "Success",
-        description: finalConfig.successMessage,
+        title: "SUCCESS",
+        description: "Product updated successfully",
       })
-      finalConfig.onSuccess?.(data)
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || finalConfig.errorMessage,
+        title: "ERROR",
+        description: error.message,
         variant: "destructive",
       })
-      finalConfig.onError?.(error)
     },
   })
 }
 
 export const useDeleteProduct = (config: Partial<MutationConfig> = {}) => {
   const queryClient = useQueryClient()
-  const finalConfig = { ...defaultConfig, ...config }
 
   return useMutation({
-    mutationFn: async (id: string) => {
+    mutationFn: async (productId: string) => {
       try {
-        return await gateway.deleteProductGateway(id)
+        return await gateway.deleteProductGateway(productId)
       } catch (error) {
         throw new Error(error instanceof Error ? error.message : "Failed to delete product")
       }
@@ -237,28 +89,25 @@ export const useDeleteProduct = (config: Partial<MutationConfig> = {}) => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["productsCatalog"] })
       toast({
-        title: "Success",
-        description: finalConfig.successMessage,
+        title: "SUCCESS",
+        description: "Product deleted successfully",
       })
-      finalConfig.onSuccess?.(data)
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || finalConfig.errorMessage,
+        title: "ERROR",
+        description: error.message,
         variant: "destructive",
       })
-      finalConfig.onError?.(error)
     },
   })
 }
 
 export const useAddAddress = (config: Partial<MutationConfig> = {}) => {
   const queryClient = useQueryClient()
-  const finalConfig = { ...defaultConfig, ...config }
 
   return useMutation({
-    mutationFn: async ({ address, userId }: { address: Address; userId: string }) => {
+    mutationFn: async ({ address, userId }: { address: ExtendedAddress; userId: string }) => {
       try {
         return await addAddress(address, userId)
       } catch (error) {
@@ -268,25 +117,22 @@ export const useAddAddress = (config: Partial<MutationConfig> = {}) => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["addresses"] })
       toast({
-        title: "Success",
-        description: finalConfig.successMessage,
+        title: "SUCCESS",
+        description: "Address added successfully",
       })
-      finalConfig.onSuccess?.(data)
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || finalConfig.errorMessage,
+        title: "ERROR",
+        description: error.message,
         variant: "destructive",
       })
-      finalConfig.onError?.(error)
     },
   })
 }
 
 export const useUpdateAddress = (config: Partial<MutationConfig> = {}) => {
   const queryClient = useQueryClient()
-  const finalConfig = { ...defaultConfig, ...config }
 
   return useMutation({
     mutationFn: async ({ address, userId }: { address: Address; userId: string }) => {
@@ -299,49 +145,44 @@ export const useUpdateAddress = (config: Partial<MutationConfig> = {}) => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["addresses"] })
       toast({
-        title: "Success",
-        description: finalConfig.successMessage,
+        title: "SUCCESS",
+        description: "Address updated successfully",
       })
-      finalConfig.onSuccess?.(data)
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || finalConfig.errorMessage,
+        title: "ERROR",
+        description: error.message,
         variant: "destructive",
       })
-      finalConfig.onError?.(error)
     },
   })
 }
 
 export const useDeleteAddress = (config: Partial<MutationConfig> = {}) => {
   const queryClient = useQueryClient()
-  const finalConfig = { ...defaultConfig, ...config }
 
   return useMutation({
-    mutationFn: async ({ addressId, userId }: { addressId: string; userId: string }) => {
+    mutationFn: async ({ deleteAddressRequest }: { deleteAddressRequest: DeleteAddressRequest }) => {
       try {
-        return await deleteAddress(addressId, userId)
+        return await deleteAddress(deleteAddressRequest)
       } catch (error) {
         throw new Error(error instanceof Error ? error.message : "Failed to delete address")
       }
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["addresses"] })
       toast({
-        title: "Success",
-        description: finalConfig.successMessage,
+        title: "SUCCESS",
+        description: "Address deleted successfully",
       })
-      finalConfig.onSuccess?.(data)
     },
     onError: (error: Error) => {
       toast({
-        title: "Error",
-        description: error.message || finalConfig.errorMessage,
+        title: "ERROR",
+        description: error.message,
         variant: "destructive",
       })
-      finalConfig.onError?.(error)
     },
   })
 }

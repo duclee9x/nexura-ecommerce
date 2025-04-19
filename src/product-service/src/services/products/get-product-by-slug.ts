@@ -33,6 +33,7 @@ export const getProductBySlug = async (call: ServerUnaryCall<GetProductBySlugReq
           include: {
             attributes: true,
             warehouse: true,
+            stock: true,
           }
         },
         dimensions: true,
@@ -131,7 +132,10 @@ export const getProductBySlug = async (call: ServerUnaryCall<GetProductBySlugReq
           id: variant.id,
           sku: variant.sku,
           price: variant.price,
-          quantity: variant.quantity,
+          stock: variant.stock ? {
+            quantity: variant.stock.quantity,
+            reserved: variant.stock.reserved
+          } : undefined,
           lowStockThreshold: variant.lowStockThreshold,
           warehouseId: variant.warehouseId,
           imageIds: variant.imageIds,

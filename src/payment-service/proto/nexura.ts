@@ -644,7 +644,6 @@ export interface CartItem {
   productId: string;
   variantId: string;
   image: string;
-  price: number;
   quantity: number;
   createdAt: string;
   updatedAt: string;
@@ -686,7 +685,7 @@ export interface VariantCart {
   id: string;
   price: number;
   image: string;
-  quantity: number;
+  stock?: Stock | undefined;
   variantName: string;
   productName: string;
   productSlug: string;
@@ -1183,8 +1182,17 @@ export interface CreateOrderRequest {
   userId: string;
   currencyCode: string;
   totalAmount: number;
-  items: CartItem[];
+  items: OrderItem[];
   shippingAddressId: string;
+  paymentId: string;
+  paymentStatus: PaymentStatus;
+}
+
+export interface OrderItem {
+  productId: string;
+  variantId: string;
+  quantity: number;
+  price: Money | undefined;
 }
 
 export interface CreateOrderResponse {
@@ -1216,17 +1224,6 @@ export interface Order {
   shippingAddressId: string;
   items: OrderItem[];
   paymentId: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface OrderItem {
-  id: string;
-  variantId: string;
-  quantity: number;
-  price: number;
-  name: string;
-  sku: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -6273,7 +6270,7 @@ export const Cart: MessageFns<Cart> = {
 };
 
 function createBaseCartItem(): CartItem {
-  return { id: "", productId: "", variantId: "", image: "", price: 0, quantity: 0, createdAt: "", updatedAt: "" };
+  return { id: "", productId: "", variantId: "", image: "", quantity: 0, createdAt: "", updatedAt: "" };
 }
 
 export const CartItem: MessageFns<CartItem> = {
@@ -6290,17 +6287,14 @@ export const CartItem: MessageFns<CartItem> = {
     if (message.image !== "") {
       writer.uint32(34).string(message.image);
     }
-    if (message.price !== 0) {
-      writer.uint32(41).double(message.price);
-    }
     if (message.quantity !== 0) {
-      writer.uint32(48).int32(message.quantity);
+      writer.uint32(40).int32(message.quantity);
     }
     if (message.createdAt !== "") {
-      writer.uint32(58).string(message.createdAt);
+      writer.uint32(50).string(message.createdAt);
     }
     if (message.updatedAt !== "") {
-      writer.uint32(66).string(message.updatedAt);
+      writer.uint32(58).string(message.updatedAt);
     }
     return writer;
   },
@@ -6345,31 +6339,23 @@ export const CartItem: MessageFns<CartItem> = {
           continue;
         }
         case 5: {
-          if (tag !== 41) {
-            break;
-          }
-
-          message.price = reader.double();
-          continue;
-        }
-        case 6: {
-          if (tag !== 48) {
+          if (tag !== 40) {
             break;
           }
 
           message.quantity = reader.int32();
           continue;
         }
-        case 7: {
-          if (tag !== 58) {
+        case 6: {
+          if (tag !== 50) {
             break;
           }
 
           message.createdAt = reader.string();
           continue;
         }
-        case 8: {
-          if (tag !== 66) {
+        case 7: {
+          if (tag !== 58) {
             break;
           }
 
@@ -6391,7 +6377,6 @@ export const CartItem: MessageFns<CartItem> = {
       productId: isSet(object.productId) ? globalThis.String(object.productId) : "",
       variantId: isSet(object.variantId) ? globalThis.String(object.variantId) : "",
       image: isSet(object.image) ? globalThis.String(object.image) : "",
-      price: isSet(object.price) ? globalThis.Number(object.price) : 0,
       quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
       createdAt: isSet(object.createdAt) ? globalThis.String(object.createdAt) : "",
       updatedAt: isSet(object.updatedAt) ? globalThis.String(object.updatedAt) : "",
@@ -6411,9 +6396,6 @@ export const CartItem: MessageFns<CartItem> = {
     }
     if (message.image !== "") {
       obj.image = message.image;
-    }
-    if (message.price !== 0) {
-      obj.price = message.price;
     }
     if (message.quantity !== 0) {
       obj.quantity = Math.round(message.quantity);
@@ -6436,7 +6418,6 @@ export const CartItem: MessageFns<CartItem> = {
     message.productId = object.productId ?? "";
     message.variantId = object.variantId ?? "";
     message.image = object.image ?? "";
-    message.price = object.price ?? 0;
     message.quantity = object.quantity ?? 0;
     message.createdAt = object.createdAt ?? "";
     message.updatedAt = object.updatedAt ?? "";
@@ -6922,7 +6903,7 @@ function createBaseVariantCart(): VariantCart {
     id: "",
     price: 0,
     image: "",
-    quantity: 0,
+    stock: undefined,
     variantName: "",
     productName: "",
     productSlug: "",
@@ -6941,8 +6922,8 @@ export const VariantCart: MessageFns<VariantCart> = {
     if (message.image !== "") {
       writer.uint32(26).string(message.image);
     }
-    if (message.quantity !== 0) {
-      writer.uint32(32).int32(message.quantity);
+    if (message.stock !== undefined) {
+      Stock.encode(message.stock, writer.uint32(34).fork()).join();
     }
     if (message.variantName !== "") {
       writer.uint32(42).string(message.variantName);
@@ -6991,11 +6972,11 @@ export const VariantCart: MessageFns<VariantCart> = {
           continue;
         }
         case 4: {
-          if (tag !== 32) {
+          if (tag !== 34) {
             break;
           }
 
-          message.quantity = reader.int32();
+          message.stock = Stock.decode(reader, reader.uint32());
           continue;
         }
         case 5: {
@@ -7044,7 +7025,7 @@ export const VariantCart: MessageFns<VariantCart> = {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
       price: isSet(object.price) ? globalThis.Number(object.price) : 0,
       image: isSet(object.image) ? globalThis.String(object.image) : "",
-      quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
+      stock: isSet(object.stock) ? Stock.fromJSON(object.stock) : undefined,
       variantName: isSet(object.variantName) ? globalThis.String(object.variantName) : "",
       productName: isSet(object.productName) ? globalThis.String(object.productName) : "",
       productSlug: isSet(object.productSlug) ? globalThis.String(object.productSlug) : "",
@@ -7065,8 +7046,8 @@ export const VariantCart: MessageFns<VariantCart> = {
     if (message.image !== "") {
       obj.image = message.image;
     }
-    if (message.quantity !== 0) {
-      obj.quantity = Math.round(message.quantity);
+    if (message.stock !== undefined) {
+      obj.stock = Stock.toJSON(message.stock);
     }
     if (message.variantName !== "") {
       obj.variantName = message.variantName;
@@ -7091,7 +7072,7 @@ export const VariantCart: MessageFns<VariantCart> = {
     message.id = object.id ?? "";
     message.price = object.price ?? 0;
     message.image = object.image ?? "";
-    message.quantity = object.quantity ?? 0;
+    message.stock = (object.stock !== undefined && object.stock !== null) ? Stock.fromPartial(object.stock) : undefined;
     message.variantName = object.variantName ?? "";
     message.productName = object.productName ?? "";
     message.productSlug = object.productSlug ?? "";
@@ -13552,7 +13533,15 @@ export const HealthCheckResponse: MessageFns<HealthCheckResponse> = {
 };
 
 function createBaseCreateOrderRequest(): CreateOrderRequest {
-  return { userId: "", currencyCode: "", totalAmount: 0, items: [], shippingAddressId: "" };
+  return {
+    userId: "",
+    currencyCode: "",
+    totalAmount: 0,
+    items: [],
+    shippingAddressId: "",
+    paymentId: "",
+    paymentStatus: 0,
+  };
 }
 
 export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
@@ -13567,10 +13556,16 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
       writer.uint32(25).double(message.totalAmount);
     }
     for (const v of message.items) {
-      CartItem.encode(v!, writer.uint32(34).fork()).join();
+      OrderItem.encode(v!, writer.uint32(34).fork()).join();
     }
     if (message.shippingAddressId !== "") {
       writer.uint32(42).string(message.shippingAddressId);
+    }
+    if (message.paymentId !== "") {
+      writer.uint32(50).string(message.paymentId);
+    }
+    if (message.paymentStatus !== 0) {
+      writer.uint32(56).int32(message.paymentStatus);
     }
     return writer;
   },
@@ -13611,7 +13606,7 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
             break;
           }
 
-          message.items.push(CartItem.decode(reader, reader.uint32()));
+          message.items.push(OrderItem.decode(reader, reader.uint32()));
           continue;
         }
         case 5: {
@@ -13620,6 +13615,22 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
           }
 
           message.shippingAddressId = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.paymentId = reader.string();
+          continue;
+        }
+        case 7: {
+          if (tag !== 56) {
+            break;
+          }
+
+          message.paymentStatus = reader.int32() as any;
           continue;
         }
       }
@@ -13636,8 +13647,10 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
       userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
       currencyCode: isSet(object.currencyCode) ? globalThis.String(object.currencyCode) : "",
       totalAmount: isSet(object.totalAmount) ? globalThis.Number(object.totalAmount) : 0,
-      items: globalThis.Array.isArray(object?.items) ? object.items.map((e: any) => CartItem.fromJSON(e)) : [],
+      items: globalThis.Array.isArray(object?.items) ? object.items.map((e: any) => OrderItem.fromJSON(e)) : [],
       shippingAddressId: isSet(object.shippingAddressId) ? globalThis.String(object.shippingAddressId) : "",
+      paymentId: isSet(object.paymentId) ? globalThis.String(object.paymentId) : "",
+      paymentStatus: isSet(object.paymentStatus) ? paymentStatusFromJSON(object.paymentStatus) : 0,
     };
   },
 
@@ -13653,10 +13666,16 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
       obj.totalAmount = message.totalAmount;
     }
     if (message.items?.length) {
-      obj.items = message.items.map((e) => CartItem.toJSON(e));
+      obj.items = message.items.map((e) => OrderItem.toJSON(e));
     }
     if (message.shippingAddressId !== "") {
       obj.shippingAddressId = message.shippingAddressId;
+    }
+    if (message.paymentId !== "") {
+      obj.paymentId = message.paymentId;
+    }
+    if (message.paymentStatus !== 0) {
+      obj.paymentStatus = paymentStatusToJSON(message.paymentStatus);
     }
     return obj;
   },
@@ -13669,8 +13688,118 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
     message.userId = object.userId ?? "";
     message.currencyCode = object.currencyCode ?? "";
     message.totalAmount = object.totalAmount ?? 0;
-    message.items = object.items?.map((e) => CartItem.fromPartial(e)) || [];
+    message.items = object.items?.map((e) => OrderItem.fromPartial(e)) || [];
     message.shippingAddressId = object.shippingAddressId ?? "";
+    message.paymentId = object.paymentId ?? "";
+    message.paymentStatus = object.paymentStatus ?? 0;
+    return message;
+  },
+};
+
+function createBaseOrderItem(): OrderItem {
+  return { productId: "", variantId: "", quantity: 0, price: undefined };
+}
+
+export const OrderItem: MessageFns<OrderItem> = {
+  encode(message: OrderItem, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.productId !== "") {
+      writer.uint32(10).string(message.productId);
+    }
+    if (message.variantId !== "") {
+      writer.uint32(18).string(message.variantId);
+    }
+    if (message.quantity !== 0) {
+      writer.uint32(24).int32(message.quantity);
+    }
+    if (message.price !== undefined) {
+      Money.encode(message.price, writer.uint32(34).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): OrderItem {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOrderItem();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.productId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.variantId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.quantity = reader.int32();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.price = Money.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): OrderItem {
+    return {
+      productId: isSet(object.productId) ? globalThis.String(object.productId) : "",
+      variantId: isSet(object.variantId) ? globalThis.String(object.variantId) : "",
+      quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
+      price: isSet(object.price) ? Money.fromJSON(object.price) : undefined,
+    };
+  },
+
+  toJSON(message: OrderItem): unknown {
+    const obj: any = {};
+    if (message.productId !== "") {
+      obj.productId = message.productId;
+    }
+    if (message.variantId !== "") {
+      obj.variantId = message.variantId;
+    }
+    if (message.quantity !== 0) {
+      obj.quantity = Math.round(message.quantity);
+    }
+    if (message.price !== undefined) {
+      obj.price = Money.toJSON(message.price);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<OrderItem>, I>>(base?: I): OrderItem {
+    return OrderItem.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<OrderItem>, I>>(object: I): OrderItem {
+    const message = createBaseOrderItem();
+    message.productId = object.productId ?? "";
+    message.variantId = object.variantId ?? "";
+    message.quantity = object.quantity ?? 0;
+    message.price = (object.price !== undefined && object.price !== null) ? Money.fromPartial(object.price) : undefined;
     return message;
   },
 };
@@ -14175,178 +14304,6 @@ export const Order: MessageFns<Order> = {
     message.shippingAddressId = object.shippingAddressId ?? "";
     message.items = object.items?.map((e) => OrderItem.fromPartial(e)) || [];
     message.paymentId = object.paymentId ?? "";
-    message.createdAt = object.createdAt ?? "";
-    message.updatedAt = object.updatedAt ?? "";
-    return message;
-  },
-};
-
-function createBaseOrderItem(): OrderItem {
-  return { id: "", variantId: "", quantity: 0, price: 0, name: "", sku: "", createdAt: "", updatedAt: "" };
-}
-
-export const OrderItem: MessageFns<OrderItem> = {
-  encode(message: OrderItem, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.id !== "") {
-      writer.uint32(10).string(message.id);
-    }
-    if (message.variantId !== "") {
-      writer.uint32(18).string(message.variantId);
-    }
-    if (message.quantity !== 0) {
-      writer.uint32(24).int32(message.quantity);
-    }
-    if (message.price !== 0) {
-      writer.uint32(33).double(message.price);
-    }
-    if (message.name !== "") {
-      writer.uint32(42).string(message.name);
-    }
-    if (message.sku !== "") {
-      writer.uint32(50).string(message.sku);
-    }
-    if (message.createdAt !== "") {
-      writer.uint32(58).string(message.createdAt);
-    }
-    if (message.updatedAt !== "") {
-      writer.uint32(66).string(message.updatedAt);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): OrderItem {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseOrderItem();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.id = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.variantId = reader.string();
-          continue;
-        }
-        case 3: {
-          if (tag !== 24) {
-            break;
-          }
-
-          message.quantity = reader.int32();
-          continue;
-        }
-        case 4: {
-          if (tag !== 33) {
-            break;
-          }
-
-          message.price = reader.double();
-          continue;
-        }
-        case 5: {
-          if (tag !== 42) {
-            break;
-          }
-
-          message.name = reader.string();
-          continue;
-        }
-        case 6: {
-          if (tag !== 50) {
-            break;
-          }
-
-          message.sku = reader.string();
-          continue;
-        }
-        case 7: {
-          if (tag !== 58) {
-            break;
-          }
-
-          message.createdAt = reader.string();
-          continue;
-        }
-        case 8: {
-          if (tag !== 66) {
-            break;
-          }
-
-          message.updatedAt = reader.string();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): OrderItem {
-    return {
-      id: isSet(object.id) ? globalThis.String(object.id) : "",
-      variantId: isSet(object.variantId) ? globalThis.String(object.variantId) : "",
-      quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
-      price: isSet(object.price) ? globalThis.Number(object.price) : 0,
-      name: isSet(object.name) ? globalThis.String(object.name) : "",
-      sku: isSet(object.sku) ? globalThis.String(object.sku) : "",
-      createdAt: isSet(object.createdAt) ? globalThis.String(object.createdAt) : "",
-      updatedAt: isSet(object.updatedAt) ? globalThis.String(object.updatedAt) : "",
-    };
-  },
-
-  toJSON(message: OrderItem): unknown {
-    const obj: any = {};
-    if (message.id !== "") {
-      obj.id = message.id;
-    }
-    if (message.variantId !== "") {
-      obj.variantId = message.variantId;
-    }
-    if (message.quantity !== 0) {
-      obj.quantity = Math.round(message.quantity);
-    }
-    if (message.price !== 0) {
-      obj.price = message.price;
-    }
-    if (message.name !== "") {
-      obj.name = message.name;
-    }
-    if (message.sku !== "") {
-      obj.sku = message.sku;
-    }
-    if (message.createdAt !== "") {
-      obj.createdAt = message.createdAt;
-    }
-    if (message.updatedAt !== "") {
-      obj.updatedAt = message.updatedAt;
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<OrderItem>, I>>(base?: I): OrderItem {
-    return OrderItem.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<OrderItem>, I>>(object: I): OrderItem {
-    const message = createBaseOrderItem();
-    message.id = object.id ?? "";
-    message.variantId = object.variantId ?? "";
-    message.quantity = object.quantity ?? 0;
-    message.price = object.price ?? 0;
-    message.name = object.name ?? "";
-    message.sku = object.sku ?? "";
     message.createdAt = object.createdAt ?? "";
     message.updatedAt = object.updatedAt ?? "";
     return message;

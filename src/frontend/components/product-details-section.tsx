@@ -26,7 +26,6 @@ import { ProductVariantSelector } from "@/components/product-variant-selector"
 import { Input } from "@/components/ui/input"
 import { Product, ProductVariant } from "@/protos/nexura"
 import { useCurrency } from "@/contexts/currency-context"
-import { useAddToCart } from "@/hooks/use-mutation"
 import { useSession } from "@/contexts/session-context"
 import { ImageViewer } from "@/components/image-viewer"
 
@@ -35,14 +34,16 @@ interface ProductDetailsSectionProps {
   onImageClick?: (index: number) => void
   onVariantSelect: (variant: ProductVariant | null) => void
   selectedVariant: ProductVariant | null
-  isAddingToCart?: boolean
   onAddToCart?: () => void
   onQuantityChange?: (value: number) => void
   quantity?: number
   currentImageIndex?: number
   onImageIndexChange?: (index: number) => void
-  isInCart?: boolean
   onGoToCart?: () => void
+  stockStatus?: { status: string; color: string; stock: number }
+  maxQuantity?: number
+  isAddingToCart?: boolean
+  quantityDisabled?: boolean
 }
 
 export function ProductDetailsSection({
@@ -50,14 +51,15 @@ export function ProductDetailsSection({
   onImageClick,
   onVariantSelect,
   selectedVariant,
-  isAddingToCart = false,
   onAddToCart,
   onQuantityChange,
   quantity = 1,
   currentImageIndex = 0,
   onImageIndexChange,
-  isInCart = false,
-  onGoToCart,
+  stockStatus,
+  maxQuantity = 0,
+  isAddingToCart = false,
+  quantityDisabled = false,
 }: ProductDetailsSectionProps) {
   const [mainCarouselRef, mainEmbla] = useEmblaCarousel()
   const [thumbCarouselRef, thumbEmbla] = useEmblaCarousel({
@@ -80,24 +82,6 @@ export function ProductDetailsSection({
       })
       .filter(Boolean)
       .join(" / ")
-  }
-
-  const { mutate: addToCart } = useAddToCart({
-    successMessage: `${quantity} × ${product?.name} ${selectedVariant ? `(${getVariantName(selectedVariant)})` : ""} added to your cart.`,
-    errorMessage: "Failed to add item to cart. Please try again."
-  })
-
-  const handleAddToCart = () => {
-    if (!product || !selectedVariant || !user?.id) return
-
-    addToCart({
-      productId: product.id,
-      variantId: selectedVariant.id,
-      userId: user.id,
-      quantity,
-      image: product.images[0]?.url || "",
-      currencyCode: currency
-    })
   }
 
   // Sync main and thumb carousels
@@ -134,31 +118,11 @@ export function ProductDetailsSection({
     return product?.basePrice?.toFixed(2) || "0.00"
   }
 
-  const getStockStatus = () => {
-    const currentStock = selectedVariant ? selectedVariant.quantity : 0
-
-    if (currentStock <= 0) {
-      return { status: "Out of Stock", color: "destructive" }
-    }
-
-    const lowThreshold = selectedVariant?.lowStockThreshold || 5
-
-    if (currentStock <= lowThreshold) {
-      return { status: `Low Stock (${currentStock} left)`, color: "warning" }
-    }
-
-    return { status: "In Stock", color: "success" }
-  }
-
-  const stockStatus = getStockStatus()
-  const mainImage = product.images[0]
-
   const handleQuantityChange = (value: number) => {
     if (onQuantityChange) {
       onQuantityChange(value)
     }
   }
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
       {/* Product Images Carousel */}
@@ -264,15 +228,15 @@ export function ProductDetailsSection({
           {selectedVariant && (
             <Badge
               variant={
-                stockStatus.color === "success"
+                (stockStatus?.color ?? "destructive") === "success"
                   ? "default"
-                  : stockStatus.color === "warning"
+                  : (stockStatus?.color ?? "destructive") === "warning"
                     ? "outline"
                     : "destructive"
               }
               className="ml-2"
             >
-              {stockStatus.status}
+              {(stockStatus?.status || "Out of Stock")}
             </Badge>
           )}
         </div>
@@ -287,7 +251,7 @@ export function ProductDetailsSection({
                 variants={product.variants}
                 onVariantSelect={onVariantSelect}
                 selectedVariant={selectedVariant}
-                disableOutOfStock={true}
+                disableOutOfStock={false} // Show all variant attribute buttons, but disable out-of-stock ones in the selector itself
               />
             </CardContent>
           </Card>
@@ -298,28 +262,34 @@ export function ProductDetailsSection({
           <div className="space-y-2">
             <label className="text-sm font-medium">Quantity</label>
             <div className="flex items-center gap-2">
-              <div className="flex items-center">
+              <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => handleQuantityChange(quantity - 1)}
-                  disabled={quantity <= 1}
+                  disabled={quantity <= 1 || quantityDisabled}
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
                 <Input
                   type="number"
-                  value={quantity}
-                  onChange={(e) => handleQuantityChange(Number(e.target.value))}
                   min={1}
-                  max={selectedVariant?.quantity || 0}
-                  className="w-20 text-center"
+                  max={maxQuantity}
+                  value={quantity}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value, 10)
+                    if (!isNaN(value)) {
+                      handleQuantityChange(value)
+                    }
+                  }}
+                  className="w-16 text-center"
+                  disabled={quantityDisabled}
                 />
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={() => handleQuantityChange(quantity + 1)}
-                  disabled={quantity >= (selectedVariant?.quantity || 0)}
+                  disabled={quantity >= maxQuantity || quantityDisabled}
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -342,18 +312,13 @@ export function ProductDetailsSection({
             <Button
               className="flex-1"
               size="lg"
-              onClick={isInCart && quantity === 1 ? onGoToCart : handleAddToCart}
-              disabled={isAddingToCart || stockStatus.color === "destructive" || !selectedVariant}
+              onClick={onAddToCart}
+              disabled={isAddingToCart || (stockStatus?.color ?? "destructive") === "destructive" || !selectedVariant}
             >
               {isAddingToCart ? (
                 <>
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                   Adding...
-                </>
-              ) : isInCart && quantity === 1 ? (
-                <>
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  Go to Cart
                 </>
               ) : (
                 <>

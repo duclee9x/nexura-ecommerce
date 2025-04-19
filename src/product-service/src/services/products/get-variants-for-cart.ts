@@ -18,7 +18,7 @@ export const getVariantsForCart = async (call: ServerUnaryCall<GetVariantsForCar
         id: true,
         price: true,
         imageIds: true,
-        quantity: true,
+        stock: true,
         attributes: true,
         product: {
           select: {
@@ -28,7 +28,7 @@ export const getVariantsForCart = async (call: ServerUnaryCall<GetVariantsForCar
           }
         }
       },
-    });
+    }); 
 
     // Extract first image IDs
     const firstImageIds = variants
@@ -49,9 +49,12 @@ export const getVariantsForCart = async (call: ServerUnaryCall<GetVariantsForCar
       const firstImageId = variant.imageIds[0];
       return {
         id: variant.id,
-        price: variant.price,
+        price: variant.price, 
         image: imageMap.get(firstImageId) ?? "",
-        quantity: variant.quantity,
+        stock: variant.stock ? {
+          quantity: variant.stock.quantity,
+          reserved: variant.stock.reserved,
+        } : undefined,
         variantName: variant.attributes.map(attribute => attribute.name + ": " + attribute.value).join(", "),
         productName: variant.product.name,
         productSlug: variant.product.slug,
