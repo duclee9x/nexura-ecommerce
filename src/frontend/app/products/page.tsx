@@ -24,9 +24,8 @@ import {
 } from "@/components/ui/sheet"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { useCurrency } from "@/contexts/currency-context"
-  import { useProducts, useCategories, useFilteredProducts, useQueryUtils } from "@/hooks/use-query"
-
-
+import { useQueryUtils } from "@/hooks/use-common"
+import { getCategories, getFilteredProducts, listProduct } from "@/hooks/use-product"
 interface filterType {
   categories: string[]
   types: string[]
@@ -49,16 +48,16 @@ export default function ProductCatalogPage() {
   })
   const [searchQuery, setSearchQuery] = useState("")
 
-  const { data: categories, isLoading: isCategoriesLoading } = useCategories()
+  const { data: categories, isLoading: isCategoriesLoading } = getCategories()
   const { 
     data: products, 
     isLoading: isProductsLoading,
     isError: isProductsError,
     error: productsError
-  } = useProducts()
+  } = listProduct()
   const { invalidateQueries } = useQueryUtils()
 
-  const filteredProducts = useFilteredProducts(products, {
+  const filteredProducts = getFilteredProducts(products, {
     searchQuery,
     categories: filters.categories,
     colors: filters.colors,

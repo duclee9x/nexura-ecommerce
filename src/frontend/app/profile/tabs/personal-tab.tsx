@@ -21,7 +21,7 @@ const initialState: FormState = {
     success: false
 }
 
-export default function PersonalTab({ user, refresh }: { user: User | null, refresh: () => void }) {
+export default function PersonalTab({ user }: { user: User | null }) {
     if (!user) {
         return <PersonalSkeleton />;
     }
@@ -60,12 +60,7 @@ export default function PersonalTab({ user, refresh }: { user: User | null, refr
             setAvatarFile(null);
             
             // Invalidate and refetch queries
-            await Promise.all([
-                queryClient.invalidateQueries({ queryKey: ['session'] }),
-                queryClient.invalidateQueries({ queryKey: ['presignedGet'] }),
-                refresh()
-
-            ]);
+            queryClient.invalidateQueries({ queryKey: ['userSession'] })
             toast.success("Profile updated successfully");
         },
         onError: (error) => {
@@ -76,7 +71,8 @@ export default function PersonalTab({ user, refresh }: { user: User | null, refr
                     return;
                 }
                 toast.error(errors.submit || "Failed to update profile");
-            } catch {
+            } catch (error) {
+                console.log(error, 'error')
                 toast.error("An unexpected error occurred");
             }
         }

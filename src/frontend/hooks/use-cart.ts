@@ -6,12 +6,10 @@ import { addItemGateway, updateItemGateway, removeItemGateway, clearCartGateway,
 
 interface QueryConfig {
     retry?: number
-    refetchOnWindowFocus?: boolean
 }
 
 const defaultConfig: QueryConfig = {
     retry: 1,
-    refetchOnWindowFocus: false
 }
 export const useCartActions = () => {
     const queryClient = useQueryClient()
@@ -27,33 +25,32 @@ export const useCartActions = () => {
                         throw error
                     }
                 },
+                enabled: !!userId,
                 ...defaultConfig,
             })
         },
-        getVariantsForCart: (variantIds: string[]) => {
+        getVariants: (variantIds: string[]) => {
             return useQuery({
               queryKey: ["cartVariants", variantIds],
-              queryFn: async () => {
+              queryFn: async () => {    
                 const response = await getVariantsForCartGateway(variantIds)
                 return response.variants
               },
+              enabled: variantIds.length > 0,
               ...defaultConfig,
             })
           },
         addItem: useMutation({
-            mutationFn: async (item: AddItemRequest) => {
-                try {
-                    return await addItemGateway(item)
-                } catch (error) {
-                    throw new Error(error instanceof Error ? error.message : "Failed to add item to cart")
-                }
+            mutationFn: (item: AddItemRequest) => {
+                return addItemGateway(item)
             },
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ["cart"] })
                 toast({
                     title: "SUCCESS",
                     description: `Item added to cart`,
                 })
+                queryClient.invalidateQueries({ queryKey: ["cart"] })
+                queryClient.invalidateQueries({ queryKey: ["cartVariants"] })
             },
             onError: (error: Error) => {
                 toast({
@@ -73,6 +70,7 @@ export const useCartActions = () => {
             },
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ["cart"] })
+                queryClient.invalidateQueries({ queryKey: ["cartVariants"] })
                 toast({
                     title: "SUCCESS",
                     description: "Update item successfully",

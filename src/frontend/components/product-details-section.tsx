@@ -71,18 +71,12 @@ export function ProductDetailsSection({
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
   const { currency } = useCurrency()
 
-  // Get variant name for display
-  const getVariantName = (variant: ProductVariant) => {
-    return variant.attributes
-      .map((attr) => {
-        if (attr.name.toLowerCase() === "color") {
-          return attr.value
-        }
-        return attr.value
-      })
-      .filter(Boolean)
-      .join(" / ")
-  }
+  // Update carousel when currentImageIndex changes
+  useEffect(() => {
+    if (mainEmbla && typeof currentImageIndex === 'number') {
+      mainEmbla.scrollTo(currentImageIndex)
+    }
+  }, [currentImageIndex, mainEmbla])
 
   // Sync main and thumb carousels
   useEffect(() => {
@@ -90,16 +84,21 @@ export function ProductDetailsSection({
 
     const onSelect = () => {
       if (!mainEmbla || !thumbEmbla) return
-      thumbEmbla.scrollTo(mainEmbla.selectedScrollSnap())
+      const currentIndex = mainEmbla.selectedScrollSnap()
+      thumbEmbla.scrollTo(currentIndex)
       if (onImageIndexChange) {
-        onImageIndexChange(mainEmbla.selectedScrollSnap())
+        onImageIndexChange(currentIndex)
       }
     }
 
     mainEmbla.on('select', onSelect)
     thumbEmbla.on('select', () => {
       if (!mainEmbla || !thumbEmbla) return
-      mainEmbla.scrollTo(thumbEmbla.selectedScrollSnap())
+      const currentIndex = thumbEmbla.selectedScrollSnap()
+      mainEmbla.scrollTo(currentIndex)
+      if (onImageIndexChange) {
+        onImageIndexChange(currentIndex)
+      }
     })
 
     return () => {
@@ -172,32 +171,39 @@ export function ProductDetailsSection({
 
         {/* Thumbnail Carousel */}
         <div className="relative overflow-hidden" ref={thumbCarouselRef}>
-          <div className="flex gap-2 -mx-2">
-            {product.images.map((image, index) => (
-              <button
-                key={image.url}
-                onClick={() => {
-                  mainEmbla?.scrollTo(index)
-                  if (onImageIndexChange) {
-                    onImageIndexChange(index)
-                  }
-                }}
-                onMouseEnter={() => {
-                  if (onImageIndexChange) {
-                    onImageIndexChange(index)
-                  }
-                }}
-                className={`relative flex-[0_0_23%] min-w-0 aspect-square border rounded-md overflow-hidden 
-                  ${index === currentImageIndex ? "ring-2 ring-primary" : ""}`}
-              >
-                <NextImage
-                  src={image.url || "/placeholder.svg"}
-                  alt={`${product.name} thumbnail ${index + 1}`}
-                  fill
-                  className="object-cover"
-                />
-              </button>
-            ))}
+          <div className="flex gap-2 mx-4">
+            {product.images.map((image, index) => {
+              const isVariantImage = selectedVariant?.imageIds?.includes(image.id)
+              return (
+                <button
+                  key={image.url}
+                  onClick={() => {
+                    mainEmbla?.scrollTo(index)
+                    if (onImageIndexChange) {
+                      onImageIndexChange(index)
+                    }
+                  }}
+                  
+                  className={`relative flex-[0_0_25%] min-w-0 aspect-square border border-6 rounded-md overflow-hidden 
+                    ${index === currentImageIndex ? "ring-2 ring-primary" : ""}
+                    ${selectedVariant && !isVariantImage ? "opacity-80" : ""}`}
+                >
+                  <NextImage
+                    src={image.url || "/placeholder.svg"}
+                    alt={`${product.name} thumbnail ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                  {isVariantImage && (
+                    <div className="absolute top-1 right-1">
+                      <Badge variant="secondary" className="h-5 w-5 p-0 flex items-center justify-center">
+                        <Check className="h-3 w-3" />
+                      </Badge>
+                    </div>
+                  )}
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>

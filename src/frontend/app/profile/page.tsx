@@ -11,7 +11,7 @@ import AddressTab from "./tabs/address-tab"
 import SecurityTab from "./tabs/security-tab"
 import Link from "next/link"
 export default function ProfilePage() {
-  const { user, refresh } = useSession()
+  const { user } = useSession()
   return (
     <div className="container mx-auto px-4">
       <main className="flex-1">
@@ -35,13 +35,13 @@ export default function ProfilePage() {
             </TabsList>
 
             {/* Personal Information Tab */}
-            <PersonalTab user={user || null} refresh={refresh} />
+            <PersonalTab user={user || null} />
 
             {/* Addresses Tab */}
-            <AddressTab type="profile" user={user || null} setAddress={() => {}} />
+            <AddressTab type="profile" user={user || null} setAddress={()=>{}} />
 
             {/* Security Tab */}
-            <SecurityTab user={user || null} refresh={refresh} />
+            <SecurityTab user={user || null} />
           </Tabs>
         </div>
       </main>

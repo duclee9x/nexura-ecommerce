@@ -22,12 +22,12 @@ export const addressService = {
         return promisifyGrpcCall(addressClient, 'getWardsByDistrict', { districtId });
     },
 
-    addAddress: async (userId: string, address: Address): Promise<DefaultResponse & { address: ExtendedAddress }> => {
-        return promisifyGrpcCall(addressClient, 'addAddress', { userId, address });
+    addAddress: async (address: Address, userId: string): Promise<DefaultResponse & { address: ExtendedAddress }> => {
+        return promisifyGrpcCall(addressClient, 'addAddress', { address, userId });
     },
 
-    updateAddress: async (userId: string, address: ExtendedAddress): Promise<DefaultResponse & { address: ExtendedAddress }> => {
-        return promisifyGrpcCall(addressClient, 'updateAddress', { userId, address });
+    updateAddress: async (address: ExtendedAddress, userId: string): Promise<DefaultResponse & { address: ExtendedAddress }> => {
+        return promisifyGrpcCall(addressClient, 'updateAddress', { address, userId });
     },
 
     deleteAddress: async (deleteAddressRequest: DeleteAddressRequest): Promise<DefaultResponse> => {

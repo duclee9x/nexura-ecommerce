@@ -2,22 +2,21 @@
 
 import { createContext, useContext, ReactNode } from "react"
 import { User } from "@/protos/nexura"
-import { useUserSession, useSessionActions } from "@/hooks/use-query"
-
+import { useUserHooks } from "@/hooks/use-user"
+import { UseMutationResult } from "@tanstack/react-query"
 interface SessionContextType {
   user: User | null
   isLoading: boolean
   isAuthenticated: boolean
-  login: (email: string, password: string) => Promise<void>
-  logout: () => Promise<void>
-  refresh: () => Promise<void>
+  login: UseMutationResult<void, Error, { email: string; password: string; }, unknown>
+  logout: UseMutationResult<void, Error, void, unknown>
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined)
 
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const { data: user, isLoading } = useUserSession()
-  const { login, logout, refresh } = useSessionActions()
+  const { getSession, login, logout } = useUserHooks()
+  const { data: user, isLoading } = getSession()
   
   const value = {
     user: user || null,
@@ -25,7 +24,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     isAuthenticated: !!user,
     login,
     logout,
-    refresh,
   }
 
   return (

@@ -39,7 +39,7 @@ export function AppProvider({ children }: AppProviderProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ReactQueryDevtools initialIsOpen={false} position="left" buttonPosition="top-right" />
+      <ReactQueryDevtools initialIsOpen={false} position="left" buttonPosition="top-left" />
       <SessionProvider>
         <ThemeProvider
           attribute="class"

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -16,15 +16,14 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { useCartVariants } from "@/hooks/use-query"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import AddressTab from "@/app/profile/tabs/address-tab"
 import { ExtendedAddress } from "@/protos/nexura"
-
+import { toast } from "@/components/ui/use-toast"
 export default function CheckoutPage() {
 
   const router = useRouter()
-  const { items, clearCart } = useCart()
+  const { items, clearCart, getVariants } = useCart()
   const { user } = useSession()
   const { formatPrice } = useCurrency()
   const [paymentMethod, setPaymentMethod] = useState("stripe")
@@ -34,10 +33,16 @@ export default function CheckoutPage() {
   const [subtotal, setSubtotal] = useState(0)
   const [shipping, setShipping] = useState(0)
   const [orderTotal, setOrderTotal] = useState(0)
-  const { data: variants } = useCartVariants(items.map((item) => item.variantId))
-  const [variantsPrice, setVariantsPrice] = useState(items.map((item) => ({id: item.variantId, price: (variants?.find((v) => v.id === item.variantId)?.price || 0) * item.quantity})))
+  const { data: variants } = getVariants(items.map((item) => item.variantId))
   const [coupons, setCoupons] = useState<{code: string, discount: number}[]>([])
   const [newCoupon, setNewCoupon] = useState("")
+
+  const variantsPrice = useMemo(() => 
+    items.map((item) => ({
+      id: item.variantId, 
+      price: (variants?.find((v) => v.id === item.variantId)?.price || 0) * item.quantity
+    }))
+  , [items, variants])
 
   useEffect(() => {
     const shipping = shippingMethod === "express" ? 20 : 12
@@ -55,19 +60,30 @@ export default function CheckoutPage() {
       return
     }
     
+    if (!address) {
+      toast({
+        title: "Error",
+        description: "Please select an address",
+      })
+      return
+    }
+
+    
     setIsProcessing(true)
-
+    if (paymentMethod === "cod") {
+      
+    }
     // Simulate order processing
-    setTimeout(() => {
-      // Generate a random order number
-      const orderNumber = Math.floor(100000000 + Math.random() * 900000000)
+    // setTimeout(() => {
+    //   // Generate a random order number
+    //   const orderNumber = Math.floor(100000000 + Math.random() * 900000000)
 
-      // Clear the cart
-      clearCart()
+    //   // Clear the cart
+    //   clearCart()
 
-      // Redirect to success page with order number
-      router.push(`/checkout/success?order=${orderNumber}`)
-    }, 2000)
+    //   // Redirect to success page with order number
+    //   router.push(`/checkout/success?order=${orderNumber}`)
+    // }, 2000)
   }
 
   const handleApplyCoupon = () => {
@@ -85,11 +101,6 @@ export default function CheckoutPage() {
 
   const handleRemoveCoupon = (code: string) => {
     setCoupons(coupons.filter(c => c.code !== code))
-  }
-
-  if (items.length === 0) {
-    router.push("/cart")
-    return null
   }
 
   return (
@@ -217,7 +228,7 @@ export default function CheckoutPage() {
                     </span>
                   </AccordionTrigger>
                   <AccordionContent>
-                    <div className="space-y-4 max-h-60 overflow-y-auto pr-2">
+                    <div className="space-y-4 pr-2">
                       {items.map((item) => (
                         <div key={item.id} className="flex gap-3 justify-center items-center">
                           <div className="relative w-16 h-16 border flex-shrink-0">
@@ -286,14 +297,14 @@ export default function CheckoutPage() {
                     <RadioGroupItem value="stripe" id="stripe" />
                     <Label htmlFor="stripe" className="flex items-center gap-2 cursor-pointer">
                       <CreditCard className="h-5 w-5" />
-                      <span>Credit Card (Stripe)</span>
+                      <span>Global payment gateway (Stripe)</span>
                     </Label>
                   </div>
                   <div className={`flex items-center space-x-3 rounded-lg border p-4 hover:border-primary cursor-pointer ${paymentMethod === "vnpay" ? "bg-primary/5" : ""}`} onClick={() => setPaymentMethod("vnpay")}>
                     <RadioGroupItem value="vnpay" id="vnpay" />
                     <Label htmlFor="vnpay" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="h-5 w-5" />
-                      <span>VNPay</span>
+                      <span>Vietnam payment gateway (VNPay)</span>
                     </Label>
                   </div>
                   <div className={`flex items-center space-x-3 rounded-lg border p-4 hover:border-primary cursor-pointer ${paymentMethod === "cod" ? "bg-primary/5" : ""}`} onClick={() => setPaymentMethod("cod")}>

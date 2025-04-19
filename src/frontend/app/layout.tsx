@@ -6,6 +6,7 @@ import { AppProvider } from "@/components/app-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
+import { GlobalLoader } from "@/components/global-loader"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -25,7 +26,9 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
 }
+
 export const experimental_ppr: boolean = true
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -35,6 +38,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <AppProvider>
+          <GlobalLoader />
           <SiteHeader />
           {children}
           <SiteFooter />

@@ -30,7 +30,7 @@ const passwordSchema = z.object({
 type PasswordForm = z.infer<typeof passwordSchema>;
 
 // Main component
-export default function SecurityTab({user, refresh}: {user: User | null, refresh: () => void}) {
+export default function SecurityTab({user}: {user: User | null}) {
     if (!user) {
         return <SecuritySkeleton />;
     }

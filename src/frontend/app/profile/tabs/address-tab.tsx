@@ -8,17 +8,16 @@ import { Edit, MapPin, Plus, Trash2 } from "lucide-react";
 import { useState, useCallback, memo } from "react";
 import { Address, ExtendedAddress, User } from "@/protos/nexura";
 import { Country, Province, District, Ward } from "@/protos/nexura";
-import { addAddress, deleteAddress, getCountries, getDistrictsByProvince, getProvincesByCountry, getWardsByDistrict, updateAddress } from "@/actions/address";
+// import { addAddress, deleteAddress, getCountries, getDistrictsByProvince, getProvincesByCountry, getWardsByDistrict, updateAddress } from "@/actions/address";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getAddresses } from "@/actions/user";
+// import { getAddresses } from "@/actions/user";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { set, z } from "zod"
 import { DefaultResponse } from "@/lib/types";
 import { AddressSkeleton } from "../skeleton";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, CustomInput, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Label, Switch, DialogFooter } from "@/components/ui/custom-dialog";
-import { useAddresses, useCountries, useProvinces, useDistricts, useWards } from "@/hooks/use-query"
-import { useAddAddress, useUpdateAddress, useDeleteAddress } from "@/hooks/use-mutation"
+import { useUserHooks } from "@/hooks/use-user"
 
 type SelectedAddress = {
     country: Country | null;
@@ -106,8 +105,8 @@ export default function AddressTab({
     if (!user) {
         return <AddressSkeleton />;
     }
-
-    const { data: addressResponse, isLoading: isAddressesLoading } = useAddresses(user.id);
+    const { getAddresses, getCountries, getProvinces, getDistricts, getWards, addAddress, updateAddress, deleteAddress  } = useUserHooks()
+    const { data: addressResponse, isLoading: isAddressesLoading } = getAddresses(user.id);
     const [isAddressLoading, setIsAddressLoading] = useState(false);
     const [addressDialogOpen, setAddressDialogOpen] = useState<"add" | "edit" | null>(null);
     const [editingAddress, setEditingAddress] = useState<Address>({
@@ -133,16 +132,16 @@ export default function AddressTab({
         ward: null,
     });
 
-    const { data: countryResponse, isLoading: isCountryLoading } = useCountries();
+    const { data: countryResponse, isLoading: isCountryLoading } = getCountries();
     const countries = countryResponse?.countries || [];
 
-    const { data: provinceResponse, isLoading: isProvinceLoading } = useProvinces(selectedAddress.country?.id || "");
+    const { data: provinceResponse, isLoading: isProvinceLoading } = getProvinces(selectedAddress.country?.id || "");
     const provinces = provinceResponse?.provinces || [];
 
-    const { data: districtResponse, isLoading: isDistrictLoading } = useDistricts(selectedAddress.province?.id || "");
+    const { data: districtResponse, isLoading: isDistrictLoading } = getDistricts(selectedAddress.province?.id || "");
     const districts = districtResponse?.districts || [];
 
-    const { data: wardResponse, isLoading: isWardLoading } = useWards(selectedAddress.district?.id || "");
+    const { data: wardResponse, isLoading: isWardLoading } = getWards(selectedAddress.district?.id || "");
     const wards = wardResponse?.wards || [];
 
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -150,21 +149,7 @@ export default function AddressTab({
     const [addressType, setAddressType] = useState<"VietNam" | "Global">("VietNam");
     const [formErrors, setFormErrors] = useState<FormErrors>({});
 
-    const addAddressMutation = useAddAddress({
-        successMessage: "Address added successfully",
-        errorMessage: "Failed to add address"
-    });
-
-    const updateAddressMutation = useUpdateAddress({
-        successMessage: "Address updated successfully",
-        errorMessage: "Failed to update address"
-    });
-
-    const deleteAddressMutation = useDeleteAddress({
-        successMessage: "Address deleted successfully",
-        errorMessage: "Failed to delete address"
-    });
-
+  
     const handleEditAddress = useCallback((address: ExtendedAddress) => {
         const country = countries.find((c: Country) => c.id.toString() === address.countryId);
         const province = provinces.find((p: Province) => p.id.toString() === address.vnProvinceId);
@@ -251,7 +236,7 @@ export default function AddressTab({
                 vnDistrictId: selectedAddress.district?.id.toString() || "",
                 vnWardId: selectedAddress.ward?.id.toString() || "",
             }
-            await addAddressMutation.mutateAsync({ address: updatedAddress, userId: user.id })
+            await addAddress.mutateAsync({ address: updatedAddress as ExtendedAddress, userId: user.id })
             setAddressDialogOpen(null)
             setFormErrors({})
             setSelectedAddress((prev) => ({
@@ -280,7 +265,7 @@ export default function AddressTab({
         } finally {
             setIsAddressLoading(false)
         }
-    }, [editingAddress, selectedAddress, user.id, addAddressMutation, validateForm])
+    }, [editingAddress, selectedAddress, user.id, addAddress, validateForm])
 
     const handleUpdateAddress = useCallback(async () => {
         if (!validateForm()) return
@@ -293,7 +278,7 @@ export default function AddressTab({
                 vnDistrictId: selectedAddress.district?.id.toString() || "",
                 vnWardId: selectedAddress.ward?.id.toString() || "",
             }
-            await updateAddressMutation.mutateAsync({ address: updatedAddress, userId: user.id })
+            await updateAddress.mutateAsync({ address: updatedAddress as ExtendedAddress, userId: user.id })
             setAddressDialogOpen(null)
             setFormErrors({})
             setEditingAddress({
@@ -322,14 +307,14 @@ export default function AddressTab({
         } finally {
             setIsAddressLoading(false)
         }
-    }, [editingAddress, selectedAddress, user.id, updateAddressMutation, validateForm])
+    }, [editingAddress, selectedAddress, user.id, updateAddress, validateForm])
 
     const handleDeleteConfirm = useCallback(async () => {
         if (!addressToDelete) return
         setIsDeleteDialogOpen(false)
         setIsAddressLoading(true)
         try {
-            await deleteAddressMutation.mutateAsync({ 
+            await deleteAddress.mutateAsync({ 
                 addressId: addressToDelete.id, 
                 userId: user.id 
             })
@@ -339,7 +324,7 @@ export default function AddressTab({
         } finally {
             setIsAddressLoading(false)
         }
-    }, [addressToDelete, user.id, deleteAddressMutation])
+    }, [addressToDelete, user.id, deleteAddress])
 
     const handleSetDefaultAddress = useCallback(async (id: string) => {
         if (!addressResponse) {
@@ -359,7 +344,7 @@ export default function AddressTab({
         }
 
         try {
-            await updateAddressMutation.mutateAsync({ 
+            await updateAddress.mutateAsync({ 
                 address: updatedAddress, 
                 userId: user.id 
             })
@@ -368,7 +353,7 @@ export default function AddressTab({
         } finally {
             setIsAddressLoading(false)
         }
-    }, [addressResponse, user.id, updateAddressMutation])
+    }, [addressResponse, user.id, updateAddress])
 
     const handleCancelDialog = useCallback(() => {
         if (addressDialogOpen === "edit") {

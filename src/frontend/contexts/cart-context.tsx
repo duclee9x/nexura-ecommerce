@@ -2,14 +2,15 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
-import { CartItem, Product, ProductVariant, UpdateItemRequest } from "@/protos/nexura"
+import { CartItem,  UpdateItemRequest, User, VariantCart } from "@/protos/nexura"
 import { useCartActions } from "@/hooks/use-cart"
+import { useQuery, UseQueryResult } from "@tanstack/react-query"
+import { getUserGateway } from "@/gateway/gateway"
 import { useSession } from "./session-context"
-import { toast } from "sonner"
 
 export type CartContextType = {
   items: CartItem[]
- addItem: (item: Omit<CartItem, "id" | "created_at" | "updated_at" | "variant">, currencyCode: string) => Promise<void>
+  addItem: (item: Omit<CartItem, "id" | "created_at" | "updated_at" | "variant">, currencyCode: string) => Promise<void>
   removeItem: (productId: string, variantId: string) => Promise<void>
   clearCart: () => Promise<void>
   setTotalItem: (total: number) => void
@@ -17,6 +18,7 @@ export type CartContextType = {
   // updateVariantInfo: (variantId: string, variant: VariantCart) => void
   isLoading: boolean
   updateQuantity: (updateItemRequest: UpdateItemRequest) => Promise<void>
+  getVariants: (variantIds: string[]) => UseQueryResult<VariantCart[], Error>
 }
 
 // Create context with a default value that matches the shape but is obviously not functional
@@ -29,29 +31,47 @@ const defaultCartContext: CartContextType = {
   itemCount: 0,
   // updateVariantInfo: () => {},
   isLoading: false,
-  updateQuantity: async () => {}
+  updateQuantity: async () => {},
+  getVariants: () => ({ 
+    data: undefined, 
+    isLoading: false, 
+    isError: false,
+    error: null,
+    refetch: async () => ({ data: undefined, isSuccess: false }),
+  } as UseQueryResult<VariantCart[], Error>),
 }
 
 export const CartContext = createContext<CartContextType>(defaultCartContext)
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const { user } = useSession()
-  const { getCart, addItem: addItemToCart, updateItem, removeItem: removeItemFromCart, clearCart: clearCartItems } = useCartActions()
-  const { data: cart, isLoading, refetch } = getCart(user?.id || "")
+  const { getCart, addItem: addItemToCart, updateItem, removeItem: removeItemFromCart, clearCart: clearCartItems, getVariants } = useCartActions()
+  const { data: cart, isLoading: isCartLoading, refetch } = getCart(user?.id || "")
   const [items, setItems] = useState<CartItem[]>([])
   const [isReady, setIsReady] = useState(false)
   const [totalItem, setTotalItem] = useState(0)
 
   useEffect(() => {
+    // Only set ready when we have processed the user session AND initial cart load
+    if (user === undefined) return // user is still loading
+    if (user && isCartLoading) return // cart is still loading for logged in user
     setIsReady(true)
-  }, [])
+  }, [user, isCartLoading])
 
   useEffect(() => {
+    if (!user) {
+      // Reset cart state when no user
+      setItems([])
+      setTotalItem(0)
+      return
+    }
+
     if (cart?.items) {
       const mappedItems: CartItem[] = cart.items.map((item: CartItem) => ({...item}))
       setItems(mappedItems)
+      setTotalItem(cart.items.reduce((acc, item) => acc + item.quantity, 0) || 0)
     }
-  }, [cart])
+  }, [cart, user])
 
   const addItem = async (newItem: Omit<CartItem, "id" | "created_at" | "updated_at" | "variant">, currencyCode: string) => {
     if (!user || !user.id) {
@@ -63,12 +83,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         ...newItem,
         currencyCode: currencyCode
       })
-      refetch()
     } catch (error) {
       console.error("Failed to add item to cart:", error)
       throw error
     }
   }
+
 
   const removeItem = async (productId: string, variantId: string) => {
     if (!user || !user.id) {
@@ -96,7 +116,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         ...updateItemRequest,
         userId: user.id
       })
-      refetch()
     } catch (error) {
       console.error("Failed to update cart item quantity:", error)
       throw error
@@ -125,11 +144,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         addItem,
         removeItem,
         clearCart,
+        getVariants,
         itemCount: totalItem,
         setTotalItem,
-        // updateVariantInfo,
-        isLoading,
-        updateQuantity
+        isLoading: !isReady || (!!user && isCartLoading), // Consider loading until ready and cart data is loaded
+        updateQuantity,
       }}
     >
       {children}

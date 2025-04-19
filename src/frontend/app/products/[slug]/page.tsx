@@ -27,11 +27,11 @@ import { ImageViewer } from "@/components/image-viewer"
 import { useCurrency } from "@/contexts/currency-context"
 // import { useCart } from "@/hooks/use-cart"
 import { ReviewImageViewer } from "@/components/review-image-viewer"
-import { useQueryUtils } from "@/hooks/use-query"
 import { useCart, useCart as useCartContext } from "@/contexts/cart-context"
 import { useSession } from "@/contexts/session-context"
 import { ProductDetailsSection } from "@/components/product-details-section"
 import { useCartActions } from "@/hooks/use-cart"
+import { useQueryUtils } from "@/hooks/use-common"
 // Add mock review data
 const mockReviews = [
   {
@@ -122,7 +122,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
-  const { formatPrice } = useCurrency()
   // Embla carousel setup
   const [mainCarouselRef, mainEmbla] = useEmblaCarousel()
   const [thumbCarouselRef, thumbEmbla] = useEmblaCarousel({
@@ -229,7 +228,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       });
       return;
     }
-    setIsAddingToCart(true);
     try {
       await addItem({
         productId: product.id,
@@ -244,7 +242,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         variant: "destructive"
       });
     } finally {
-      setIsAddingToCart(false);
     }
   };
 
@@ -282,6 +279,25 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       month: 'long',
       day: 'numeric'
     })
+  }
+
+  // Handle variant selection and update currentImageIndex
+  const handleVariantSelect = (variant: ProductVariant | null) => {
+    setSelectedVariant(variant)
+    if (variant && variant.imageIds && variant.imageIds.length > 0 && product) {
+      // Find all image indices that match the variant's imageIds
+      const variantImageIndices = product.images
+        .map((img, index) => variant.imageIds.includes(img.id) ? index : -1)
+        .filter(index => index !== -1)
+
+      // If we found any matching images, set to the first one
+      if (variantImageIndices.length > 0) {
+        setCurrentImageIndex(variantImageIndices[0])
+      }
+    } else {
+      // Reset to first image if no variant selected or no imageIds
+      setCurrentImageIndex(0)
+    }
   }
 
   if (isLoading) {
@@ -340,11 +356,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                 setCurrentImageIndex(index)
                 setIsImageViewerOpen(true)
               }}
-              onVariantSelect={setSelectedVariant}
+              onVariantSelect={handleVariantSelect}
               onAddToCart={handleAddToCart}
               onQuantityChange={handleQuantityChange}
               onImageIndexChange={setCurrentImageIndex}
-              // Pass in computed stock status and stock for explicit control
               stockStatus={getStockStatus()}
               maxQuantity={selectedVariant?.stock?.quantity ?? 0}
               quantityDisabled={!selectedVariant || (selectedVariant.stock?.quantity ?? 0) <= 0}

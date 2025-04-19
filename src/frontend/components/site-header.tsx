@@ -24,9 +24,10 @@ import { useCart } from "@/contexts/cart-context"
 export function SiteHeader() {
   const pathname = usePathname()
   const [isMounted, setIsMounted] = useState(false)
-  const { itemCount: cartItemCount } = useCart()
   const [searchOpen, setSearchOpen] = useState(false)
   const { user } = useSession()
+  const { itemCount: cartItemCount } = useCart()
+
   const profilePictureUrl = user?.profilePictureUrl ? user.profilePictureUrl : generateAvatar(user?.firstName || "User")
   useEffect(() => {
     setIsMounted(true)
@@ -45,7 +46,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* Announcement Bar */}
       <div className="bg-black text-white dark:bg-gray-900 text-xs py-2 px-4 text-center">
-        Enjoy an exclusive 10% coupon for your first purchase.
+        <p>Enjoy an exclusive 10% coupon for your first purchase.</p>
       </div>
 
       <div className="container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 text-center h-16 items-center">
