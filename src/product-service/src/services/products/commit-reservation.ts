@@ -1,6 +1,6 @@
-import { CommitReservationRequest, CommitReservationResponse } from "@/src/proto/nexura"
-import { PrismaClient } from '@prisma/client'
-import { ServerUnaryCall } from '@grpc/grpc-js'
+import { CommitReservationRequest, CommitReservationResponse } from "@nexura/common/protos"
+import { PrismaClient } from '../../db/prisma-client'
+import type { ServerUnaryCall } from '@grpc/grpc-js'
 
 interface VariantRequest {
   id: string

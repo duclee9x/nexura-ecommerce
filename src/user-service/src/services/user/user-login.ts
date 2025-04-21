@@ -1,19 +1,15 @@
-import { trace, SpanStatusCode } from "@opentelemetry/api";
-import { ServerUnaryCall, UntypedHandleCall, sendUnaryData, status } from '@grpc/grpc-js';
+import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
+import { status } from '@grpc/grpc-js';
+import { LoginUserRequest, LoginUserResponse } from "@nexura/common/protos";
+import { SpanStatusCode, logger, verifyPassword, generateAccessToken, generateRefreshToken, defaultTracer, withTracing } from "@nexura/common/utils";
+import { LoginUserSchema } from "@nexura/common/validators";
 
-import { LoginUserRequest, LoginUserResponse, GetUserResponse } from "../../proto/nexura";
-import { LoginUserSchema } from "../../utils/user-validator";
-
-import logger from "../../utils/logger";
-import prisma from "../../db/client";
-import { verifyPassword } from "../../utils/password-utils";
-import { generateAccessToken, generateRefreshToken } from "../../utils/jwt-utils";
-
-import { defaultTracer, withTracing } from "../../utils/opentelemetry";
+import { PrismaClient } from "@prisma/client";
 
 const tracer = defaultTracer('loginUser')
+const prisma = new PrismaClient()
 
-export const LoginUser: UntypedHandleCall = async (
+export const LoginUser = async (
     call: ServerUnaryCall<LoginUserRequest, LoginUserResponse>,
     callback: sendUnaryData<LoginUserResponse>
 ) => {

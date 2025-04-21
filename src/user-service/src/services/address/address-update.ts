@@ -1,7 +1,7 @@
-import { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
-import { AddressResponse, UpdateAddressRequest } from '../../proto/nexura';
-import { PrismaClient } from '@prisma/client'
-import { defaultTracer, withTracing } from '../../utils/opentelemetry';
+import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
+import type { AddressResponse, UpdateAddressRequest } from '@nexura/common/protos';
+import { PrismaClient } from '../../db/prisma-client';
+import { defaultTracer, withTracing } from '@nexura/common/utils';
 import { AddAndUpdateAddressSchema } from './address-validator';
 
 const prisma = new PrismaClient()
@@ -12,7 +12,7 @@ export async function updateAddress(
 ): Promise<void> {
   try {
     const { userId, address } = call.request;
-    if (!address) {
+    if (!address || !address.id) {
       callback(null, {
         success: false,
         message: 'Address is required',

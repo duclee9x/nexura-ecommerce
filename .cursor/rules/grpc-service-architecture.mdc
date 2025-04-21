@@ -1,0 +1,44 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# gRPC Service Architecture
+
+## Service Communication Layer
+The gRPC service communication is structured in three layers:
+
+1. Base Adapter Layer [baseAdapter.ts](mdc:src/orchestrator-service/src/gateway/services/baseAdapter.ts)
+   - Provides core gRPC client configuration and connection handling
+   - Uses @grpc/grpc-js for client creation and communication
+   - Handles default gRPC options and credentials
+
+2. Service Client Layer [serviceClient.ts](mdc:src/orchestrator-service/src/gateway/services/serviceClient.ts)
+   - Defines service-specific clients and configurations
+   - Exports service interfaces for cart, order, product, payment, and user services
+   - Each service method should wrap the request in an object with the request name as key
+
+3. Service Implementation Layer [create-saga-order.ts](mdc:src/orchestrator-service/src/services/orchestrator/create-saga-order.ts)
+   - Implements business logic using service clients
+   - Uses saga pattern for distributed transactions
+   - Handles compensation logic for failed operations
+
+## Service Client Guidelines
+- Use typed request/response interfaces from proto definitions
+- Service methods should accept request objects directly, not wrapped
+- Handle errors at the service implementation level
+- Use early returns for validation and error cases
+- Implement compensation logic for distributed transactions
+
+## Proto Interface Guidelines
+- All service interfaces should be defined in [nexura.ts](mdc:src/orchestrator-service/src/proto/nexura.ts)
+- Use proper TypeScript interfaces generated from proto definitions
+- Follow proto naming conventions for requests and responses
+- Include all required fields in request/response types
+
+## Error Handling
+- Use proper error types from @grpc/grpc-js
+- Implement compensation logic for failed distributed transactions
+- Handle service-specific errors at the implementation level
+- Provide meaningful error messages for debugging
+

@@ -1,8 +1,7 @@
-import { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
-import { GetAddressesRequest, GetAddressesResponse } from '../../proto/nexura';
-import { PrismaClient } from '@prisma/client'
-import { defaultTracer, withTracing } from '../../utils/opentelemetry';
-import { SpanStatusCode } from '@opentelemetry/api';
+import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
+import type { GetAddressesRequest, GetAddressesResponse } from '@nexura/common/protos';
+import { PrismaClient } from '../../db/prisma-client'
+import { defaultTracer, SpanStatusCode } from '@nexura/common/utils';
 
 const prisma = new PrismaClient()
 

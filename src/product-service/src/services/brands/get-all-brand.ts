@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client'
-import { handleError } from '../../utils/error'
+import { PrismaClient } from '../../db/prisma-client'
+import { handleError } from '@nexura/common/utils'
 
 const prisma = new PrismaClient()
 

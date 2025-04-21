@@ -1,6 +1,6 @@
-import { ReleaseReservationRequest, ReleaseReservationResponse } from "@/src/proto/nexura"
-import { PrismaClient } from '@prisma/client'
-import { ServerUnaryCall } from '@grpc/grpc-js'
+import { ReleaseReservationRequest, ReleaseReservationResponse } from "@nexura/common/protos"
+import { PrismaClient } from '../../db/prisma-client'
+import type { ServerUnaryCall } from '@grpc/grpc-js'
 
 export async function releaseReservation(
   call: ServerUnaryCall<ReleaseReservationRequest, ReleaseReservationResponse>

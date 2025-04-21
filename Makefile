@@ -298,31 +298,35 @@ proto:
 proto2:
 	docker compose -f docker-compose-dev.yml up protoc
 	echo "Copying proto files..."
-	cp ./protos/nexura.ts ./src/frontend/protos/nexura.ts
-	cp ./protos/nexura.proto ./src/frontend/protos/nexura.proto
+	cp ./packages/protos/nexura.ts ./src/frontend/protos/nexura.ts
+	cp ./packages/protos/nexura.proto ./src/frontend/protos/nexura.proto
 
-	cp -r ./protos/nexura.ts ./src/user-service/src/proto/nexura.ts
-	cp -r ./protos/nexura.proto ./src/user-service/src/proto/nexura.proto
+	cp -r ./packages/protos/nexura.ts ./src/user-service/src/proto/nexura.ts
+	cp -r ./packages/protos/nexura.proto ./src/user-service/src/proto/nexura.proto
 	cp -r ./src/user-service/src/proto/ ./src/user-service/dist/
 
-	cp -r ./protos/nexura.ts ./src/product-service/src/proto/nexura.ts
-	cp -r ./protos/nexura.proto ./src/product-service/src/proto/nexura.proto
+	cp -r ./packages/protos/nexura.ts ./src/product-service/src/proto/nexura.ts
+	cp -r ./packages/protos/nexura.proto ./src/product-service/src/proto/nexura.proto
 	cp -r ./src/product-service/src/proto/ ./src/product-service/dist/
 
-	cp -r ./protos/nexura_*.py ./src/cart-service/src/proto/
-	cp -r ./protos/nexura.proto ./src/cart-service/src/proto/
+	cp -r ./packages/protos/nexura.ts ./src/cart-service/src/proto/nexura.ts
+	cp -r ./packages/protos/nexura.proto ./src/cart-service/src/proto/nexura.proto
+	cp -r ./src/cart-service/src/proto/ ./src/cart-service/dist/
 
-	sed -i 's/from protos import/from . import/g' ./protos/nexura_pb2_grpc.py
-	cp ./protos/nexura_pb2* ./src/email-service/protos
-	cp ./protos/nexura.proto ./src/email-service/protos/nexura.proto
+	sed -i 's/from protos import/from . import/g' ./packages/protos/nexura_pb2_grpc.py
+	cp ./packages/protos/nexura_pb2* ./src/email-service/protos
+	cp ./packages/protos/nexura.proto ./src/email-service/protos/nexura.proto
 	echo "Proto files generated successfully"
 
-	cp -r ./protos/nexura.ts ./src/order-service/src/proto/nexura.ts
-	cp -r ./protos/nexura.proto ./src/order-service/src/proto/nexura.proto
+	cp -r ./packages/protos/nexura.ts ./src/order-service/src/proto/nexura.ts
+	cp -r ./packages/protos/nexura.proto ./src/order-service/src/proto/nexura.proto
 	cp -r ./src/order-service/src/proto/ ./src/order-service/dist/
 
-	cp -r ./protos/nexura.ts ./src/payment-service/proto/nexura.ts
-	cp -r ./protos/nexura.proto ./src/payment-service/proto/nexura.proto
+	cp -r ./packages/protos/nexura.ts ./src/payment-service/proto/nexura.ts
+	cp -r ./packages/protos/nexura.proto ./src/payment-service/proto/nexura.proto
 	cp -r ./src/payment-service/proto/ ./src/payment-service/dist/
 
-	
+	cp -r ./packages/protos/nexura.ts ./src/orchestrator-service/src/proto/nexura.ts
+	cp -r ./packages/protos/nexura.proto ./src/orchestrator-service/src/proto/nexura.proto
+	cp -r ./src/orchestrator-service/src/proto/ ./src/orchestrator-service/dist/
+

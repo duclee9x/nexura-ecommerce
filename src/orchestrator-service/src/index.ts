@@ -1,23 +1,21 @@
-import './orchestrator/otel';
-import { runSaga } from './orchestrator/sagaRunner';
+import { startServer, gracefulShutdown } from '@nexura/common/utils';
+import { orchestratorService } from './services/orchestrator';
+import { OrchestratorServiceService } from '@nexura/common/protos';
 
-const fakeCall = (name: string, succeed = true) => () =>
-  new Promise<void>((res, rej) => setTimeout(() => succeed ? res() : rej(`${name} failed`), 500));
+// Start the server
+const port = process.env.GRPC_PORT || '50056';
 
-runSaga([
-  {
-    name: 'ReserveStock',
-    forward: fakeCall('ReserveStock'),
-    compensate: fakeCall('ReleaseStock')
-  },
-  {
-    name: 'ChargePayment',
-    forward: fakeCall('ChargePayment', false),
-    compensate: fakeCall('Refund')
-  },
-  {
-    name: 'CreateOrder',
-    forward: fakeCall('CreateOrder'),
-    compensate: fakeCall('CancelOrder')
-  }
-]);
+const services = [
+    {
+        service: OrchestratorServiceService,
+        serviceHandler: orchestratorService
+    }
+]
+
+const server = startServer(services, port, "ORCHESTRATOR_SERVICE");
+
+// Handle graceful shutdown
+process.once('SIGTERM', () => gracefulShutdown('SIGTERM', server));
+process.once('SIGINT', () => gracefulShutdown('SIGINT', server));
+
+

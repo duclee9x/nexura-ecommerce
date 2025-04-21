@@ -1,4 +1,4 @@
-import { UntypedServiceImplementation } from '@grpc/grpc-js';
+import type { UntypedServiceImplementation } from '@grpc/grpc-js';
 import { getCountries } from './address-get-countries';
 import { getProvincesByCountry } from './address-get-provinces';
 import { getDistrictsByProvince } from './address-get-districts';

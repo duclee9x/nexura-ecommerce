@@ -8,28 +8,32 @@ import { ChevronLeft, X, CreditCard, Wallet, Banknote } from "lucide-react"
 import { useCart } from "@/contexts/cart-context"
 import { useSession } from "@/contexts/session-context"
 import { useCurrency } from "@/contexts/currency-context"
+import { CreateOrderRequest, CreateSagaOrderRequest, PaymentStatus } from "@/protos/nexura"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs } from "@/components/ui/tabs"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import AddressTab from "@/app/profile/tabs/address-tab"
-import { ExtendedAddress } from "@/protos/nexura"
 import { toast } from "@/components/ui/use-toast"
-export default function CheckoutPage() {
+import { ExtendedAddressType, OrderItemType, CouponType, CreateOrderRequestType, PaymentStatusType } from "@/app/checkout/order.type"
+import { useOrderActions } from "@/hooks/use-order"
 
+export default function CheckoutPage() {
+  const { createSagaOrder } = useOrderActions()
   const router = useRouter()
   const { items, clearCart, getVariants } = useCart()
   const { user } = useSession()
-  const { formatPrice } = useCurrency()
+  const { cartId } = useCart()
+  const { formatPrice, currency } = useCurrency()
   const [paymentMethod, setPaymentMethod] = useState("stripe")
   const [shippingMethod, setShippingMethod] = useState("standard")
   const [isProcessing, setIsProcessing] = useState(false)
-  const [address, setAddress] = useState<ExtendedAddress | null>(null)
+  const [address, setAddress] = useState<ExtendedAddressType | null>(null)
   const [subtotal, setSubtotal] = useState(0)
   const [shipping, setShipping] = useState(0)
   const [orderTotal, setOrderTotal] = useState(0)
@@ -40,7 +44,9 @@ export default function CheckoutPage() {
   const variantsPrice = useMemo(() => 
     items.map((item) => ({
       id: item.variantId, 
-      price: (variants?.find((v) => v.id === item.variantId)?.price || 0) * item.quantity
+      price: (variants?.find((v) => v.id === item.variantId)?.price || 0) * item.quantity,
+      variantName: variants?.find((v) => v.id === item.variantId)?.variantName,
+      productName: variants?.find((v) => v.id === item.variantId)?.productName,
     }))
   , [items, variants])
 
@@ -52,14 +58,13 @@ export default function CheckoutPage() {
     const orderTotal = total + shipping
     setOrderTotal(orderTotal)
   }, [shippingMethod, items, variants])
-  // const tax = total * 0.08
-  // const orderTotal = total + shipping + tax
+
   const handlePlaceOrder = () => {
     if (!user) {
       router.push("/login")
       return
     }
-    
+
     if (!address) {
       toast({
         title: "Error",
@@ -68,22 +73,39 @@ export default function CheckoutPage() {
       return
     }
 
-    
-    setIsProcessing(true)
-    if (paymentMethod === "cod") {
-      
+    if (cartId === undefined) {
+      toast({
+        title: "Error",
+        description: "Cart not found",
+      })
+      return
     }
-    // Simulate order processing
-    // setTimeout(() => {
-    //   // Generate a random order number
-    //   const orderNumber = Math.floor(100000000 + Math.random() * 900000000)
+    const order: CreateSagaOrderRequest = {
+      userId: user.id,
+      cartId: cartId,
+      shippingAddress: address,
+      items: variantsPrice.map((item) => ({
+        productId: item.id,
+        variantId: item.id,
+        quantity: items.find((i) => i.variantId === item.id)?.quantity || 0,
+        price: item.price,
+      })),
+      shippingMethod: shippingMethod,
+      shippingCost: shipping,
+      paymentMethod: paymentMethod,
+      paymentAmount: orderTotal,
+      paymentCurrency: currency,
+      subtotal: subtotal,
+      coupons: coupons.map((coupon) => ({
+        code: coupon.code,
+        discount: coupon.discount,
+      })),
+      total: orderTotal,
+      currencyCode: currency,
+    }
 
-    //   // Clear the cart
-    //   clearCart()
-
-    //   // Redirect to success page with order number
-    //   router.push(`/checkout/success?order=${orderNumber}`)
-    // }, 2000)
+    createSagaOrder(order)
+    setIsProcessing(false)
   }
 
   const handleApplyCoupon = () => {

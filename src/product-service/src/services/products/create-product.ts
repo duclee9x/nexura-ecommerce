@@ -1,11 +1,11 @@
-import { PrismaClient, Prisma } from '@prisma/client'
-import { handleError } from '../../utils/error'
-import { sendUnaryData, ServerUnaryCall, UntypedHandleCall } from '@grpc/grpc-js'
-import { CreateProductRequest, CreateProductResponse } from '../../proto/nexura'
+import { PrismaClient } from '../../db/prisma-client'
+import { handleError } from '@nexura/common/utils'
+import type { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js'
+import { CreateProductRequest, CreateProductResponse } from '@nexura/common/protos'
 
 const prisma = new PrismaClient()
 
-export const createProduct: UntypedHandleCall = async (call: ServerUnaryCall<CreateProductRequest, CreateProductResponse>, callback: sendUnaryData<CreateProductResponse>) => {
+export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, CreateProductResponse>, callback: sendUnaryData<CreateProductResponse>) => {
   try {
     console.log("Creating product", call.request)
     const productData = call.request.product
@@ -35,13 +35,13 @@ export const createProduct: UntypedHandleCall = async (call: ServerUnaryCall<Cre
       }
     })
 
-    const images: Prisma.ProductImageCreateWithoutProductInput[] = productData.images?.map((image) => ({
+    const images = productData.images?.map((image) => ({
       url: image.url,
       isMain: image.isMain,
       blurhash: image.blurhash,
     })) || []
 
-    const attributes: Prisma.ProductAttributeCreateWithoutProductInput[] = productData.attributes?.map((attribute) => ({
+    const attributes = productData.attributes?.map((attribute) => ({
       name: attribute.name,
       required: attribute.required,
       visible: attribute.visible,
@@ -67,7 +67,7 @@ export const createProduct: UntypedHandleCall = async (call: ServerUnaryCall<Cre
       throw new Error(`The following SKUs already exist: ${duplicateSkus.join(', ')}`)
     }
 
-    const variants: Prisma.ProductVariantCreateWithoutProductInput[] = productData.variants?.map((variant) => {
+    const variants = productData.variants?.map((variant) => {
       // Create a new variant object without the ID if it's a generated one
       const variantData = {
         sku: variant.sku,

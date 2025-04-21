@@ -1,6 +1,7 @@
-import { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
-import { Empty, GetCountriesResponse, Country } from '../../proto/nexura';
-import { PrismaClient } from '@prisma/client'
+import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
+import type { Empty, GetCountriesResponse } from '@nexura/common/protos';
+import type { Country } from '@prisma/client'
+import { PrismaClient } from '../../db/prisma-client';
 
 const prisma = new PrismaClient()
 

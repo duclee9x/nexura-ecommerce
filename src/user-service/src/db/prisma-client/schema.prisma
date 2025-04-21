@@ -6,14 +6,137 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
+  url      = "mysql://root:nexura-root-password@localhost:3306/user"
+  // url      = env("DATABASE_URL")
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String    @id @default(uuid())
+  email             String    @unique
+  firstName         String
+  lastName          String
+  password          String
+  phone             String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  isActive          Boolean   @default(true)
+  isVerified        Boolean   @default(false)
+  role              String    @default("user") // "user" | "admin"
+  lastLogin         DateTime?
+  permissions       String    @default("[]") // JSON string of permissions array
+  phoneNumber       String?
+  gender            String?
+  dateOfBirth       DateTime?
+  profilePictureUrl String?
+  address           Address[]
+}
+
+model Address {
+  id           String            @id @default(uuid())
+  userId       String
+  user         User              @relation(fields: [userId], references: [id])
+  name         String
+  street       String
+  city         String?
+  state        String?
+  vnProvinceId String?
+  vnProvince   AddressProvinces? @relation(fields: [vnProvinceId], references: [id])
+  vnDistrictId String?
+  vnDistrict   AddressDistricts? @relation(fields: [vnDistrictId], references: [id])
+  vnWardId     String?
+  vnWard       AddressWards?     @relation(fields: [vnWardId], references: [id])
+  zip          String?
+  countryId    String
+  country      Country           @relation(fields: [countryId], references: [id])
+  isDefault    Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+}
+
+model Country {
+  id        String             @id @default(uuid())
+  name      String
+  codeName  String             @unique
+  provinces AddressProvinces[]
+  addresses Address[]
+}
+
+model AddressProvinces {
+  id                     String                       @id @default(uuid())
+  name                   String
+  nameEn                 String
+  fullName               String
+  fullNameEn             String
+  administrativeUnitId   String
+  administrativeUnit     AddressAdministrativeUnits   @relation(fields: [administrativeUnitId], references: [id])
+  administrativeRegionId String
+  administrativeRegion   AddressAdministrativeRegions @relation(fields: [administrativeRegionId], references: [id])
+  districts              AddressDistricts[]
+  countryId              String
+  country                Country                      @relation(fields: [countryId], references: [id])
+  addresses              Address[]
+}
+
+model AddressDistricts {
+  id                   String                     @id @default(uuid())
+  name                 String
+  nameEn               String
+  fullName             String
+  fullNameEn           String
+  provinceCode         String
+  province             AddressProvinces           @relation(fields: [provinceCode], references: [id])
+  administrativeUnitId String
+  administrativeUnit   AddressAdministrativeUnits @relation(fields: [administrativeUnitId], references: [id])
+  wards                AddressWards[]
+  addresses            Address[]
+}
+
+model AddressWards {
+  id                   String                     @id @default(uuid())
+  name                 String
+  nameEn               String
+  fullName             String
+  fullNameEn           String
+  districtId           String
+  district             AddressDistricts           @relation(fields: [districtId], references: [id])
+  administrativeUnitId String
+  administrativeUnit   AddressAdministrativeUnits @relation(fields: [administrativeUnitId], references: [id])
+  addresses            Address[]
+}
+
+model AddressAdministrativeUnits {
+  id         String             @id @default(uuid())
+  name       String
+  nameEn     String
+  fullName   String
+  fullNameEn String
+  codeName   String             @unique
+  codeNameEn String
+  provinces  AddressProvinces[]
+  districts  AddressDistricts[]
+  wards      AddressWards[]
+}
+
+model AddressAdministrativeRegions {
+  id         String             @id @default(uuid())
+  name       String
+  nameEn     String
+  codeName   String             @unique
+  codeNameEn String
+  provinces  AddressProvinces[]
+}
+
+model OTP {
+  id             String   @id @default(uuid())
+  email          String
+  type           String // "reset" | "activation"
+  otp            String
+  createdAt      DateTime @default(now())
+  lastAttempt    DateTime @default(now())
+  attemptCount   Int      @default(0)
+  isUsed         Boolean  @default(false)
+  failedAttempts Int      @default(0)
+
+  @@index([email, type])
+  @@index([createdAt])
 }

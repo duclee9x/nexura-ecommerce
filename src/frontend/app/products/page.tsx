@@ -25,7 +25,7 @@ import {
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { useCurrency } from "@/contexts/currency-context"
 import { useQueryUtils } from "@/hooks/use-common"
-import { getCategories, getFilteredProducts, listProduct } from "@/hooks/use-product"
+import { useProductActions } from "@/hooks/use-product"
 interface filterType {
   categories: string[]
   types: string[]
@@ -34,6 +34,7 @@ interface filterType {
 }
 
 export default function ProductCatalogPage() {
+  const { getCategories, listProduct, getFilteredProducts } = useProductActions()
   const searchParams = useSearchParams()
   const categoryParam = searchParams.get("category")
   const { formatPrice } = useCurrency()

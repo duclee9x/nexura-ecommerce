@@ -1,38 +1,71 @@
+'use client'
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroupItem } from "@/components/ui/radio-group";
-import { RadioGroup } from "@/components/ui/radio-group";
+import { RadioGroupItem, RadioGroup } from "@/components/ui/radio-group";
 import { TabsContent } from "@/components/ui/tabs";
 import Image from "next/image";
-import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
-import { generateAvatar, getAvatarUrl } from "@/lib/utils";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { generateAvatar } from "@/lib/utils";
 import { toast } from "sonner";
-import { onPersonalSubmitAction, FormState } from "../personalSubmit"
+import { onPersonalSubmitAction, FormState } from "../personalSubmit";
 import { useState } from "react";
 import { AvatarCropperModal } from "@/components/ui/avatar-cropper-modal";
 import { User } from "@/protos/nexura";
 import { PersonalSkeleton } from "../skeleton";
-import { uploadToImageKit } from "@/lib/imagekit"
+import { uploadToImageKit } from "@/lib/imagekit";
 
-const initialState: FormState = {
+interface PersonalTabProps {
+    user: User | null
+}
+
+interface FormData {
+    firstName: string
+    lastName: string
+    email: string
+    phone: string
+    gender: string
+    dateOfBirth: string
+}
+
+interface ImageState {
+    selectedImage: string | null
+    avatarFile: File | null
+    previewUrl: string | null
+    isCropperOpen: boolean
+}
+
+const initialFormState: FormState = {
     message: "",
     success: false
 }
 
-export default function PersonalTab({ user }: { user: User | null }) {
+const initialImageState: ImageState = {
+    selectedImage: null,
+    avatarFile: null,
+    previewUrl: null,
+    isCropperOpen: false
+}
+
+export default function PersonalTab({ user }: PersonalTabProps) {
     if (!user) {
         return <PersonalSkeleton />;
     }
-    const queryClient = useQueryClient();
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
-    const [avatarFile, setAvatarFile] = useState<File | null>(null);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [isCropperOpen, setIsCropperOpen] = useState(false);
 
-    console.log(user, 'user')
-    const { isPending, error, mutate } = useMutation({
+    const queryClient = useQueryClient();
+    const [imageState, setImageState] = useState<ImageState>(initialImageState);
+    const [formData, setFormData] = useState<FormData>({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        gender: user.gender || "",
+        dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : ""
+    });
+
+    const { mutate, isPending, error } = useMutation({
         mutationFn: async (request: {
             id: string;
             user: {
@@ -43,42 +76,35 @@ export default function PersonalTab({ user }: { user: User | null }) {
                 gender: string | null;
                 dateOfBirth: string | null;
                 profilePictureUrl: string | null;
+                email: string;
+                updatedAt: string;
             };
             currentPassword: string | null;
             newPassword: string | null;
         }) => {
-            const result = await onPersonalSubmitAction(initialState, request);
+            const result = await onPersonalSubmitAction(initialFormState, request);
             if (!result.success) {
                 throw new Error(JSON.stringify(result.errors));
             }
             return result;
         },
-        onSuccess: async () => {
-            // Clear form states
-            setPreviewUrl(null);
-            setSelectedImage(null);
-            setAvatarFile(null);
-            
-            // Invalidate and refetch queries
-            queryClient.invalidateQueries({ queryKey: ['userSession'] })
+        onSuccess: () => {
+            setImageState(initialImageState);
+            queryClient.invalidateQueries({ queryKey: ['userSession'] });
             toast.success("Profile updated successfully");
         },
-        onError: (error) => {
+        onError: (error: Error) => {
             try {
                 const errors = JSON.parse(error.message);
-                // Don't show toast for validation errors
-                if (!errors.submit) {
-                    return;
-                }
+                if (!errors.submit) return;
                 toast.error(errors.submit || "Failed to update profile");
-            } catch (error) {
-                console.log(error, 'error')
+            } catch (parseError) {
+                console.error(parseError);
                 toast.error("An unexpected error occurred");
             }
         }
     });
 
-    // Function to get field error
     const getFieldError = (fieldName: string): string | undefined => {
         if (!error?.message) return undefined;
         try {
@@ -89,102 +115,110 @@ export default function PersonalTab({ user }: { user: User | null }) {
         }
     };
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleGenderChange = (value: string) => {
+        setFormData(prev => ({
+            ...prev,
+            gender: value
+        }));
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        try {
-            const formData = new FormData(e.currentTarget)
+        e.preventDefault();
+        const updatedFields: Partial<typeof user> = { id: user.id };
 
-            // Create an object to store only changed fields
-            const updatedFields: Partial<typeof user> = {
-                id: user.id // ID is always required
-            }
+        // Validate and add changed fields
+        if (formData.firstName.trim() && formData.firstName !== user.firstName) {
+            updatedFields.firstName = formData.firstName;
+        }
 
-            // Check and add only changed fields
-            const firstName = formData.get('firstName') as string
-            if (firstName?.trim() && firstName !== user.firstName) {
-                updatedFields.firstName = firstName
-            }
+        if (formData.lastName.trim() && formData.lastName !== user.lastName) {
+            updatedFields.lastName = formData.lastName;
+        }
 
-            const lastName = formData.get('lastName') as string
-            if (lastName?.trim() && lastName !== user.lastName) {
-                updatedFields.lastName = lastName
+        if (formData.phone.trim() && formData.phone !== user.phone) {
+            if (formData.phone.length < 10) {
+                toast.error("Phone number must be at least 10 digits");
+                return;
             }
+            updatedFields.phone = formData.phone;
+        }
 
-            const phone = formData.get('phone') as string
-            if (phone?.trim() && phone !== user.phone) {
-                // Validate phone number
-                if (phone.length < 10) {
-                    toast.error("Phone number must be at least 10 digits")
-                    return
-                }
-                updatedFields.phone = phone
+        if (formData.gender && formData.gender !== user.gender) {
+            if (!['male', 'female', 'other'].includes(formData.gender)) {
+                toast.error("Invalid gender value");
+                return;
             }
+            updatedFields.gender = formData.gender;
+        }
 
-            const gender = formData.get('gender') as string
-            if (gender && gender !== user.gender) {
-                // Validate gender
-                if (!['male', 'female', 'other'].includes(gender)) {
-                    toast.error("Invalid gender value")
-                    return
-                }
-                updatedFields.gender = gender
+        if (formData.dateOfBirth && formData.dateOfBirth !== user.dateOfBirth) {
+            const date = new Date(formData.dateOfBirth);
+            if (isNaN(date.getTime())) {
+                toast.error("Invalid date format");
+                return;
             }
+            updatedFields.dateOfBirth = date.toISOString();
+        }
 
-            const dateOfBirth = formData.get('dateOfBirth') as string
-            if (dateOfBirth && dateOfBirth !== user.dateOfBirth) {
-                // Validate date format
-                const date = new Date(dateOfBirth)
-                if (isNaN(date.getTime())) {
-                    toast.error("Invalid date format")
-                    return
-                }
-                updatedFields.dateOfBirth = date.toISOString()
-            }
-            // Handle avatar upload if exists
-            if (avatarFile) {
-                try {
-                    const { url, fileId } = await uploadToImageKit(avatarFile, "avatars")
-                    updatedFields.profilePictureUrl = url
-                } catch (error) {
-                    console.error("Error uploading avatar:", error)
-                    toast.error("Failed to upload profile picture")
-                    return
-                }
-            }
-
-            // Only include required fields and changed fields
-            const userData = {
-                ...user,
-                ...updatedFields,
-                updatedAt: new Date().toISOString()
-            }
-
-            // Only include password fields if they are provided
-            const currentPassword = formData.get('currentPassword') as string
-            const newPassword = formData.get('newPassword') as string
-            const updateRequest = {
-                id: user.id,
-                user: userData,
-                currentPassword: currentPassword || null,
-                newPassword: newPassword || null
-            }
-
-            // Submit the form data only if there are changes
-            if (Object.keys(updatedFields).length > 1) { // > 1 because id is always included
-                await mutate(updateRequest)
-                
-            } else {
-                toast.info("No changes to save")
-            }
-        } catch (error) {
-            console.error("Error submitting form:", error)
-            if (error instanceof Error) {
-                toast.error(error.message)
-            } else {
-                toast.error("An unexpected error occurred")
+        // Handle avatar upload
+        if (imageState.avatarFile) {
+            try {
+                const { url } = await uploadToImageKit(imageState.avatarFile, "avatars");
+                updatedFields.profilePictureUrl = url;
+            } catch (error) {
+                console.error("Error uploading avatar:", error);
+                toast.error("Failed to upload profile picture");
+                return;
             }
         }
-    }
+
+        const userData = {
+            ...user,
+            ...updatedFields,
+            updatedAt: new Date().toISOString()
+        };
+
+        if (Object.keys(updatedFields).length > 1) {
+            await mutate({
+                id: user.id,
+                user: userData,
+                currentPassword: null,
+                newPassword: null
+            });
+        } else {
+            toast.info("No changes to save");
+        }
+    };
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const imageUrl = URL.createObjectURL(file);
+        setImageState(prev => ({
+            ...prev,
+            selectedImage: imageUrl,
+            isCropperOpen: true
+        }));
+    };
+
+    const handleSaveAvatar = (file: File) => {
+        const previewUrl = URL.createObjectURL(file);
+        setImageState({
+            selectedImage: null,
+            avatarFile: file,
+            previewUrl,
+            isCropperOpen: false
+        });
+    };
 
     if (isPending) {
         return (
@@ -193,24 +227,7 @@ export default function PersonalTab({ user }: { user: User | null }) {
                     <p>Loading...</p>
                 </div>
             </TabsContent>
-        )
-    }
-
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file) return
-
-        const imageUrl = URL.createObjectURL(file)
-        setSelectedImage(imageUrl)
-        setIsCropperOpen(true)
-    }
-
-    const handleSaveAvatar = (file: File) => {
-        setAvatarFile(file)
-        const previewUrl = URL.createObjectURL(file)
-        setPreviewUrl(previewUrl)
-        setSelectedImage(null)
-        setIsCropperOpen(false)
+        );
     }
 
     return (
@@ -224,7 +241,7 @@ export default function PersonalTab({ user }: { user: User | null }) {
                     <div className="relative">
                         <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                             <Image
-                                src={previewUrl || user.profilePictureUrl || generateAvatar(user?.firstName || "")}
+                                src={imageState.previewUrl || user.profilePictureUrl || generateAvatar(user.firstName || "")}
                                 alt="Profile picture"
                                 width={96}
                                 height={96}
@@ -241,15 +258,19 @@ export default function PersonalTab({ user }: { user: User | null }) {
                             <Label htmlFor="picture" className="border btn-secondary p-3 rounded-md cursor-pointer">
                                 Upload
                             </Label>
-                            <Input onChange={handleImageUpload} id="picture" type="file" className="hidden" accept="image/*" />
+                            <Input 
+                                onChange={handleImageUpload} 
+                                id="picture" 
+                                type="file" 
+                                className="hidden" 
+                                accept="image/*" 
+                            />
                         </div>
                     </div>
                 </CardContent>
             </Card>
 
             <form onSubmit={handleSubmit}>
-                <input type="hidden" name="userId" value={user?.id} />
-                <input type="hidden" name="email" value={user?.email} />
                 <Card>
                     <CardHeader>
                         <CardTitle>Personal Information</CardTitle>
@@ -262,7 +283,8 @@ export default function PersonalTab({ user }: { user: User | null }) {
                                 <Input
                                     id="firstName"
                                     name="firstName"
-                                    defaultValue={user?.firstName}
+                                    value={formData.firstName}
+                                    onChange={handleChange}
                                     aria-describedby="firstName-error"
                                     className={getFieldError('firstName') ? "border-destructive" : ""}
                                 />
@@ -277,7 +299,8 @@ export default function PersonalTab({ user }: { user: User | null }) {
                                 <Input
                                     id="lastName"
                                     name="lastName"
-                                    defaultValue={user?.lastName}
+                                    value={formData.lastName}
+                                    onChange={handleChange}
                                     aria-describedby="lastName-error"
                                     className={getFieldError('lastName') ? "border-destructive" : ""}
                                 />
@@ -291,16 +314,14 @@ export default function PersonalTab({ user }: { user: User | null }) {
 
                         <div className="space-y-2">
                             <Label htmlFor="email">Email Address</Label>
-                            <div className="flex gap-2">
-                                <Input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    defaultValue={user?.email}
-                                    disabled={true}
-                                    aria-describedby="email-error"
-                                />
-                            </div>
+                            <Input
+                                id="email"
+                                name="email"
+                                type="email"
+                                value={formData.email}
+                                disabled
+                                aria-describedby="email-error"
+                            />
                             {getFieldError('email') && (
                                 <p className="text-sm text-destructive" id="email-error">
                                     {getFieldError('email')}
@@ -314,7 +335,8 @@ export default function PersonalTab({ user }: { user: User | null }) {
                                 id="phone"
                                 name="phone"
                                 type="tel"
-                                defaultValue={user?.phone}
+                                value={formData.phone}
+                                onChange={handleChange}
                                 aria-describedby="phone-error"
                                 className={getFieldError('phone') ? "border-destructive" : ""}
                             />
@@ -328,7 +350,8 @@ export default function PersonalTab({ user }: { user: User | null }) {
                         <div className="space-y-2">
                             <Label>Gender</Label>
                             <RadioGroup 
-                                defaultValue={user?.gender} 
+                                value={formData.gender}
+                                onValueChange={handleGenderChange}
                                 name="gender" 
                                 className="flex gap-6"
                             >
@@ -358,8 +381,11 @@ export default function PersonalTab({ user }: { user: User | null }) {
                                 id="dob"
                                 name="dateOfBirth"
                                 type="date"
-                                max={new Date(new Date().setFullYear(new Date().getFullYear() - 12)).toISOString().split('T')[0]}
-                                defaultValue={user?.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : ""}
+                                max={new Date(new Date().setFullYear(new Date().getFullYear() - 12))
+                                    .toISOString()
+                                    .split('T')[0]}
+                                value={formData.dateOfBirth}
+                                onChange={handleChange}
                                 aria-describedby="dob-error"
                                 className={getFieldError('dateOfBirth') ? "border-destructive" : ""}
                             />
@@ -377,13 +403,13 @@ export default function PersonalTab({ user }: { user: User | null }) {
                     </CardFooter>
                 </Card>
             </form>
+
             <AvatarCropperModal
-                image={selectedImage}
-                isOpen={isCropperOpen}
-                onClose={() => setIsCropperOpen(false)}
+                image={imageState.selectedImage}
+                isOpen={imageState.isCropperOpen}
+                onClose={() => setImageState(prev => ({ ...prev, isCropperOpen: false }))}
                 onSave={handleSaveAvatar}
             />
         </TabsContent>
-
-    )
+    );
 }

@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/db/prisma-client"
 }
 
 datasource db {
@@ -11,16 +12,16 @@ datasource db {
 }
 
 model Order {
-  id              String    @id @default(uuid())
-  userId          String
-  status          String    @default("pending")
-  totalAmount     Float
+  id                String      @id @default(uuid())
+  userId            String
+  status            String      @default("pending")
+  totalAmount       Float
   shippingAddressId String
-  items           OrderItem[]
-  paymentId       String?   // Reference to payment service
-  shipping        Shipping?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  items             OrderItem[]
+  paymentId         String? // Reference to payment service
+  shipping          Shipping?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
 
   @@index([userId])
   @@index([status])
@@ -29,29 +30,28 @@ model Order {
 }
 
 model OrderItem {
-  id          String   @id @default(uuid())
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId     String
-  variantId   String
-  quantity    Int
-  productId   String
-  price       Float
-  image       String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid())
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String
+  variantId String
+  quantity  Int
+  productId String
+  price     Float
+  image     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([orderId])
   @@index([variantId])
 }
 
 model Shipping {
-  id          String   @id @default(uuid())
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId     String   @unique
-  method      String
+  id             String   @id @default(uuid())
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId        String   @unique
+  method         String
   trackingNumber String?
-  status      String   @default("pending")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  status         String   @default("pending")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
-

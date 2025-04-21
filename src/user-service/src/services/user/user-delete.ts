@@ -1,17 +1,19 @@
-import { trace, SpanStatusCode } from "@opentelemetry/api";
-import { ServerUnaryCall, UntypedHandleCall, sendUnaryData, status } from '@grpc/grpc-js';
+import { SpanStatusCode } from "@opentelemetry/api";
+import type { ServerUnaryCall, sendUnaryData } from "@grpc/grpc-js";
+import { status } from "@grpc/grpc-js";
 
-import { DeleteUserSchema } from "../../utils/user-validator";
-import { validateToken } from "../../utils/jwt-utils";
+import { DeleteUserSchema } from "@nexura/common/validators";
+import { validateToken } from "@nexura/common/utils";
 
-import logger from "../../utils/logger";
-import prisma from "../../db/client";
-import { defaultTracer } from "../../utils/opentelemetry";
-import { DeleteUserResponse, DeleteUserRequest } from "../../proto/nexura";
+import { logger } from "@nexura/common/utils";
+import { defaultTracer } from "@nexura/common/utils";
+import { DeleteUserResponse, DeleteUserRequest } from "@nexura/common/protos";
+import { PrismaClient } from "@prisma/client";
 
 const tracer = defaultTracer('deleteUser')
+const prisma = new PrismaClient()
 
-export const DeleteUser: UntypedHandleCall = async (
+export const DeleteUser = async (
     call: ServerUnaryCall<DeleteUserRequest, DeleteUserResponse>,
     callback: sendUnaryData<DeleteUserResponse>
 ) => {
@@ -36,7 +38,19 @@ export const DeleteUser: UntypedHandleCall = async (
             });
             return authenticateSpan.end();
         }
-        const token = authHeader[0].toString();
+        const token = authHeader[0]?.toString();
+        if (!token) {
+            logger.warn('Authentication failed: Missing token');
+            authenticateSpan.setStatus({
+                code: SpanStatusCode.ERROR,
+                message: 'Missing token'
+            });
+            callback({
+                code: status.UNAUTHENTICATED,
+                message: 'Missing token',
+            });
+            return authenticateSpan.end();
+        }
         const userId = validateToken(token);
         if (!userId) {
             logger.warn('Authentication failed: Invalid token');

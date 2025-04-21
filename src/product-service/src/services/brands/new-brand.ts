@@ -1,12 +1,11 @@
-import { PrismaClient } from '@prisma/client'
-import { handleError } from '../../utils/error'
-import { sendUnaryData, ServerUnaryCall, UntypedHandleCall } from '@grpc/grpc-js'
-import { NewBrandRequest } from '../../proto/nexura'
-import { NewBrandResponse } from '../../proto/nexura'
+import { PrismaClient } from '../../db/prisma-client'
+import { handleError } from '@nexura/common/utils'
+import type { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js'
+import { NewBrandRequest, NewBrandResponse } from '@nexura/common/protos'
 
 const prisma = new PrismaClient()
 
-export const newBrand: UntypedHandleCall = async (call: ServerUnaryCall<NewBrandRequest, NewBrandResponse>, callback: sendUnaryData<NewBrandResponse>) => {
+export const newBrand = async (call: ServerUnaryCall<NewBrandRequest, NewBrandResponse>, callback: sendUnaryData<NewBrandResponse>) => {
     try {
       const brandData = call.request.brand
       if (brandData == undefined) {

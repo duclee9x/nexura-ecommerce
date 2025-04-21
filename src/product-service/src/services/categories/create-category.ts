@@ -1,11 +1,11 @@
-import { PrismaClient } from '@prisma/client'
-import { handleError } from '../../utils/error'
-import { sendUnaryData, ServerUnaryCall, UntypedHandleCall } from '@grpc/grpc-js'
-import { CreateCategoryRequest, CreateCategoryResponse } from '../../proto/nexura'
+import { PrismaClient } from '../../db/prisma-client'
+import { handleError } from '@nexura/common/utils'
+import type { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js'
+import { CreateCategoryRequest, CreateCategoryResponse } from '@nexura/common/protos'
 
 const prisma = new PrismaClient()
 
-export const createCategory: UntypedHandleCall = async (call: ServerUnaryCall<CreateCategoryRequest, CreateCategoryResponse>, callback: sendUnaryData<CreateCategoryResponse>) => {
+export const createCategory = async (call: ServerUnaryCall<CreateCategoryRequest, CreateCategoryResponse>, callback: sendUnaryData<CreateCategoryResponse>) => {
     try {
       console.log("Creating category", call.request)
       const categoryData = call.request.category

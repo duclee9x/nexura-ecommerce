@@ -1,17 +1,19 @@
-import { SpanStatusCode, trace } from "@opentelemetry/api";
-import { ServerUnaryCall, UntypedHandleCall, sendUnaryData, status } from "@grpc/grpc-js";
+import { SpanStatusCode } from "@opentelemetry/api";
+import type { ServerUnaryCall, sendUnaryData } from "@grpc/grpc-js";
+import { status } from "@grpc/grpc-js";
 
-import { GetUserSchema } from "../../utils/user-validator";
+import { GetUserSchema } from "@nexura/common/validators";
 
-import prisma from "../../db/client";
-import logger from "../../utils/logger";
+import { logger } from "@nexura/common/utils";
 
-import { defaultTracer } from "../../utils/opentelemetry";
-import { GetUserResponse, GetUserRequest } from "../../proto/nexura";
+import { defaultTracer } from "@nexura/common/utils";
+import { GetUserResponse, GetUserRequest } from "@nexura/common/protos";
+import { PrismaClient } from "@prisma/client";
 
 const tracer = defaultTracer('getUser')
+const prisma = new PrismaClient()
 
-export const GetUser: UntypedHandleCall = async (
+export const GetUser = async (
     call: ServerUnaryCall<GetUserRequest, GetUserResponse>,
     callback: sendUnaryData<GetUserResponse>
 ) => {
@@ -59,7 +61,7 @@ export const GetUser: UntypedHandleCall = async (
                 code: SpanStatusCode.ERROR,
                 message: 'User not found'
             });
-            
+
             callback({
                 code: status.NOT_FOUND,
                 message: 'User not found',
@@ -92,6 +94,7 @@ export const GetUser: UntypedHandleCall = async (
         });
         userSpan.end();
     } catch (error) {
+        console.log(error)
         logger.error('Error in GetUser', {
             error: error instanceof Error ? error.message : 'Unknown error',
             stack: error instanceof Error ? error.stack : undefined
@@ -101,7 +104,7 @@ export const GetUser: UntypedHandleCall = async (
             message: `Internal error: ${error instanceof Error ? error.message : 'Unknown error'}`
         });
         span.recordException(error as Error);
-        
+
         span.end();
 
         callback({

@@ -1,4 +1,4 @@
-import { UntypedServiceImplementation } from '@grpc/grpc-js'
+import type { UntypedServiceImplementation } from '@grpc/grpc-js'
 import { newBrand } from './brands/new-brand'
 import { getAllBrand } from './brands/get-all-brand'
 import { removeBrand } from './brands/remove-brand'

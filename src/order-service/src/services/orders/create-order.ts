@@ -1,41 +1,42 @@
-import { PrismaClient } from '@prisma/client'
-import { logger } from '../../utils/logger'
-import { CreateOrderRequest, CreateOrderResponse, OrderStatus } from '../../proto/nexura'
-import { ServerUnaryCall } from '@grpc/grpc-js'
-import { sendUnaryData } from '@grpc/grpc-js'
+import { PrismaClient } from '../../db/prisma-client'
+import { logger } from '@nexura/common/utils'
+import { CreateOrderRequest, CreateOrderResponse, OrderStatus } from '@nexura/common/protos'
+import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js'
 import { Status } from '@grpc/grpc-js/build/src/constants'
 const prisma = new PrismaClient()
 
 export const createOrder = async (call: ServerUnaryCall<CreateOrderRequest, CreateOrderResponse>, callback: sendUnaryData<CreateOrderResponse>) => {
   try {
-    const { userId, items, shippingAddressId, totalAmount } = call.request
-
-    // Calculate total amount
-    
+    const { userId, cartId, items, shippingAddress, paymentMethod, paymentAmount, paymentCurrency, shippingMethod, shippingCost, subtotal, total, currencyCode } = call.request
 
     // Create order with transaction
     const order = await prisma.$transaction(async (tx) => {
-      // Create addresses
-
-
       // Create order
       const order = await tx.order.create({
         data: {
           userId,
-          totalAmount,
-          shippingAddressId: shippingAddressId,
+          totalAmount: total,
+          shippingAddressId: shippingAddress?.id || '',
+          status: OrderStatus.ORDER_PENDING.toString(),
           items: {
             create: items.map((item: any) => ({
               variantId: item.variantId,
               quantity: item.quantity,
               price: item.price,
               productId: item.productId,
-              image: item.image,
+              image: item.image || ''
             }))
+          },
+          shipping: {
+            create: {
+              method: shippingMethod,
+              status: 'pending'
+            }
           }
         },
         include: {
           items: true,
+          shipping: true
         }
       })
 
@@ -43,8 +44,7 @@ export const createOrder = async (call: ServerUnaryCall<CreateOrderRequest, Crea
     })
 
     callback(null, {
-      orderId: order.id,
-      status: OrderStatus.ORDER_PENDING 
+      orderId: order.id
     })
   } catch (error) {
     logger.error('Error creating order:', error)

@@ -78,7 +78,7 @@ export async function onPersonalSubmitAction(prev: FormState, request: UpdateUse
             request.currentPassword || '',
             request.newPassword || ''
         );
-        revalidatePath("/profile")
+        
         return {
             message: "Profile updated successfully",
             success: true

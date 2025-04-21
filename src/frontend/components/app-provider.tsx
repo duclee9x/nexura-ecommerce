@@ -51,7 +51,7 @@ export function AppProvider({ children }: AppProviderProps) {
           <CurrencyProvider>
             <CartProvider>
               <ReactScan />
-              <ErrorBoundary>{children}</ErrorBoundary>
+              {children}
             </CartProvider>
           </CurrencyProvider>
         </ThemeProvider>

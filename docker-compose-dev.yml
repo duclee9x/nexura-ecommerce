@@ -18,8 +18,6 @@ services:
   grpcui:
     container_name: grpcui
     image: wongnai/grpcui
-    depends_on:
-      - cart-service
     ports: 
       - 8080:8080
     environment:
@@ -27,42 +25,42 @@ services:
     # command: ["-plaintext",":8085"]
 
 
-  user-service:
-    container_name: user-service
-    build:
-      context: ./
-      dockerfile: ${USER_SERVICE_DOCKERFILE}
-      cache_from:
-        - user-service
-    volumes:
-      - ./src/user-service:/app
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-    depends_on:
-      user-service-db:
-        condition: service_healthy
-        restart: true
-      # otel-collector:
-      #   condition: service_started
-    restart: unless-stopped
-    ports:
-      - "${USER_SERVICE_PORT}:${USER_SERVICE_PORT}"
-    environment:
-      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
-      - OTEL_EXPORTER_OTLP_TRACES_TEMPORALITY_PREFERENCE
-      - OTEL_EXPORTER_OTLP_LOGS_TEMPORALITY_PREFERENCE
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-lgtm:4317
-      - OTEL_RESOURCE_ATTRIBUTES="service.name=user-service,service.instance.id=localhost:50051"
-      - OTEL_RESOURCE_NAMESPACE=nexura
-      - DATABASE_URL=mysql://${USER_SERVICE_DB_USER}:${USER_SERVICE_DB_PASSWORD}@${USER_SERVICE_DB_HOST}:${USER_SERVICE_DB_PORT}/${USER_SERVICE_DB_NAME}
-      - JWT_ACCESS_SECRET
-      - JWT_REFRESH_SECRET
-      - JWT_ACCESS_EXPIRATION
-      - JWT_REFRESH_EXPIRATION
-    # entrypoint: ["sleep", "infinity"]
-    logging: *logging
+  # user-service:
+  #   container_name: user-service
+  #   build:
+  #     context: ./
+  #     dockerfile: ${USER_SERVICE_DOCKERFILE}
+  #     cache_from:
+  #       - user-service
+  #   volumes:
+  #     - ./src/user-service:/app
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 128M
+  #   depends_on:
+  #     user-service-db:
+  #       condition: service_healthy
+  #       restart: true
+  #     # otel-collector:
+  #     #   condition: service_started
+  #   restart: unless-stopped
+  #   ports:
+  #     - "${USER_SERVICE_PORT}:${USER_SERVICE_PORT}"
+  #   environment:
+  #     - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+  #     - OTEL_EXPORTER_OTLP_TRACES_TEMPORALITY_PREFERENCE
+  #     - OTEL_EXPORTER_OTLP_LOGS_TEMPORALITY_PREFERENCE
+  #     - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-lgtm:4317
+  #     - OTEL_RESOURCE_ATTRIBUTES="service.name=user-service,service.instance.id=localhost:50051"
+  #     - OTEL_RESOURCE_NAMESPACE=nexura
+  #     - DATABASE_URL=mysql://${USER_SERVICE_DB_USER}:${USER_SERVICE_DB_PASSWORD}@${USER_SERVICE_DB_HOST}:${USER_SERVICE_DB_PORT}/${USER_SERVICE_DB_NAME}
+  #     - JWT_ACCESS_SECRET
+  #     - JWT_REFRESH_SECRET
+  #     - JWT_ACCESS_EXPIRATION
+  #     - JWT_REFRESH_EXPIRATION
+  #   # entrypoint: ["sleep", "infinity"]
+  #   logging: *logging
     
 
   # product-service:
@@ -283,35 +281,35 @@ services:
   #     retries: 10
   #   logging: *logging
 
-  cart-service:
-    build:
-      context: ./src/cart-service
-      dockerfile: Dockerfile
-      cache_from:
-        - cart-service
-    container_name: cart-service
-    working_dir: /app
-    entrypoint: ["python", "-m", "src.server"]
-    ports:
-      - "${CART_SERVICE_PORT}:${CART_SERVICE_PORT}"
-    environment:
-      - DATABASE_URL=${CART_SERVICE_DB_ADDRESS}
-      - PORT=${CART_SERVICE_PORT}
-      - HOST=${CART_SERVICE_HOST}
-      - OTEL_SERVICE_NAME=cart-service
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-lgtm:4317
-    volumes:
-      - ./src/cart-service:/app
-    deploy:
-      resources:
-        limits:
-          memory: 128M
-    logging: *logging
-    develop:
-      watch:
-        - action: restart
-          path: ./src/cart-service/src/
-          target: /app/src/
+  # cart-service:
+  #   build:
+  #     context: ./src/cart-service
+  #     dockerfile: Dockerfile
+  #     cache_from:
+  #       - cart-service
+  #   container_name: cart-service
+  #   working_dir: /app
+  #   entrypoint: ["python", "src/server.py"]
+  #   ports:
+  #     - "${CART_SERVICE_PORT}:${CART_SERVICE_PORT}"
+  #   environment:
+  #     - DATABASE_URL=${CART_SERVICE_DB_ADDRESS}
+  #     - PORT=${CART_SERVICE_PORT}
+  #     - HOST=${CART_SERVICE_HOST}
+  #     - OTEL_SERVICE_NAME=cart-service
+  #     - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-lgtm:4317
+  #   volumes:
+  #     - ./src/cart-service:/app
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 128M
+  #   logging: *logging
+  #   develop:
+  #     watch:
+  #       - action: restart
+  #         path: ./src/cart-service/src/
+  #         target: /app/src/
   
   otel-lgtm:
     image: grafana/otel-lgtm

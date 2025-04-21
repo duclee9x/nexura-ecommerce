@@ -1,8 +1,7 @@
-import { PrismaClient } from '@prisma/client'
-import { handleError } from '../../utils/error'
-import { sendUnaryData } from '@grpc/grpc-js'
-import { GetProductResponse, GetVariantsForCartRequest, GetVariantsForCartResponse, VariantCart } from '@/src/proto/nexura'
-import { ServerUnaryCall } from '@grpc/grpc-js'
+import { PrismaClient } from '../../db/prisma-client'
+import { handleError } from '@nexura/common/utils'
+import type { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js'
+import { GetVariantsForCartRequest, GetVariantsForCartResponse, VariantCart } from '@nexura/common/protos'
 
 const prisma = new PrismaClient()
 
@@ -37,7 +36,7 @@ export const getVariantsForCart = async (call: ServerUnaryCall<GetVariantsForCar
 
     // Fetch corresponding ProductImages
     const images = await prisma.productImage.findMany({
-      where: { id: { in: firstImageIds } },
+      where: { id: { in: firstImageIds as string[] } },
       select: { id: true, url: true },
     });
 
@@ -50,7 +49,7 @@ export const getVariantsForCart = async (call: ServerUnaryCall<GetVariantsForCar
       return {
         id: variant.id,
         price: variant.price, 
-        image: imageMap.get(firstImageId) ?? "",
+        image: imageMap.get(firstImageId as string) ?? "",
         stock: variant.stock ? {
           quantity: variant.stock.quantity,
           reserved: variant.stock.reserved,

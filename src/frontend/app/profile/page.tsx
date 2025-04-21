@@ -10,6 +10,8 @@ import PersonalTab from "./tabs/personal-tab"
 import AddressTab from "./tabs/address-tab"
 import SecurityTab from "./tabs/security-tab"
 import Link from "next/link"
+
+
 export default function ProfilePage() {
   const { user } = useSession()
   return (

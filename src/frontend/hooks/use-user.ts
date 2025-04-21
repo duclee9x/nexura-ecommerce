@@ -19,6 +19,8 @@ export const useUserHooks = () => {
     const router = useRouter()
 
     return {
+
+        
         getSession: () => useQuery({
             queryKey: ["userSession"],
             queryFn: async () => {

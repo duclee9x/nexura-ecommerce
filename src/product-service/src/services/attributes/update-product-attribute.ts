@@ -1,8 +1,8 @@
-import { PrismaClient } from '@prisma/client'
-import { handleError } from '../../utils/error'
-import { ServerUnaryCall } from '@grpc/grpc-js'
-import { UpdateProductAttributesRequest, UpdateProductAttributesResponse } from '@/src/proto/nexura'
-import { sendUnaryData } from '@grpc/grpc-js'
+import { PrismaClient } from '../../db/prisma-client'
+import type { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js'
+
+import { handleError } from '@nexura/common/utils'
+import { UpdateProductAttributesRequest, UpdateProductAttributesResponse } from '@nexura/common/protos'
 
 const prisma = new PrismaClient()
 

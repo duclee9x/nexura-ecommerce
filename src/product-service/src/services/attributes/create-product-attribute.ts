@@ -1,11 +1,11 @@
-import { PrismaClient } from '@prisma/client'
-import { handleError } from '../../utils/error'
-import { sendUnaryData, ServerUnaryCall, UntypedHandleCall } from '@grpc/grpc-js'
-import { CreateProductAttributeRequest, CreateProductAttributeResponse } from '../../proto/nexura'
+import { PrismaClient } from '../../db/prisma-client'
+import { handleError } from '@nexura/common/utils'
+import type { handleUnaryCall, sendUnaryData, ServerUnaryCall} from '@grpc/grpc-js'
+import { CreateProductAttributeRequest, CreateProductAttributeResponse } from '@nexura/common/protos'
 
 const prisma = new PrismaClient()
 
-export const createProductAttribute: UntypedHandleCall = async (call: ServerUnaryCall<CreateProductAttributeRequest, CreateProductAttributeResponse>, callback: sendUnaryData<CreateProductAttributeResponse>) => {
+export const createProductAttribute: handleUnaryCall<CreateProductAttributeRequest, CreateProductAttributeResponse> = async (call: ServerUnaryCall<CreateProductAttributeRequest, CreateProductAttributeResponse>, callback: sendUnaryData<CreateProductAttributeResponse>) => {
     try {
       console.log("Creating product attribute", call.request)
       const attributeData = call.request.attribute

@@ -1,7 +1,6 @@
-import { PrismaClient } from '@prisma/client';
-import { GetOrderRequest, GetOrderResponse } from '../../proto/nexura';
-import { ServerUnaryCall } from '@grpc/grpc-js';
-import { sendUnaryData } from '@grpc/grpc-js';
+import { PrismaClient } from '../../db/prisma-client';
+import { GetOrderRequest, GetOrderResponse } from '@nexura/common/protos';
+import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
 import { Status } from '@grpc/grpc-js/build/src/constants';
 
 const prisma = new PrismaClient();
@@ -36,8 +35,7 @@ export async function getOrder(call: ServerUnaryCall<GetOrderRequest, GetOrderRe
           variantId: item.variantId,
           quantity: item.quantity,
           price: item.price,
-          name: item.name,
-          sku: item.sku,
+          productId: item.productId,
           createdAt: item.createdAt.toISOString(),
           updatedAt: item.updatedAt.toISOString()
         })),

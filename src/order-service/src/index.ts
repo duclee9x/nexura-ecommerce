@@ -1,14 +1,21 @@
-import { startServer } from './server'
-import { logger } from './utils/logger'
+import { startServer, gracefulShutdown } from '@nexura/common/utils';
+import { OrderServiceService } from '@nexura/common/protos';
+import { orderService } from './services/order-service';
 
-async function main() {
-  try {
-    await startServer()
-    logger.info('Order service started successfully')
-  } catch (error) {
-    logger.error('Failed to start order service:', error)
-    process.exit(1)
-  }
-}
+// Start the server
+const port = process.env.GRPC_PORT || '50055';
 
-main() 
+const services = [
+    {
+        service: OrderServiceService,
+        serviceHandler: orderService
+    }
+]
+
+const server = startServer(services, port, "ORDER_SERVICE");
+
+// Handle graceful shutdown
+process.once('SIGTERM', () => gracefulShutdown('SIGTERM', server));
+process.once('SIGINT', () => gracefulShutdown('SIGINT', server));
+
+

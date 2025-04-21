@@ -1,6 +1,6 @@
-import { ValidateAndReserveRequest, ValidateAndReserveResponse } from "@/src/proto/nexura"
-import { PrismaClient, Reservation, ProductVariant } from '@prisma/client'
-import { ServerUnaryCall } from '@grpc/grpc-js'
+import { ValidateAndReserveRequest, ValidateAndReserveResponse } from "@nexura/common/protos"
+import { PrismaClient } from '../../db/prisma-client'
+import type { ServerUnaryCall } from '@grpc/grpc-js'
 
 interface VariantRequest {
   id: string
@@ -122,8 +122,8 @@ export async function validateAndReserve(
       return await tx.reservation.create({
         data: {
           userId: userId,
-          variantId: variants[0].id,
-          quantity: variantsRequest[0].stock?.reserved || 0
+          variantId: variants[0]?.id || "",
+          quantity: variantsRequest[0]?.stock?.reserved || 0
         }
       })
     })

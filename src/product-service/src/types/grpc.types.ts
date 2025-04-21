@@ -1,4 +1,4 @@
-import { ServerUnaryCall, sendUnaryData, StatusObject, ServerErrorResponse } from '@grpc/grpc-js'
+import type { ServerUnaryCall, sendUnaryData, StatusObject, ServerErrorResponse } from '@grpc/grpc-js'
 
 export type GrpcUnaryCall<Request = any, Response = any> = ServerUnaryCall<Request, Response>
 export type GrpcCallback<Response = any> = sendUnaryData<Response>

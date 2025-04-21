@@ -1,15 +1,13 @@
 import { PrismaClient } from '@prisma/client'
-import { SpanStatusCode, Tracer } from '@opentelemetry/api'
-import logger from "../../utils/logger";
-import { ServerUnaryCall, UntypedHandleCall, sendUnaryData, status } from '@grpc/grpc-js'
-import { VerifyAccountRequest, VerifyAccountResponse } from "../../proto/nexura";
-import { withTracing, defaultTracer } from "../../utils/opentelemetry";
-import { verifyToken } from "../../utils/jwt-utils";
+import { SpanStatusCode, logger, defaultTracer, withTracing, verifyToken } from "@nexura/common/utils";
+import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
+import { status } from '@grpc/grpc-js';
+import { VerifyAccountRequest, VerifyAccountResponse } from "@nexura/common/protos";
 
 const tracer = defaultTracer('verifyAccount')
 const prisma = new PrismaClient()
 
-export const verifyAccount: UntypedHandleCall = async (
+export const verifyAccount = async (
     call: ServerUnaryCall<VerifyAccountRequest, VerifyAccountResponse>,
     callback: sendUnaryData<VerifyAccountResponse>
 ) => {

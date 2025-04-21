@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
 import { Edit, MapPin, Plus, Trash2 } from "lucide-react";
-import { useState, useCallback, memo } from "react";
+import { useState, useCallback, memo, useEffect } from "react";
 import { Address, ExtendedAddress, User } from "@/protos/nexura";
 import { Country, Province, District, Ward } from "@/protos/nexura";
 // import { addAddress, deleteAddress, getCountries, getDistrictsByProvince, getProvincesByCountry, getWardsByDistrict, updateAddress } from "@/actions/address";
@@ -106,7 +106,7 @@ export default function AddressTab({
         return <AddressSkeleton />;
     }
     const { getAddresses, getCountries, getProvinces, getDistricts, getWards, addAddress, updateAddress, deleteAddress  } = useUserHooks()
-    const { data: addressResponse, isLoading: isAddressesLoading } = getAddresses(user.id);
+    const { data: addressResponse } = getAddresses(user.id);
     const [isAddressLoading, setIsAddressLoading] = useState(false);
     const [addressDialogOpen, setAddressDialogOpen] = useState<"add" | "edit" | null>(null);
     const [editingAddress, setEditingAddress] = useState<Address>({
@@ -146,7 +146,6 @@ export default function AddressTab({
 
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [addressToDelete, setAddressToDelete] = useState<ExtendedAddress | null>(null);
-    const [addressType, setAddressType] = useState<"VietNam" | "Global">("VietNam");
     const [formErrors, setFormErrors] = useState<FormErrors>({});
 
   
@@ -388,6 +387,11 @@ export default function AddressTab({
         setIsDeleteDialogOpen(true)
     }, [])
 
+    useEffect(() => {
+        if (addressResponse && addressResponse.addresses.length > 0) {
+            setAddress(addressResponse.addresses.find((a) => a.isDefault) || addressResponse.addresses[0])
+        }
+    }, [addressResponse])
     return (
         <TabsContent value="addresses" className="space-y-6">
             {isAddressLoading ? <AddressSkeleton /> :

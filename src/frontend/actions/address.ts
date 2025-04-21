@@ -1,8 +1,7 @@
 'use server'
 
 import { getCountriesGateway, getProvincesByCountryGateway, getWardsByDistrictGateway, getDistrictsByProvinceGateway, addAddressGateway, updateAddressGateway, deleteAddressGateway } from "@/gateway/gateway"
-import { getCurrentUserId } from "./auth"
-import { Address, DeleteAddressRequest, ExtendedAddress } from "@/protos/nexura"
+import { Address, DeleteAddressRequest, ExtendedAddress } from "@nexura/common/protos"
 
 export async function getCountries() {
     const countries = await getCountriesGateway()
@@ -24,12 +23,12 @@ export async function getWardsByDistrict(districtId: string) {
     return wards
 }
 
-export async function addAddress(address: Address, userId: string | undefined) {
+export async function addAddress(address: ExtendedAddress, userId: string | undefined) {
     try {
         if (!userId) {
             return { success: false, message: "User not authenticated", address: null }
         }
-        const result = await addAddressGateway(userId, address)
+        const result = await addAddressGateway(address, userId)
         return result
     } catch (error) {
         console.error("Error adding address:", error)
@@ -42,7 +41,7 @@ export async function updateAddress(address: ExtendedAddress, userId: string | u
         if (!userId) {
             return { success: false, message: "User not authenticated", address: null }
         }
-        const result = await updateAddressGateway(userId, address)
+        const result = await updateAddressGateway(address, userId)
         return result
     } catch (error) {
         console.error("Error updating address:", error)

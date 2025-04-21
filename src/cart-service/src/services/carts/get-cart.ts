@@ -1,0 +1,70 @@
+import { GetCartRequest, GetCartResponse } from "@nexura/common/protos"
+import type { ServerUnaryCall, sendUnaryData } from "@grpc/grpc-js"
+import { PrismaClient } from '../../db/prisma-client'
+import { handleError } from "@nexura/common/utils"
+
+// Create a single Prisma client instance
+const prisma = new PrismaClient({
+  log: ['query', 'error', 'warn'],
+})
+
+export const getCart = async (call: ServerUnaryCall<GetCartRequest, GetCartResponse>, callback: sendUnaryData<GetCartResponse>) => {
+    try {
+        const { userId } = call.request
+        console.log('userId', userId)
+        if (!userId) {
+            throw new Error('User ID is required')
+        }
+
+        const cart = await prisma.cart.findUnique({
+            where: { userId },
+            include: { 
+                items: {
+                    orderBy: {
+                        createdAt: 'desc'
+                    }
+                }
+            }
+        })
+
+        if (!cart) {            
+            return callback(null, {
+                cart: {
+                    id: '',
+                    userId: '',
+                    createdAt: '',
+                    updatedAt: '',
+                    currencyCode: '',
+                    items: [],
+                }
+            })
+        }
+
+        const response: GetCartResponse = {
+            cart: {
+                id: cart.id,
+                userId: cart.userId,
+                createdAt: cart.createdAt.toISOString(),
+                updatedAt: cart.updatedAt.toISOString(),
+                currencyCode: cart.currencyCode,
+                items: cart.items.map((item) => ({
+                    id: item.id,
+                    productId: item.productId,
+                    variantId: item.variantId,
+                    image: item.image || '',
+                    quantity: item.quantity,
+                    createdAt: item.createdAt.toISOString(),
+                    updatedAt: item.updatedAt.toISOString()
+                })),
+            }
+        }
+
+        return callback(null, response)
+
+    } catch (error) {
+        handleError(error, callback)
+    } finally {
+        // Ensure proper cleanup
+        await prisma.$disconnect()
+    }
+}

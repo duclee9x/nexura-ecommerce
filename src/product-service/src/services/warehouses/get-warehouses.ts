@@ -1,8 +1,7 @@
-import { PrismaClient } from '@prisma/client'
-import { handleError } from '../../utils/error'
-import { sendUnaryData } from '@grpc/grpc-js'
-import { Empty, GetAllCategoryResponse, GetWarehousesResponse } from '@/src/proto/nexura'
-import { ServerUnaryCall } from '@grpc/grpc-js'
+import { PrismaClient } from '../../db/prisma-client'
+import { handleError } from '@nexura/common/utils'
+import type { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js'
+import { Empty, GetWarehousesResponse } from '@nexura/common/protos'
 
 const prisma = new PrismaClient()
 
@@ -24,7 +23,6 @@ export const getWarehouses = async (call: ServerUnaryCall<Empty, GetWarehousesRe
         manager: warehouse.manager,
         contact: warehouse.contact,
         status: warehouse.status,
-        totalProducts: warehouse.totalProducts,
         createdAt: warehouse.createdAt.toISOString(),
         updatedAt: warehouse.updatedAt.toISOString(),
       })),

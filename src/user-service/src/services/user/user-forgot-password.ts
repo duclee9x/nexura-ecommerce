@@ -1,27 +1,21 @@
 import { PrismaClient } from '@prisma/client'
-import { addMinutes } from 'date-fns'
-import { Span, SpanStatusCode, trace, Tracer } from '@opentelemetry/api'
-import { generateOTP } from '../../utils/otp'
-import logger from "../../utils/logger";
-import { createGRPCClient } from '../../utils/client'
-import { LoginUserRequest, ResetPasswordResponse } from '../../proto/nexura'
-import { ServerUnaryCall, UntypedHandleCall } from '@grpc/grpc-js'
-import { sendUnaryData } from '@grpc/grpc-js'
-import { api } from '@opentelemetry/sdk-node'
-import { createToken } from '../../utils/jwt-utils'
-import { withTracing, defaultTracer } from '../../utils/opentelemetry'
+import { generateOTP, logger, SpanStatusCode, api, withTracing, defaultTracer, createToken } from '@nexura/common/utils'
+import { createGRPCClient } from '@nexura/common/grpc'
+
+import type { LoginUserRequest, ResetPasswordResponse } from '@nexura/common/protos'
+import type { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js'
 
 const tracer = defaultTracer('forgotPassword')
 const prisma = new PrismaClient()
 
 
-export const forgotPassword: UntypedHandleCall = async (
+export const forgotPassword = async (
     call: ServerUnaryCall<LoginUserRequest, ResetPasswordResponse>,
     callback: sendUnaryData<ResetPasswordResponse>
 ) => {
     try {
         // Find user
-        const user = await withTracing(tracer,'Find Existing User', async (span) => {
+        const user = await withTracing(tracer, 'Find Existing User', async (span) => {
             const userDB = await prisma.user.findUnique({
                 where: { email: call.request.email },
                 select: { id: true, email: true }
@@ -47,7 +41,7 @@ export const forgotPassword: UntypedHandleCall = async (
         const otp = generateOTP()
 
         // Check recent OTP attempts
-        const recentOTP = await withTracing(tracer,'Check Recent OTP Attempts', async (span) => {
+        const recentOTP = await withTracing(tracer, 'Check Recent OTP Attempts', async (span) => {
             const recentOTP = await prisma.oTP.findFirst({
                 where: {
                     email: call.request.email,
@@ -96,7 +90,7 @@ export const forgotPassword: UntypedHandleCall = async (
                 }
 
                 // Update existing OTP
-                await withTracing(tracer,'Update OTP', async (updateSpan) => {
+                await withTracing(tracer, 'Update OTP', async (updateSpan) => {
                     await prisma.oTP.update({
                         where: {
                             id: recentOTP.id,
@@ -117,7 +111,7 @@ export const forgotPassword: UntypedHandleCall = async (
             }
 
             // Create new OTP
-            await withTracing(tracer,'Create OTP Record', async (createSpan) => {
+            await withTracing(tracer, 'Create OTP Record', async (createSpan) => {
                 await prisma.oTP.create({
                     data: {
                         email: call.request.email,
@@ -156,25 +150,25 @@ export const forgotPassword: UntypedHandleCall = async (
 }
 
 const sendOTPToEmail = async (email: string, otp: string, resetToken: string) => {
-    await withTracing(tracer,'sendOTPToEmail', async (span) => {
-    api.context.with(api.trace.setSpan(api.context.active(), span), () => {
-        logger.info('Sending OTP to email', { traceId: span.spanContext().traceId });
-        span.setAttribute('client.request.email', email);
-        const client = createGRPCClient(process.env.EMAIL_SERVICE_ADDRESS || "localhost:50052", "EmailService");
-        client.SendOTPResetPassword({
-            email,
-            otp,
-            reset_token: resetToken
-        }, (error: Error | null, response: any) => {
-            if (error) {
-                logger.error('Error sending OTP to email', { error: error.message });
-                span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
-                span.end();
-                return;
-            }
-            logger.info(response.message);
-            span.setStatus({ code: SpanStatusCode.OK, message: 'OTP sent to email successfully' });
-            span.setAttribute('response.message', response.message);
+    await withTracing(tracer, 'sendOTPToEmail', async (span) => {
+        api.context.with(api.trace.setSpan(api.context.active(), span), () => {
+            logger.info('Sending OTP to email', { traceId: span.spanContext().traceId });
+            span.setAttribute('client.request.email', email);
+            const client = createGRPCClient(process.env.EMAIL_SERVICE_ADDRESS || "localhost:50052", "EmailService");
+            client.SendOTPResetPassword({
+                email,
+                otp,
+                reset_token: resetToken
+            }, (error: Error | null, response: any) => {
+                if (error) {
+                    logger.error('Error sending OTP to email', { error: error.message });
+                    span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+                    span.end();
+                    return;
+                }
+                logger.info(response.message);
+                span.setStatus({ code: SpanStatusCode.OK, message: 'OTP sent to email successfully' });
+                span.setAttribute('response.message', response.message);
                 span.end();
             });
         });

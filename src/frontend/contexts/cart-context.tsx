@@ -10,6 +10,7 @@ import { useSession } from "./session-context"
 
 export type CartContextType = {
   items: CartItem[]
+  cartId: string | undefined
   addItem: (item: Omit<CartItem, "id" | "created_at" | "updated_at" | "variant">, currencyCode: string) => Promise<void>
   removeItem: (productId: string, variantId: string) => Promise<void>
   clearCart: () => Promise<void>
@@ -24,6 +25,7 @@ export type CartContextType = {
 // Create context with a default value that matches the shape but is obviously not functional
 const defaultCartContext: CartContextType = {
   items: [],
+  cartId: undefined,
   setTotalItem: () => {},
   addItem: async () => {},
   removeItem: async () => {},
@@ -57,7 +59,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     if (user && isCartLoading) return // cart is still loading for logged in user
     setIsReady(true)
   }, [user, isCartLoading])
-
   useEffect(() => {
     if (!user) {
       // Reset cart state when no user
@@ -141,6 +142,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     <CartContext.Provider
       value={{
         items,
+        cartId: cart?.id,
         addItem,
         removeItem,
         clearCart,

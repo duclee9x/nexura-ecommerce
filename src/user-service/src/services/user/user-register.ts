@@ -1,13 +1,10 @@
 import { PrismaClient } from '@prisma/client'
-import { SpanStatusCode, Tracer } from '@opentelemetry/api'
-import logger from "../../utils/logger";
-import { ServerUnaryCall, UntypedHandleCall, sendUnaryData, status } from '@grpc/grpc-js'
-import { RegisterUserRequest, RegisterUserResponse } from "../../proto/nexura";
-import { RegisterUserSchema } from "../../utils/user-validator";
-import { hashPassword } from "../../utils/password-utils";
-import { withTracing, defaultTracer } from "../../utils/opentelemetry";
-import { sendWelcomeEmail } from "../../utils/email";
-import { createToken } from '../../utils/jwt-utils';
+
+import { createToken, sendWelcomeEmail, SpanStatusCode, hashPassword, withTracing, defaultTracer, logger } from '@nexura/common/utils';
+import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
+import { status } from '@grpc/grpc-js';
+import { RegisterUserRequest, RegisterUserResponse } from "@nexura/common/protos";
+import { RegisterUserSchema } from "@nexura/common/validators";
 
 const tracer = defaultTracer('UserRegister');
 const prisma = new PrismaClient();
@@ -20,7 +17,7 @@ const resultMessage = {
     UNREGISTERED_USER: "UNREGISTERED_USER",
 }
 
-export const RegisterUser: UntypedHandleCall = async (
+export const RegisterUser = async (
     call: ServerUnaryCall<RegisterUserRequest, RegisterUserResponse>,
     callback: sendUnaryData<RegisterUserResponse>
 ) => {
