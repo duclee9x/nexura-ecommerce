@@ -1,5 +1,5 @@
 import { PrismaClient } from '../../db/prisma-client';
-import { UpdateOrderStatusRequest, UpdateOrderStatusResponse, OrderStatus, StepStatus } from '@nexura/common/protos';
+import { UpdateOrderStatusRequest, UpdateOrderStatusResponse, OrderStatus, StepStatus } from '@nexura/grpc_gateway/protos';
 import type { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js';
 import { Status } from '@grpc/grpc-js/build/src/constants';
 const prisma = new PrismaClient();

@@ -9,10 +9,10 @@ import {
     OrchestratorServiceService, 
     ServiceName, 
     AddressServiceService 
-} from "../protos/nexura";
-import { HealthServiceImpl } from "../protos/health-service";
+} from "@nexura/grpc_gateway/protos";
+import { HealthServiceImpl } from "@nexura/grpc_gateway/protos";
 import { ReflectionService } from "@grpc/reflection";
-import { protoDefinition } from "../protos";
+import { protoDefinition } from "@nexura/grpc_gateway/protos";
 
 export async function gracefulShutdown(signal: string, server: Server) {
     logger.info(`Received ${signal} signal. Shutting down gracefully...`);

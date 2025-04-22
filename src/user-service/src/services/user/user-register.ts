@@ -1,10 +1,11 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '../../db/prisma-client'
 
-import { createToken, sendWelcomeEmail, SpanStatusCode, hashPassword, withTracing, defaultTracer, logger } from '@nexura/common/utils';
+import { createToken, SpanStatusCode, hashPassword, withTracing, defaultTracer, logger } from '@nexura/common/utils';
 import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
 import { status } from '@grpc/grpc-js';
-import { RegisterUserRequest, RegisterUserResponse } from "@nexura/common/protos";
+import { RegisterUserRequest, RegisterUserResponse } from "@nexura/grpc_gateway/protos";
 import { RegisterUserSchema } from "@nexura/common/validators";
+import { sendWelcomeEmailGateway } from '@nexura/grpc_gateway/gateway';
 
 const tracer = defaultTracer('UserRegister');
 const prisma = new PrismaClient();
@@ -68,7 +69,7 @@ export const RegisterUser = async (
                     const resendActivationEmail = await withTracing(tracer, 'Resend Activation Email', async (span) => {
                         try {
                             const token = createToken(email, "");
-                            await sendWelcomeEmail(email, `${firstName} ${lastName}`, token);
+                            await sendWelcomeEmailGateway({email, name: `${firstName} ${lastName}`, token});
                             span.setStatus({
                                 code: SpanStatusCode.OK,
                                 message: 'Activation email sent successfully'
@@ -129,7 +130,7 @@ export const RegisterUser = async (
         await withTracing(tracer, 'Send Welcome Email', async (span) => {
             try {
                 const token = createToken(email, "");
-                await sendWelcomeEmail(email, `${firstName} ${lastName}`, token);
+                await sendWelcomeEmailGateway({email, name: `${firstName} ${lastName}`, token});
                 span.setStatus({
                     code: SpanStatusCode.OK,
                     message: 'Activation email sent successfully'

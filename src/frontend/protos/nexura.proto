@@ -131,8 +131,19 @@ service UserService {
     rpc ValidateOTP (ValidateOTPRequest) returns (ValidateOTPResponse);
     rpc ResetPassword (ResetPasswordRequest) returns (ResetPasswordResponse);
     rpc VerifyAccount (VerifyAccountRequest) returns (VerifyAccountResponse);
+    rpc UpdatePassword (UpdatePasswordRequest) returns (UpdatePasswordResponse);
   }
  
+
+  message UpdatePasswordRequest {
+    string email = 1;
+    string new_password = 2;
+  }
+  message UpdatePasswordResponse {
+    bool success = 1;
+    string message = 2;
+  }
+    
   message ForgotPasswordRequest {
     string email = 1;
   }
@@ -153,6 +164,7 @@ service UserService {
   message ResetPasswordRequest {
     string email = 1;
     string new_password = 2;
+    string token = 3;
   }
   message ResetPasswordResponse {
     bool success = 1;
@@ -858,6 +870,8 @@ enum ServiceName {
   AD_SERVICE = 10;
   FEATURE_FLAG_SERVICE = 11;
   ADDRESS_SERVICE = 12;
+  ORCHESTRATOR_SERVICE = 13;
+  ORDER_SERVICE = 14;
 }
 
 // ---------------Order service-----------------

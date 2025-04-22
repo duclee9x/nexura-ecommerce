@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
-import { getGateway, registerUser } from "@/gateway/gateway"
+import { registerUserGateway } from "@/gateway/gateway"
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -52,7 +52,7 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterFormValues) => {
     try {
-      const { success, message } = await registerUser(data.firstName, data.lastName, data.email, data.password)
+      const { success, message } = await registerUserGateway(data.firstName, data.lastName, data.email, data.password)
 
       if (success) {
         toast.success("Registration successful! Please activate your account to continue.")

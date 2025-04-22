@@ -1,10 +1,10 @@
 import { SpanStatusCode, logger, verifyPassword, hashPassword, defaultTracer } from "@nexura/common/utils";
 import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
 import { status } from '@grpc/grpc-js';
-import { UpdateUserRequest, UpdateUserResponse } from "@nexura/common/protos";
+import { UpdateUserRequest, UpdateUserResponse } from "@nexura/grpc_gateway/protos";
 import { UpdateUserSchema } from "@nexura/common/validators";
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../../db/prisma-client";
 
 const tracer = defaultTracer('updateUser')
 const prisma = new PrismaClient()

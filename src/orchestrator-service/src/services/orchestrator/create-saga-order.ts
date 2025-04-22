@@ -1,18 +1,18 @@
 import { handleError } from '@nexura/common/utils'
-import type { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js'
+import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js'
 import { 
     CreateSagaOrderRequest, 
     CreateSagaOrderResponse, 
     OrderStatus, 
     CartItem, 
-    GetVariantsForCartRequest, 
     ValidateAndReserveRequest, 
     CreateOrderRequest, 
     GetOrderResponse,
     VariantCart
-} from '@nexura/common/protos'
-import { cartService, productService, orderService } from '../../gateway/services/serviceClient'
+} from '@nexura/grpc_gateway/protos'
+import { getCartGateway,  getVariantsForCartGateway, validateAndReserveGateway, releaseReservationGateway, commitReservationGateway, createOrderGateway, getOrderStatusGateway } from '@nexura/grpc_gateway/gateway'
 import { runSaga } from '../sagaRunner'
+import { productService } from '../../gateway/services/serviceClient'
 
 interface EnrichedCartItem extends CartItem {
     variant: VariantCart
@@ -46,7 +46,7 @@ export const createSagaOrder = async (
         }
 
         // Get cart data
-        const cartResponse = await cartService.getCart({ userId })
+        const cartResponse = await getCartGateway({ userId })
         
         if (!cartResponse?.cart) {
             throw new Error('Cart not found')
@@ -59,7 +59,7 @@ export const createSagaOrder = async (
 
         // Get variant information for all items
         const variantIds: string[] = cartResponse.cart.items.map((item: CartItem) => item.variantId)
-        const variantsResponse = await productService.getVariantsForCart(variantIds)
+        const variantsResponse = await getVariantsForCartGateway(variantIds)
 
         // Enrich cart items with variant information
         const enrichedItems: EnrichedCartItem[] = cartResponse.cart.items.map((item: CartItem) => {
@@ -95,7 +95,7 @@ export const createSagaOrder = async (
                             imageIds: [item.variant.image]
                         }))
                     }
-                    const reserveResponse = await productService.validateAndReserve(reserveRequest)
+                    const reserveResponse = await validateAndReserveGateway(reserveRequest)
                     
                     if (!reserveResponse.success) {
                         throw new Error('Failed to reserve stock')
@@ -124,18 +124,16 @@ export const createSagaOrder = async (
                         currencyCode
                     }
 
-                    const createOrderResponse = await orderService.createOrder(orderRequest)
-                    orderResponse = await orderService.getOrderStatus({ orderId: createOrderResponse.orderId })
-
+                    await createOrderGateway(orderRequest)
                     // Commit reservation
                     if (reservationId) {
-                        await productService.commitReservation({ reservationId })
+                        await commitReservationGateway({ reservationId })
                     }
                 },
                 compensate: async () => {
                     // Release reservation if it exists
                     if (reservationId) {
-                        await productService.releaseReservation({ reservationId })
+                        await releaseReservationGateway({ reservationId })
                     }
                 }
             }
@@ -152,6 +150,6 @@ export const createSagaOrder = async (
 
         callback(null, response)
     } catch (error) {
-        handleError(error, callback)
+        handleError(error as ServiceError, callback)
     }
 }

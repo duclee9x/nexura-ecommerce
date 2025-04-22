@@ -1,6 +1,6 @@
 import { startServer } from "@nexura/common/utils";
 import { gracefulShutdown } from '@nexura/common/utils';
-import { ProductCatalogServiceService } from '@nexura/common/protos';
+import { ProductCatalogServiceService } from '@nexura/grpc_gateway/protos';
 import { productService } from './services/product.service';
 import type { ServiceDefinition } from '@nexura/common/utils';
 // Start the server

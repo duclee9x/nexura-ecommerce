@@ -1,5 +1,5 @@
 {
-  "name": "cart-service",
+  "name": "@nexura/cart-service",
   "version": "1.0.0",
   "description": "Cart service for Nexura e-commerce",
   "main": "dist/server.js",  "prisma": {

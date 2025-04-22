@@ -7,8 +7,8 @@ import { validateToken } from "@nexura/common/utils";
 
 import { logger } from "@nexura/common/utils";
 import { defaultTracer } from "@nexura/common/utils";
-import { DeleteUserResponse, DeleteUserRequest } from "@nexura/common/protos";
-import { PrismaClient } from "@prisma/client";
+import { DeleteUserResponse, DeleteUserRequest } from "@nexura/grpc_gateway/protos";
+import { PrismaClient } from "../../db/prisma-client";
 
 const tracer = defaultTracer('deleteUser')
 const prisma = new PrismaClient()

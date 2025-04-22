@@ -467,7 +467,7 @@ export const VariantManager = memo(function VariantManager({
 
   // Generate SKU from base SKU and variant attributes
   const generateSkuFromAttributes = (variantAttributes: VariantAttribute[]) => {
-    if (variantAttributes.length === 0) {
+    if (variantAttributes.length === 0) { 
       return baseSku
     }
 
@@ -478,10 +478,10 @@ export const VariantManager = memo(function VariantManager({
 
         if (attribute.name.toLowerCase() === "color") {
           // For color attributes, use the first 3 characters of the value
-          return attr.value.substring(1, 4).toUpperCase()
+          return attr.value.toUpperCase()
         }
 
-        return attr.value.substring(0, 3).toUpperCase()
+        return attr.value.toUpperCase()
       })
       .filter(Boolean)
       .join("-")

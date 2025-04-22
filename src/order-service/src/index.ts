@@ -1,5 +1,5 @@
 import { startServer, gracefulShutdown } from '@nexura/common/utils';
-import { OrderServiceService } from '@nexura/common/protos';
+import { OrderServiceService } from '@nexura/grpc_gateway/protos';
 import { orderService } from './services/order-service';
 
 // Start the server

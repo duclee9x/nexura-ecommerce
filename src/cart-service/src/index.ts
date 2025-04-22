@@ -1,6 +1,6 @@
 import { startServer, gracefulShutdown } from '@nexura/common/utils';
 import { CartService } from './services/cart';
-import { CartServiceService } from '@nexura/common/protos';
+import { CartServiceService } from '@nexura/grpc_gateway/protos';
 
 // Start the server
 const port = process.env.GRPC_PORT || '50054';

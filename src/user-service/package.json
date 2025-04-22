@@ -1,5 +1,5 @@
 {
-  "name": "user-service",
+  "name": "@nexura/user-service",
   "description": "User Service",
   "main": "dist/index.js",
   "scripts": {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
 
@@ -12,21 +12,25 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
-import { emailSchema, verificationSchema } from "@/app/forgot-password/forgotPasswordFormSchema"
+import { emailSchema, verificationSchema } from "@/app/\(auth\)/forgot-password/forgotPasswordFormSchema"
 
 import { useActionState } from "react"
-import { handleSubmitEmailAction, handleSubmitVerificationAction } from "@/app/forgot-password/forgotPasswordSubmitAction"
+import { handleSubmitEmailAction, handleSubmitVerificationAction } from "@/app/(auth)/forgot-password/forgotPasswordSubmitAction"
+import { useUserHooks } from "@/hooks/use-user"
 
 
 type EmailFormValues = z.infer<typeof emailSchema>
 type VerificationFormValues = z.infer<typeof verificationSchema>
 
 export function ForgotPasswordForm() {
+  const { forgotPassword, validateOTP } = useUserHooks()
   const router = useRouter()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [step, setStep] = useState<"email" | "verification">("email")
   const [userEmail, setUserEmail] = useState("")
+  const [lastEmailSent, setLastEmailSent] = useState<Date | null>(null)
+  const [cooldownRemaining, setCooldownRemaining] = useState<number>(0)
     
   // Email form
   const {
@@ -52,26 +56,39 @@ export function ForgotPasswordForm() {
     },
   })
 
+  // Cooldown timer effect
+  useEffect(() => {
+    if (!lastEmailSent) return
+
+    const interval = setInterval(() => {
+      const now = new Date()
+      const diffSeconds = Math.floor((now.getTime() - lastEmailSent.getTime()) / 1000)
+      const remainingSeconds = Math.max(0, 60 - diffSeconds)
+      
+      setCooldownRemaining(remainingSeconds)
+      
+      if (remainingSeconds === 0) {
+        clearInterval(interval)
+      }
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [lastEmailSent])
 
   const [stateSubmitEmail, formActionSubmitEmail] = useActionState(handleSubmitEmailAction, {message: "", success: false})
   const [stateSubmitVerification, formActionSubmitVerification] = useActionState(handleSubmitVerificationAction, {message: "", success: false})
+
   async function onSubmitEmail(data: EmailFormValues) {
     setIsLoading(true)
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // In a real app, you would call your API here
-      // const response = await fetch("/api/auth/forgot-password", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(data),
-      // });
-
-      // if (!response.ok) throw new Error("User not found");
-
+      const { success, message } = await forgotPassword.mutateAsync(data.email)
+      console.log(success, message)
+      if (!success) {
+        throw new Error(message)
+      }
       setUserEmail(data.email)
+      setLastEmailSent(new Date())
       setStep("verification")
 
       toast({
@@ -95,33 +112,49 @@ export function ForgotPasswordForm() {
     setIsLoading(true)
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // In a real app, you would call your API here
-      // const response = await fetch("/api/auth/verify-code", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ email: userEmail, code: data.code }),
-      // });
-
-      // if (!response.ok) throw new Error("Invalid verification code");
-
+      const { success, message, resetToken } = await validateOTP.mutateAsync({ email: userEmail, otp: data.code })
+      if (!success) {
+        throw new Error(message)
+      }
       toast({
         title: "Verification successful",
         description: "Your identity has been verified. You can now reset your password.",
         variant: "default",
       })
 
-      // Redirect to reset password page with a token
-      // In a real app, the API would return a token
-      const mockToken = Buffer.from(`${userEmail}-${Date.now()}`).toString("base64")
-      router.push(`/reset-password?token=${mockToken}`)
+      router.push(`/reset-password?token=${resetToken}&email=${userEmail}`)
     } catch (error) {
       console.error("Verification error:", error)
       toast({
         title: "Verification failed",
         description: "The verification code is invalid or has expired. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleResendCode = async () => {
+    if (cooldownRemaining > 0) return
+
+    setIsLoading(true)
+    try {
+      const { success, message } = await forgotPassword.mutateAsync(userEmail)
+      if (!success) {
+        throw new Error(message)
+      }
+      setLastEmailSent(new Date())
+      toast({
+        title: "Code resent",
+        description: `We've sent a new verification code to ${userEmail}.`,
+        variant: "default",
+      })
+    } catch (error) {
+      console.error("Resend code error:", error)
+      toast({
+        title: "Error",
+        description: "Failed to resend the verification code. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -198,17 +231,11 @@ export function ForgotPasswordForm() {
               Didn't receive the code?{" "}
               <button
                 type="button"
-                className="text-brand-primary hover:underline"
-                onClick={() => {
-                  toast({
-                    title: "Code resent",
-                    description: `We've sent a new verification code to ${userEmail}.`,
-                    variant: "default",
-                  })
-                }}
-                disabled={isLoading}
+                className={`text-brand-primary hover:underline ${cooldownRemaining > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={handleResendCode}
+                disabled={isLoading || cooldownRemaining > 0}
               >
-                Resend code
+                {cooldownRemaining > 0 ? `Resend code (${cooldownRemaining}s)` : 'Resend code'}
               </button>
             </p>
           </div>

@@ -1,0 +1,1 @@
+bun --filter "@nexura/frontend" --filter "@nexura/user-service" --filter "@nexura/product-service" --filter "@nexura/cart-service" --filter "@nexura/order-service" dev

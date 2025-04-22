@@ -6,8 +6,8 @@ const userConfig = createServiceConfig('UserService', 50051);
 const userClient = createClient(UserServiceClient, userConfig);
 
 export const userService = {
-    validateOTP: async (email: string, otp: string): Promise<DefaultResponse & { user: User }> => {
-        return promisifyGrpcCall(userClient, 'validateOtp', { email, otp });
+    validateOTP: async (email: string, otp: string): Promise<DefaultResponse & { resetToken: string }> => {
+        return promisifyGrpcCall(userClient, 'validateOTP', { email, otp });
     },
 
     forgotPassword: async (email: string): Promise<DefaultResponse & { user: User }> => {

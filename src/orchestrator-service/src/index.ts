@@ -1,6 +1,6 @@
 import { startServer, gracefulShutdown } from '@nexura/common/utils';
 import { orchestratorService } from './services/orchestrator';
-import { OrchestratorServiceService } from '@nexura/common/protos';
+import { OrchestratorServiceService } from '@nexura/grpc_gateway/protos';
 
 // Start the server
 const port = process.env.GRPC_PORT || '50056';

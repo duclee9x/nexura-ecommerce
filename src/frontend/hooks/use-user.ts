@@ -1,8 +1,8 @@
 import { getDistrictsByProvince, getWardsByDistrict } from "@/actions/address"
 import { getProvincesByCountry } from "@/actions/address"
 import { toast } from "@/components/ui/use-toast"
-import { addAddressGateway, deleteAddressGateway, getAddressesGateway, getCountriesGateway, getUserGateway, updateAddressGateway } from "@/gateway/gateway"
-import { Address, DeleteAddressRequest, ExtendedAddress, User } from "@/protos/nexura"
+import { addAddressGateway, deleteAddressGateway, forgotPasswordGateway, getAddressesGateway, getCountriesGateway, getUserGateway, updateAddressGateway, validateOTPGateway } from "@nexura/grpc_gateway/gateway"
+import { Address, DeleteAddressRequest, ExtendedAddress, User } from "@nexura/grpc_gateway/protos"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 
@@ -18,9 +18,7 @@ export const useUserHooks = () => {
     const queryClient = useQueryClient()
     const router = useRouter()
 
-    return {
-
-        
+    return {       
         getSession: () => useQuery({
             queryKey: ["userSession"],
             queryFn: async () => {
@@ -30,6 +28,9 @@ export const useUserHooks = () => {
                         throw new Error("Failed to fetch session")
                     }
                     const data = await response.json()
+                    if (!data.user) {
+                        return null
+                    }
                     const user = await getUserGateway(data.user.id)
                     return user.user as User
                 } catch (error) {
@@ -91,6 +92,43 @@ export const useUserHooks = () => {
             },
         }),
 
+        forgotPassword: useMutation({
+            mutationFn: async (email: string) => {
+                return await forgotPasswordGateway(email)
+            },
+            onSuccess: () => {
+                toast({
+                    title: "SUCCESS",
+                    description: "Email sent successfully",
+                })
+            },
+            onError: (error: Error) => {
+                toast({
+                    title: "ERROR",
+                    description: error.message,
+                    variant: "destructive",
+                })
+            },
+        }),
+
+        validateOTP: useMutation({
+            mutationFn: async (data: { email: string; otp: string }) => {
+                return await validateOTPGateway(data.email, data.otp)
+            },
+            onSuccess: () => {
+                toast({
+                    title: "SUCCESS",
+                    description: "OTP validated successfully",
+                })
+            },
+            onError: (error: Error) => {
+                toast({
+                    title: "ERROR",
+                    description: error.message,
+                    variant: "destructive",
+                })
+            },
+        }),
         getAddresses: (userId: string) => useQuery({
             queryKey: ["addresses", userId],
             queryFn: async () => {

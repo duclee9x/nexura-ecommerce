@@ -1,0 +1,15 @@
+{
+  "name": "@nexura/grpc_gateway",
+  "private": true,
+  "main": "./gateway.ts",
+  "exports": {
+    "./protos": "./protos/index.ts",
+    "./gateway": "./gateway.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

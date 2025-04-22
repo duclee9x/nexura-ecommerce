@@ -1,9 +1,9 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Prisma } from '../../db/prisma-client'
 import { generateOTP, logger, SpanStatusCode, api, withTracing, defaultTracer, createToken } from '@nexura/common/utils'
-import { createGRPCClient } from '@nexura/common/grpc'
-
-import type { LoginUserRequest, ResetPasswordResponse } from '@nexura/common/protos'
+import type { LoginUserRequest, ResetPasswordResponse } from '@nexura/grpc_gateway/protos'
 import type { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js'
+import { sendOTPResetPasswordGateway } from '@nexura/grpc_gateway/gateway'
+import { isServiceError } from '@nexura/common/utils'
 
 const tracer = defaultTracer('forgotPassword')
 const prisma = new PrismaClient()
@@ -39,7 +39,7 @@ export const forgotPassword = async (
 
         // Generate OTP
         const otp = generateOTP()
-
+        const resetToken = createToken(user.email, otp)
         // Check recent OTP attempts
         const recentOTP = await withTracing(tracer, 'Check Recent OTP Attempts', async (span) => {
             const recentOTP = await prisma.oTP.findFirst({
@@ -52,12 +52,33 @@ export const forgotPassword = async (
                     otp: true,
                     attemptCount: true,
                     lastAttempt: true,
+                    createdAt: true,
                 }
             })
 
             if (recentOTP) {
                 const last_attempt = new Date(recentOTP.lastAttempt)
                 const diffMinutes = Math.abs(Date.now() - last_attempt.getTime()) / (1000 * 60)
+                const lastEmailSent = new Date(recentOTP.createdAt)
+                const diffMinutesSinceLastEmail = Math.abs(Date.now() - lastEmailSent.getTime()) / (1000 * 60)
+
+                // Check if less than 1 minute has passed since last email
+                if (diffMinutesSinceLastEmail < 1) {
+                    span.setStatus({
+                        code: SpanStatusCode.ERROR,
+                        message: 'Email cooldown period'
+                    })
+                    span.addEvent('Email cooldown period', {
+                        email: call.request.email,
+                        lastEmailSent: lastEmailSent.toISOString(),
+                        diffMinutesSinceLastEmail
+                    })
+                    callback(null, {
+                        success: false,
+                        message: 'Please wait 1 minute before requesting another reset link.'
+                    })
+                    return null
+                }
 
                 if (diffMinutes < 3) {
                     span.setStatus({
@@ -129,19 +150,39 @@ export const forgotPassword = async (
         })
         if (!recentOTP) return
         // Send OTP email
-        const resetToken = createToken(user.email, otp)
-        await sendOTPToEmail(user.email, otp, resetToken)
+        try { await sendOTPToEmail(user.email, otp, resetToken) }
+        catch (error) {
+            if (isServiceError(error)) {
+                logger.error('forgot_password_error', {
+                    error: error.details,
+                    email: call.request.email
+                })
+            }
+            
+            callback(null, {
+                success: false,
+                message: 'An error occurred while sending the OTP email.'
+            })
+            return
+        }
         callback(null, {
             success: true,
             message: 'If an account exists with this email, you will receive a password reset link.'
         })
 
     } catch (error) {
-        logger.error('forgot_password_error', {
-            error: error instanceof Error ? error.message : 'Unknown error',
-            email: call.request.email
-        })
-
+        if (error instanceof Prisma.PrismaClientKnownRequestError || error instanceof Prisma.PrismaClientInitializationError) {
+            logger.error('forgot_password_error', {
+                error: error.message,
+                email: call.request.email
+            })
+        }
+        else {
+            logger.error('forgot_password_error', {
+                error: error instanceof Error ? error.message : 'Unknown error',
+                email: call.request.email
+            })
+        }
         callback(null, {
             success: false,
             message: 'An error occurred while processing your request.'
@@ -154,23 +195,7 @@ const sendOTPToEmail = async (email: string, otp: string, resetToken: string) =>
         api.context.with(api.trace.setSpan(api.context.active(), span), () => {
             logger.info('Sending OTP to email', { traceId: span.spanContext().traceId });
             span.setAttribute('client.request.email', email);
-            const client = createGRPCClient(process.env.EMAIL_SERVICE_ADDRESS || "localhost:50052", "EmailService");
-            client.SendOTPResetPassword({
-                email,
-                otp,
-                reset_token: resetToken
-            }, (error: Error | null, response: any) => {
-                if (error) {
-                    logger.error('Error sending OTP to email', { error: error.message });
-                    span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
-                    span.end();
-                    return;
-                }
-                logger.info(response.message);
-                span.setStatus({ code: SpanStatusCode.OK, message: 'OTP sent to email successfully' });
-                span.setAttribute('response.message', response.message);
-                span.end();
-            });
+            sendOTPResetPasswordGateway({ email, verificationCode: otp, resetToken: resetToken })
         });
     })
 }

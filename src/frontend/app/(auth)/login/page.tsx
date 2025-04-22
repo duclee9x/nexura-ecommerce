@@ -1,6 +1,5 @@
 "use client"
 
-import { useSession } from "@/contexts/session-context"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -19,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
+import { useSession } from "@/contexts/session-context"
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -40,7 +40,7 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      await login(data.email, data.password)
+      await login.mutateAsync(data)
       toast.success("Logged in successfully")
       router.push("/")
     } catch (error) {
@@ -59,7 +59,7 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 flex flex-col">
               <FormField
                 control={form.control}
                 name="email"
@@ -68,7 +68,7 @@ export default function LoginPage() {
                     <FormLabel className="text-foreground">Email</FormLabel>
                     <FormControl>
                       <Input
-                  
+
                         type="email"
                         placeholder="Enter your email"
                         {...field}
@@ -95,6 +95,11 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
+              <p className="text-sm text-foreground hover:underline  cursor-pointer text-right">
+                <Link href="/forgot-password" className="text-primary hover:underline">
+                  Forgot password?
+                </Link>
+              </p>
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Logging in..." : "Login"}
               </Button>
@@ -108,6 +113,7 @@ export default function LoginPage() {
               Register
             </Link>
           </p>
+
         </CardFooter>
       </Card>
     </div>

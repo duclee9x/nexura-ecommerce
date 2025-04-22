@@ -7,8 +7,8 @@ import { GetUserSchema } from "@nexura/common/validators";
 import { logger } from "@nexura/common/utils";
 
 import { defaultTracer } from "@nexura/common/utils";
-import { GetUserResponse, GetUserRequest } from "@nexura/common/protos";
-import { PrismaClient } from "@prisma/client";
+import { GetUserResponse, GetUserRequest } from "@nexura/grpc_gateway/protos";
+import { PrismaClient } from "../../db/prisma-client";
 
 const tracer = defaultTracer('getUser')
 const prisma = new PrismaClient()

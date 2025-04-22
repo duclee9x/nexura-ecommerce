@@ -3,12 +3,11 @@ import { LoginUser } from './user-login';
 import { RegisterUser } from './user-register';
 import { DeleteUser } from './user-delete';
 import { UpdateUser } from './user-update';
-import { UntypedServiceImplementation } from '@grpc/grpc-js';
+import type { UntypedServiceImplementation } from '@grpc/grpc-js';
 import { forgotPassword } from './user-forgot-password';
 import { validateOTP } from './user-validate-otp';
-import { updatePassword } from './user-update-password';
 import { verifyAccount } from './user-verify-account';
-
+import { resetPassword } from './user-reset-password.ts';
 export const userService: UntypedServiceImplementation = {
     getUser: GetUser,
     updateUser: UpdateUser,
@@ -16,7 +15,7 @@ export const userService: UntypedServiceImplementation = {
     registerUser: RegisterUser,
     loginUser: LoginUser,
     forgotPassword: forgotPassword,
-    validateOTP: validateOTP,
-    updatePassword: updatePassword,
+    validateOtp: validateOTP,
     verifyAccount: verifyAccount,
+    resetPassword: resetPassword,
 }

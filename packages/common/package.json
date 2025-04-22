@@ -8,7 +8,8 @@
     "./protos": "./protos/index.ts",
     "./grpc": "./grpc/index.ts",
     "./utils": "./utils/index.ts",
-    "./validators": "./validators/index.ts"
+    "./validators": "./validators/index.ts",
+    "./gateway": "./gateway/index.ts"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.2.5",

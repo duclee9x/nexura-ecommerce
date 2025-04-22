@@ -1,4 +1,4 @@
-import { credentials } from '@grpc/grpc-js';
+import { credentials, Client, ClientUnaryCall, Metadata, ChannelCredentials } from '@grpc/grpc-js';
 
 export const defaultGrpcOptions = {
     'grpc.keepalive_time_ms': 120000,
@@ -34,19 +34,29 @@ export const createServiceConfig = (
     };
 };
 
-export const promisifyGrpcCall = <T>(client: any, method: string, request: any): Promise<T> => {
+type GrpcMethodCallback<T> = (error: Error | null, response: T) => void;
+
+export const promisifyGrpcCall = <T>(
+    client: Client,
+    method: string,
+    request: unknown
+): Promise<T> => {
     return new Promise((resolve, reject) => {
-        client[method](request, (error: Error | null, response: T) => {
+        const callback: GrpcMethodCallback<T> = (error, response) => {
             if (error) {
                 reject(error);
             } else {
                 resolve(response);
             }
-        });
+        };
+        (client[method as keyof Client] as Function)(request, callback);
     });
 };
 
-export const createClient = (ClientClass: any, config: ServiceConfig) => {
+export const createClient = <T extends Client>(
+    ClientClass: new (address: string, credentials: ChannelCredentials, options: typeof defaultGrpcOptions) => T,
+    config: ServiceConfig
+): T => {
     return new ClientClass(
         config.endpoint,
         credentials.createInsecure(),

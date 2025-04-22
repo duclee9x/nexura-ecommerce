@@ -1,5 +1,5 @@
 {
-  "name": "payment-service",
+  "name": "@nexura/payment-service",
   "version": "1.0.0",
   "description": "Payment service for Nexura Ecommerce",
   "main": "dist/index.js",

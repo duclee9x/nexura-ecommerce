@@ -5,7 +5,23 @@ import { cartService } from './services/cartService';
 import { productService } from './services/productService';
 import { addressService } from './services/addressService';
 
-import { AddItemRequest, ClearCartRequest, CreateSagaOrderRequest, DeleteAddressRequest, DeleteProductRequest, ExtendedAddress, GetCartRequest, OrderStatus, Product, RemoveItemRequest, UpdateItemRequest } from '@/protos/nexura';
+import { 
+    AddItemRequest, 
+    ClearCartRequest, 
+    CreateSagaOrderRequest, 
+    DeleteAddressRequest, 
+    DeleteProductRequest, 
+    ExtendedAddress, 
+    GetCartRequest, 
+    OrderStatus, 
+    Product, 
+    RemoveItemRequest, 
+    UpdateItemRequest,
+    User,
+    Brand,
+    Category,
+    ProductAttribute
+} from '@/protos/nexura';
 import { orderService } from './services/orderService';
 import { orchestratorService } from './services/orchestratorService';
 
@@ -37,14 +53,13 @@ export const getUserGateway = async (id: string) => {
     return userService.getUser(id);
 };
 
-export const updateUserGateway = async (id: string, user: any, currentPassword: string, newPassword: string) => {
+export const updateUserGateway = async (id: string, user: User, currentPassword: string, newPassword: string) => {
     return userService.updateUser(id, user, currentPassword, newPassword);
 };
 
 export const deleteUserGateway = async (id: string) => {
     return userService.deleteUser(id);
 };
-
 
 export const searchProductsGateway = async (query: string) => {
     return productService.searchProducts(query);
@@ -86,7 +101,7 @@ export const getAddressesGateway = async (userId: string) => {
     return addressService.getAddresses(userId);
 };
 
-export const newBrandGateway = async (brand: any) => {
+export const newBrandGateway = async (brand: Brand) => {
     return productService.newBrand(brand);
 };
 
@@ -98,7 +113,7 @@ export const getAllBrandGateway = async () => {
     return productService.getAllBrand();
 };
 
-export const createCategoryGateway = async (category: any) => {
+export const createCategoryGateway = async (category: Category) => {
     return productService.createCategory(category);
 };
 
@@ -110,7 +125,7 @@ export const getAllCategoryGateway = async () => {
     return productService.getAllCategory();
 };
 
-export const updateCategoryGateway = async (category: any) => {
+export const updateCategoryGateway = async (category: Category) => {
     return productService.updateCategory(category);
 };
 
@@ -118,7 +133,7 @@ export const getProductAttributesGateway = async (productId: string) => {
     return productService.getProductAttributes(productId);
 };
 
-export const updateProductAttributeGateway = async (attribute: any) => {
+export const updateProductAttributeGateway = async (attribute: ProductAttribute) => {
     return productService.updateProductAttribute(attribute);
 };
 
@@ -126,7 +141,7 @@ export const deleteProductAttributeGateway = async (attributeId: string) => {
     return productService.deleteProductAttribute(attributeId);
 };
 
-export const createProductAttributeGateway = async (attribute: any) => {
+export const createProductAttributeGateway = async (attribute: ProductAttribute) => {
     return productService.createProductAttribute(attribute);
 };
 
@@ -139,7 +154,7 @@ export const deleteProductGateway = async (productId: string) => {
     return productService.deleteProduct(productId);
 };
 
-export const createProductGateway = async (product: any) => {
+export const createProductGateway = async (product: Product) => {
     return productService.createProduct(product);
 };
 

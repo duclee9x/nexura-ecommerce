@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client'
-import { SpanStatusCode, logger, defaultTracer, withTracing } from '@nexura/common/utils'
+import { PrismaClient } from '../../db/prisma-client'
+import { SpanStatusCode, logger, defaultTracer, withTracing, createToken } from '@nexura/common/utils'
 import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js'
-import { ValidateOTPRequest, ValidateOTPResponse } from '@nexura/common/protos'
+import { ValidateOTPRequest, ValidateOTPResponse } from '@nexura/grpc_gateway/protos'
 
 const tracer = defaultTracer('validateOTP')
 const prisma = new PrismaClient()
@@ -31,7 +31,8 @@ export const validateOTP = async (
                 span.addEvent('OTP not found', { email })
                 callback(null, {
                     success: false,
-                    message: 'Invalid or expired OTP'
+                    message: 'Invalid or expired OTP',
+                    resetToken: ''
                 })
                 return null
             }
@@ -64,7 +65,8 @@ export const validateOTP = async (
                 })
                 callback(null, {
                     success: false,
-                    message: 'Maximum failed attempts reached. Please request a new OTP.'
+                    message: 'Maximum failed attempts reached. Please request a new OTP.',
+                    resetToken: ''
                 })
             })
             return
@@ -93,12 +95,13 @@ export const validateOTP = async (
                 })
                 callback(null, {
                     success: false,
-                    message: 'Invalid OTP'
+                    message: 'Invalid OTP',
+                    resetToken: ''
                 })
             })
             return
         }
-
+        const resetToken = createToken(email, otp)
         // Mark OTP as used
         await withTracing(tracer, 'Mark OTP as Used', async (span) => {
             await prisma.oTP.update({
@@ -117,7 +120,8 @@ export const validateOTP = async (
             span.addEvent('OTP validated successfully', { email })
             callback(null, {
                 success: true,
-                message: 'OTP validated successfully'
+                message: 'OTP validated successfully',
+                resetToken: resetToken
             })
         })
 
@@ -129,7 +133,8 @@ export const validateOTP = async (
 
         callback(null, {
             success: false,
-            message: 'An error occurred while validating OTP'
+            message: 'An error occurred while validating OTP',
+            resetToken: ''
         })
     }
 } 

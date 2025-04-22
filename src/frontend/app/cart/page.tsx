@@ -33,7 +33,6 @@ const shippingOptions = [
   { id: "express", name: "Express Shipping", price: 20, description: "1-2 business days" },
 ] as const
 
-const TAX_RATE = 0.1 // 10% tax rate
 
 export default function CartPage() {
   const router = useRouter()
