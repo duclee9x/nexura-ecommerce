@@ -192,10 +192,9 @@ service UserService {
   }
 
   message UpdateUserRequest {
-    string id = 1;
-    User user = 2;
-    string currentPassword = 3;
-    string newPassword = 4;
+    User user = 1;
+    string currentPassword = 2;
+    string newPassword = 3;
   }
   
   message RegisterUserRequest {

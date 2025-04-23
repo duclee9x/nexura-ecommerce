@@ -1,7 +1,7 @@
-import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
-import type { AddAddressRequest, AddressResponse } from '@nexura/common/protos';
+import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js';
+import type { AddAddressRequest, AddressResponse } from '@nexura/grpc_gateway/protos';
 import { PrismaClient } from '../../db/prisma-client';
-import { defaultTracer, withTracing } from '@nexura/common/utils';
+import { defaultTracer, handleError, withTracing } from '@nexura/common/utils';
 import { AddAndUpdateAddressSchema } from './address-validator';
 
 const prisma = new PrismaClient()
@@ -96,7 +96,6 @@ export async function addAddress(
       }
     });
   } catch (error) {
-    console.error('Error adding address:', error);
-    callback(error as Error, null);
+    handleError(error as ServiceError, callback)
   }
 } 

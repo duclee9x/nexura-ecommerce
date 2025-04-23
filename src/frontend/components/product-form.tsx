@@ -18,14 +18,13 @@ import { CategoryTree, type Category } from "@/components/category-tree"
 import { VariantManager } from "@/components/variant-manager"
 import { TagCombobox } from "@/components/tag-combobox"
 import { ImageGallery, type ProductImage } from "@/components/image-gallery"
-import { BrandSelector, type Brand } from "@/components/brand-selector"
+import { BrandSelector } from "@/components/brand-selector"
 import { AttributesManager } from "@/components/attributes-manager"
 import { SizeInstructionEditor, type SizeChart } from "@/components/size-instruction-editor"
-import { createCategoryGateway, getProductByIdGateway, newBrandGateway, updateCategoryGateway } from "@/gateway/gateway"
-import { Product, ProductAttribute, ProductVariant, VariantAttribute } from "@/protos/nexura"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { Product, ProductAttribute, ProductVariant, CreateCategoryRequest, CreateBrandRequest, Brand } from "@nexura/grpc_gateway/protos"
+import { useQueryClient } from "@tanstack/react-query"
 import { Skeleton } from "@/components/ui/skeleton"
-
+import { useProductActions } from "@/hooks/use-product"
 interface ProductFormProps {
   productId?: string
   categoriesData: {
@@ -89,15 +88,14 @@ export function ProductForm({
   const [sizeCharts, setSizeCharts] = useState<SizeChart[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("details")
-  const [selectedTag, setSelectedTag] = useState("")
   const [isSaving, setIsSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   // console.log(JSON.stringify(product, null, 2), "product")
-  const { data: productData, isLoading: isLoadingProduct } = useQuery({
-    queryKey: ["product", productId],
-    queryFn: () => getProductByIdGateway(productId || "").then((res) => res.product),
-    enabled: !!productId
-  })
+  const { getProductById, createCategory, updateCategory, createBrand } = useProductActions()
+  const { data: productData, isLoading: isLoadingProduct } = getProductById(productId || "")
+  const { mutate: createCategoryMutation } = createCategory
+  const { mutate: updateCategoryMutation } = updateCategory
+  const { mutate: createBrandMutation } = createBrand
   const queryClient = useQueryClient()
   const { categories, isLoadingCategories } = categoriesData
   const { brands, isLoadingBrands } = brandsData
@@ -250,13 +248,15 @@ export function ProductForm({
   }
 
   const handleCategoryCreate = async (category: Category, parentCategoryId: string) => {
-    try {
-      await createCategoryGateway({
+    const newCategory: CreateCategoryRequest = {
+      category: {
         id: category.id,
         name: category.name,
         parentId: parentCategoryId,
-      })
-      queryClient.invalidateQueries({ queryKey: ["categories"] })
+      }
+    }
+    try {
+      createCategoryMutation(newCategory)
     } catch (error) {
       toast({
         title: "Error",
@@ -264,16 +264,18 @@ export function ProductForm({
         variant: "destructive",
       })
     }
+  
   }
   // Handle category update
   const handleCategoryUpdate = async (updatedCategory: Category) => {
     try {
-      await updateCategoryGateway({
-        id: updatedCategory.id,
-        name: updatedCategory.name,
-        parentId: updatedCategory.parentId || "",
+      updateCategoryMutation({
+        category: {
+          id: updatedCategory.id,
+          name: updatedCategory.name,
+          parentId: updatedCategory.parentId || "",
+        }
       })
-      queryClient.invalidateQueries({ queryKey: ["categories"] })
     } catch (error) {
       toast({
         title: "Error",
@@ -427,7 +429,14 @@ export function ProductForm({
 
   const handleBrandCreate = async (brand: Brand) => {
     try {
-      await newBrandGateway(brand);
+      const newBrand: CreateBrandRequest = {
+        brand: {
+          id: brand.id,
+          name: brand.name,
+          logo: brand.logo,
+        }
+      }
+      createBrandMutation(newBrand);
     } catch (error) {
       toast({
         title: "Error",

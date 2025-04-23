@@ -6,18 +6,13 @@ import { Card } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
 import { Edit, MapPin, Plus, Trash2 } from "lucide-react";
 import { useState, useCallback, memo, useEffect } from "react";
-import { Address, ExtendedAddress, User } from "@/protos/nexura";
-import { Country, Province, District, Ward } from "@/protos/nexura";
-// import { addAddress, deleteAddress, getCountries, getDistrictsByProvince, getProvincesByCountry, getWardsByDistrict, updateAddress } from "@/actions/address";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-// import { getAddresses } from "@/actions/user";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ExtendedAddress, User, Country, Province, District, Ward, Address } from "@nexura/grpc_gateway/protos";
 
-import { set, z } from "zod"
+import { z } from "zod"
 import { DefaultResponse } from "@/lib/types";
 import { AddressSkeleton } from "../skeleton";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, CustomInput, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Label, Switch, DialogFooter } from "@/components/ui/custom-dialog";
-import { useUserHooks } from "@/hooks/use-user"
+import { useUserActions } from "@/hooks/use-user"
 
 type SelectedAddress = {
     country: Country | null;
@@ -105,7 +100,7 @@ export default function AddressTab({
     if (!user) {
         return <AddressSkeleton />;
     }
-    const { getAddresses, getCountries, getProvinces, getDistricts, getWards, addAddress, updateAddress, deleteAddress  } = useUserHooks()
+    const { getAddresses, getCountries, getProvinces, getDistricts, getWards, addAddress, updateAddress, deleteAddress  } = useUserActions()
     const { data: addressResponse } = getAddresses(user.id);
     const [isAddressLoading, setIsAddressLoading] = useState(false);
     const [addressDialogOpen, setAddressDialogOpen] = useState<"add" | "edit" | null>(null);

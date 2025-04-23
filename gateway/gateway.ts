@@ -21,7 +21,7 @@ import {
     Brand,
     Category,
     ProductAttribute
-} from '@/protos/nexura';
+} from '@nexura/grpc_gateway/protos';
 import { orderService } from './services/orderService';
 import { orchestratorService } from './services/orchestratorService';
 

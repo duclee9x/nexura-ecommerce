@@ -23,7 +23,7 @@ import {
 
 import { AttributeForm } from "./attribute-form"
 import { SortableAttribute } from "./sortable-attribute"
-import { ProductAttribute } from "@/protos/nexura"
+import { ProductAttribute } from "@nexura/grpc_gateway/protos"
 
 interface AttributesManagerProps {
   attributes: ProductAttribute[]

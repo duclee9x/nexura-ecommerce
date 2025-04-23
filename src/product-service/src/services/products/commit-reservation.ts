@@ -1,6 +1,7 @@
-import { CommitReservationRequest, CommitReservationResponse } from "@nexura/common/protos"
+import { CommitReservationRequest, CommitReservationResponse } from "@nexura/grpc_gateway/protos"
 import { PrismaClient } from '../../db/prisma-client'
-import type { ServerUnaryCall } from '@grpc/grpc-js'
+import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js'
+import { handleError } from "@nexura/common/utils"
 
 interface VariantRequest {
   id: string
@@ -11,7 +12,8 @@ interface VariantRequest {
 }
 
 export async function commitReservation(
-  call: ServerUnaryCall<CommitReservationRequest, CommitReservationResponse>
+  call: ServerUnaryCall<CommitReservationRequest, CommitReservationResponse>,
+  callback: sendUnaryData<CommitReservationResponse>
 ): Promise<CommitReservationResponse> {
   const prisma = new PrismaClient()
   
@@ -69,7 +71,7 @@ export async function commitReservation(
       message: "Reservation committed successfully"
     }
   } catch (error) {
-    console.error("Error committing reservation:", error)
+    handleError(error as ServiceError, callback)
     return {
       success: false,
       message: "Failed to commit reservation"

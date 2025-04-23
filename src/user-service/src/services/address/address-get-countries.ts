@@ -1,7 +1,7 @@
-import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
-import type { Empty, GetCountriesResponse } from '@nexura/common/protos';
-import type { Country } from '@prisma/client'
+import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js';
+import type { Empty, GetCountriesResponse, Country } from '@nexura/grpc_gateway/protos';
 import { PrismaClient } from '../../db/prisma-client';
+import { handleError } from '@nexura/common/utils';
 
 const prisma = new PrismaClient()
 
@@ -33,7 +33,6 @@ export async function getCountries(
       countries
     });
   } catch (error) {
-    console.error('Error fetching countries:', error);
-    callback(error as Error, null);
+    handleError(error as ServiceError, callback)
   }
 } 

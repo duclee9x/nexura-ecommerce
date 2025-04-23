@@ -18,20 +18,19 @@ import {
 import NextImage from "next/image"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { useQuery } from "@tanstack/react-query"
-import { getProductBySlugGateway } from "@/gateway/gateway"
-// import { formatPrice } from "@/utils/format"
-import { Product, ProductVariant, CartItem } from "@/protos/nexura"
+import { getProductBySlugGateway } from "@nexura/grpc_gateway/gateway"
+import { Product, ProductVariant, CartItem } from "@nexura/grpc_gateway/protos"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { ImageViewer } from "@/components/image-viewer"
 import { useCurrency } from "@/contexts/currency-context"
-// import { useCart } from "@/hooks/use-cart"
 import { ReviewImageViewer } from "@/components/review-image-viewer"
 import { useCart, useCart as useCartContext } from "@/contexts/cart-context"
 import { useSession } from "@/contexts/session-context"
 import { ProductDetailsSection } from "@/components/product-details-section"
 import { useCartActions } from "@/hooks/use-cart"
 import { useQueryUtils } from "@/hooks/use-common"
+import { useProductActions } from "@/hooks/use-product"
 // Add mock review data
 const mockReviews = [
   {
@@ -115,7 +114,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const { slug } = use(params)
   const router = useRouter()
   const { addItem } = useCartContext()
-  // const { addItem } = useCart()
+  const { getProductBySlug } = useProductActions()
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState("description")
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null)
@@ -132,16 +131,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const [currentReviewImageIndex, setCurrentReviewImageIndex] = useState(0)
   const [isReviewImageViewerOpen, setIsReviewImageViewerOpen] = useState(false)
   const { currency } = useCurrency()
-  const {
-    data: product,
-    isLoading,
-    isError,
-    error
-  } = useQuery<Product>({
-    queryKey: ['product', slug],
-    queryFn: () => getProductBySlugGateway(slug).then(res => res.product),
-    enabled: !!slug,
-  })
+  const { data: product, isLoading, isError } = getProductBySlug(slug) 
   const { user } = useSession()
   const { invalidateQueries } = useQueryUtils()
   const { getCart } = useCartActions()
@@ -165,17 +155,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       .join(" / ")
   }
 
-  // const { mutate: addToCart } = useAddToCart({
-  //   successMessage: `${quantity} × ${product?.name} ${selectedVariant ? `(${getVariantName(selectedVariant)})` : ""} added to your cart.`,
-  //   errorMessage: "Failed to add item to cart. Please try again.",
-  //   onSuccess: () => {
-  //     // Optionally refetch product data to get latest stock
-  //     invalidateQueries(['product', slug]);
-  //     invalidateQueries(['cart']);
-  //   }
-  // });
-
-    
   // Sync main and thumb carousels
   useEffect(() => {
     if (!mainEmbla || !thumbEmbla) return

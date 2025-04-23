@@ -5,21 +5,18 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { CardFooter } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { getUser, updateUser } from "@/actions/user";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { z } from "zod";
 import { useState, useCallback } from "react";
-import { User } from "@/protos/nexura";
-import { updateUserGateway } from "@/gateway/gateway";
+import { User } from "@nexura/grpc_gateway/protos";
 import { SecuritySkeleton } from "../skeleton";
-
+import { useUserActions } from "@/hooks/use-user";
 
 const passwordSchema = z.object({
     currentPassword: z.string().min(1, "Current password is required"),
     newPassword: z.string()
         .min(8, "Password must be at least 8 characters")
-        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/, 
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
             "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character"),
     confirmPassword: z.string().min(1, "Please confirm your password")
 }).refine((data) => data.newPassword === data.confirmPassword, {
@@ -30,13 +27,9 @@ const passwordSchema = z.object({
 type PasswordForm = z.infer<typeof passwordSchema>;
 
 // Main component
-export default function SecurityTab({user}: {user: User | null}) {
-    if (!user) {
-        return <SecuritySkeleton />;
-    }
-
-    const queryClient = useQueryClient();
-
+export default function SecurityTab({ user }: { user: User | null }) {
+    const { updateUser } = useUserActions()
+    const { mutate: updateUserMutation } = updateUser
     const [formState, setFormState] = useState<PasswordForm>({
         currentPassword: "",
         newPassword: "",
@@ -73,34 +66,32 @@ export default function SecurityTab({user}: {user: User | null}) {
         if (!validateForm() || !user) return;
         setIsLoading(true);
         try {
-            const result = await updateUserGateway(
-                user.id,
-                user,
-                formState.currentPassword,
-                formState.newPassword
-            );
+            updateUserMutation({
+                user: user,
+                currentPassword: formState.currentPassword,
+                newPassword: formState.newPassword
+            });
 
-            if (result.success) {
-                toast.success("Password updated successfully");
-                setFormState({
-                    currentPassword: "",
-                    newPassword: "",
-                    confirmPassword: ""
-                });
-                await queryClient.invalidateQueries({ queryKey: ["userId", user.id] });
-            } else {
-                toast.error(result.message || "Failed to update password");
-            }
+            toast.success("Password updated successfully");
+            setFormState({
+                currentPassword: "",
+                newPassword: "",
+                confirmPassword: ""
+            });
         } catch (error) {
             if (error instanceof Error) {
                 toast.error(error.message);
             } else {
                 toast.error("An unexpected error occurred");
             }
-          } finally {
+        } finally {
             setIsLoading(false);
         }
-    }, [formState, user, validateForm, queryClient]);
+    }, [formState, user, validateForm, updateUserMutation]);
+
+    if (!user) {
+        return <SecuritySkeleton />;
+    }
 
     return (
         <TabsContent value="security" className="space-y-6">
@@ -112,8 +103,8 @@ export default function SecurityTab({user}: {user: User | null}) {
                 <CardContent className="space-y-6">
                     <div className="space-y-2">
                         <Label htmlFor="currentPassword">Current Password</Label>
-                        <Input 
-                            id="currentPassword" 
+                        <Input
+                            id="currentPassword"
                             type="password"
                             value={formState.currentPassword}
                             onChange={(e) => handleInputChange("currentPassword", e.target.value)}
@@ -125,8 +116,8 @@ export default function SecurityTab({user}: {user: User | null}) {
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="newPassword">New Password</Label>
-                        <Input 
-                            id="newPassword" 
+                        <Input
+                            id="newPassword"
                             type="password"
                             value={formState.newPassword}
                             onChange={(e) => handleInputChange("newPassword", e.target.value)}
@@ -138,8 +129,8 @@ export default function SecurityTab({user}: {user: User | null}) {
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                        <Input 
-                            id="confirmPassword" 
+                        <Input
+                            id="confirmPassword"
                             type="password"
                             value={formState.confirmPassword}
                             onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
@@ -151,7 +142,7 @@ export default function SecurityTab({user}: {user: User | null}) {
                     </div>
                 </CardContent>
                 <CardFooter>
-                    <Button 
+                    <Button
                         onClick={handleUpdatePassword}
                         disabled={isLoading}
                     >

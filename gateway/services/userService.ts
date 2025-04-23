@@ -1,5 +1,5 @@
-import { UserServiceClient, User } from '../../protos/nexura';
-import { DefaultResponse } from '../../lib/types';
+import { UserServiceClient, User } from '@nexura/grpc_gateway/protos';
+import { DefaultResponse } from '@/lib/types';
 import { createServiceConfig, createClient, promisifyGrpcCall } from './baseAdapter';
 
 const userConfig = createServiceConfig('UserService', 50051);

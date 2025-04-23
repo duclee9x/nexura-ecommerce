@@ -5,41 +5,41 @@ import { cartService } from './methods/cartService';
 import { productService } from './methods/productService';
 import { addressService } from './methods/addressService';
 
-import { AddItemRequest, ClearCartRequest, CreateSagaOrderRequest, DeleteAddressRequest,  ExtendedAddress, GetCartRequest, OrderStatus, Product, RemoveItemRequest, SendWelcomeEmailRequest, SendOTPResetPasswordRequest, UpdateItemRequest, ValidateAndReserveRequest, ReleaseReservationRequest, CommitReservationRequest, CreateOrderRequest, GetOrderStatusResponse, CreateOrderResponse } from '@nexura/grpc_gateway/protos';
+import { AddItemRequest, ClearCartRequest,  CreateSagaOrderRequest, RegisterUserRequest, DeleteAddressRequest,  ExtendedAddress, GetCartRequest, OrderStatus, Product, RemoveItemRequest, SendWelcomeEmailRequest, SendOTPResetPasswordRequest, UpdateItemRequest, ValidateAndReserveRequest, ReleaseReservationRequest, CommitReservationRequest, CreateOrderRequest, GetOrderStatusResponse, CreateOrderResponse, CancelOrderResponse, CreateCategoryRequest, CreateBrandRequest, UpdateUserRequest, LoginUserRequest, VerifyAccountRequest, ForgotPasswordRequest, ResetPasswordRequest, ValidateOTPRequest, GetProvincesByCountryRequest, GetDistrictsByProvinceRequest, GetWardsByDistrictRequest, AddAddressRequest, UpdateAddressRequest, GetAddressesRequest, RemoveBrandRequest, UpdateCategoryRequest, DeleteCategoryRequest, GetProductAttributesRequest, CreateProductAttributeRequest, UpdateProductRequest, DeleteProductRequest, CreateProductRequest, GetProductByIdRequest, GetVariantsForCartRequest, GetProductBySlugRequest, UpdateProductAttributesRequest, DeleteProductAttributesRequest } from '@nexura/grpc_gateway/protos';
 import { orderService } from './methods/orderService';
 import { orchestratorService } from './methods/orchestratorService';
 import { emailService } from './methods/emailService';
 
-export const validateOTPGateway = async (email: string, otp: string) => {
-    return userService.validateOTP(email, otp);
+export const validateOTPGateway = async (validateOTPRequest: ValidateOTPRequest) => {
+    return userService.validateOTP(validateOTPRequest);
 };
 
-export const forgotPasswordGateway = async (email: string) => {
-    return userService.forgotPassword(email);
+export const forgotPasswordGateway = async (forgotPasswordRequest: ForgotPasswordRequest) => {
+    return userService.forgotPassword(forgotPasswordRequest);
 };
 
-export const resetPasswordGateway = async (email: string, newPassword: string, token: string) => {
-    return userService.resetPassword(email, newPassword, token);
+export const resetPasswordGateway = async (resetPasswordRequest: ResetPasswordRequest) => {
+    return userService.resetPassword(resetPasswordRequest);
 };
 
-export const verifyAccountGateway = async (token: string) => {
-    return userService.verifyAccount(token);
+export const verifyAccountGateway = async (verifyAccountRequest: VerifyAccountRequest) => {
+    return userService.verifyAccount(verifyAccountRequest);
 };
 
-export const loginUserGateway = async (email: string, password: string) => {
-    return userService.loginUser(email, password);
+export const loginUserGateway = async (loginUserRequest: LoginUserRequest) => {
+    return userService.loginUser(loginUserRequest);
 };
 
-export const registerUserGateway = async (firstName: string, lastName: string, email: string, password: string) => {
-    return userService.registerUser(firstName, lastName, email, password);
+export const registerUserGateway = async (registerUserRequest: RegisterUserRequest) => {
+    return userService.registerUser(registerUserRequest);
 };
 
 export const getUserGateway = async (id: string) => {
     return userService.getUser(id);
 };
 
-export const updateUserGateway = async (id: string, user: any, currentPassword: string, newPassword: string) => {
-    return userService.updateUser(id, user, currentPassword, newPassword);
+export const updateUserGateway = async (updateUserRequest: UpdateUserRequest) => {
+    return userService.updateUser(updateUserRequest);
 };
 
 export const deleteUserGateway = async (id: string) => {
@@ -58,96 +58,95 @@ export const getCountriesGateway = async () => {
     return addressService.getCountries();
 };
 
-export const getProvincesByCountryGateway = async (countryId: string) => {
-    return addressService.getProvincesByCountry(countryId);
+export const getProvincesByCountryGateway = async (getProvincesByCountryRequest: GetProvincesByCountryRequest) => {
+    return addressService.getProvincesByCountry(getProvincesByCountryRequest);
 };
 
-export const getDistrictsByProvinceGateway = async (provinceId: string) => {
-    return addressService.getDistrictsByProvince(provinceId);
+export const getDistrictsByProvinceGateway = async (getDistrictsByProvinceRequest: GetDistrictsByProvinceRequest) => {
+    return addressService.getDistrictsByProvince(getDistrictsByProvinceRequest);
 };
 
-export const getWardsByDistrictGateway = async (districtId: string) => {
-    return addressService.getWardsByDistrict(districtId);
+export const getWardsByDistrictGateway = async (getWardsByDistrictRequest: GetWardsByDistrictRequest) => {
+    return addressService.getWardsByDistrict(getWardsByDistrictRequest);
 };
 
-export const addAddressGateway = async (address: ExtendedAddress, userId: string) => {
-    return addressService.addAddress(address, userId);
+export const addAddressGateway = async (addAddressRequest: AddAddressRequest) => {
+    return addressService.addAddress(addAddressRequest);
 };
 
-export const updateAddressGateway = async (address: ExtendedAddress, userId: string) => {
-    return addressService.updateAddress(address, userId);
+export const updateAddressGateway = async (updateAddressRequest: UpdateAddressRequest) => {
+    return addressService.updateAddress(updateAddressRequest);
 };
 
 export const deleteAddressGateway = async (deleteAddressRequest: DeleteAddressRequest) => {
     return addressService.deleteAddress(deleteAddressRequest);
 };
 
-export const getAddressesGateway = async (userId: string) => {
-    return addressService.getAddresses(userId);
+export const getAddressesGateway = async (getAddressesRequest: GetAddressesRequest) => {
+    return addressService.getAddresses(getAddressesRequest);
 };
 
-export const newBrandGateway = async (brand: any) => {
-    return productService.newBrand(brand);
+export const createBrandGateway = async (createBrandRequest: CreateBrandRequest) => {
+    return productService.createBrand(createBrandRequest);
 };
 
-export const removeBrandGateway = async (id: string) => {
-    return productService.removeBrand(id);
+export const removeBrandGateway = async (removeBrandRequest: RemoveBrandRequest) => {
+    return productService.removeBrand(removeBrandRequest);
 };
 
 export const getAllBrandGateway = async () => {
     return productService.getAllBrand();
 };
 
-export const createCategoryGateway = async (category: any) => {
-    return productService.createCategory(category);
+export const createCategoryGateway = async (createCategoryRequest: CreateCategoryRequest) => {
+    return productService.createCategory(createCategoryRequest);
 };
 
-export const removeCategoryGateway = async (id: string) => {
-    return productService.removeCategory(id);
+export const removeCategoryGateway = async (removeCategoryRequest: DeleteCategoryRequest) => {
+    return productService.removeCategory(removeCategoryRequest);
 };
 
 export const getAllCategoryGateway = async () => {
     return productService.getAllCategory();
 };
 
-export const updateCategoryGateway = async (category: any) => {
-    return productService.updateCategory(category);
+export const updateCategoryGateway = async (updateCategoryRequest: UpdateCategoryRequest) => {
+    return productService.updateCategory(updateCategoryRequest);
 };
 
-export const getProductAttributesGateway = async (productId: string) => {
-    return productService.getProductAttributes(productId);
+export const getProductAttributesGateway = async (getProductAttributesRequest: GetProductAttributesRequest) => {
+    return productService.getProductAttributes(getProductAttributesRequest);
 };
 
-export const updateProductAttributeGateway = async (attribute: any) => {
-    return productService.updateProductAttribute(attribute);
+export const updateProductAttributeGateway = async (updateProductAttributeRequest: UpdateProductAttributesRequest) => {
+    return productService.updateProductAttribute(updateProductAttributeRequest);
 };
 
-export const deleteProductAttributeGateway = async (attributeId: string) => {
-    return productService.deleteProductAttribute(attributeId);
+export const deleteProductAttributeGateway = async (deleteProductAttributeRequest: DeleteProductAttributesRequest) => {
+    return productService.deleteProductAttribute(deleteProductAttributeRequest);
 };
 
-export const createProductAttributeGateway = async (attribute: any) => {
-    return productService.createProductAttribute(attribute);
+export const createProductAttributeGateway = async (createProductAttributeRequest: CreateProductAttributeRequest) => {
+    return productService.createProductAttribute(createProductAttributeRequest);
 };
 
-export const updateProductGateway = async (product: Product) => {
-    console.log(product, "productgateway")
-    return productService.updateProduct(product);
+export const updateProductGateway = async (updateProductRequest: UpdateProductRequest) => {
+    return productService.updateProduct(updateProductRequest);
 };
 
-export const deleteProductGateway = async (productId: string) => {
-    return productService.deleteProduct(productId);
+export const deleteProductGateway = async (deleteProductRequest: DeleteProductRequest) => {
+    return productService.deleteProduct(deleteProductRequest);
 };
 
-export const createProductGateway = async (product: any) => {
-    return productService.createProduct(product);
+export const createProductGateway = async (createProductRequest: CreateProductRequest) => {
+    return productService.createProduct(createProductRequest);
 };
 
-export const getProductByIdGateway = async (id: string) => {
-    return productService.getProductById(id);
+export const getProductByIdGateway = async (getProductByIdRequest: GetProductByIdRequest) => {
+    return productService.getProductById(getProductByIdRequest);
 };
-export const getProductBySlugGateway = async (slug: string) => {
-    return productService.getProductBySlug(slug);
+export const getProductBySlugGateway = async (getProductBySlugRequest: GetProductBySlugRequest) => {
+    return productService.getProductBySlug(getProductBySlugRequest);
 };
 
 export const listProductsGateway = async () => {
@@ -158,24 +157,24 @@ export const getWarehousesGateway = async () => {
     return productService.getWarehouses();
 };
 
-export const getVariantsForCartGateway = async (variantIds: string[]) => {
-    return productService.getVariantsForCart(variantIds);
+export const getVariantsForCartGateway = async (getVariantsForCartRequest: GetVariantsForCartRequest) => {
+    return productService.getVariantsForCart(getVariantsForCartRequest);
 };
 
-export const getCartGateway = async ({userId}: GetCartRequest) => {
-    return cartService.getCart({userId});
+export const getCartGateway = async (getCartRequest: GetCartRequest) => {
+    return cartService.getCart(getCartRequest);
 };
 
-export const addItemGateway = async ({userId, productId, variantId, quantity, image, currencyCode}: AddItemRequest) => {
-    return cartService.addItem({userId, productId, variantId, quantity, image, currencyCode});
+export const addItemGateway = async (addItemRequest: AddItemRequest) => {
+    return cartService.addItem(addItemRequest);
 };  
 
-export const updateItemGateway = async ({userId, productId, variantId, quantity, image}: UpdateItemRequest) => {
-    return cartService.updateItem({userId, productId, variantId, quantity, image});
+export const updateItemGateway = async (updateItemRequest: UpdateItemRequest) => {
+    return cartService.updateItem(updateItemRequest);
 };
 
-export const removeItemGateway = async ({userId, productId, variantId}: RemoveItemRequest) => {
-    return cartService.removeItem({userId, productId, variantId});
+export const removeItemGateway = async (removeItemRequest: RemoveItemRequest) => {
+    return cartService.removeItem(removeItemRequest);
 };
 
 export const clearCartGateway = async ({userId}: ClearCartRequest) => {
@@ -191,7 +190,7 @@ export const getOrderGateway = async (orderId: string) => {
     return orderService.getOrder(orderId);
 };
 
-export const cancelOrderGateway = async (orderId: string) => {
+export const cancelOrderGateway = async (orderId: string): Promise<CancelOrderResponse> => {
     return orderService.cancelOrder(orderId);
 };
 
@@ -212,15 +211,15 @@ export const sendOTPResetPasswordGateway = async (request: SendOTPResetPasswordR
 };
 
 export const validateAndReserveGateway = async (request: ValidateAndReserveRequest) => {
-    return orderService.validateAndReserve(request);
+    return productService.validateAndReserve(request);
 };
 
 export const releaseReservationGateway = async (request: ReleaseReservationRequest) => {
-    return orderService.releaseReservation(request);
+    return productService.releaseReservation(request);
 };
 
 export const commitReservationGateway = async (request: CommitReservationRequest) => {
-    return orderService.commitReservation(request);
+    return productService.commitReservation(request);
 };
 
 export const createOrderGateway = async (request: CreateOrderRequest): Promise<CreateOrderResponse> => {

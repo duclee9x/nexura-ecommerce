@@ -1,4 +1,4 @@
-import { AddressServiceClient, Address, ExtendedAddress, Country, Province, District, DeleteAddressRequest } from '../../protos/nexura';
+import { AddressServiceClient, Address, ExtendedAddress, Country, Province, District, DeleteAddressRequest } from '@nexura/grpc_gateway/protos';
 import { DefaultResponse } from '../../lib/types';
 import { createServiceConfig, createClient, promisifyGrpcCall } from './baseAdapter';
 

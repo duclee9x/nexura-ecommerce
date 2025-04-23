@@ -12,7 +12,6 @@ import {
 } from '@nexura/grpc_gateway/protos'
 import { getCartGateway,  getVariantsForCartGateway, validateAndReserveGateway, releaseReservationGateway, commitReservationGateway, createOrderGateway, getOrderStatusGateway } from '@nexura/grpc_gateway/gateway'
 import { runSaga } from '../sagaRunner'
-import { productService } from '../../gateway/services/serviceClient'
 
 interface EnrichedCartItem extends CartItem {
     variant: VariantCart
@@ -22,6 +21,7 @@ export const createSagaOrder = async (
     callContext: ServerUnaryCall<CreateSagaOrderRequest, CreateSagaOrderResponse>, 
     callback: sendUnaryData<CreateSagaOrderResponse>
 ) => {
+    console.log("createSagaOrder", callContext.request)
     try {
         const { 
             userId, 
@@ -36,7 +36,7 @@ export const createSagaOrder = async (
             total, 
             currencyCode 
         } = callContext.request
-
+        
         if (!userId) {
             throw new Error('User ID is required')
         }
@@ -59,7 +59,7 @@ export const createSagaOrder = async (
 
         // Get variant information for all items
         const variantIds: string[] = cartResponse.cart.items.map((item: CartItem) => item.variantId)
-        const variantsResponse = await getVariantsForCartGateway(variantIds)
+        const variantsResponse = await getVariantsForCartGateway({ variantIds })
 
         // Enrich cart items with variant information
         const enrichedItems: EnrichedCartItem[] = cartResponse.cart.items.map((item: CartItem) => {
@@ -95,8 +95,9 @@ export const createSagaOrder = async (
                             imageIds: [item.variant.image]
                         }))
                     }
+                    console.log("reserveRequest", reserveRequest)
                     const reserveResponse = await validateAndReserveGateway(reserveRequest)
-                    
+                    console.log("reserveResponse", reserveResponse)
                     if (!reserveResponse.success) {
                         throw new Error('Failed to reserve stock')
                     }

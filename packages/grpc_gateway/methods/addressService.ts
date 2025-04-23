@@ -1,4 +1,4 @@
-import { AddressServiceClient, Address, ExtendedAddress, DeleteAddressRequest, GetCountriesResponse, GetProvincesResponse, GetDistrictsResponse, GetWardsResponse, AddressResponse, DeleteAddressResponse, GetAddressesResponse } from '@nexura/grpc_gateway/protos';
+import { AddressServiceClient, Address, ExtendedAddress, DeleteAddressRequest, GetCountriesResponse, GetProvincesResponse, GetDistrictsResponse, GetWardsResponse, AddressResponse, DeleteAddressResponse, GetAddressesResponse, GetProvincesByCountryRequest, GetDistrictsByProvinceRequest, GetWardsByDistrictRequest, AddAddressRequest, UpdateAddressRequest, GetAddressesRequest } from '@nexura/grpc_gateway/protos';
 import { createServiceConfig, createClient, promisifyGrpcCall } from './baseAdapter';
 
 const addressConfig = createServiceConfig('AddressService', 50051);
@@ -9,31 +9,31 @@ export const addressService = {
         return promisifyGrpcCall(addressClient, 'getCountries', {});
     },
 
-    getProvincesByCountry: async (countryId: string): Promise<GetProvincesResponse> => {
-        return promisifyGrpcCall(addressClient, 'getProvincesByCountry', { countryId });
+    getProvincesByCountry: async (getProvincesByCountryRequest: GetProvincesByCountryRequest): Promise<GetProvincesResponse> => {
+        return promisifyGrpcCall(addressClient, 'getProvincesByCountry', getProvincesByCountryRequest);
     },
 
-    getDistrictsByProvince: async (provinceId: string): Promise<GetDistrictsResponse> => {
-        return promisifyGrpcCall(addressClient, 'getDistrictsByProvince', { provinceId });
+    getDistrictsByProvince: async (getDistrictsByProvinceRequest: GetDistrictsByProvinceRequest): Promise<GetDistrictsResponse> => {
+        return promisifyGrpcCall(addressClient, 'getDistrictsByProvince', getDistrictsByProvinceRequest);
     },
 
-    getWardsByDistrict: async (districtId: string): Promise<GetWardsResponse> => {
-        return promisifyGrpcCall(addressClient, 'getWardsByDistrict', { districtId });
+    getWardsByDistrict: async (getWardsByDistrictRequest: GetWardsByDistrictRequest): Promise<GetWardsResponse> => {
+        return promisifyGrpcCall(addressClient, 'getWardsByDistrict', getWardsByDistrictRequest);
     },
 
-    addAddress: async (address: Address, userId: string): Promise<AddressResponse> => {
-        return promisifyGrpcCall(addressClient, 'addAddress', { address, userId });
+    addAddress: async (addAddressRequest: AddAddressRequest): Promise<AddressResponse> => {
+        return promisifyGrpcCall(addressClient, 'addAddress', addAddressRequest);
     },
 
-    updateAddress: async (address: ExtendedAddress, userId: string): Promise<AddressResponse> => {
-        return promisifyGrpcCall(addressClient, 'updateAddress', { address, userId });
+    updateAddress: async (updateAddressRequest: UpdateAddressRequest): Promise<AddressResponse> => {
+        return promisifyGrpcCall(addressClient, 'updateAddress', updateAddressRequest);
     },
 
     deleteAddress: async (deleteAddressRequest: DeleteAddressRequest): Promise<DeleteAddressResponse> => {
-        return promisifyGrpcCall(addressClient, 'deleteAddress', { deleteAddressRequest });
+        return promisifyGrpcCall(addressClient, 'deleteAddress', deleteAddressRequest);
     },
 
-    getAddresses: async (userId: string): Promise<GetAddressesResponse> => {
-        return promisifyGrpcCall(addressClient, 'getAddresses', { userId });
+    getAddresses: async (getAddressesRequest: GetAddressesRequest): Promise<GetAddressesResponse> => {
+        return promisifyGrpcCall(addressClient, 'getAddresses', getAddressesRequest);
     }
 }; 

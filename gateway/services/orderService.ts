@@ -1,5 +1,5 @@
-import { Order, CreateOrderRequest, OrderServiceClient, OrderStatus } from '../../protos/nexura';
-import { DefaultResponse } from '../../lib/types';
+import { Order, CreateOrderRequest, OrderServiceClient, OrderStatus } from '@nexura/grpc_gateway/protos';
+import { DefaultResponse } from '@/lib/types';
 import { createServiceConfig, createClient, promisifyGrpcCall } from './baseAdapter';
 
 const productConfig = createServiceConfig('OrderService', 50055);

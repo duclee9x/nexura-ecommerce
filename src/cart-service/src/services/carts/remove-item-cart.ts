@@ -1,6 +1,6 @@
-import type { sendUnaryData, ServerUnaryCall } from "@grpc/grpc-js"
+import type { sendUnaryData, ServerUnaryCall, ServiceError } from "@grpc/grpc-js"
 
-import type { RemoveItemRequest, RemoveItemResponse } from "@nexura/common/protos"
+import type { RemoveItemRequest, RemoveItemResponse } from "@nexura/grpc_gateway/protos"
 
 import { PrismaClient } from '../../db/prisma-client'
 import { handleError } from "@nexura/common/utils"
@@ -64,6 +64,6 @@ export const removeItem = async (call: ServerUnaryCall<RemoveItemRequest, Remove
       }
     })
   } catch (error) {
-    handleError(error, callback)
+    handleError(error as ServiceError, callback)
   }
 }

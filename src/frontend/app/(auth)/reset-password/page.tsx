@@ -9,7 +9,6 @@ import { useReducer, useState, useEffect } from "react"
 import { RefreshCw, Loader2, Eye, EyeOff } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter, useSearchParams } from "next/navigation"
-import { resetPasswordSchema } from "../forgot-password/forgotPasswordFormSchema"
 import { handleSubmitResetPasswordAction } from "../forgot-password/forgotPasswordSubmitAction"
 import { useActionState } from "react"
 

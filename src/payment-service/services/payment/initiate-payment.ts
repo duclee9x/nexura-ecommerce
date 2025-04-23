@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client'
-import { handleError } from '../../utils/error'
 import { handleUnaryCall, sendUnaryData, ServerUnaryCall,  } from '@grpc/grpc-js'
-import { InitiatePaymentRequest, InitiatePaymentResponse, PaymentStatus } from '../../proto/nexura'
+import { InitiatePaymentRequest, InitiatePaymentResponse, PaymentStatus } from '@nexura/grpc_gateway/protos'
 
 const prisma = new PrismaClient()
 const payments: Record<string, { status: PaymentStatus, redirectUrl: string }> = {};

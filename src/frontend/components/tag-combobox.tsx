@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Plus, X } from "lucide-react"
-import { ProductTag } from "@/protos/nexura"
+import { ProductTag } from "@nexura/grpc_gateway/protos"
 
 interface TagComboboxProps {
   selectedTags: ProductTag[]

@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
 import { ColorButton } from "@/components/ui/color-button"
-import { ProductVariant } from "@/protos/nexura"
+import { ProductVariant } from "@nexura/grpc_gateway/protos"
 
 interface ProductVariantSelectorProps {
     variants: ProductVariant[]

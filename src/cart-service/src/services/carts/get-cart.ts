@@ -1,5 +1,5 @@
-import { GetCartRequest, GetCartResponse } from "@nexura/common/protos"
-import type { ServerUnaryCall, sendUnaryData } from "@grpc/grpc-js"
+import { GetCartRequest, GetCartResponse } from "@nexura/grpc_gateway/protos"
+import type { ServerUnaryCall, sendUnaryData, ServiceError } from "@grpc/grpc-js"
 import { PrismaClient } from '../../db/prisma-client'
 import { handleError } from "@nexura/common/utils"
 
@@ -62,7 +62,7 @@ export const getCart = async (call: ServerUnaryCall<GetCartRequest, GetCartRespo
         return callback(null, response)
 
     } catch (error) {
-        handleError(error, callback)
+        handleError(error as ServiceError, callback)
     } finally {
         // Ensure proper cleanup
         await prisma.$disconnect()

@@ -1,8 +1,8 @@
 import { PrismaClient } from '../../db/prisma-client'
-import { GetProductAttributesRequest, GetProductAttributesResponse } from '@nexura/common/protos'
+import { GetProductAttributesRequest, GetProductAttributesResponse } from '@nexura/grpc_gateway/protos'
 
 import { handleError } from '@nexura/common/utils'
-import type { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js'
+import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js'
 
 const prisma = new PrismaClient()
 
@@ -36,6 +36,6 @@ export const getProductAttributes = async (call: ServerUnaryCall<GetProductAttri
 
     callback(null, response)
   } catch (error) {
-    handleError(error, callback)
+    handleError(error as ServiceError, callback)
   }
 }

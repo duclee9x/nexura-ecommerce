@@ -1,7 +1,7 @@
-import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
-import type { GetAddressesRequest, GetAddressesResponse } from '@nexura/common/protos';
+import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js';
+import type { GetAddressesRequest, GetAddressesResponse } from '@nexura/grpc_gateway/protos';
 import { PrismaClient } from '../../db/prisma-client'
-import { defaultTracer, SpanStatusCode } from '@nexura/common/utils';
+import { defaultTracer, handleError, SpanStatusCode } from '@nexura/common/utils';
 
 const prisma = new PrismaClient()
 
@@ -89,7 +89,6 @@ export async function getAddresses(
       }))
     });
   } catch (error) {
-    console.error('Error deleting address:', error);
-    callback(error as Error, null);
+    handleError(error as ServiceError, callback)
   }
 } 

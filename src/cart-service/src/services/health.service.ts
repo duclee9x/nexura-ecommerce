@@ -1,5 +1,5 @@
-import { ServerUnaryCall, ServerWritableStream, sendUnaryData } from '@grpc/grpc-js';
-import { HealthCheckRequest, HealthCheckResponse, HealthServiceServer } from '../proto/nexura';
+import type { ServerUnaryCall, ServerWritableStream, sendUnaryData } from '@grpc/grpc-js';
+import { HealthCheckRequest, HealthCheckResponse, type HealthServiceServer } from '@nexura/grpc_gateway/protos';
 
 export const HealthStatus = {
     SERVING: 1,

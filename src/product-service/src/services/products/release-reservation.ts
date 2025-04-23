@@ -1,9 +1,10 @@
-import { ReleaseReservationRequest, ReleaseReservationResponse } from "@nexura/common/protos"
+import { ReleaseReservationRequest, ReleaseReservationResponse } from "@nexura/grpc_gateway/protos"
 import { PrismaClient } from '../../db/prisma-client'
-import type { ServerUnaryCall } from '@grpc/grpc-js'
-
+import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js'
+import { handleError } from "@nexura/common/utils"
 export async function releaseReservation(
-  call: ServerUnaryCall<ReleaseReservationRequest, ReleaseReservationResponse>
+  call: ServerUnaryCall<ReleaseReservationRequest, ReleaseReservationResponse>,
+  callback: sendUnaryData<ReleaseReservationResponse>
 ): Promise<ReleaseReservationResponse> {
   const prisma = new PrismaClient()
   
@@ -61,7 +62,7 @@ export async function releaseReservation(
       message: "Reservation released successfully"
     }
   } catch (error) {
-    console.error("Error releasing reservation:", error)
+    handleError(error as ServiceError, callback)
     return {
       success: false,
       message: "Failed to release reservation"

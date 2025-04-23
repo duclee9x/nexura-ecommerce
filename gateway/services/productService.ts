@@ -1,5 +1,5 @@
-import { ProductCatalogServiceClient, Product, Brand, Category, ProductAttribute, Warehouse, Cart, CartItem, VariantCart, DeleteProductRequest } from '../../protos/nexura';
-import { DefaultResponse } from '../../lib/types';
+import { ProductCatalogServiceClient, Product, Brand, Category, ProductAttribute, Warehouse, VariantCart} from '@nexura/grpc_gateway/protos';
+import { DefaultResponse } from '@/lib/types';
 import { createServiceConfig, createClient, promisifyGrpcCall } from './baseAdapter';
 
 const productConfig = createServiceConfig('ProductCatalogService', 50053);

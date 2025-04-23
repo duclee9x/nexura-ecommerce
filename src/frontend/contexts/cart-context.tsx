@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
-import { CartItem,  UpdateItemRequest, User, VariantCart } from "@/protos/nexura"
+import { CartItem,  UpdateItemRequest, User, VariantCart } from "@nexura/grpc_gateway/protos"
 import { useCartActions } from "@/hooks/use-cart"
 import { useQuery, UseQueryResult } from "@tanstack/react-query"
 import { getUserGateway } from "@/gateway/gateway"

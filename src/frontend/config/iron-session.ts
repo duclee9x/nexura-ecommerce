@@ -1,4 +1,4 @@
-import { User } from "@/protos/nexura"
+import { User } from "@nexura/grpc_gateway/protos"
 import { SessionOptions } from "iron-session"
 
 export interface SessionData {

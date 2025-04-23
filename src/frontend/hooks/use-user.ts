@@ -1,8 +1,6 @@
-import { getDistrictsByProvince, getWardsByDistrict } from "@/actions/address"
-import { getProvincesByCountry } from "@/actions/address"
 import { toast } from "@/components/ui/use-toast"
-import { addAddressGateway, deleteAddressGateway, forgotPasswordGateway, getAddressesGateway, getCountriesGateway, getUserGateway, updateAddressGateway, validateOTPGateway } from "@nexura/grpc_gateway/gateway"
-import { Address, DeleteAddressRequest, ExtendedAddress, User } from "@nexura/grpc_gateway/protos"
+import { addAddressGateway, deleteAddressGateway, forgotPasswordGateway, getAddressesGateway, getCountriesGateway, getDistrictsByProvinceGateway, getProvincesByCountryGateway, getUserGateway, getWardsByDistrictGateway, resetPasswordGateway, updateAddressGateway, updateUserGateway, validateOTPGateway } from "@nexura/grpc_gateway/gateway"
+import { DeleteAddressRequest, ExtendedAddress, ResetPasswordRequest, UpdateUserRequest, User } from "@nexura/grpc_gateway/protos"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 
@@ -14,7 +12,7 @@ const defaultConfig: QueryConfig = {
     retry: 1,
 }
 
-export const useUserHooks = () => {
+export const useUserActions = () => {
     const queryClient = useQueryClient()
     const router = useRouter()
 
@@ -94,7 +92,7 @@ export const useUserHooks = () => {
 
         forgotPassword: useMutation({
             mutationFn: async (email: string) => {
-                return await forgotPasswordGateway(email)
+                return await forgotPasswordGateway({email})
             },
             onSuccess: () => {
                 toast({
@@ -111,9 +109,28 @@ export const useUserHooks = () => {
             },
         }),
 
+        resetPassword: useMutation({
+            mutationFn: async (resetPasswordRequest: ResetPasswordRequest) => {
+                return await resetPasswordGateway(resetPasswordRequest)
+            },
+            onSuccess: () => {
+                toast({
+                    title: "SUCCESS",
+                    description: "Password reset successfully",
+                })
+            },
+            onError: (error: Error) => {
+                toast({
+                    title: "ERROR",
+                    description: error.message,
+                    variant: "destructive",
+                })
+            },
+        }),
+
         validateOTP: useMutation({
-            mutationFn: async (data: { email: string; otp: string }) => {
-                return await validateOTPGateway(data.email, data.otp)
+            mutationFn: async ({ email, otp }: { email: string; otp: string }) => {
+                return await validateOTPGateway({ email, otp })
             },
             onSuccess: () => {
                 toast({
@@ -133,7 +150,7 @@ export const useUserHooks = () => {
             queryKey: ["addresses", userId],
             queryFn: async () => {
                 try {
-                    const response = await getAddressesGateway(userId)
+                    const response = await getAddressesGateway({ userId })
                     return response
                 } catch (error) {
                     console.error("Error fetching addresses:", error)
@@ -162,7 +179,7 @@ export const useUserHooks = () => {
             queryKey: ["provinces", countryId],
             queryFn: async () => {
                 try {
-                    const response = await getProvincesByCountry(countryId)
+                    const response = await getProvincesByCountryGateway({ countryId })
                     return response
                 } catch (error) {
                     console.error("Error fetching provinces:", error)
@@ -177,7 +194,7 @@ export const useUserHooks = () => {
             queryKey: ["districts", provinceId],
             queryFn: async () => {
                 try {
-                    const response = await getDistrictsByProvince(provinceId)
+                    const response = await getDistrictsByProvinceGateway({ provinceId })
                     return response
                 } catch (error) {
                     console.error("Error fetching districts:", error)
@@ -192,7 +209,7 @@ export const useUserHooks = () => {
             queryKey: ["wards", districtId],
             queryFn: async () => {
                 try {
-                    const response = await getWardsByDistrict(districtId)
+                    const response = await getWardsByDistrictGateway({ districtId })
                     return response
                 } catch (error) {
                     console.error("Error fetching wards:", error)
@@ -206,7 +223,7 @@ export const useUserHooks = () => {
         addAddress: useMutation({
             mutationFn: async ({ address, userId }: { address: ExtendedAddress; userId: string }) => {
                 try {
-                    return await addAddressGateway(address, userId)
+                    return await addAddressGateway({ address, userId })
                 } catch (error) {
                     throw new Error(error instanceof Error ? error.message : "Failed to add address")
                 }
@@ -230,7 +247,7 @@ export const useUserHooks = () => {
         updateAddress: useMutation({
             mutationFn: async ({ address, userId }: { address: ExtendedAddress; userId: string }) => {
                 try {
-                    return await updateAddressGateway(address, userId)
+                    return await updateAddressGateway({ address, userId })
                 } catch (error) {
                     throw new Error(error instanceof Error ? error.message : "Failed to update address")
                 }
@@ -274,6 +291,25 @@ export const useUserHooks = () => {
                 })
             },
         }),
+
+        updateUser: useMutation({
+            mutationFn: async (request: UpdateUserRequest) => {
+                return await updateUserGateway(request)
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ["userSession"] })
+                toast({
+                    title: "SUCCESS",
+                    description: "User updated successfully",
+                })
+            },
+            onError: (error: Error) => {
+                toast({
+                    title: "ERROR",
+                    description: error.message,
+                    variant: "destructive",
+                })
+            },
+        }),
     }
 }
-

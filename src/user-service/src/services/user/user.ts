@@ -1,13 +1,13 @@
-import { GetUser } from './user-get';
-import { LoginUser } from './user-login';
-import { RegisterUser } from './user-register';
-import { DeleteUser } from './user-delete';
-import { UpdateUser } from './user-update';
+import { GetUser } from './get-user.ts';
+import { LoginUser } from './login-user.ts';
+import { RegisterUser } from './register-user.ts';
+import { DeleteUser } from './delete-user.ts';
+import { UpdateUser } from './update-user.ts';
 import type { UntypedServiceImplementation } from '@grpc/grpc-js';
-import { forgotPassword } from './user-forgot-password';
-import { validateOTP } from './user-validate-otp';
-import { verifyAccount } from './user-verify-account';
-import { resetPassword } from './user-reset-password.ts';
+import { forgotPassword } from './forgot-password-user.ts';
+import { validateOTP } from './validate-otp-user.ts';
+import { verifyAccount } from './verify-account-user.ts';
+import { resetPassword } from './reset-password-user.ts';
 export const userService: UntypedServiceImplementation = {
     getUser: GetUser,
     updateUser: UpdateUser,

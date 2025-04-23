@@ -1,7 +1,7 @@
-import { CartServiceClient, Cart, CartItem, UpdateItemRequest, RemoveItemRequest, ClearCartRequest, GetCartRequest } from '../../protos/nexura';
+import { CartServiceClient, Cart, CartItem, UpdateItemRequest, RemoveItemRequest, ClearCartRequest, GetCartRequest } from '@nexura/grpc_gateway/protos';
 import { DefaultResponse } from '../../lib/types';
 import { createServiceConfig, createClient, promisifyGrpcCall } from './baseAdapter';
-import {AddItemRequest} from '../../protos/nexura';
+import {AddItemRequest} from '@nexura/grpc_gateway/protos';
 const cartConfig = createServiceConfig('CartService', 50054);
 const cartClient = createClient(CartServiceClient, cartConfig);
 

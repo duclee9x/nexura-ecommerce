@@ -1,10 +1,6 @@
-'use server'
-
 import { z } from "zod"
-import { User } from "@/protos/nexura"
-import { updateUserGateway } from "@/gateway/gateway"
-import { revalidatePath } from "next/cache"
-
+import { UpdateUserRequest } from "@nexura/grpc_gateway/protos"
+import { useUserActions } from "@/hooks/use-user"
 export type FormState = {
     message: string
     success: boolean
@@ -29,32 +25,18 @@ const personalFormSchema = z.object({
     profilePictureUrl: z.string().optional(),
 })
 
-type UpdateUserRequest = {
-    id: string;
-    user: {
-        id: string;
-        firstName: string | null;
-        lastName: string | null;
-        phone: string | null;
-        gender: string | null;
-        dateOfBirth: string | null;
-        profilePictureUrl: string | null;
-    };
-    currentPassword: string | null;
-    newPassword: string | null;
-}
-
-
 
 export async function onPersonalSubmitAction(prev: FormState, request: UpdateUserRequest): Promise<FormState> {
+    const { updateUser } = useUserActions()
+    const { mutate: updateUserMutation } = updateUser
     const validatedFields = personalFormSchema.safeParse({
-        userId: request.id,
-        firstName: request.user.firstName,
-        lastName: request.user.lastName,
-        phone: request.user.phone,
-        gender: request.user.gender,
-        dateOfBirth: request.user.dateOfBirth,
-        profilePictureUrl: request.user.profilePictureUrl
+        userId: request.user?.id,
+        firstName: request.user?.firstName,
+        lastName: request.user?.lastName,
+        phone: request.user?.phone,
+        gender: request.user?.gender,
+        dateOfBirth: request.user?.dateOfBirth,
+        profilePictureUrl: request.user?.profilePictureUrl
     })
 
     if (!validatedFields.success) {
@@ -72,13 +54,28 @@ export async function onPersonalSubmitAction(prev: FormState, request: UpdateUse
     }
 
     try {
-        await updateUserGateway(
-            request.id,
-            request.user as User,
-            request.currentPassword || '',
-            request.newPassword || ''
-        );
-        
+        const updateUserRequest: UpdateUserRequest = {
+            user: {
+                id: request.user?.id || "",
+                firstName: request.user?.firstName || "",
+                lastName: request.user?.lastName || "",
+                phone: request.user?.phone || "",
+                gender: request.user?.gender || "",
+                isActive: request.user?.isActive || false,
+                role: request.user?.role || "",
+                permissions: request.user?.permissions || "",
+                lastLogin: request.user?.lastLogin || "",
+                dateOfBirth: request.user?.dateOfBirth || "",
+                profilePictureUrl: request.user?.profilePictureUrl || "",
+                email: request.user?.email || "",
+                createdAt: request.user?.createdAt || "",
+                updatedAt: request.user?.updatedAt || "",
+                isVerified: request.user?.isVerified || false,
+            },
+            currentPassword: "",
+            newPassword: ""
+        }
+        updateUserMutation(updateUserRequest)
         return {
             message: "Profile updated successfully",
             success: true

@@ -1,6 +1,6 @@
-import { createProductGateway, deleteProductGateway, getAllCategoryGateway, listProductsGateway, updateProductGateway } from "@/gateway/gateway"
+import { createBrandGateway, createCategoryGateway, createProductGateway, deleteProductGateway, getAllCategoryGateway, getProductByIdGateway, getProductBySlugGateway, getWarehousesGateway, listProductsGateway, updateCategoryGateway, updateProductGateway } from "@nexura/grpc_gateway/gateway"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { CreateProductRequest, Product, UpdateProductRequest } from "@/protos/nexura"
+import { Category, CreateBrandRequest, CreateCategoryRequest, CreateProductRequest, Product, UpdateCategoryRequest, UpdateProductRequest } from "@nexura/grpc_gateway/protos"
 import { toast } from "@/components/ui/use-toast"
 
 
@@ -17,7 +17,7 @@ export const useProductActions = () => {
                 }
             },
             onSuccess: (data) => {
-                queryClient.invalidateQueries({ queryKey: ["productsCatalog"] })
+                queryClient.invalidateQueries({ queryKey: ["inventory"] })
                 toast({
                     title: "SUCCESS",
                     description: "Product created successfully",
@@ -34,14 +34,13 @@ export const useProductActions = () => {
         updateProduct: useMutation({
             mutationFn: async (product: UpdateProductRequest) => {
                 try {
-                    return await updateProductGateway(product as unknown as Product)
+                    return await updateProductGateway(product)
                 } catch (error) {
                     throw new Error(error instanceof Error ? error.message : "Failed to update product")
                 }
             },
             onSuccess: (data) => {
-                queryClient.invalidateQueries({ queryKey: ["productsCatalog"] })
-                queryClient.invalidateQueries({ queryKey: ["product"] })
+                queryClient.invalidateQueries({ queryKey: ["inventory"] })
                 toast({
                     title: "SUCCESS",
                     description: "Product updated successfully",
@@ -58,13 +57,13 @@ export const useProductActions = () => {
         deleteProduct: useMutation({
             mutationFn: async (productId: string) => {
                 try {
-                    return await deleteProductGateway(productId)
+                    return await deleteProductGateway({ id: productId })
                 } catch (error) {
                     throw new Error(error instanceof Error ? error.message : "Failed to delete product")
                 }
             },
             onSuccess: (data) => {
-                queryClient.invalidateQueries({ queryKey: ["productsCatalog"] })
+                queryClient.invalidateQueries({ queryKey: ["inventory"] })
                 toast({
                     title: "SUCCESS",
                     description: "Product deleted successfully",
@@ -78,8 +77,8 @@ export const useProductActions = () => {
                 })
             },
         }),
-        listProduct: ()=> useQuery({
-            queryKey: ["productsCatalog"],
+        listProducts: () => useQuery({
+            queryKey: ["inventory"],
             queryFn: async () => {
                 try {
                     const res = await listProductsGateway()
@@ -90,7 +89,7 @@ export const useProductActions = () => {
                 }
             },
         }),
-        getCategories: ()=> useQuery({
+        getCategories: () => useQuery({
             queryKey: ["categories"],
             queryFn: async () => {
                 try {
@@ -100,6 +99,70 @@ export const useProductActions = () => {
                     console.error("Error fetching categories:", error)
                     throw new Error("Failed to load categories. Please try again later.")
                 }
+            },
+        }),
+        createCategory: useMutation({
+            mutationFn: async (category: CreateCategoryRequest) => {
+                return await createCategoryGateway(category)
+            },
+            onSuccess: (data) => {
+                queryClient.invalidateQueries({ queryKey: ["categories"] })
+                toast({
+                    title: "SUCCESS",
+                    description: "Category created successfully",
+                })
+            },
+            onError: (error: Error) => {
+                toast({
+                    title: "ERROR",
+                    description: error.message,
+                    variant: "destructive",
+                })
+            },
+        }),
+        updateCategory: useMutation({
+            mutationFn: async (category: UpdateCategoryRequest) => {
+                return await updateCategoryGateway(category)
+            },
+            onSuccess: (data) => {
+                queryClient.invalidateQueries({ queryKey: ["categories"] })
+                toast({
+                    title: "SUCCESS",
+                    description: "Category updated successfully",
+                })
+            },
+            onError: (error: Error) => {
+                toast({
+                    title: "ERROR",
+                    description: error.message,
+                    variant: "destructive",
+                })
+            },
+        }),
+        createBrand: useMutation({
+            mutationFn: async (brand: CreateBrandRequest) => {
+                return await createBrandGateway(brand)
+            },
+            onSuccess: (data) => {
+                queryClient.invalidateQueries({ queryKey: ["brands"] })
+                toast({
+                    title: "SUCCESS",
+                    description: "Brand created successfully",
+                })
+            },
+            onError: (error: Error) => {
+                toast({
+                    title: "ERROR",
+                    description: error.message,
+                    variant: "destructive",
+                })
+            },
+        }),
+        getWarehouses: () => useQuery({
+            queryKey: ["warehouses"],
+            queryFn: async () => {
+                const res = await getWarehousesGateway()
+                return res.warehouses
             },
         }),
         getFilteredProducts: (
@@ -161,7 +224,29 @@ export const useProductActions = () => {
 
                 return true
             })
-        }
+        },
+        getProductBySlug: (slug: string) => useQuery({
+            queryKey: ["product", slug],
+            queryFn: async () => {
+                const res = await getProductBySlugGateway({ slug })
+                return res.product
+            },
+            enabled: !!slug,
+        }),
+        getProductById: (id: string) => useQuery({
+            queryKey: ["product", id],
+            queryFn: async () => {
+                const res = await getProductByIdGateway({ id })
+                return res.product
+            },
+            enabled: !!id,
+        }),
+        publishProduct: useMutation({
+            mutationFn: (product: Product) => updateProductGateway({ product }),
+            onSuccess: async () => {
+                queryClient.invalidateQueries({ queryKey: ["inventory"] })
+            }
+        })
     }
 }
 

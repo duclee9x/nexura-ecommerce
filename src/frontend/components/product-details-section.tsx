@@ -24,7 +24,7 @@ import {
 import NextImage from "next/image"
 import { ProductVariantSelector } from "@/components/product-variant-selector"
 import { Input } from "@/components/ui/input"
-import { Product, ProductVariant } from "@/protos/nexura"
+import { Product, ProductVariant } from "@nexura/grpc_gateway/protos"
 import { useCurrency } from "@/contexts/currency-context"
 import { useSession } from "@/contexts/session-context"
 import { ImageViewer } from "@/components/image-viewer"

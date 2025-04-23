@@ -24,10 +24,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useCurrency } from "@/contexts/currency-context"
-import { deleteProductGateway, getAllCategoryGateway, listProductsGateway, updateProductGateway } from "@/gateway/gateway"
+import { deleteProductGateway, getAllCategoryGateway, listProductsGateway, updateProductGateway } from "@nexura/grpc_gateway/gateway"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Product } from "@/protos/nexura"
-
+import { Product } from "@nexura/grpc_gateway/protos"
+import { useProductActions } from "@/hooks/use-product" 
 
 export default function InventoryManagementPage() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -35,64 +35,26 @@ export default function InventoryManagementPage() {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const { formatPrice } = useCurrency()
   const queryClient = useQueryClient()
-
+  const { listProducts , getCategories, publishProduct, deleteProduct} = useProductActions()
   const { 
     data: inventory, 
     isLoading: isInventoryLoading, 
     isError: isInventoryError,
     error: inventoryError 
-  } = useQuery({
-    queryKey: ["inventory"],
-    queryFn: async () => {
-      try {
-        const res = await listProductsGateway()
-        return res.products
-      } catch (error) {
-        console.error("Error fetching inventory:", error)
-        throw new Error("Failed to load inventory. Please try again later.")
-      }
-    },
-    retry: 1,
-    refetchOnWindowFocus: false
-  })
+  } = listProducts()
 
   const {
     data: categories,
     isLoading: isCategoriesLoading,
-  } = useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      try {
-        const res = await getAllCategoryGateway()
-        return res.categories
-      } catch (error) {
-        console.error("Error fetching categories:", error)
-        throw new Error("Failed to load categories. Please try again later.")
-      }
-    },
-    retry: 1,
-    refetchOnWindowFocus: false
-  })
+    } = getCategories()
 
   console.log(JSON.stringify(categories, null, 2), "categories")
   const [isPublishing, setIsPublishing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   
-  const { mutate: publishProduct } = useMutation({
-    mutationFn: (product: Product) => updateProductGateway(product),
-    onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ["inventory"] })
-      await queryClient.prefetchQuery({ queryKey: ["inventory"], queryFn: ()=>listProductsGateway().then((res) => res.products) });
-    }
-  })
+  const { mutate: publishProductMutation } = publishProduct
 
-  const { mutate: deleteProduct } = useMutation({
-    mutationFn: (productId: string) => deleteProductGateway(productId),
-    onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: ["inventory"] })
-      await queryClient.prefetchQuery({ queryKey: ["inventory"], queryFn: ()=>listProductsGateway().then((res) => res.products) });
-    }
-  })
+  const { mutate: deleteProductMutation } = deleteProduct
 
   // New product form state
   const [newProduct, setNewProduct] = useState({
@@ -323,7 +285,7 @@ export default function InventoryManagementPage() {
       return
     }
     publishedProduct.status = "published"
-    publishProduct(publishedProduct)
+    publishProductMutation(publishedProduct)
 
     toast({
       title: "Product Published",
@@ -342,7 +304,7 @@ export default function InventoryManagementPage() {
       })
       return
     }
-    deleteProduct(deletedProduct.id)
+    deleteProductMutation(deletedProduct.id)
     toast({
       title: "Product Deleted",
       description: "Product has been removed from inventory.",

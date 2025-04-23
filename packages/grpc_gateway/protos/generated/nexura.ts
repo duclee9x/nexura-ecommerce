@@ -534,7 +534,6 @@ export interface DeleteUserRequest {
 }
 
 export interface UpdateUserRequest {
-  id: string;
   user: User | undefined;
   currentPassword: string;
   newPassword: string;
@@ -3967,22 +3966,19 @@ export const DeleteUserRequest: MessageFns<DeleteUserRequest> = {
 };
 
 function createBaseUpdateUserRequest(): UpdateUserRequest {
-  return { id: "", user: undefined, currentPassword: "", newPassword: "" };
+  return { user: undefined, currentPassword: "", newPassword: "" };
 }
 
 export const UpdateUserRequest: MessageFns<UpdateUserRequest> = {
   encode(message: UpdateUserRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.id !== "") {
-      writer.uint32(10).string(message.id);
-    }
     if (message.user !== undefined) {
-      User.encode(message.user, writer.uint32(18).fork()).join();
+      User.encode(message.user, writer.uint32(10).fork()).join();
     }
     if (message.currentPassword !== "") {
-      writer.uint32(26).string(message.currentPassword);
+      writer.uint32(18).string(message.currentPassword);
     }
     if (message.newPassword !== "") {
-      writer.uint32(34).string(message.newPassword);
+      writer.uint32(26).string(message.newPassword);
     }
     return writer;
   },
@@ -3999,7 +3995,7 @@ export const UpdateUserRequest: MessageFns<UpdateUserRequest> = {
             break;
           }
 
-          message.id = reader.string();
+          message.user = User.decode(reader, reader.uint32());
           continue;
         }
         case 2: {
@@ -4007,19 +4003,11 @@ export const UpdateUserRequest: MessageFns<UpdateUserRequest> = {
             break;
           }
 
-          message.user = User.decode(reader, reader.uint32());
+          message.currentPassword = reader.string();
           continue;
         }
         case 3: {
           if (tag !== 26) {
-            break;
-          }
-
-          message.currentPassword = reader.string();
-          continue;
-        }
-        case 4: {
-          if (tag !== 34) {
             break;
           }
 
@@ -4037,7 +4025,6 @@ export const UpdateUserRequest: MessageFns<UpdateUserRequest> = {
 
   fromJSON(object: any): UpdateUserRequest {
     return {
-      id: isSet(object.id) ? globalThis.String(object.id) : "",
       user: isSet(object.user) ? User.fromJSON(object.user) : undefined,
       currentPassword: isSet(object.currentPassword) ? globalThis.String(object.currentPassword) : "",
       newPassword: isSet(object.newPassword) ? globalThis.String(object.newPassword) : "",
@@ -4046,9 +4033,6 @@ export const UpdateUserRequest: MessageFns<UpdateUserRequest> = {
 
   toJSON(message: UpdateUserRequest): unknown {
     const obj: any = {};
-    if (message.id !== "") {
-      obj.id = message.id;
-    }
     if (message.user !== undefined) {
       obj.user = User.toJSON(message.user);
     }
@@ -4066,7 +4050,6 @@ export const UpdateUserRequest: MessageFns<UpdateUserRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<UpdateUserRequest>, I>>(object: I): UpdateUserRequest {
     const message = createBaseUpdateUserRequest();
-    message.id = object.id ?? "";
     message.user = (object.user !== undefined && object.user !== null) ? User.fromPartial(object.user) : undefined;
     message.currentPassword = object.currentPassword ?? "";
     message.newPassword = object.newPassword ?? "";

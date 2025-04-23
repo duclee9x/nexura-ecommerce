@@ -5,14 +5,16 @@ import { AdminSidebar } from "@/components/admin-sidebar"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "@/hooks/use-toast"
-import { Product } from "@/protos/nexura"
-import { createProductGateway, getAllBrandGateway, getAllCategoryGateway } from "@/gateway/gateway"
+import { Product } from "@nexura/grpc_gateway/protos"
+import { getAllBrandGateway, getAllCategoryGateway } from "@nexura/grpc_gateway/gateway"
 import { useQuery } from "@tanstack/react-query"
-
+import { useProductActions } from "@/hooks/use-product"
 export default function AddProductPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
+  const { createProduct } = useProductActions()
+  const { mutate: createProductMutation } = createProduct
   const {data: categories, isLoading: isLoadingCategories} = useQuery({
     queryKey: ["categories"],
     queryFn: () => getAllCategoryGateway().then((res) => res.categories)
@@ -39,10 +41,9 @@ export default function AddProductPage() {
         throw new Error("Please add at least one product image")
       }
 
-      // Wait for the product creation to complete
-      const result = await createProductGateway(product)
-      
-      if (!result) {
+      try {
+        createProductMutation({product})
+      } catch (error) {
         throw new Error("Failed to create product")
       }
 

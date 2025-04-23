@@ -2,21 +2,21 @@
 
 import { ProductForm } from "@/components/product-form"
 import { AdminSidebar } from "@/components/admin-sidebar"
-import { Product } from "@/protos/nexura"
+import { Product } from "@nexura/grpc_gateway/protos"
 import { use, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "@/hooks/use-toast"
-import { getAllBrandGateway, updateProductGateway } from "@/gateway/gateway"
+import { getAllBrandGateway, updateProductGateway, getAllCategoryGateway, listProductsGateway } from "@nexura/grpc_gateway/gateway"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { getAllCategoryGateway, listProductsGateway } from "@/gateway/gateway"
 import { Loader2 } from "lucide-react"
-
+import { useProductActions } from "@/hooks/use-product"
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter()
   const { id: productId } = use(params)
   const queryClient = useQueryClient()
   const [isLoading, setIsLoading] = useState(false)
-
+  const { updateProduct } = useProductActions()
+  const { mutate: updateProductMutation, isPending } = updateProduct
   const {data: categories, isLoading: isLoadingCategories} = useQuery({
     queryKey: ["categories"],
     queryFn: () => getAllCategoryGateway().then((res) => res.categories)
@@ -30,28 +30,17 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const handleUpdateProduct = (product: Product) => {
     if (isLoading) return
 
-    setIsLoading(true)
-    updateProduct(product)
+    setIsLoading(true)  
+    try {
+      updateProductMutation({product})
+    } catch (error) {
+      throw new Error("Failed to update product")
+    }
     setIsLoading(false)
 
   }
 
 
-  const { mutate: updateProduct, isPending } = useMutation({
-    mutationFn: (product: Product) => updateProductGateway(product),
-    onSuccess: async () => {
-      queryClient.invalidateQueries({ queryKey: [ "inventory" ] })
-      await queryClient.prefetchQuery({ queryKey: ["inventory"], queryFn: ()=>listProductsGateway().then((res) => res.products) });
-      router.push("/admin/inventory")
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to update the product. Please try again.",
-        variant: "destructive",
-      })
-    }
-  })
   
   const handleCancel = () => {
     router.back()

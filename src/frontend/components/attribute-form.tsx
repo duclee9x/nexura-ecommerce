@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator"
 import { Plus, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { ProductAttribute } from "@/protos/nexura"
+import { ProductAttribute } from "@nexura/grpc_gateway/protos"
 
 interface AttributeFormProps {
   mode: "edit" | "add"

@@ -8,7 +8,7 @@ import { logger } from "@nexura/common/utils";
 
 import { defaultTracer } from "@nexura/common/utils";
 import { GetUserResponse, GetUserRequest } from "@nexura/grpc_gateway/protos";
-import { PrismaClient } from "../../db/prisma-client";
+import { PrismaClient, Prisma } from "../../db/prisma-client";
 
 const tracer = defaultTracer('getUser')
 const prisma = new PrismaClient()
@@ -94,11 +94,16 @@ export const GetUser = async (
         });
         userSpan.end();
     } catch (error) {
-        console.log(error)
+        if (error instanceof Prisma.PrismaClientKnownRequestError || error instanceof Prisma.PrismaClientUnknownRequestError) {
+            logger.error('Error in Prisma', {
+                error: error.message,
+                stack: error.stack
+            });
+        }
         logger.error('Error in GetUser', {
             error: error instanceof Error ? error.message : 'Unknown error',
             stack: error instanceof Error ? error.stack : undefined
-        });
+    });
         span.setStatus({
             code: SpanStatusCode.ERROR,
             message: `Internal error: ${error instanceof Error ? error.message : 'Unknown error'}`

@@ -1,4 +1,4 @@
-import { ProductCatalogServiceClient, Product, Brand, Category, ProductAttribute, SearchProductsResponse, ListRecommendationsResponse, GetProductResponse, CreateProductResponse, UpdateProductResponse, DeleteProductResponse, NewBrandResponse, RemoveBrandResponse, GetAllBrandResponse, CreateCategoryResponse, DeleteCategoryResponse, GetAllCategoryResponse, UpdateCategoryResponse, GetProductAttributesResponse, UpdateProductAttributesResponse, DeleteProductAttributesResponse, CreateProductAttributeResponse, ListProductsResponse, GetWarehousesResponse, GetVariantsForCartResponse } from '@nexura/grpc_gateway/protos';
+import { ProductCatalogServiceClient, Product, GetProductResponse, CreateProductResponse, UpdateProductResponse, DeleteProductResponse, NewBrandResponse, RemoveBrandResponse, GetAllBrandResponse, CreateCategoryResponse, DeleteCategoryResponse, GetAllCategoryResponse, UpdateCategoryResponse, GetProductAttributesResponse, UpdateProductAttributesResponse, DeleteProductAttributesResponse, CreateProductAttributeResponse, ListProductsResponse, GetWarehousesResponse, GetVariantsForCartResponse, ValidateAndReserveResponse, ReleaseReservationRequest, ReleaseReservationResponse, ValidateAndReserveRequest, CommitReservationRequest, CommitReservationResponse, CreateCategoryRequest, CreateBrandRequest, CreateBrandResponse, RemoveBrandRequest, DeleteCategoryRequest, UpdateCategoryRequest, GetProductAttributesRequest, CreateProductAttributeRequest, UpdateProductAttributesRequest, UpdateProductRequest, CreateProductRequest, GetProductBySlugRequest, GetProductByIdRequest, DeleteProductRequest, GetVariantsForCartRequest, DeleteProductAttributesRequest } from '@nexura/grpc_gateway/protos';
 import { createServiceConfig, createClient, promisifyGrpcCall } from './baseAdapter';
 
 const productConfig = createServiceConfig('ProductCatalogService', 50053);
@@ -13,67 +13,67 @@ export const productService = {
     //     return promisifyGrpcCall(productClient, 'listRecommendations', { userId, productIds });
     // },
 
-    getProductById: async (id: string): Promise<GetProductResponse> => {
-        return promisifyGrpcCall(productClient, 'getProductById', { id });
+    getProductById: async (getProductByIdRequest: GetProductByIdRequest): Promise<GetProductResponse> => {
+        return promisifyGrpcCall(productClient, 'getProductById', getProductByIdRequest);
     },
-    getProductBySlug: async (slug: string): Promise<GetProductResponse> => {
-        return promisifyGrpcCall(productClient, 'getProductBySlug', { slug });
-    },
-
-    createProduct: async (product: Product): Promise<CreateProductResponse> => {
-        return promisifyGrpcCall(productClient, 'createProduct', { product });
+    getProductBySlug: async (getProductBySlugRequest: GetProductBySlugRequest): Promise<GetProductResponse> => {
+        return promisifyGrpcCall(productClient, 'getProductBySlug', getProductBySlugRequest);
     },
 
-    updateProduct: async (product: Product): Promise<UpdateProductResponse> => {
-        return promisifyGrpcCall(productClient, 'updateProduct', { product });
+    createProduct: async (createProductRequest: CreateProductRequest): Promise<CreateProductResponse> => {
+        return promisifyGrpcCall(productClient, 'createProduct', createProductRequest);
     },
 
-    deleteProduct: async (productId: string): Promise<DeleteProductResponse> => {
-        return promisifyGrpcCall(productClient, 'deleteProduct', { productId });
+    updateProduct: async (updateProductRequest: UpdateProductRequest): Promise<UpdateProductResponse> => {
+        return promisifyGrpcCall(productClient, 'updateProduct', updateProductRequest);
     },
 
-    newBrand: async (brand: Brand): Promise<NewBrandResponse> => {
-        return promisifyGrpcCall(productClient, 'newBrand', { brand });
+    deleteProduct: async (deleteProductRequest: DeleteProductRequest): Promise<DeleteProductResponse> => {
+        return promisifyGrpcCall(productClient, 'deleteProduct', deleteProductRequest);
     },
 
-    removeBrand: async (id: string): Promise<RemoveBrandResponse> => {
-        return promisifyGrpcCall(productClient, 'removeBrand', { id });
+    createBrand: async (createBrandRequest: CreateBrandRequest): Promise<CreateBrandResponse> => {
+        return promisifyGrpcCall(productClient, 'createBrand', createBrandRequest);
+    },
+
+    removeBrand: async (removeBrandRequest: RemoveBrandRequest): Promise<RemoveBrandResponse> => {
+        return promisifyGrpcCall(productClient, 'removeBrand', removeBrandRequest);
     },
 
     getAllBrand: async (): Promise<GetAllBrandResponse> => {
         return promisifyGrpcCall(productClient, 'getAllBrand', {});
     },
 
-    createCategory: async (category: Category): Promise<CreateCategoryResponse> => {
-        return promisifyGrpcCall(productClient, 'createCategory', { category });
+    createCategory: async (createCategoryRequest: CreateCategoryRequest): Promise<CreateCategoryResponse> => {
+        return promisifyGrpcCall(productClient, 'createCategory', createCategoryRequest);
     },
 
-    removeCategory: async (id: string): Promise<DeleteCategoryResponse> => {
-        return promisifyGrpcCall(productClient, 'deleteCategory', { id });
+    removeCategory: async (deleteCategoryRequest: DeleteCategoryRequest): Promise<DeleteCategoryResponse> => {
+        return promisifyGrpcCall(productClient, 'deleteCategory', deleteCategoryRequest);
     },
 
     getAllCategory: async (): Promise<GetAllCategoryResponse> => {
         return promisifyGrpcCall(productClient, 'getAllCategory', {});
     },
 
-    updateCategory: async (category: Category): Promise<UpdateCategoryResponse> => {
-        return promisifyGrpcCall(productClient, 'updateCategory', { category });
+    updateCategory: async (updateCategoryRequest: UpdateCategoryRequest): Promise<UpdateCategoryResponse> => {
+        return promisifyGrpcCall(productClient, 'updateCategory', updateCategoryRequest);
     },
 
-    getProductAttributes: async (productId: string): Promise<GetProductAttributesResponse> => {
-        return promisifyGrpcCall(productClient, 'getProductAttributes', { productId });
+    getProductAttributes: async (getProductAttributesRequest: GetProductAttributesRequest): Promise<GetProductAttributesResponse> => {
+        return promisifyGrpcCall(productClient, 'getProductAttributes', getProductAttributesRequest);
     },
 
-    updateProductAttribute: async (attribute: ProductAttribute): Promise<UpdateProductAttributesResponse> => {
-        return promisifyGrpcCall(productClient, 'updateProductAttributes', { attribute });
+    updateProductAttribute: async (updateProductAttributeRequest: UpdateProductAttributesRequest): Promise<UpdateProductAttributesResponse> => {
+        return promisifyGrpcCall(productClient, 'updateProductAttributes', updateProductAttributeRequest);
     },
 
-    deleteProductAttribute: async (attributeId: string): Promise<DeleteProductAttributesResponse> => {
-        return promisifyGrpcCall(productClient, 'deleteProductAttributes', { attributeId });
+    deleteProductAttribute: async (deleteProductAttributeRequest: DeleteProductAttributesRequest): Promise<DeleteProductAttributesResponse> => {
+        return promisifyGrpcCall(productClient, 'deleteProductAttributes', deleteProductAttributeRequest);
     },
 
-    createProductAttribute: async (attribute: ProductAttribute): Promise<CreateProductAttributeResponse> => {
-        return promisifyGrpcCall(productClient, 'createProductAttribute', { attribute });
+    createProductAttribute: async (createProductAttributeRequest: CreateProductAttributeRequest): Promise<CreateProductAttributeResponse> => {
+        return promisifyGrpcCall(productClient, 'createProductAttribute', createProductAttributeRequest);
     },
 
     listProducts: async (): Promise<ListProductsResponse> => {
@@ -84,7 +84,19 @@ export const productService = {
         return promisifyGrpcCall(productClient, 'getWarehouses', {});
     },
 
-    getVariantsForCart: async (variantIds: string[]): Promise<GetVariantsForCartResponse> => {
-        return promisifyGrpcCall(productClient, 'getVariantsForCart', { variantIds });
+    getVariantsForCart: async (getVariantsForCartRequest: GetVariantsForCartRequest): Promise<GetVariantsForCartResponse> => {
+        return promisifyGrpcCall(productClient, 'getVariantsForCart', getVariantsForCartRequest);
+    },
+
+    validateAndReserve: async (request: ValidateAndReserveRequest): Promise<ValidateAndReserveResponse> => {
+        return promisifyGrpcCall(productClient, 'validateAndReserve', request);
+    },
+
+    releaseReservation: async (request: ReleaseReservationRequest): Promise<ReleaseReservationResponse> => {
+        return promisifyGrpcCall(productClient, 'releaseReservation', request);
+    },
+
+    commitReservation: async (request: CommitReservationRequest): Promise<CommitReservationResponse> => {
+        return promisifyGrpcCall(productClient, 'commitReservation', request);
     },
 }; 

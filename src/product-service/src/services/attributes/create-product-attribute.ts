@@ -1,7 +1,7 @@
 import { PrismaClient } from '../../db/prisma-client'
 import { handleError } from '@nexura/common/utils'
-import type { handleUnaryCall, sendUnaryData, ServerUnaryCall} from '@grpc/grpc-js'
-import { CreateProductAttributeRequest, CreateProductAttributeResponse } from '@nexura/common/protos'
+import type { handleUnaryCall, sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js'
+import { CreateProductAttributeRequest, CreateProductAttributeResponse } from '@nexura/grpc_gateway/protos'
 
 const prisma = new PrismaClient()
 
@@ -47,6 +47,6 @@ export const createProductAttribute: handleUnaryCall<CreateProductAttributeReque
 
       callback(null, response)
     } catch (error) {
-      handleError(error, callback)
+      handleError(error as ServiceError, callback)
     }
 }

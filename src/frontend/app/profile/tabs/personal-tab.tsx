@@ -13,10 +13,10 @@ import { toast } from "sonner";
 import { onPersonalSubmitAction, FormState } from "../personalSubmit";
 import { useState } from "react";
 import { AvatarCropperModal } from "@/components/ui/avatar-cropper-modal";
-import { User } from "@/protos/nexura";
+import { User } from "@nexura/grpc_gateway/protos";
 import { PersonalSkeleton } from "../skeleton";
 import { uploadToImageKit } from "@/lib/imagekit";
-
+import { useUserActions } from "@/hooks/use-user";
 interface PersonalTabProps {
     user: User | null
 }
@@ -50,60 +50,19 @@ const initialImageState: ImageState = {
 }
 
 export default function PersonalTab({ user }: PersonalTabProps) {
-    if (!user) {
-        return <PersonalSkeleton />;
-    }
 
-    const queryClient = useQueryClient();
+    const { updateUser } = useUserActions()
     const [imageState, setImageState] = useState<ImageState>(initialImageState);
     const [formData, setFormData] = useState<FormData>({
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        email: user.email || "",
-        phone: user.phone || "",
-        gender: user.gender || "",
-        dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : ""
+        firstName: user?.firstName || "",
+        lastName: user?.lastName || "",
+        email: user?.email || "",
+        phone: user?.phone || "",
+        gender: user?.gender || "",
+        dateOfBirth: user?.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : ""
     });
 
-    const { mutate, isPending, error } = useMutation({
-        mutationFn: async (request: {
-            id: string;
-            user: {
-                id: string;
-                firstName: string | null;
-                lastName: string | null;
-                phone: string | null;
-                gender: string | null;
-                dateOfBirth: string | null;
-                profilePictureUrl: string | null;
-                email: string;
-                updatedAt: string;
-            };
-            currentPassword: string | null;
-            newPassword: string | null;
-        }) => {
-            const result = await onPersonalSubmitAction(initialFormState, request);
-            if (!result.success) {
-                throw new Error(JSON.stringify(result.errors));
-            }
-            return result;
-        },
-        onSuccess: () => {
-            setImageState(initialImageState);
-            queryClient.invalidateQueries({ queryKey: ['userSession'] });
-            toast.success("Profile updated successfully");
-        },
-        onError: (error: Error) => {
-            try {
-                const errors = JSON.parse(error.message);
-                if (!errors.submit) return;
-                toast.error(errors.submit || "Failed to update profile");
-            } catch (parseError) {
-                console.error(parseError);
-                toast.error("An unexpected error occurred");
-            }
-        }
-    });
+    const { mutate: updateUserMutation, isPending, error } = updateUser
 
     const getFieldError = (fieldName: string): string | undefined => {
         if (!error?.message) return undefined;
@@ -132,18 +91,18 @@ export default function PersonalTab({ user }: PersonalTabProps) {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const updatedFields: Partial<typeof user> = { id: user.id };
+        const updatedFields: Partial<typeof user> = { id: user?.id };
 
         // Validate and add changed fields
-        if (formData.firstName.trim() && formData.firstName !== user.firstName) {
+        if (formData.firstName.trim() && formData.firstName !== user?.firstName) {
             updatedFields.firstName = formData.firstName;
         }
 
-        if (formData.lastName.trim() && formData.lastName !== user.lastName) {
+        if (formData.lastName.trim() && formData.lastName !== user?.lastName) {
             updatedFields.lastName = formData.lastName;
         }
 
-        if (formData.phone.trim() && formData.phone !== user.phone) {
+        if (formData.phone.trim() && formData.phone !== user?.phone) {
             if (formData.phone.length < 10) {
                 toast.error("Phone number must be at least 10 digits");
                 return;
@@ -151,7 +110,7 @@ export default function PersonalTab({ user }: PersonalTabProps) {
             updatedFields.phone = formData.phone;
         }
 
-        if (formData.gender && formData.gender !== user.gender) {
+        if (formData.gender && formData.gender !== user?.gender) {
             if (!['male', 'female', 'other'].includes(formData.gender)) {
                 toast.error("Invalid gender value");
                 return;
@@ -159,7 +118,7 @@ export default function PersonalTab({ user }: PersonalTabProps) {
             updatedFields.gender = formData.gender;
         }
 
-        if (formData.dateOfBirth && formData.dateOfBirth !== user.dateOfBirth) {
+        if (formData.dateOfBirth && formData.dateOfBirth !== user?.dateOfBirth) {
             const date = new Date(formData.dateOfBirth);
             if (isNaN(date.getTime())) {
                 toast.error("Invalid date format");
@@ -180,18 +139,29 @@ export default function PersonalTab({ user }: PersonalTabProps) {
             }
         }
 
-        const userData = {
-            ...user,
-            ...updatedFields,
-            updatedAt: new Date().toISOString()
-        };
+
 
         if (Object.keys(updatedFields).length > 1) {
-            await mutate({
-                id: user.id,
-                user: userData,
-                currentPassword: null,
-                newPassword: null
+            updateUserMutation({
+                user: {
+                    id: user?.id || "",
+                    firstName: updatedFields.firstName || "",
+                    lastName: updatedFields.lastName || "",
+                    email: updatedFields.email || "",
+                    phone: updatedFields.phone || "",
+                    gender: updatedFields.gender || "",
+                    dateOfBirth: updatedFields.dateOfBirth || "",
+                    profilePictureUrl: updatedFields.profilePictureUrl || "",
+                    createdAt: user?.createdAt || "",
+                    isActive: user?.isActive || false,
+                    isVerified: user?.isVerified || false,
+                    role: user?.role || "",
+                    updatedAt: new Date().toISOString(),
+                    lastLogin: user?.lastLogin || "",
+                    permissions: user?.permissions || ""
+                },
+                currentPassword: "",
+                newPassword: ""
             });
         } else {
             toast.info("No changes to save");
@@ -229,7 +199,9 @@ export default function PersonalTab({ user }: PersonalTabProps) {
             </TabsContent>
         );
     }
-
+    if (!user) {
+        return <PersonalSkeleton />;
+    }
     return (
         <TabsContent value="personal" className="space-y-6">
             <Card>

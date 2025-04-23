@@ -4,7 +4,7 @@
   "description": "Orchestrator service for e-commerce platform",
   "main": "dist/server.js",
   "scripts": {
-    "build": "pkgroll",
+    "build": "bun build src/index.ts --target bun --outdir dist",
     "start": "node dist/server.js",
     "dev": "bun src/index.ts",
     "generate": "prisma generate"

@@ -2,7 +2,7 @@
 
 import { resetPasswordGateway } from "@nexura/grpc_gateway/gateway"
 import { emailSchema, resetPasswordSchema, verificationSchema } from "./forgotPasswordFormSchema"
-
+import { useUserActions } from "@/hooks/use-user"
 
 export type FormState = {message: string, success: boolean, field?: Record<string, string>, issue?: string[]}
 export async function handleSubmitEmailAction(prev: FormState, data: FormData) :Promise<FormState> {
@@ -37,6 +37,7 @@ export async function handleSubmitVerificationAction(prev: FormState, data: Form
 
 
 export async function handleSubmitResetPasswordAction(prev: FormState, data: FormData) :Promise<FormState> {
+
   const parsedData = resetPasswordSchema.safeParse({password: data.get('password'), confirmPassword: data.get('confirmPassword'), token: data.get('token'), email: data.get('email')})
 
   if (!parsedData.success) {
@@ -48,10 +49,13 @@ export async function handleSubmitResetPasswordAction(prev: FormState, data: For
     }
   }
 
-  const response = await resetPasswordGateway(parsedData.data.email, parsedData.data.password, parsedData.data.token)
-  if (!response.success) {
+  const { resetPassword } = useUserActions()
+  const {mutate: resetPasswordMutation} = resetPassword
+  try {
+    resetPasswordMutation({ email: parsedData.data.email, newPassword: parsedData.data.password, token: parsedData.data.token })
+  } catch (error) {
     return {
-      message: response.message,
+      message: error instanceof Error ? error.message : "An unknown error occurred",
       success: false,
     }
   }

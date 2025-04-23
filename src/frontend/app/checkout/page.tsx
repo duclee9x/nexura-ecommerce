@@ -8,7 +8,7 @@ import { ChevronLeft, X, CreditCard, Wallet, Banknote } from "lucide-react"
 import { useCart } from "@/contexts/cart-context"
 import { useSession } from "@/contexts/session-context"
 import { useCurrency } from "@/contexts/currency-context"
-import { CreateOrderRequest, CreateSagaOrderRequest, PaymentStatus } from "@/protos/nexura"
+import { CreateSagaOrderRequest } from "@nexura/grpc_gateway/protos"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,7 +20,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import AddressTab from "@/app/profile/tabs/address-tab"
 import { toast } from "@/components/ui/use-toast"
-import { ExtendedAddressType, OrderItemType, CouponType, CreateOrderRequestType, PaymentStatusType } from "@/app/checkout/order.type"
+import { ExtendedAddressType } from "@/app/checkout/order.type"
 import { useOrderActions } from "@/hooks/use-order"
 
 export default function CheckoutPage() {
@@ -104,7 +104,15 @@ export default function CheckoutPage() {
       currencyCode: currency,
     }
 
-    createSagaOrder(order)
+    try {
+      createSagaOrder(order)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create order",
+      })
+      console.log(error)
+    }
     setIsProcessing(false)
   }
 

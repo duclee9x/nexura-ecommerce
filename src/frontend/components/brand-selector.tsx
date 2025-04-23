@@ -22,12 +22,8 @@ import { toast } from "@/hooks/use-toast"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getAllBrandGateway } from "@/gateway/gateway"
 import { Skeleton } from "./ui/skeleton"
+import { Brand } from "@nexura/grpc_gateway/protos"
 
-export interface Brand {
-  id: string
-  name: string
-  logo: string
-}
 
 interface BrandSelectorProps {
   selectedBrandId: string | null

@@ -1,6 +1,6 @@
-import { CreateOrderRequest, CreateSagaOrderRequest, OrderStatus } from "@/protos/nexura"
+import { CreateOrderRequest, CreateSagaOrderRequest, OrderStatus } from "@nexura/grpc_gateway/protos"
 import { useQuery, useMutation } from "@tanstack/react-query"
-import { getOrderStatusGateway, getOrderGateway, cancelOrderGateway, updateOrderStatusGateway, createSagaOrderGateway } from "@/gateway/gateway"
+import { getOrderStatusGateway, getOrderGateway, cancelOrderGateway, updateOrderStatusGateway, createSagaOrderGateway } from "@nexura/grpc_gateway/gateway"
 import { toast } from "@/components/ui/use-toast"
 import { useRouter } from "next/navigation"
 
@@ -49,7 +49,7 @@ export const useOrderActions = () => {
                 queryKey: ["orderStatus", orderId],
                 queryFn: async () => {
                     const response = await getOrderStatusGateway(orderId)
-                    return response.order.status
+                    return response.status
                 },
                 ...defaultConfig,
             })
@@ -70,7 +70,7 @@ export const useOrderActions = () => {
             return useMutation({
                 mutationFn: async () => {
                     const response = await cancelOrderGateway(orderId)
-                    return response.order
+                    return response
                 },
                 ...defaultConfig,
             })
@@ -80,7 +80,7 @@ export const useOrderActions = () => {
             return useMutation({
                 mutationFn: async () => {
                     const response = await updateOrderStatusGateway(orderId, status)
-                    return response.order
+                    return response
                 },
                 ...defaultConfig,
             })

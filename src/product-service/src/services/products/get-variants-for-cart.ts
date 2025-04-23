@@ -1,14 +1,13 @@
 import { PrismaClient } from '../../db/prisma-client'
 import { handleError } from '@nexura/common/utils'
-import type { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js'
-import { GetVariantsForCartRequest, GetVariantsForCartResponse, VariantCart } from '@nexura/common/protos'
+import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js'
+import { GetVariantsForCartRequest, GetVariantsForCartResponse, VariantCart } from '@nexura/grpc_gateway/protos'
 
 const prisma = new PrismaClient()
 
 export const getVariantsForCart = async (call: ServerUnaryCall<GetVariantsForCartRequest, GetVariantsForCartResponse>, callback: sendUnaryData<GetVariantsForCartResponse>) => {
   try {
     const { variantIds } = call.request
-    console.log(call.request, "call.request")
     
     // Fetch variants with their associated product information
     const variants = await prisma.productVariant.findMany({
@@ -69,6 +68,6 @@ export const getVariantsForCart = async (call: ServerUnaryCall<GetVariantsForCar
     console.log(response, "response")
     callback(null, { variants: response })
   } catch (error) {
-    handleError(error, callback)
+    handleError(error as ServiceError, callback)
   }
 }

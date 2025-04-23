@@ -1,6 +1,7 @@
-import { ValidateAndReserveRequest, ValidateAndReserveResponse } from "@nexura/common/protos"
+import { ValidateAndReserveRequest, ValidateAndReserveResponse } from "@nexura/grpc_gateway/protos"
 import { PrismaClient } from '../../db/prisma-client'
-import type { ServerUnaryCall } from '@grpc/grpc-js'
+import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js'
+import { handleError } from "@nexura/common/utils"
 
 interface VariantRequest {
   id: string

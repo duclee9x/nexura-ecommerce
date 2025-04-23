@@ -1,7 +1,7 @@
-import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
-import type { DeleteAddressRequest, DeleteAddressResponse } from '@nexura/common/protos';
+import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js';
+import type { DeleteAddressRequest, DeleteAddressResponse } from '@nexura/grpc_gateway/protos';
 import { PrismaClient } from '../../db/prisma-client'
-import { defaultTracer, withTracing } from '@nexura/common/utils';
+import { defaultTracer, handleError, withTracing } from '@nexura/common/utils';
 import { DeleteAddressSchema } from './address-validator';
 
 const prisma = new PrismaClient()

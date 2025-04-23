@@ -1,8 +1,8 @@
-import { AddItemRequest, UpdateItemRequest, RemoveItemRequest } from "@/protos/nexura"
+import { AddItemRequest, UpdateItemRequest, RemoveItemRequest } from "@nexura/grpc_gateway/protos"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useMutation } from "@tanstack/react-query"
 import { toast } from "@/components/ui/use-toast"
-import { addItemGateway, updateItemGateway, removeItemGateway, clearCartGateway, getCartGateway, getVariantsForCartGateway } from "@/gateway/gateway"
+import { addItemGateway, updateItemGateway, removeItemGateway, clearCartGateway, getCartGateway, getVariantsForCartGateway } from "@nexura/grpc_gateway/gateway"
 
 interface QueryConfig {
     retry?: number
@@ -33,7 +33,7 @@ export const useCartActions = () => {
             return useQuery({
               queryKey: ["cartVariants", variantIds],
               queryFn: async () => {    
-                const response = await getVariantsForCartGateway(variantIds)
+                const response = await getVariantsForCartGateway({ variantIds })
                 return response.variants
               },
               enabled: variantIds.length > 0,

@@ -1,5 +1,5 @@
-import { AddItemRequest, AddItemResponse } from "@nexura/common/protos"
-import type { ServerUnaryCall, sendUnaryData } from "@grpc/grpc-js"
+import { AddItemRequest, AddItemResponse } from "@nexura/grpc_gateway/protos"
+import type { ServerUnaryCall, sendUnaryData, ServiceError } from "@grpc/grpc-js"
 
 import { PrismaClient } from '../../db/prisma-client'
 
@@ -82,6 +82,6 @@ export const addItem = async (call: ServerUnaryCall<AddItemRequest, AddItemRespo
         }
       })
     } catch (error) {
-      handleError(error, callback)
+      handleError(error as ServiceError, callback)
     }
   }

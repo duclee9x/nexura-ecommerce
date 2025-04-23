@@ -1,40 +1,40 @@
-import { UserServiceClient, User, ValidateOTPResponse, ForgotPasswordResponse, ResetPasswordResponse, VerifyAccountResponse, LoginUserResponse, RegisterUserResponse, GetUserResponse, UpdateUserResponse, DeleteUserResponse } from '@nexura/grpc_gateway/protos';
+import { UserServiceClient, User, ValidateOTPResponse, ForgotPasswordResponse, RegisterUserRequest, ResetPasswordResponse, VerifyAccountResponse, LoginUserResponse, RegisterUserResponse, GetUserResponse, UpdateUserResponse, DeleteUserResponse, UpdateUserRequest, LoginUserRequest, VerifyAccountRequest, ResetPasswordRequest, ForgotPasswordRequest, ValidateOTPRequest    } from '@nexura/grpc_gateway/protos';
 import { createServiceConfig, createClient, promisifyGrpcCall } from './baseAdapter';
 
 const userConfig = createServiceConfig('UserService', 50051);
 const userClient = createClient(UserServiceClient, userConfig);
 
 export const userService = {
-    validateOTP: async (email: string, otp: string): Promise<ValidateOTPResponse & { user: User }> => {
-        return promisifyGrpcCall(userClient, 'validateOtp', { email, otp })
+    validateOTP: async (validateOTPRequest: ValidateOTPRequest): Promise<ValidateOTPResponse & { user: User }> => {
+        return promisifyGrpcCall(userClient, 'validateOtp', { validateOTPRequest })
     },
 
-    forgotPassword: async (email: string): Promise<ForgotPasswordResponse & { user: User }> => {
-        return promisifyGrpcCall(userClient, 'forgotPassword', { email });
+    forgotPassword: async (forgotPasswordRequest: ForgotPasswordRequest): Promise<ForgotPasswordResponse & { user: User }> => {
+        return promisifyGrpcCall(userClient, 'forgotPassword', { forgotPasswordRequest });
     },
 
-    resetPassword: async (email: string, newPassword: string, token: string): Promise<ResetPasswordResponse & { user: User }> => {
-        return promisifyGrpcCall(userClient, 'resetPassword', { email, newPassword, token });
+    resetPassword: async (resetPasswordRequest: ResetPasswordRequest): Promise<ResetPasswordResponse & { user: User }> => {
+        return promisifyGrpcCall(userClient, 'resetPassword', { resetPasswordRequest });
     },
 
-    verifyAccount: async (token: string): Promise<VerifyAccountResponse & { user: User }> => {
-        return promisifyGrpcCall(userClient, 'verifyAccount', { token });
+    verifyAccount: async (verifyAccountRequest: VerifyAccountRequest): Promise<VerifyAccountResponse & { user: User }> => {
+        return promisifyGrpcCall(userClient, 'verifyAccount', { verifyAccountRequest });
     },
 
-    loginUser: async (email: string, password: string): Promise<LoginUserResponse & { user: User }> => {
-        return promisifyGrpcCall(userClient, 'loginUser', { email, password });
+    loginUser: async (loginUserRequest: LoginUserRequest): Promise<LoginUserResponse & { user: User }> => {
+        return promisifyGrpcCall(userClient, 'loginUser', { loginUserRequest });
     },
 
-    registerUser: async (firstName: string, lastName: string, email: string, password: string): Promise<RegisterUserResponse & { user: User }> => {
-        return promisifyGrpcCall(userClient, 'registerUser', { firstName, lastName, email, password });
+    registerUser: async (registerUserRequest: RegisterUserRequest): Promise<RegisterUserResponse & { user: User }> => {
+        return promisifyGrpcCall(userClient, 'registerUser', { registerUserRequest });
     },
 
     getUser: async (id: string): Promise<GetUserResponse & { user: User }> => {
         return promisifyGrpcCall(userClient, 'getUser', { id });
     },
 
-    updateUser: async (id: string, user: User, currentPassword: string, newPassword: string): Promise<UpdateUserResponse & { user: User }> => {
-        return promisifyGrpcCall(userClient, 'updateUser', { id, user, currentPassword, newPassword });
+    updateUser: async (updateUserRequest: UpdateUserRequest): Promise<UpdateUserResponse & { user: User }> => {
+        return promisifyGrpcCall(userClient, 'updateUser', { updateUserRequest });
     },
 
     deleteUser: async (id: string): Promise<DeleteUserResponse> => {

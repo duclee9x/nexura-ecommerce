@@ -1,8 +1,8 @@
 "use client"
 
 import { createContext, useContext, ReactNode } from "react"
-import { User } from "@/protos/nexura"
-import { useUserHooks } from "@/hooks/use-user"
+import { User } from "@nexura/grpc_gateway/protos"
+import { useUserActions } from "@/hooks/use-user"
 import { UseMutationResult } from "@tanstack/react-query"
 interface SessionContextType {
   user: User | null
@@ -15,7 +15,7 @@ interface SessionContextType {
 const SessionContext = createContext<SessionContextType | undefined>(undefined)
 
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const { getSession, login, logout } = useUserHooks()
+  const { getSession, login, logout } = useUserActions()
   const { data: user, isLoading } = getSession()
   
   const value = {

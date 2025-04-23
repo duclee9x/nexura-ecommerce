@@ -40,11 +40,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getWarehousesGateway } from "@/gateway/gateway"
-import { useQuery } from "@tanstack/react-query"
-import { ProductVariant, ProductAttribute, VariantAttribute } from "@/protos/nexura"
+import { ProductVariant, ProductAttribute, VariantAttribute } from "@nexura/grpc_gateway/protos"
 import type { ProductImage } from "@/components/image-gallery"
-
+import { useProductActions } from "@/hooks/use-product"
 interface VariantManagerProps {
   variants: ProductVariant[]
   onVariantUpdate: (variants: ProductVariant[], action: "delete" | "update") => void
@@ -69,6 +67,7 @@ export const VariantManager = memo(function VariantManager({
   attributes = [],
   productImages,
 }: VariantManagerProps) {
+  const { getWarehouses } = useProductActions()
   const [productVariants, setProductVariants] = useState<ProductVariant[]>(variants)
   const [isAddingVariant, setIsAddingVariant] = useState(false)
   const [newVariant, setNewVariant] = useState<ProductVariant>({
@@ -99,10 +98,7 @@ export const VariantManager = memo(function VariantManager({
   const [activeTab, setActiveTab] = useState("manual")
   const [filterAttribute, setFilterAttribute] = useState<string | null>(null)
   const [filterValue, setFilterValue] = useState<string | null>(null)
-  const { data: warehouses } = useQuery({
-    queryKey: ["warehouses"],
-    queryFn: () => getWarehousesGateway().then((res) => res.warehouses),
-  })
+  const { data: warehouses } = getWarehouses()
   // Get variantable attributes
   const variantableAttributes = useMemo(() => {
     return attributes.filter((attr) => attr.variantable)
