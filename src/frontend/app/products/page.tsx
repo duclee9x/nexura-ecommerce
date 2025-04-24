@@ -34,7 +34,7 @@ interface filterType {
 }
 
 export default function ProductCatalogPage() {
-  const { getCategories, listProduct, getFilteredProducts } = useProductActions()
+  const { getCategories, listProducts, getFilteredProducts } = useProductActions()
   const searchParams = useSearchParams()
   const categoryParam = searchParams.get("category")
   const { formatPrice } = useCurrency()
@@ -55,7 +55,7 @@ export default function ProductCatalogPage() {
     isLoading: isProductsLoading,
     isError: isProductsError,
     error: productsError
-  } = listProduct()
+  } = listProducts()
   const { invalidateQueries } = useQueryUtils()
 
   const filteredProducts = getFilteredProducts(products, {

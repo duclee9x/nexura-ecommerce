@@ -70,7 +70,7 @@ model Stock {
 model Reservation {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   quantity  Int
-  userId    String   @db.ObjectId
+  userId    String
   variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
   variantId String   @db.ObjectId
   createdAt DateTime @default(now())

@@ -65,7 +65,6 @@ export const getVariantsForCart = async (call: ServerUnaryCall<GetVariantsForCar
       };
     });
 
-    console.log(response, "response")
     callback(null, { variants: response })
   } catch (error) {
     handleError(error as ServiceError, callback)

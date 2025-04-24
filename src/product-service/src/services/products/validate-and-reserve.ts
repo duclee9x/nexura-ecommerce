@@ -1,24 +1,14 @@
 import { ValidateAndReserveRequest, ValidateAndReserveResponse } from "@nexura/grpc_gateway/protos"
 import { PrismaClient } from '../../db/prisma-client'
-import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js'
-import { handleError } from "@nexura/common/utils"
-
-interface VariantRequest {
-  id: string
-  stock: {
-    quantity: number
-    reserved: number
-  }
-  price: number
-}
+import type { ServerUnaryCall } from '@grpc/grpc-js'
 
 export async function validateAndReserve(
   call: ServerUnaryCall<ValidateAndReserveRequest, ValidateAndReserveResponse>
 ): Promise<ValidateAndReserveResponse> {
   const prisma = new PrismaClient()
-  
   try {
     const { userId, variants: variantsRequest } = call.request
+    console.log("validateAndReserve", call.request)
 
     // Get all variants with their current stock
     const variants = await prisma.productVariant.findMany({
@@ -29,7 +19,7 @@ export async function validateAndReserve(
         stock: true
       }
     })
-
+    console.log("variants", variants)
     // Check if all variants exist
     if (variants.length !== variantsRequest.length) {
       return {
@@ -41,7 +31,7 @@ export async function validateAndReserve(
         }]
       }
     }
-
+    console.log("variants exist", variants.length === variantsRequest.length)
     const validationErrors = []
 
     // Validate each variant
@@ -85,7 +75,7 @@ export async function validateAndReserve(
         })
       }
     }
-
+    console.log("validationErrors", validationErrors)
     if (validationErrors.length > 0) {
       return {
         success: false,
@@ -93,10 +83,11 @@ export async function validateAndReserve(
         validationErrors
       }
     }
-
+    console.log("no validation errors")
     // Start a transaction to ensure atomicity
     const reservation = await prisma.$transaction(async (tx) => {
       // Create reservations and update stock for each variant
+      console.log("creating reservations")
       for (const variant of variants) {
         const requestedVariant = variantsRequest.find((v) => v.id === variant.id)!
         const requestedQuantity = requestedVariant.stock?.reserved || 0
@@ -119,7 +110,7 @@ export async function validateAndReserve(
           }
         })
       }
-
+      console.log("reservations created")
       return await tx.reservation.create({
         data: {
           userId: userId,
