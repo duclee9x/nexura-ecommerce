@@ -2,10 +2,11 @@ import { ReleaseReservationRequest, ReleaseReservationResponse } from "@nexura/g
 import { PrismaClient } from '../../db/prisma-client'
 import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js'
 import { handleError } from "@nexura/common/utils"
+
 export async function releaseReservation(
   call: ServerUnaryCall<ReleaseReservationRequest, ReleaseReservationResponse>,
   callback: sendUnaryData<ReleaseReservationResponse>
-): Promise<ReleaseReservationResponse> {
+): Promise<void> {
   const prisma = new PrismaClient()
   
   try {
@@ -24,17 +25,19 @@ export async function releaseReservation(
     })
 
     if (!reservation) {
-      return {
+      callback(null, {
         success: false,
         message: "Reservation not found"
-      }
+      })
+      return
     }
 
     if (!reservation.variant?.stock) {
-      return {
+      callback(null, {
         success: false,
         message: "Variant or stock not found"
-      }
+      })
+      return
     }
 
     // Store stock data in variables to avoid repeated null checks
@@ -57,16 +60,12 @@ export async function releaseReservation(
       })
     })
 
-    return {
+    callback(null, {
       success: true,
       message: "Reservation released successfully"
-    }
+    })
   } catch (error) {
     handleError(error as ServiceError, callback)
-    return {
-      success: false,
-      message: "Failed to release reservation"
-    }
   } finally {
     await prisma.$disconnect()
   }

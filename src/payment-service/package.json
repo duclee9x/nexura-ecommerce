@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Payment service for Nexura Ecommerce",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "prisma": {
     "schema": "prisma/schema.prisma"
   },
@@ -10,7 +11,7 @@
   "scripts": {
     "run": "tsx src/index.ts",
     "start": "node dist/index.js",
-    "dev": "tsx src/index.ts",
+    "dev": "bun src/index.ts",
     "test": "jest",
     "build": "bun build src/index.ts --target bun --outdir dist",
     "prisma:generate": "prisma generate",
@@ -19,6 +20,10 @@
     "format": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {
-    "@nexura/common": "workspace:*"
+    "@nexura/common": "workspace:*",
+    "@nexura/grpc_gateway": "workspace:*"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
   }
 }

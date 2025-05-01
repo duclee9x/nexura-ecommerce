@@ -3,80 +3,83 @@ import { PrismaClient } from '../../db/prisma-client'
 import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js'
 import { handleError } from "@nexura/common/utils"
 
-interface VariantRequest {
-  id: string
-  stock: {
-    quantity: number
-    reserved: number
-  }
-}
-
 export async function commitReservation(
   call: ServerUnaryCall<CommitReservationRequest, CommitReservationResponse>,
   callback: sendUnaryData<CommitReservationResponse>
-): Promise<CommitReservationResponse> {
+): Promise<void> {
   const prisma = new PrismaClient()
   
   try {
-    const { reservationId } = call.request
+    const { reservationId, orderId } = call.request
 
-    // Get the reservation with its variant and stock
+    // Get the reservation with its items, variants and their stock
     const reservation = await prisma.reservation.findUnique({
       where: { id: reservationId },
       include: {
-        variant: {
+        items: {
           include: {
-            stock: true
+            variant: {
+              include: {
+                stock: true
+              }
+            }
           }
         }
       }
     })
 
     if (!reservation) {
-      return {
+      callback(null, {
         success: false,
-        message: "Reservation not found"
-      }
+        message: "Reservation not found",
+        orderId: ""
+      })
+      return
     }
 
-    if (!reservation.variant?.stock) {
-      return {
+    if (!reservation.items || reservation.items.length === 0) {
+      callback(null, {
         success: false,
-        message: "Variant or stock not found"
-      }
+        message: "No items found in reservation",
+        orderId: ""
+      })
+      return
     }
-
-    // Store stock data in variables to avoid repeated null checks
-    const { quantity, reserved } = reservation.variant.stock
 
     // Start a transaction to ensure atomicity
     await prisma.$transaction(async (tx) => {
-      // Delete the reservation
+      // Delete the reservation (this will cascade delete the items)
       await tx.reservation.delete({
         where: { id: reservationId }
       })
 
-      // Update stock - commit the reservation
-      await tx.stock.update({
-        where: { variantId: reservation.variantId },
-        data: {
-          quantity,
-          reserved: reserved - reservation.quantity
+      // Update stock for each item in the reservation
+      for (const item of reservation.items) {
+        if (!item.variant?.stock) {
+          throw new Error(`Stock not found for variant ${item.variantId}`)
         }
-      })
+
+        const { quantity, reserved } = item.variant.stock
+
+        await tx.stock.update({
+          where: { variantId: item.variantId },
+          data: {
+            quantity,
+            reserved: reserved - item.quantity
+          }
+        })
+      }
     })
 
-    return {
+    callback(null, {
       success: true,
-      message: "Reservation committed successfully"
-    }
+      message: "Reservation committed successfully",
+      orderId: orderId
+    })
   } catch (error) {
     handleError(error as ServiceError, callback)
-    return {
-      success: false,
-      message: "Failed to commit reservation"
-    }
   } finally {
     await prisma.$disconnect()
   }
 } 
+  

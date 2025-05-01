@@ -10,14 +10,13 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Search, ChevronDown, Eye, Download, Mail, ArrowUpDown, X, UserPlus } from "lucide-react"
+import { Search, ChevronDown, UserRoundPen, Download, Mail, ArrowUpDown, X, UserPlus, AlertCircle } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -38,133 +37,76 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-// Sample customer data
-const initialCustomers = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
-    location: "New York, USA",
-    status: "active",
-    orders: 5,
-    totalSpent: 645.99,
-    lastOrder: "2023-03-15T10:30:00",
-    dateJoined: "2022-11-05T08:15:00",
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    email: "jane.smith@example.com",
-    phone: "+1 (555) 987-6543",
-    location: "Los Angeles, USA",
-    status: "active",
-    orders: 3,
-    totalSpent: 325.5,
-    lastOrder: "2023-03-14T14:45:00",
-    dateJoined: "2022-12-10T11:30:00",
-  },
-  {
-    id: 3,
-    name: "Robert Johnson",
-    email: "robert.johnson@example.com",
-    phone: "+1 (555) 456-7890",
-    location: "Chicago, USA",
-    status: "active",
-    orders: 7,
-    totalSpent: 890.25,
-    lastOrder: "2023-03-14T09:15:00",
-    dateJoined: "2022-09-22T15:45:00",
-  },
-  {
-    id: 4,
-    name: "Emily Davis",
-    email: "emily.davis@example.com",
-    phone: "+1 (555) 234-5678",
-    location: "Miami, USA",
-    status: "inactive",
-    orders: 2,
-    totalSpent: 159.99,
-    lastOrder: "2023-02-20T16:20:00",
-    dateJoined: "2023-01-15T09:10:00",
-  },
-  {
-    id: 5,
-    name: "Michael Brown",
-    email: "michael.brown@example.com",
-    phone: "+1 (555) 876-5432",
-    location: "Seattle, USA",
-    status: "active",
-    orders: 4,
-    totalSpent: 475.25,
-    lastOrder: "2023-03-12T11:10:00",
-    dateJoined: "2022-10-05T14:20:00",
-  },
-  {
-    id: 6,
-    name: "Sarah Wilson",
-    email: "sarah.wilson@example.com",
-    phone: "+1 (555) 345-6789",
-    location: "Boston, USA",
-    status: "active",
-    orders: 6,
-    totalSpent: 720.5,
-    lastOrder: "2023-03-11T13:30:00",
-    dateJoined: "2022-08-18T10:05:00",
-  },
-  {
-    id: 7,
-    name: "David Miller",
-    email: "david.miller@example.com",
-    phone: "+1 (555) 654-3210",
-    location: "Denver, USA",
-    status: "active",
-    orders: 3,
-    totalSpent: 295.75,
-    lastOrder: "2023-03-10T15:45:00",
-    dateJoined: "2022-12-22T16:30:00",
-  },
-  {
-    id: 8,
-    name: "Jennifer Taylor",
-    email: "jennifer.taylor@example.com",
-    phone: "+1 (555) 432-1098",
-    location: "Austin, USA",
-    status: "inactive",
-    orders: 1,
-    totalSpent: 85.0,
-    lastOrder: "2023-01-15T10:20:00",
-    dateJoined: "2023-01-05T13:45:00",
-  },
-  {
-    id: 9,
-    name: "Thomas Anderson",
-    email: "thomas.anderson@example.com",
-    phone: "+1 (555) 789-0123",
-    location: "Portland, USA",
-    status: "active",
-    orders: 2,
-    totalSpent: 175.25,
-    lastOrder: "2023-03-08T09:15:00",
-    dateJoined: "2023-02-10T11:20:00",
-  },
-  {
-    id: 10,
-    name: "Lisa Martinez",
-    email: "lisa.martinez@example.com",
-    phone: "+1 (555) 210-9876",
-    location: "San Diego, USA",
-    status: "active",
-    orders: 4,
-    totalSpent: 435.5,
-    lastOrder: "2023-03-07T14:30:00",
-    dateJoined: "2022-11-15T09:30:00",
-  },
-]
+
+import { useCurrency } from "@/contexts/currency-context"
+import UserHooks from "@/hooks/user-hooks"
+
+// Loading Skeleton Components
+function TableSkeleton() {
+  return (
+    <div className="space-y-4">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <div key={i} className="flex items-center justify-between p-4 border rounded-lg animate-pulse">
+          <div className="space-y-2">
+            <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          </div>
+          <div className="space-y-2">
+            <div className="h-4 w-40 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          </div>
+          <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="h-6 w-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className="h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function FilterSkeleton() {
+  return (
+    <div className="flex flex-col md:flex-row gap-4 mb-6">
+      <div className="relative flex-1">
+        <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+      </div>
+      <div className="flex gap-4">
+        <div className="h-10 w-[150px] bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+        <div className="h-10 w-[100px] bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+      </div>
+    </div>
+  )
+}
+
+// Error Component
+function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  return (
+    <div className="text-center py-16 space-y-6">
+      <div className="mx-auto w-24 h-24 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+        <AlertCircle className="h-12 w-12 text-red-600 dark:text-red-400" />
+      </div>
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold">Something went wrong</h2>
+        <p className="text-muted-foreground">{message}</p>
+      </div>
+      {onRetry && (
+        <Button onClick={onRetry} variant="outline">
+          Try Again
+        </Button>
+      )}
+    </div>
+  )
+}
 
 export default function CustomersManagementPage() {
   const router = useRouter()
-  const [customers, setCustomers] = useState(initialCustomers)
+  const { useGetAllUsers, useRegisterUserForAdmin } = UserHooks()
+  const { mutateAsync: registerUserForAdmin } = useRegisterUserForAdmin
+  const { formatPrice, formatDate } = useCurrency()
+  const { data: users, error, isLoading, refetch } = useGetAllUsers()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [sortField, setSortField] = useState("lastOrder")
@@ -172,21 +114,11 @@ export default function CustomersManagementPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(5)
   const [newCustomer, setNewCustomer] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     phone: "",
-    location: "",
   })
-
-  // Format date
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }).format(date)
-  }
 
   // Handle sort
   const handleSort = (field: string) => {
@@ -198,20 +130,82 @@ export default function CustomersManagementPage() {
     }
   }
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <div className="flex flex-1">
+          <AdminSidebar />
+          <main className="flex-1 p-6">
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold mb-2 dark:text-white">Customers</h1>
+              <p className="text-muted-foreground">Manage your customer database</p>
+            </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Customer Management</CardTitle>
+                  <CardDescription>View and manage all customers</CardDescription>
+                </div>
+                <div className="h-10 w-[140px] bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              </CardHeader>
+              <CardContent>
+                <FilterSkeleton />
+                <TableSkeleton />
+              </CardContent>
+            </Card>
+          </main>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <div className="flex flex-1">
+          <AdminSidebar />
+          <main className="flex-1 p-6">
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold mb-2 dark:text-white">Customers</h1>
+            </div>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Customer Management</CardTitle>
+                  <CardDescription>View and manage all customers</CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ErrorState 
+                  message={"Internal server error. Please try again later."} 
+                  onRetry={refetch}
+                />
+              </CardContent>
+            </Card>
+          </main>
+        </div>
+      </div>
+    )
+  }
+
+  if (!users) return null
   // Filter customers based on search and filters
-  const filteredCustomers = customers.filter((customer) => {
+  const filteredCustomers = users.filter((user) => {
     // Filter by search query
     if (
       searchQuery &&
-      !customer.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !customer.email.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !customer.phone.toLowerCase().includes(searchQuery.toLowerCase())
+      !user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !user.lastName.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !user.email.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !user.phone.toLowerCase().includes(searchQuery.toLowerCase())
     ) {
       return false
     }
 
     // Filter by status
-    if (selectedStatus !== "all" && customer.status !== selectedStatus) {
+    if (selectedStatus !== "all" && user.isActive !== selectedStatus) {
       return false
     }
 
@@ -221,15 +215,15 @@ export default function CustomersManagementPage() {
   // Sort customers
   const sortedCustomers = [...filteredCustomers].sort((a, b) => {
     if (sortField === "name") {
-      return sortDirection === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
+      return sortDirection === "asc" ? a.firstName.localeCompare(b.firstName) : b.firstName.localeCompare(a.firstName)
     } else if (sortField === "orders") {
-      return sortDirection === "asc" ? a.orders - b.orders : b.orders - a.orders
+      return sortDirection === "asc" ? a.totalOrders - b.totalOrders : b.totalOrders - a.totalOrders
     } else if (sortField === "totalSpent") {
       return sortDirection === "asc" ? a.totalSpent - b.totalSpent : b.totalSpent - a.totalSpent
     } else if (sortField === "lastOrder") {
       return sortDirection === "asc"
-        ? new Date(a.lastOrder).getTime() - new Date(b.lastOrder).getTime()
-        : new Date(b.lastOrder).getTime() - new Date(a.lastOrder).getTime()
+        ? new Date(a.lastOrderDate).getTime() - new Date(b.lastOrderDate).getTime()
+        : new Date(b.lastOrderDate).getTime() - new Date(a.lastOrderDate).getTime()
     }
     return 0
   })
@@ -254,31 +248,28 @@ export default function CustomersManagementPage() {
   // Handle add new customer
   const handleAddCustomer = () => {
     // Validate form
-    if (!newCustomer.name || !newCustomer.email) {
+    if (!newCustomer.firstName || !newCustomer.lastName || !newCustomer.email) {
       return
     }
 
     // Create new customer
-    const newCustomerData = {
-      id: customers.length + 1,
-      ...newCustomer,
-      status: "active",
-      orders: 0,
-      totalSpent: 0,
-      lastOrder: "",
-      dateJoined: new Date().toISOString(),
-    }
+    registerUserForAdmin({
+      firstName: newCustomer.firstName,
+      lastName: newCustomer.lastName,
+      email: newCustomer.email,
+      phone: newCustomer.phone,
+    })
 
     // Add to customers
-    setCustomers((prev) => [newCustomerData, ...prev])
+    // setCustomers((prev) => [newCustomerData, ...prev])
 
     // Reset form
-    setNewCustomer({
-      name: "",
-      email: "",
-      phone: "",
-      location: "",
-    })
+    // setNewCustomer({
+    //   name: "",
+    //   email: "",
+    //   phone: "",
+    //   location: "",
+    // })
   }
 
   return (
@@ -315,16 +306,25 @@ export default function CustomersManagementPage() {
 
                   <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
+                      <Label htmlFor="name">First Name</Label>
                       <Input
-                        id="name"
-                        name="name"
-                        placeholder="John Doe"
-                        value={newCustomer.name}
+                        id="firstName"
+                        name="firstName"
+                        placeholder="John"
+                        value={newCustomer.firstName}
                         onChange={handleNewCustomerChange}
                       />
                     </div>
-
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        name="lastName"
+                        placeholder="Doe"
+                        value={newCustomer.lastName}
+                        onChange={handleNewCustomerChange}
+                      />
+                    </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email Address</Label>
                       <Input
@@ -348,16 +348,6 @@ export default function CustomersManagementPage() {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="location">Location</Label>
-                      <Input
-                        id="location"
-                        name="location"
-                        placeholder="New York, USA"
-                        value={newCustomer.location}
-                        onChange={handleNewCustomerChange}
-                      />
-                    </div>
                   </div>
 
                   <DialogFooter>
@@ -448,9 +438,9 @@ export default function CustomersManagementPage() {
                       currentItems.map((customer) => (
                         <TableRow key={customer.id}>
                           <TableCell className="font-medium">
-                            {customer.name}
+                            {customer.firstName} {customer.lastName}
                             <div className="text-xs text-muted-foreground mt-1">
-                              Joined {formatDate(customer.dateJoined)}
+                              Joined {formatDate(customer.createdAt, true)}
                             </div>
                           </TableCell>
                           <TableCell>
@@ -460,19 +450,18 @@ export default function CustomersManagementPage() {
                             </div>
                             <div className="text-xs text-muted-foreground mt-1">{customer.phone}</div>
                           </TableCell>
-                          <TableCell>{customer.location}</TableCell>
-                          <TableCell>{customer.orders}</TableCell>
-                          <TableCell>${customer.totalSpent.toFixed(2)}</TableCell>
-                          <TableCell>{customer.lastOrder ? formatDate(customer.lastOrder) : "Never"}</TableCell>
+                          <TableCell>{customer.address?.city}</TableCell>
+                          <TableCell>{customer.totalOrders}</TableCell>
+                          <TableCell>{formatPrice(customer.totalSpent)}</TableCell>
+                          <TableCell>{customer.lastOrderDate ? formatDate(customer.lastOrderDate, true) : "Never"}</TableCell>
                           <TableCell>
                             <Badge
-                              className={`${
-                                customer.status === "active"
-                                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                  : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-                              }`}
+                              className={`${customer.isActive === "active"
+                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                                : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                                }`}
                             >
-                              {customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}
+                              {customer.isActive === "active" ? "Active" : "Inactive"}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
@@ -484,16 +473,8 @@ export default function CustomersManagementPage() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem onClick={() => router.push(`/admin/customers/${customer.id}`)}>
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View Profile
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                  <Mail className="h-4 w-4 mr-2" />
-                                  Send Email
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
                                 <DropdownMenuItem onClick={() => router.push(`/admin/customers/edit/${customer.id}`)}>
+                                  <UserRoundPen className="h-4 w-4 mr-2" />
                                   Edit Customer
                                 </DropdownMenuItem>
                               </DropdownMenuContent>

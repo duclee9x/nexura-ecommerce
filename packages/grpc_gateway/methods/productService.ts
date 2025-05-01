@@ -1,4 +1,4 @@
-import { ProductCatalogServiceClient, Product, GetProductResponse, CreateProductResponse, UpdateProductResponse, DeleteProductResponse, NewBrandResponse, RemoveBrandResponse, GetAllBrandResponse, CreateCategoryResponse, DeleteCategoryResponse, GetAllCategoryResponse, UpdateCategoryResponse, GetProductAttributesResponse, UpdateProductAttributesResponse, DeleteProductAttributesResponse, CreateProductAttributeResponse, ListProductsResponse, GetWarehousesResponse, GetVariantsForCartResponse, ValidateAndReserveResponse, ReleaseReservationRequest, ReleaseReservationResponse, ValidateAndReserveRequest, CommitReservationRequest, CommitReservationResponse, CreateCategoryRequest, CreateBrandRequest, CreateBrandResponse, RemoveBrandRequest, DeleteCategoryRequest, UpdateCategoryRequest, GetProductAttributesRequest, CreateProductAttributeRequest, UpdateProductAttributesRequest, UpdateProductRequest, CreateProductRequest, GetProductBySlugRequest, GetProductByIdRequest, DeleteProductRequest, GetVariantsForCartRequest, DeleteProductAttributesRequest } from '@nexura/grpc_gateway/protos';
+import { ProductCatalogServiceClient, Product, GetProductResponse, CreateProductResponse, UpdateProductResponse, DeleteProductResponse, NewBrandResponse, RemoveBrandResponse, GetAllBrandResponse, CreateCategoryResponse, DeleteCategoryResponse, GetAllCategoryResponse, UpdateCategoryResponse, GetProductAttributesResponse, UpdateProductAttributesResponse, DeleteProductAttributesResponse, CreateProductAttributeResponse, ListProductsResponse, GetWarehousesResponse, GetVariantsForCartResponse, ValidateAndReserveResponse, ReleaseReservationRequest, ReleaseReservationResponse, ValidateAndReserveRequest, CommitReservationRequest, CommitReservationResponse, CreateCategoryRequest, CreateBrandRequest, CreateBrandResponse, RemoveBrandRequest, DeleteCategoryRequest, UpdateCategoryRequest, GetProductAttributesRequest, CreateProductAttributeRequest, UpdateProductAttributesRequest, UpdateProductRequest, CreateProductRequest, GetProductBySlugRequest, GetProductByIdRequest, DeleteProductRequest, GetVariantsForCartRequest, DeleteProductAttributesRequest, ChangeProductStatusResponse, ChangeProductStatusRequest, GetWishlistResponse, AddWishlistRequest, GetWishlistRequest, AddWishlistResponse, RemoveWishlistResponse, RemoveWishlistRequest, GetProductRequest } from '@nexura/grpc_gateway/protos';
 import { createServiceConfig, createClient, promisifyGrpcCall } from './baseAdapter';
 
 const productConfig = createServiceConfig('ProductCatalogService', 50053);
@@ -13,11 +13,8 @@ export const productService = {
     //     return promisifyGrpcCall(productClient, 'listRecommendations', { userId, productIds });
     // },
 
-    getProductById: async (getProductByIdRequest: GetProductByIdRequest): Promise<GetProductResponse> => {
-        return promisifyGrpcCall(productClient, 'getProductById', getProductByIdRequest);
-    },
-    getProductBySlug: async (getProductBySlugRequest: GetProductBySlugRequest): Promise<GetProductResponse> => {
-        return promisifyGrpcCall(productClient, 'getProductBySlug', getProductBySlugRequest);
+    getProduct: async (getProductRequest: GetProductRequest): Promise<GetProductResponse> => {
+        return promisifyGrpcCall(productClient, 'getProduct', getProductRequest);
     },
 
     createProduct: async (createProductRequest: CreateProductRequest): Promise<CreateProductResponse> => {
@@ -98,5 +95,21 @@ export const productService = {
 
     commitReservation: async (request: CommitReservationRequest): Promise<CommitReservationResponse> => {
         return promisifyGrpcCall(productClient, 'commitReservation', request);
+    },
+
+    changeProductStatus: async (request: ChangeProductStatusRequest): Promise<ChangeProductStatusResponse> => {
+        return promisifyGrpcCall(productClient, 'changeProductStatus', request);
+    },
+
+    addWishlist: async (request: AddWishlistRequest): Promise<AddWishlistResponse> => {
+        return promisifyGrpcCall(productClient, 'addWishlist', request);
+    },
+
+    getWishlist: async (request: GetWishlistRequest): Promise<GetWishlistResponse> => {
+        return promisifyGrpcCall(productClient, 'getWishlist', request);
+    },
+
+    removeWishlist: async (request: RemoveWishlistRequest): Promise<RemoveWishlistResponse> => {
+        return promisifyGrpcCall(productClient, 'removeWishlist', request);
     },
 }; 

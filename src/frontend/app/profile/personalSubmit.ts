@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { UpdateUserRequest } from "@nexura/grpc_gateway/protos"
-import { useUserActions } from "@/hooks/use-user"
+import UserHooks from "@/hooks/user-hooks"
 export type FormState = {
     message: string
     success: boolean
@@ -18,7 +18,7 @@ const personalFormSchema = z.object({
     }).optional(),
     dateOfBirth: z.string().refine((val) => {
         const date = new Date(val);
-        return !isNaN(date.getTime());
+        return !Number.isNaN(date.getTime());
     }, {
         message: "Invalid date format"
     }).optional(),
@@ -27,8 +27,8 @@ const personalFormSchema = z.object({
 
 
 export async function onPersonalSubmitAction(prev: FormState, request: UpdateUserRequest): Promise<FormState> {
-    const { updateUser } = useUserActions()
-    const { mutate: updateUserMutation } = updateUser
+    const { useUpdateUser } = UserHooks()
+    const { mutateAsync: updateUser } = useUpdateUser
     const validatedFields = personalFormSchema.safeParse({
         userId: request.user?.id,
         firstName: request.user?.firstName,
@@ -75,7 +75,7 @@ export async function onPersonalSubmitAction(prev: FormState, request: UpdateUse
             currentPassword: "",
             newPassword: ""
         }
-        updateUserMutation(updateUserRequest)
+        await updateUser(updateUserRequest)
         return {
             message: "Profile updated successfully",
             success: true

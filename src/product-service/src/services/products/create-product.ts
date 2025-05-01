@@ -7,7 +7,6 @@ const prisma = new PrismaClient()
 
 export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, CreateProductResponse>, callback: sendUnaryData<CreateProductResponse>) => {
   try {
-    console.log("Creating product", call.request)
     const productData = call.request.product
     if (productData == undefined) {
       throw new Error("Product data is required")
@@ -19,21 +18,22 @@ export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, 
     if (!productData.sku) throw new Error("Product SKU is required")
     if (!productData.variants?.length) throw new Error("At least one variant is required")
 
-    // Find or create default warehouse
-    const defaultWarehouse = await prisma.warehouse.upsert({
+    // Check for existing SKUs first
+    const variantSkus = productData.variants?.map(variant => variant.sku) || []
+    const existingVariants = await prisma.productVariant.findMany({
       where: {
-        code: "WH-DEFAULT"
+        sku: {
+          in: variantSkus
+        }
       },
-      update: {},
-      create: {
-        name: "Default Warehouse",
-        code: "WH-DEFAULT",
-        status: "active",
-        address: "Default Location",
-        manager: "System",
-        contact: "system@nexura.com"
+      select: {
+        sku: true
       }
     })
+
+    if (existingVariants.length > 0) {
+      throw new Error(`The following SKUs already exist: ${existingVariants.map(v => v.sku).join(', ')}`)
+    }
 
     const images = productData.images?.map((image) => ({
       url: image.url,
@@ -52,145 +52,223 @@ export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, 
       displayOrder: attribute.displayOrder,
     })) || []
 
-    // Check for existing SKUs first
-    const existingSkus = await Promise.all(
-      productData.variants?.map(async (variant) => {
-        const existingVariant = await prisma.productVariant.findUnique({
-          where: { sku: variant.sku }
-        })
-        return existingVariant ? variant.sku : null
-      }) || []
-    )
-
-    const duplicateSkus = existingSkus.filter(sku => sku !== null)
-    if (duplicateSkus.length > 0) {
-      throw new Error(`The following SKUs already exist: ${duplicateSkus.join(', ')}`)
-    }
-
-    const variants = productData.variants?.map((variant) => {
-      // Create a new variant object without the ID if it's a generated one
-      const variantData = {
-        sku: variant.sku,
-        price: variant.price,
-        lowStockThreshold: variant.lowStockThreshold,
-        imageIds: variant.imageIds || [],
-        attributes: {
-          create: variant.attributes?.map((attr) => ({
-            name: attr.name,
-            value: attr.value,
-            extraValue: attr.extraValue || "",
-          })) || [],
-        },
-        warehouse: {
-          connect: {
-            id: variant.warehouseId || defaultWarehouse.id
-          }
-        },
-        stock: {
-          create: {
-            quantity: variant.stock?.quantity || 0,
-            reserved: variant.stock?.reserved || 0
-          }
+    const variants = productData.variants?.map((variant) => ({
+      name: variant.name,
+      sku: variant.sku,
+      price: variant.price,
+      lowStockThreshold: variant.lowStockThreshold,
+      imageIds: variant.imageIds || [],
+      attributes: {
+        create: variant.attributes?.map((attr) => ({
+          name: attr.name,
+          value: attr.value,
+          extraValue: attr.extraValue || "",
+        })) || [],
+      },
+      warehouse: {
+        connect: {
+          id: variant.warehouseId
+        }
+      },
+      stock: {
+        create: {
+          quantity: variant.stock?.quantity || 0,
+          reserved: variant.stock?.reserved || 0
         }
       }
+    })) || []
 
-      return variantData
-    }) || []
+    // Execute all database operations in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Find or create default warehouse
+      // const defaultWarehouse = await tx.warehouse.upsert({
+      //   where: {
+      //     code: "WH-DEFAULT"
+      //   },
+      //   update: {},
+      //   create: {
+      //     name: "Default Warehouse",
+      //     code: "WH-DEFAULT",
+      //     status: "active",
+      //     address: "Default Location",
+      //     manager: "System",
+      //     contact: "system@nexura.com"
+      //   }
+      // })
 
-    const product = await prisma.product.create({
-      data: {
-        name: productData.name,
-        slug: productData.slug,
-        description: productData.description,
-        costPrice: productData.costPrice,
-        basePrice: productData.basePrice,
-        sku: productData.sku,
-        barcode: productData.barcode,
-        categories: productData.categories,
-        images: {
-          create: images,
-        },
-        attributes: {
-          create: attributes,
-        },
-        variants: {
-          create: variants,
-        },
-        productTags: {
-          create: productData.productTags?.map(productTag => {
-            if (!productTag?.tag?.name) {
-              throw new Error("Tag name is required");
+      // Create the product
+      const product = await tx.product.create({
+        data: {
+          name: productData.name,
+          slug: productData.slug,
+          description: productData.description,
+          costPrice: productData.costPrice,
+          basePrice: productData.basePrice,
+          sku: productData.sku,
+          barcode: productData.barcode,
+          categories: productData.categories,
+          images: {
+            create: images,
+          },
+          attributes: {
+            create: attributes,
+          },
+          variants: {
+            create: variants,
+          },
+          productTags: {
+            create: productData.productTags?.map(productTag => {
+              if (!productTag?.tag?.name) {
+                throw new Error("Tag name is required");
+              }
+              return {
+                tag: {
+                  connectOrCreate: {
+                    where: { name: productTag.tag.name },
+                    create: { name: productTag.tag.name }
+                  }
+                }
+              };
+            }) || []
+          },
+          brandId: productData.brandId,
+          featured: productData.featured,
+          status: productData.status,
+          dimensions: productData.dimensions ? {
+            create: {
+              length: productData.dimensions.length,
+              width: productData.dimensions.width,
+              height: productData.dimensions.height,
+              weight: productData.dimensions.weight,
             }
-            return {
-              tag: {
-                connectOrCreate: {
-                  where: { name: productTag.tag.name },
-                  create: { name: productTag.tag.name }
+          } : undefined,
+          seo: productData.seo ? {
+            create: {
+              title: productData.seo.title,
+              description: productData.seo.description,
+              keywords: productData.seo.keywords,
+            }
+          } : undefined,
+          taxable: productData.taxable,
+          shippable: productData.shippable,
+        },
+        include: {
+          images: true,
+          attributes: true,
+          variants: {
+            include: {
+              attributes: true,
+              warehouse: true,
+              stock: true
+            }
+          },
+          sizeCharts: {
+            include: {
+              images: true,
+              columns: true,
+              rows: true
+            }
+          },
+          dimensions: true,
+          seo: true,
+          productTags: {
+            include: {
+              tag: true
+            }
+          }
+        }
+      })
+
+      // Create related products if they exist
+      if (productData.relatedProducts?.length) {
+        await tx.relatedProduct.createMany({
+          data: productData.relatedProducts.map(relatedProduct => ({
+            fromProductId: product.id,
+            toProductId: relatedProduct.id
+          }))
+        })
+      }
+
+      // Fetch the created product with all relations
+      const productWithRelations = await tx.product.findUnique({
+        where: { id: product.id },
+        include: {
+          images: true,
+          attributes: true,
+          variants: {
+            include: {
+              attributes: true,
+              warehouse: true,
+              stock: true
+            }
+          },
+          sizeCharts: {
+            include: {
+              images: true,
+              columns: true,
+              rows: true
+            }
+          },
+          dimensions: true,
+          seo: true,
+          productTags: {
+            include: {
+              tag: true
+            }
+          },
+          relatedTo: {
+            include: {
+              toProduct: {
+                include: {
+                  images: true,
+                  attributes: true,
+                  variants: {
+                    include: {
+                      attributes: true,
+                      warehouse: true,
+                      stock: true
+                    }
+                  },
+                  sizeCharts: {
+                    include: {
+                      images: true,
+                      columns: true,
+                      rows: true
+                    }
+                  },
+                  dimensions: true,
+                  seo: true,
+                  productTags: {
+                    include: {
+                      tag: true
+                    }
+                  }
                 }
               }
-            };
-          }) || []
-        },
-        brandId: productData.brandId,
-        featured: productData.featured,
-        status: productData.status,
-        dimensions: productData.dimensions ? {
-          create: {
-            length: productData.dimensions.length,
-            width: productData.dimensions.width,
-            height: productData.dimensions.height,
-            weight: productData.dimensions.weight,
-          }
-        } : undefined,
-        seo: productData.seo ? {
-          create: {
-            title: productData.seo.title,
-            description: productData.seo.description,
-            keywords: productData.seo.keywords,
-          }
-        } : undefined,
-        taxable: productData.taxable,
-        shippable: productData.shippable,
-      },
-      include: {
-        images: true,
-        attributes: true,
-        variants: {
-          include: {
-            attributes: true,
-            warehouse: true,
-            stock: true
-          }
-        },
-        sizeCharts: {
-          include: {
-            images: true,
-            columns: true,
-            rows: true
-          }
-        },
-        dimensions: true,
-        seo: true,
-        productTags: {
-          include: {
-            tag: true
+            }
           }
         }
+      })
+
+      if (!productWithRelations) {
+        throw new Error("Failed to fetch created product with relations")
       }
+
+      return productWithRelations
     })
 
     const response: CreateProductResponse = {
       product: {
-        id: product.id,
-        name: product.name,
-        slug: product.slug,
-        description: product.description,
-        costPrice: product.costPrice,
-        basePrice: product.basePrice,
-        sku: product.sku,
-        barcode: product.barcode || "",
-        categories: product.categories,
-        productTags: product.productTags.map((pt) => ({
+        id: result.id,
+        name: result.name,
+        slug: result.slug,
+        description: result.description,
+        costPrice: result.costPrice,
+        basePrice: result.basePrice,
+        sku: result.sku,
+        barcode: result.barcode || "",
+        categories: result.categories,
+        productTags: result.productTags.map((pt) => ({
           id: pt.id,
           tag: {
             id: pt.tag.id,
@@ -198,15 +276,127 @@ export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, 
             createdAt: pt.tag.createdAt.toISOString(),
             updatedAt: pt.tag.updatedAt.toISOString()
           },
-          productId: product.id
+          productId: result.id
         })),
-        images: product.images.map((img) => ({
+        images: result.images.map((img) => ({
           id: img.id,
           url: img.url,
           isMain: img.isMain,
           blurhash: img.blurhash,
         })),
-        sizeCharts: product.sizeCharts.map((sizeChart) => ({
+        relatedProducts: result.relatedTo.map(rp => ({
+          id: rp.toProduct.id,
+          name: rp.toProduct.name,
+          slug: rp.toProduct.slug,
+          description: rp.toProduct.description,
+          costPrice: rp.toProduct.costPrice,
+          basePrice: rp.toProduct.basePrice,
+          sku: rp.toProduct.sku,
+          barcode: rp.toProduct.barcode || "",
+          categories: rp.toProduct.categories,
+          images: rp.toProduct.images.map(img => ({
+            id: img.id,
+            url: img.url,
+            isMain: img.isMain,
+            blurhash: img.blurhash,
+          })),
+          attributes: rp.toProduct.attributes.map(attr => ({
+            id: attr.id,
+            name: attr.name,
+            required: attr.required,
+            visible: attr.visible,
+            values: attr.values,
+            variantable: attr.variantable,
+            filterable: attr.filterable,
+            searchable: attr.searchable,
+            displayOrder: attr.displayOrder,
+            productId: rp.toProduct.id,
+          })),
+          variants: rp.toProduct.variants.map(variant => ({
+            id: variant.id,
+            sku: variant.sku,
+            name: variant.name,
+            price: variant.price,
+            lowStockThreshold: variant.lowStockThreshold,
+            warehouseId: variant.warehouseId,
+            imageIds: variant.imageIds,
+            attributes: variant.attributes.map(attr => ({
+              id: attr.id,
+              name: attr.name,
+              value: attr.value,
+              extraValue: attr.extraValue || "",
+              variantId: variant.id,
+            })),
+            stock: variant.stock ? {
+              quantity: variant.stock.quantity,
+              reserved: variant.stock.reserved
+            } : {
+              quantity: 0,
+              reserved: 0
+            }
+          })),
+          productTags: rp.toProduct.productTags.map(pt => ({
+            id: pt.id,
+            tag: {
+              id: pt.tag.id,
+              name: pt.tag.name,
+              createdAt: pt.tag.createdAt.toISOString(),
+              updatedAt: pt.tag.updatedAt.toISOString()
+            },
+            productId: rp.toProduct.id
+          })),
+          sizeCharts: rp.toProduct.sizeCharts.map(sizeChart => ({
+            id: sizeChart.id,
+            name: sizeChart.name,
+            description: sizeChart.description || "",
+            category: sizeChart.category,
+            productId: sizeChart.productId,
+            images: sizeChart.images.map(img => ({
+              id: img.id,
+              url: img.url,
+              name: img.name,
+              sizeChartId: img.sizeChartId,
+              createdAt: img.createdAt.toISOString(),
+            })),
+            createdAt: sizeChart.createdAt.toISOString(),
+            updatedAt: sizeChart.updatedAt.toISOString(),
+            columns: sizeChart.columns.map(column => ({
+              id: column.id,
+              name: column.name,
+              type: column.type,
+              unit: column.unit || "",
+              sizeChartId: column.sizeChartId,
+              createdAt: column.createdAt.toISOString(),
+            })),
+            rows: sizeChart.rows.map(row => ({
+              id: row.id,
+              name: row.name,
+              cells: row.values as any,
+              sizeChartId: row.sizeChartId,
+              createdAt: row.createdAt.toISOString(),
+            })),
+          })),
+          relatedProducts: [], // Related products of related products are not included
+          brandId: rp.toProduct.brandId || "",
+          featured: rp.toProduct.featured,
+          status: rp.toProduct.status,
+          dimensions: rp.toProduct.dimensions ? {
+            length: rp.toProduct.dimensions.length,
+            width: rp.toProduct.dimensions.width,
+            height: rp.toProduct.dimensions.height,
+            weight: rp.toProduct.dimensions.weight,
+          } : undefined,
+          seo: rp.toProduct.seo ? {
+            title: rp.toProduct.seo.title,
+            description: rp.toProduct.seo.description,
+            keywords: rp.toProduct.seo.keywords,
+          } : undefined,
+          taxable: rp.toProduct.taxable,
+          shippable: rp.toProduct.shippable,
+          createdAt: rp.toProduct.createdAt.toISOString(),
+          updatedAt: rp.toProduct.updatedAt.toISOString(),
+        })),
+        sizeCharts: result.sizeCharts.map((sizeChart) => ({
           id: sizeChart.id,
           name: sizeChart.name,
           description: sizeChart.description || "",
@@ -237,7 +427,7 @@ export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, 
             createdAt: row.createdAt.toISOString(),
           })),
         })),
-        attributes: product.attributes.map((attr) => ({
+        attributes: result.attributes.map((attr) => ({
           id: attr.id,
           name: attr.name,
           required: attr.required,
@@ -247,11 +437,12 @@ export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, 
           filterable: attr.filterable,
           searchable: attr.searchable,
           displayOrder: attr.displayOrder,
-          productId: product.id,
+          productId: result.id,
         })),
-        variants: product.variants.map((variant) => ({
+        variants: result.variants.map((variant) => ({
           id: variant.id,
           sku: variant.sku,
+          name: variant.name,
           price: variant.price,
           lowStockThreshold: variant.lowStockThreshold,
           warehouseId: variant.warehouseId,
@@ -261,6 +452,7 @@ export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, 
             name: attr.name,
             value: attr.value,
             extraValue: attr.extraValue || "",
+            variantId: variant.id,
           })),
           stock: variant.stock ? {
             quantity: variant.stock.quantity,
@@ -270,24 +462,24 @@ export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, 
             reserved: 0
           }
         })),
-        brandId: product.brandId || "",
-        featured: product.featured,
-        status: product.status,
-        dimensions: product.dimensions ? {
-          length: product.dimensions.length,
-          width: product.dimensions.width,
-          height: product.dimensions.height,
-          weight: product.dimensions.weight,
+        brandId: result.brandId || "",
+        featured: result.featured,
+        status: result.status,
+        dimensions: result.dimensions ? {
+          length: result.dimensions.length,
+          width: result.dimensions.width,
+          height: result.dimensions.height,
+          weight: result.dimensions.weight,
         } : undefined,
-        seo: product.seo ? {
-          title: product.seo.title,
-          description: product.seo.description,
-          keywords: product.seo.keywords,
+        seo: result.seo ? {
+          title: result.seo.title,
+          description: result.seo.description,
+          keywords: result.seo.keywords,
         } : undefined,
-        taxable: product.taxable,
-        shippable: product.shippable,
-        createdAt: product.createdAt.toISOString(),
-        updatedAt: product.updatedAt.toISOString(),
+        taxable: result.taxable,
+        shippable: result.shippable,
+        createdAt: result.createdAt.toISOString(),
+        updatedAt: result.updatedAt.toISOString(),
       }
     }
 

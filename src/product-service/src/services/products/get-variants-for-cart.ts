@@ -16,6 +16,7 @@ export const getVariantsForCart = async (call: ServerUnaryCall<GetVariantsForCar
         id: true,
         price: true,
         imageIds: true,
+        sku: true,
         stock: true,
         attributes: true,
         product: {
@@ -53,6 +54,7 @@ export const getVariantsForCart = async (call: ServerUnaryCall<GetVariantsForCar
           quantity: variant.stock.quantity,
           reserved: variant.stock.reserved,
         } : undefined,
+        sku: variant.sku,
         variantName: variant.attributes.map(attribute => attribute.name + ": " + attribute.value).join(", "),
         productName: variant.product.name,
         productSlug: variant.product.slug,

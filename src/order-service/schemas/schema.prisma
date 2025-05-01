@@ -49,6 +49,11 @@ model OrderItem {
   orderId String
   productId String
   variantId String
+  productName String
+  productSlug String
+  variantName String
+  image String
+  sku String
   quantity Int
   price Float
   createdAt DateTime @default(now())

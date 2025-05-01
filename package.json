@@ -6,13 +6,17 @@
     "packages/*"
   ],
   "scripts": {
-    "proto": "docker compose -f docker-compose-dev.yml up protoc -d && mv packages/grpc_gateway/protos/generated/nexura_pb2* src/email-service/protos"
+    "proto": "cp ./packages/grpc_gateway/protos/nexura.proto ./src/email-service/protos && docker compose -f docker-compose-dev.yml up protoc -d && mv packages/grpc_gateway/protos/generated/nexura_pb2* src/email-service/protos"
   },
   "private": true,
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "prettier": "^3.5.3",
+    "eslint": "^9.25.1"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "^5",
+    "prettier": "^3.5.3",
+    "eslint": "^9.25.1"
   }
 }

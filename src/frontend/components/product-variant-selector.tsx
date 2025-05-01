@@ -96,39 +96,7 @@ export function ProductVariantSelector({
         }) || null
     }
 
-    // Get available values for an attribute based on current selections
-    const getAvailableValues = (attributeName: string) => {
-        // If no selections yet, return all values for this attribute
-        if (Object.keys(selectedValues).length === 0) {
-            return Array.from(variantAttributes[attributeName]?.values || [])
-        }
-
-        // Get all variants that match current selections (excluding the current attribute)
-        const matchingVariants = variants.filter((variant) => {
-            return Object.entries(selectedValues).every(([attrName, value]) => {
-                // Skip the current attribute
-                if (attrName === attributeName) return true
-
-                // Check if this variant matches the selected value for other attributes
-                return variant.attributes.some(
-                    (attr) => attr.name === attrName && attr.value === value
-                )
-            })
-        })
-
-        // Get unique values for this attribute from matching variants
-        const availableValues = new Set<string>()
-        matchingVariants.forEach((variant) => {
-            variant.attributes.forEach((attr) => {
-                if (attr.name === attributeName) {
-                    availableValues.add(attr.value)
-                }
-            })
-        })
-
-        return Array.from(availableValues)
-    }
-
+  
     const isValueAvailable = (attributeName: string, value: string) => {
         // Find variants that have this attribute value
         const matchingVariants = variants.filter((variant) => {

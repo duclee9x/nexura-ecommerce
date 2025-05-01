@@ -18,6 +18,7 @@ type CurrencyContextType = {
   setCurrency: (currency: CurrencyCode) => void
   formatPrice: (price: number) => string
   convertPrice: (price: number) => number
+  formatDate: (dateString: string, short?: boolean) => string
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined)
@@ -74,7 +75,34 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     // For other currencies, keep 2 decimal places
     return Number.parseFloat((price * rate).toFixed(2))
   }
+  const formatDate = (dateString: string, short?: boolean): string => {
+    const date = new Date(dateString);
+    let locale;
+    if (currency === "VND") {
+      locale = "vi-VN";
+    } else {
+      locale = "en-US";
+    }
 
+    const datePart = date.toLocaleDateString(locale, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    const timePart = date.toLocaleTimeString(locale, {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    if (short) {
+      return `${date.toLocaleDateString(locale, {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+      })}`;
+    }
+    return `${datePart} - ${timePart}`;
+  }
   // Format price with currency symbol
   const formatPrice = (price: number): string => {
     const convertedPrice = convertPrice(price)
@@ -92,7 +120,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <CurrencyContext.Provider value={{ currency, setCurrency, formatPrice, convertPrice }}>
+    <CurrencyContext.Provider value={{ currency, setCurrency, formatPrice, convertPrice, formatDate }}>
       {children}
     </CurrencyContext.Provider>
   )

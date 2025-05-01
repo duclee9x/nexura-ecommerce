@@ -8,11 +8,11 @@ import {
     OrderServiceService, 
     OrchestratorServiceService, 
     ServiceName, 
-    AddressServiceService 
+    AddressServiceService,
+    PaymentServiceService
 } from "@nexura/grpc_gateway/protos";
-import { HealthServiceImpl } from "@nexura/grpc_gateway/protos";
 import { ReflectionService } from "@grpc/reflection";
-import { protoDefinition } from "@nexura/grpc_gateway/protos";
+import { protoDefinition,HealthServiceImpl } from "@nexura/grpc_gateway/protos/lib";
 
 export async function gracefulShutdown(signal: string, server: Server) {
     logger.info(`Received ${signal} signal. Shutting down gracefully...`);
@@ -26,7 +26,8 @@ type GrpcService =
     | typeof ProductCatalogServiceService
     | typeof OrderServiceService
     | typeof OrchestratorServiceService
-    | typeof AddressServiceService;
+    | typeof AddressServiceService
+    | typeof PaymentServiceService;
 
 export interface ServiceDefinition {
     service: GrpcService;

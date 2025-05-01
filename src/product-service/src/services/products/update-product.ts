@@ -8,10 +8,12 @@ const prisma = new PrismaClient()
 export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, UpdateProductResponse>, callback: sendUnaryData<UpdateProductResponse>) => {
   try {
     const request = call.request
-    if (request.product == undefined) {
+    if (!request.product) {
       throw new Error("Product is required")
     }
-    console.log(request.product, "request")
+
+    const product = request.product
+
     // Find or create default warehouse
     const defaultWarehouse = await prisma.warehouse.upsert({
       where: {
@@ -27,267 +29,179 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
         contact: "system@nexura.com"
       }
     })
+    await prisma.$transaction(async (tx) => {
+      if (request.relatedProductIds && request.relatedProductIds.length > 0) {
+        // First, delete existing related products
+        await tx.relatedProduct.deleteMany({
+          where: {
+            fromProductId: product.id
+          }
+        })
 
-    // Update product with all related data
-    const updatedProduct = await prisma.product.update({
-      where: {
-        id: request.product.id,
-      },
-      data: {
-        name: request.product.name,
-        slug: request.product.slug,
-        description: request.product.description,
-        costPrice: request.product.costPrice,
-        basePrice: request.product.basePrice,
-        sku: request.product.sku,
-        barcode: request.product.barcode,
-        brandId: request.product.brandId,
-        featured: request.product.featured,
-        status: request.product.status,
-        taxable: request.product.taxable,
-        shippable: request.product.shippable,
-        categories: request.product.categories,
-        images: {
-          deleteMany: {
-            id: {
-              notIn: request.product.images?.map(img => img.id) || []
-            }
-          },
-          upsert: request.product.images?.map((img) => ({
-            where: { id: img.id },
-            create: {
-              id: img.id,
-              url: img.url,
-              blurhash: img.blurhash,
-              isMain: img.isMain,
-            },
-            update: {
-              url: img.url,
-              blurhash: img.blurhash,
-              isMain: img.isMain,
-            }
-          })) || [],
+        // Then create new related product relationships
+        const relatedProducts = request.relatedProductIds.map((id) => ({
+          fromProductId: product.id,
+          toProductId: id
+        }))
+
+        await prisma.relatedProduct.createMany({
+          data: relatedProducts
+        })
+      }
+      // Update product with all related data
+      await tx.product.update({
+        where: {
+          id: product.id,
         },
-        attributes: {
-          deleteMany: {},
-          create: request.product.attributes?.map((attr) => ({
-            name: attr.name,
-            required: attr.required,
-            visible: attr.visible,
-            values: attr.values,
-            variantable: attr.variantable,
-            filterable: attr.filterable,
-            searchable: attr.searchable,
-            displayOrder: attr.displayOrder,
-          })) || [],
-        },
-        variants: {
-          deleteMany: {},
-          create: request.product.variants?.map((variant) => ({
-            sku: variant.sku,
-            price: variant.price,
-            lowStockThreshold: variant.lowStockThreshold,
-            imageIds: variant.imageIds,
-            attributes: {
-              create: variant.attributes?.map((attr) => ({
-                name: attr.name,
-                value: attr.value,
-                extraValue: attr.extraValue || "",
-              })) || [],
-            },
-            warehouseId: variant.warehouseId || defaultWarehouse.id,
-            stock: {
-              create: {
-                quantity: variant.stock?.quantity ?? undefined,
-                reserved: variant.stock?.reserved ?? undefined
+        data: {
+          name: product.name,
+          slug: product.slug,
+          description: product.description,
+          costPrice: product.costPrice,
+          basePrice: product.basePrice,
+          sku: product.sku,
+          barcode: product.barcode,
+          brandId: product.brandId,
+          featured: product.featured,
+          status: product.status,
+          taxable: product.taxable,
+          shippable: product.shippable,
+          categories: product.categories,
+          images: {
+            deleteMany: {
+              id: {
+                notIn: product.images?.map(img => img.id) || []
               }
-            }
-          })) || [],
-        },
-        productTags: {
-          deleteMany: {},
-          create: request.product.productTags?.map(productTag => {
-            if (!productTag?.tag?.name) {
-              throw new Error("Tag name is required");
-            }
-            return {
-              tag: {
-                connectOrCreate: {
-                  where: { name: productTag.tag.name },
-                  create: { name: productTag.tag.name }
+            },
+            upsert: product.images?.map((img) => ({
+              where: { id: img.id },
+              create: {
+                id: img.id,
+                url: img.url,
+                blurhash: img.blurhash,
+                isMain: img.isMain,
+              },
+              update: {
+                url: img.url,
+                blurhash: img.blurhash,
+                isMain: img.isMain,
+              }
+            })) || [],
+          },
+          attributes: {
+            deleteMany: {},
+            create: product.attributes?.map((attr) => ({
+              name: attr.name,
+              required: attr.required,
+              visible: attr.visible,
+              values: attr.values,
+              variantable: attr.variantable,
+              filterable: attr.filterable,
+              searchable: attr.searchable,
+              displayOrder: attr.displayOrder,
+            })) || [],
+          },
+          variants: {
+            deleteMany: {},
+            create: product.variants?.map((variant) => ({
+              sku: variant.sku,
+              price: variant.price,
+              lowStockThreshold: variant.lowStockThreshold,
+              imageIds: variant.imageIds,
+              attributes: {
+                create: variant.attributes?.map((attr) => ({
+                  name: attr.name,
+                  value: attr.value,
+                  extraValue: attr.extraValue || "",
+                })) || [],
+              },
+              warehouseId: variant.warehouseId || defaultWarehouse.id,
+              stock: {
+                create: {
+                  quantity: variant.stock?.quantity ?? undefined,
+                  reserved: variant.stock?.reserved ?? undefined
                 }
               }
-            };
-          }) || []
-        },
-        dimensions: request.product.dimensions ? {
-          upsert: {
-            create: {
-              length: request.product.dimensions.length || 0,
-              width: request.product.dimensions.width || 0,
-              height: request.product.dimensions.height || 0,
-              weight: request.product.dimensions.weight || 0,
-            },
-            update: {
-              length: request.product.dimensions.length || 0,
-              width: request.product.dimensions.width || 0,
-              height: request.product.dimensions.height || 0,
-              weight: request.product.dimensions.weight || 0,
+            })) || [],
+          },
+          productTags: {
+            deleteMany: {},
+            create: product.productTags?.map(productTag => {
+              if (!productTag?.tag?.name) {
+                throw new Error("Tag name is required");
+              }
+              return {
+                tag: {
+                  connectOrCreate: {
+                    where: { name: productTag.tag.name },
+                    create: { name: productTag.tag.name }
+                  }
+                }
+              };
+            }) || []
+          },
+          dimensions: product.dimensions ? {
+            upsert: {
+              create: {
+                length: product.dimensions.length || 0,
+                width: product.dimensions.width || 0,
+                height: product.dimensions.height || 0,
+                weight: product.dimensions.weight || 0,
+              },
+              update: {
+                length: product.dimensions.length || 0,
+                width: product.dimensions.width || 0,
+                height: product.dimensions.height || 0,
+                weight: product.dimensions.weight || 0,
+              }
             }
-          }
-        } : undefined,
-        seo: request.product.seo ? {
-          upsert: {
-            create: {
-              title: request.product.seo.title,
-              description: request.product.seo.description,
-              keywords: request.product.seo.keywords,
-            },
-            update: {
-              title: request.product.seo.title,
-              description: request.product.seo.description,
-              keywords: request.product.seo.keywords,
+          } : undefined,
+          seo: product.seo ? {
+            upsert: {
+              create: {
+                title: product.seo.title,
+                description: product.seo.description,
+                keywords: product.seo.keywords,
+              },
+              update: {
+                title: product.seo.title,
+                description: product.seo.description,
+                keywords: product.seo.keywords,
+              }
             }
-          }
-        } : undefined,
-      },
-      include: {
-        images: true,
-        attributes: true,
-        variants: {
-          include: {
-            attributes: true,
-            warehouse: true,
-            stock: true
-          }
+          } : undefined,
         },
-        sizeCharts: {
-          include: {
-            columns: true,
-            rows: true,
-            images: true,
-          }
-        },
-        productTags: {
-          include: {
-            tag: true
-          }
-        },
-        dimensions: true,
-        seo: true
-      }
+        include: {
+          images: true,
+          attributes: true,
+          variants: {
+            include: {
+              attributes: true,
+              warehouse: true,
+              stock: true
+            }
+          },
+          sizeCharts: {
+            include: {
+              columns: true,
+              rows: true,
+              images: true,
+            }
+          },
+          productTags: {
+            include: {
+              tag: true
+            }
+          },
+          dimensions: true,
+          seo: true
+        }
+      })
     })
 
     const response: UpdateProductResponse = {
-      product: {
-        id: updatedProduct.id,
-        name: updatedProduct.name,
-        slug: updatedProduct.slug,
-        description: updatedProduct.description,
-        costPrice: updatedProduct.costPrice,
-        basePrice: updatedProduct.basePrice,
-        sizeCharts: updatedProduct.sizeCharts.map((sizeChart) => ({
-          id: sizeChart.id,
-          name: sizeChart.name,
-          description: sizeChart.description || "",
-          columns: sizeChart.columns.map((column) => ({
-            id: column.id,
-            name: column.name,
-            type: column.type,
-            unit: column.unit || "",
-            sizeChartId: column.sizeChartId,
-            createdAt: column.createdAt.toISOString(),
-          })),
-          rows: sizeChart.rows.map((row) => ({
-            id: row.id,
-            name: row.name,
-            values: row.values,
-            sizeChartId: row.sizeChartId,
-            createdAt: row.createdAt.toISOString(),
-            cells: []
-          })),
-          images: sizeChart.images.map((image) => ({
-            id: image.id,
-            name: image.name,
-            createdAt: image.createdAt.toISOString(),
-            url: image.url,
-            sizeChartId: image.sizeChartId,
-          })),
-          category: sizeChart.category,
-          createdAt: sizeChart.createdAt.toISOString(),
-          updatedAt: sizeChart.updatedAt.toISOString(),
-          productId: sizeChart.productId,
-        })),
-        sku: updatedProduct.sku,
-        barcode: updatedProduct.barcode || "",
-        categories: updatedProduct.categories,
-        productTags: updatedProduct.productTags.map((pt) => ({
-          id: pt.id,
-          tag: {
-            id: pt.tag.id,
-            name: pt.tag.name,
-            createdAt: pt.tag.createdAt.toISOString(),
-            updatedAt: pt.tag.updatedAt.toISOString()
-          },
-          productId: updatedProduct.id
-        })),
-        images: updatedProduct.images.map((img) => ({
-          id: img.id,
-          blurhash: img.blurhash,
-          url: img.url,
-          isMain: img.isMain,
-        })),
-        attributes: updatedProduct.attributes.map((attr) => ({
-          id: attr.id,
-          name: attr.name,
-          required: attr.required,
-          visible: attr.visible,
-          values: attr.values,
-          variantable: attr.variantable,
-          filterable: attr.filterable,
-          searchable: attr.searchable,
-          displayOrder: attr.displayOrder,
-          productId: updatedProduct.id,
-        })),
-        variants: updatedProduct.variants.map((variant) => ({
-          id: variant.id,
-          sku: variant.sku,
-          price: variant.price,
-          lowStockThreshold: variant.lowStockThreshold,
-          warehouseId: variant.warehouseId,
-          imageIds: variant.imageIds,
-          attributes: variant.attributes.map((attr) => ({
-            id: attr.id,
-            name: attr.name,
-            value: attr.value,
-            extraValue: attr.extraValue || "",
-          })),
-          stock: {
-            quantity: variant.stock?.quantity ?? 0,
-            reserved: variant.stock?.reserved ?? 0
-          }
-        })),
-        brandId: updatedProduct.brandId || "",
-        featured: updatedProduct.featured,
-        status: updatedProduct.status,
-        dimensions: updatedProduct.dimensions ? {
-          length: updatedProduct.dimensions.length || 0,
-          width: updatedProduct.dimensions.width || 0,
-          height: updatedProduct.dimensions.height || 0,
-          weight: updatedProduct.dimensions.weight || 0,
-        } : undefined,
-        seo: updatedProduct.seo ? {
-          title: updatedProduct.seo.title,
-          description: updatedProduct.seo.description,
-          keywords: updatedProduct.seo.keywords,
-        } : undefined,
-        taxable: updatedProduct.taxable,
-        shippable: updatedProduct.shippable,
-        createdAt: updatedProduct.createdAt.toISOString(),
-        updatedAt: updatedProduct.updatedAt.toISOString(),
-      }
+      success: true
     }
-    console.log(response, "response update")
     callback(null, response)
   } catch (error) {
     handleError(error as ServiceError, callback)

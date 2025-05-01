@@ -128,12 +128,23 @@ exports.Prisma.OrderScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.OrderNoteScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  note: 'note',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.OrderItemScalarFieldEnum = {
   id: 'id',
   orderId: 'orderId',
   variantId: 'variantId',
   quantity: 'quantity',
   productId: 'productId',
+  productName: 'productName',
+  productSlug: 'productSlug',
+  variantName: 'variantName',
+  sku: 'sku',
   price: 'price',
   image: 'image',
   createdAt: 'createdAt',
@@ -144,10 +155,53 @@ exports.Prisma.ShippingScalarFieldEnum = {
   id: 'id',
   orderId: 'orderId',
   method: 'method',
-  trackingNumber: 'trackingNumber',
+  cost: 'cost',
+  shippingAddressId: 'shippingAddressId',
+  estimatedDelivery: 'estimatedDelivery',
+  trackingId: 'trackingId',
   status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TrackingScalarFieldEnum = {
+  id: 'id',
+  number: 'number',
+  carrier: 'carrier',
+  status: 'status',
+  currentLocation: 'currentLocation',
+  coordinatesId: 'coordinatesId'
+};
+
+exports.Prisma.TrackingEventScalarFieldEnum = {
+  id: 'id',
+  trackingId: 'trackingId',
+  date: 'date',
+  time: 'time',
+  location: 'location',
+  status: 'status',
+  description: 'description'
+};
+
+exports.Prisma.CoordinatesScalarFieldEnum = {
+  id: 'id',
+  originId: 'originId',
+  currentId: 'currentId',
+  destinationId: 'destinationId'
+};
+
+exports.Prisma.PointScalarFieldEnum = {
+  id: 'id',
+  lat: 'lat',
+  lng: 'lng'
+};
+
+exports.Prisma.OrderStatusHistoryScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  status: 'status',
+  description: 'description',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -163,9 +217,14 @@ exports.Prisma.NullsOrder = {
 exports.Prisma.OrderOrderByRelevanceFieldEnum = {
   id: 'id',
   userId: 'userId',
-  status: 'status',
   shippingAddressId: 'shippingAddressId',
   paymentId: 'paymentId'
+};
+
+exports.Prisma.OrderNoteOrderByRelevanceFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  note: 'note'
 };
 
 exports.Prisma.OrderItemOrderByRelevanceFieldEnum = {
@@ -173,6 +232,10 @@ exports.Prisma.OrderItemOrderByRelevanceFieldEnum = {
   orderId: 'orderId',
   variantId: 'variantId',
   productId: 'productId',
+  productName: 'productName',
+  productSlug: 'productSlug',
+  variantName: 'variantName',
+  sku: 'sku',
   image: 'image'
 };
 
@@ -180,15 +243,71 @@ exports.Prisma.ShippingOrderByRelevanceFieldEnum = {
   id: 'id',
   orderId: 'orderId',
   method: 'method',
-  trackingNumber: 'trackingNumber',
+  shippingAddressId: 'shippingAddressId',
+  trackingId: 'trackingId',
   status: 'status'
 };
 
+exports.Prisma.TrackingOrderByRelevanceFieldEnum = {
+  id: 'id',
+  number: 'number',
+  carrier: 'carrier',
+  status: 'status',
+  currentLocation: 'currentLocation',
+  coordinatesId: 'coordinatesId'
+};
+
+exports.Prisma.TrackingEventOrderByRelevanceFieldEnum = {
+  id: 'id',
+  trackingId: 'trackingId',
+  location: 'location',
+  status: 'status',
+  description: 'description'
+};
+
+exports.Prisma.CoordinatesOrderByRelevanceFieldEnum = {
+  id: 'id',
+  originId: 'originId',
+  currentId: 'currentId',
+  destinationId: 'destinationId'
+};
+
+exports.Prisma.PointOrderByRelevanceFieldEnum = {
+  id: 'id'
+};
+
+exports.Prisma.OrderStatusHistoryOrderByRelevanceFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  description: 'description'
+};
+exports.OrderStatus = exports.$Enums.OrderStatus = {
+  ORDER_PENDING: 'ORDER_PENDING',
+  ORDER_PROCESSING: 'ORDER_PROCESSING',
+  ORDER_SHIPPED: 'ORDER_SHIPPED',
+  ORDER_COMPENSATING: 'ORDER_COMPENSATING',
+  ORDER_DELIVERED: 'ORDER_DELIVERED',
+  ORDER_CANCELLED: 'ORDER_CANCELLED',
+  ORDER_COMPLETED: 'ORDER_COMPLETED',
+  ORDER_FAILED: 'ORDER_FAILED',
+  ORDER_REFUNDED: 'ORDER_REFUNDED',
+  ORDER_EXPIRED: 'ORDER_EXPIRED',
+  ORDER_ON_HOLD: 'ORDER_ON_HOLD',
+  ORDER_PAYMENT_PAID: 'ORDER_PAYMENT_PAID',
+  ORDER_TRACKING_UPDATED: 'ORDER_TRACKING_UPDATED',
+  ORDER_NOTE_ADDED: 'ORDER_NOTE_ADDED'
+};
 
 exports.Prisma.ModelName = {
   Order: 'Order',
+  OrderNote: 'OrderNote',
   OrderItem: 'OrderItem',
-  Shipping: 'Shipping'
+  Shipping: 'Shipping',
+  Tracking: 'Tracking',
+  TrackingEvent: 'TrackingEvent',
+  Coordinates: 'Coordinates',
+  Point: 'Point',
+  OrderStatusHistory: 'OrderStatusHistory'
 };
 
 /**

@@ -11,24 +11,38 @@ datasource db {
 }
 
 model User {
-  id                String    @id @default(uuid())
-  email             String    @unique
+  id                String     @id @default(uuid())
+  email             String     @unique
   firstName         String
   lastName          String
   password          String
   phone             String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  isActive          Boolean   @default(true)
-  isVerified        Boolean   @default(false)
-  role              String    @default("user") // "user" | "admin"
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  isActive          Boolean    @default(true)
+  isVerified        Boolean    @default(false)
+  role              String     @default("user") // "user" | "admin"
   lastLogin         DateTime?
-  permissions       String    @default("[]") // JSON string of permissions array
+  permissions       String     @default("[]") // JSON string of permissions array
   phoneNumber       String?
   gender            String?
   dateOfBirth       DateTime?
   profilePictureUrl String?
   address           Address[]
+  wishlist          Wishlist[]
+}
+
+model Wishlist {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  productId    String
+  productImage String
+  productName  String
+  productPrice Float
+  productSlug  String
+  categoryName String
+  createdAt    DateTime @default(now())
 }
 
 model Address {

@@ -387,7 +387,7 @@ export default function NewsletterPage() {
   }
 
   // Handle newsletter edit
-  const handleNewsletterEdit = (id: number) => {
+  const handleNewsletterEdit = () => {
     toast({
       title: "Not implemented yet",
       description: "This feature is not yet implemented.",
@@ -683,7 +683,7 @@ export default function NewsletterPage() {
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
                                     <DropdownMenuItem
-                                      onClick={() => handleNewsletterEdit(subscriber.id)}
+                                      onClick={handleNewsletterEdit}
                                     >
                                       Edit
                                     </DropdownMenuItem>

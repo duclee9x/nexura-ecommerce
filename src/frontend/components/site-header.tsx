@@ -18,16 +18,17 @@ import {
   DropdownMenuTrigger,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
-import { generateAvatar, getAvatarUrl } from "@/lib/utils"
+import { cn, generateAvatar } from "@/lib/utils"
 import { useSession } from "@/contexts/session-context"
 import { useCart } from "@/contexts/cart-context"
+import { useWishlist } from "@/contexts/wishlist-context"
 export function SiteHeader() {
   const pathname = usePathname()
   const [isMounted, setIsMounted] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const { user } = useSession()
   const { itemCount: cartItemCount } = useCart()
-
+  const { wishlistItems } = useWishlist()
   const profilePictureUrl = user?.profilePictureUrl ? user.profilePictureUrl : generateAvatar(user?.firstName || "User")
   useEffect(() => {
     setIsMounted(true)
@@ -41,7 +42,6 @@ export function SiteHeader() {
     { name: "Blog", href: "/blog" },
     { name: "Stores", href: "/stores" },
   ]
-
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* Announcement Bar */}
@@ -81,7 +81,7 @@ export function SiteHeader() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" aria-label="Account">
                 {/* <User className="h-5 w-5" /> */}
-                {user ? <Image src={profilePictureUrl+"?v="+Date.now()} alt="Profile Picture" width={46} height={46} className="rounded-full" /> : <User className="h-5 w-5" />}
+                {user ? <Image src={profilePictureUrl + "?v=" + Date.now()} alt="Profile Picture" width={46} height={46} className="rounded-full" /> : <User className="h-5 w-5" />}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -125,14 +125,25 @@ export function SiteHeader() {
           </DropdownMenu>
 
           <Button variant="ghost" size="icon" aria-label="Wishlist" asChild>
-            <Link href="/wishlist">
-              <Heart className="h-5 w-5" />
+            <Link href="/wishlist" className="relative">
+              <Heart className={cn(
+                "h-5 w-5",
+                wishlistItems.length > 0 && "fill-current"
+              )} />
+              {isMounted && wishlistItems.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {wishlistItems.length}
+                </span>
+              )}
             </Link>
           </Button>
 
           <Link href="/cart">
             <Button variant="ghost" size="icon" aria-label="Cart" className="relative">
-              <ShoppingBag className="h-5 w-5" />
+              <ShoppingBag className={cn(
+                "h-5 w-5",
+                cartItemCount > 0 && "fill-green-200"
+              )} />
               {isMounted && cartItemCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {cartItemCount}
@@ -197,10 +208,16 @@ export function SiteHeader() {
                   </SheetClose>
 
                   <SheetClose asChild>
-                    <Link href="/wishlist" className="px-2 py-1 flex items-center">
+                    <Link href="/wishlist" className="px-2 py-1 flex items-center relative">
                       <Heart className="h-4 w-4 mr-2" />
                       Wishlist
+                      {isMounted && wishlistItems.length > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                          {wishlistItems.length}
+                        </span>
+                      )}
                     </Link>
+
                   </SheetClose>
                 </nav>
 

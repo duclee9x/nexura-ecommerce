@@ -20,27 +20,29 @@ import {
   type ServiceError,
   type UntypedServiceImplementation,
 } from "@grpc/grpc-js";
+import { Observable } from "rxjs";
+import { map } from "rxjs/operators";
 
 export const protobufPackage = "nexuraTelemetry";
 
 /** Service names for health checks */
 export enum ServiceName {
-  UNSPECIFIED = 0,
-  CART_SERVICE = 1,
-  USER_SERVICE = 2,
-  PRODUCT_CATALOG_SERVICE = 3,
-  RECOMMENDATION_SERVICE = 4,
-  SHIPPING_SERVICE = 5,
-  CURRENCY_SERVICE = 6,
-  PAYMENT_SERVICE = 7,
-  EMAIL_SERVICE = 8,
-  CHECKOUT_SERVICE = 9,
-  AD_SERVICE = 10,
-  FEATURE_FLAG_SERVICE = 11,
-  ADDRESS_SERVICE = 12,
-  ORCHESTRATOR_SERVICE = 13,
-  ORDER_SERVICE = 14,
-  UNRECOGNIZED = -1,
+  UNSPECIFIED = "UNSPECIFIED",
+  CART_SERVICE = "CART_SERVICE",
+  USER_SERVICE = "USER_SERVICE",
+  PRODUCT_CATALOG_SERVICE = "PRODUCT_CATALOG_SERVICE",
+  RECOMMENDATION_SERVICE = "RECOMMENDATION_SERVICE",
+  SHIPPING_SERVICE = "SHIPPING_SERVICE",
+  CURRENCY_SERVICE = "CURRENCY_SERVICE",
+  PAYMENT_SERVICE = "PAYMENT_SERVICE",
+  EMAIL_SERVICE = "EMAIL_SERVICE",
+  CHECKOUT_SERVICE = "CHECKOUT_SERVICE",
+  AD_SERVICE = "AD_SERVICE",
+  FEATURE_FLAG_SERVICE = "FEATURE_FLAG_SERVICE",
+  ADDRESS_SERVICE = "ADDRESS_SERVICE",
+  ORCHESTRATOR_SERVICE = "ORCHESTRATOR_SERVICE",
+  ORDER_SERVICE = "ORDER_SERVICE",
+  UNRECOGNIZED = "UNRECOGNIZED",
 }
 
 export function serviceNameFromJSON(object: any): ServiceName {
@@ -135,19 +137,60 @@ export function serviceNameToJSON(object: ServiceName): string {
   }
 }
 
+export function serviceNameToNumber(object: ServiceName): number {
+  switch (object) {
+    case ServiceName.UNSPECIFIED:
+      return 0;
+    case ServiceName.CART_SERVICE:
+      return 1;
+    case ServiceName.USER_SERVICE:
+      return 2;
+    case ServiceName.PRODUCT_CATALOG_SERVICE:
+      return 3;
+    case ServiceName.RECOMMENDATION_SERVICE:
+      return 4;
+    case ServiceName.SHIPPING_SERVICE:
+      return 5;
+    case ServiceName.CURRENCY_SERVICE:
+      return 6;
+    case ServiceName.PAYMENT_SERVICE:
+      return 7;
+    case ServiceName.EMAIL_SERVICE:
+      return 8;
+    case ServiceName.CHECKOUT_SERVICE:
+      return 9;
+    case ServiceName.AD_SERVICE:
+      return 10;
+    case ServiceName.FEATURE_FLAG_SERVICE:
+      return 11;
+    case ServiceName.ADDRESS_SERVICE:
+      return 12;
+    case ServiceName.ORCHESTRATOR_SERVICE:
+      return 13;
+    case ServiceName.ORDER_SERVICE:
+      return 14;
+    case ServiceName.UNRECOGNIZED:
+    default:
+      return -1;
+  }
+}
+
 export enum OrderStatus {
-  ORDER_PENDING = 0,
-  ORDER_PROCESSING = 1,
-  ORDER_SHIPPED = 2,
-  ORDER_COMPENSATING = 3,
-  ORDER_DELIVERED = 4,
-  ORDER_CANCELLED = 5,
-  ORDER_COMPLETED = 6,
-  ORDER_FAILED = 7,
-  ORDER_REFUNDED = 8,
-  ORDER_EXPIRED = 9,
-  ORDER_ON_HOLD = 10,
-  UNRECOGNIZED = -1,
+  ORDER_PENDING = "ORDER_PENDING",
+  ORDER_PROCESSING = "ORDER_PROCESSING",
+  ORDER_SHIPPED = "ORDER_SHIPPED",
+  ORDER_COMPENSATING = "ORDER_COMPENSATING",
+  ORDER_DELIVERED = "ORDER_DELIVERED",
+  ORDER_CANCELLED = "ORDER_CANCELLED",
+  ORDER_COMPLETED = "ORDER_COMPLETED",
+  ORDER_FAILED = "ORDER_FAILED",
+  ORDER_REFUNDED = "ORDER_REFUNDED",
+  ORDER_EXPIRED = "ORDER_EXPIRED",
+  ORDER_ON_HOLD = "ORDER_ON_HOLD",
+  ORDER_PAYMENT_PAID = "ORDER_PAYMENT_PAID",
+  ORDER_TRACKING_UPDATED = "ORDER_TRACKING_UPDATED",
+  ORDER_NOTE_ADDED = "ORDER_NOTE_ADDED",
+  UNRECOGNIZED = "UNRECOGNIZED",
 }
 
 export function orderStatusFromJSON(object: any): OrderStatus {
@@ -185,6 +228,15 @@ export function orderStatusFromJSON(object: any): OrderStatus {
     case 10:
     case "ORDER_ON_HOLD":
       return OrderStatus.ORDER_ON_HOLD;
+    case 11:
+    case "ORDER_PAYMENT_PAID":
+      return OrderStatus.ORDER_PAYMENT_PAID;
+    case 12:
+    case "ORDER_TRACKING_UPDATED":
+      return OrderStatus.ORDER_TRACKING_UPDATED;
+    case 13:
+    case "ORDER_NOTE_ADDED":
+      return OrderStatus.ORDER_NOTE_ADDED;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -216,19 +268,61 @@ export function orderStatusToJSON(object: OrderStatus): string {
       return "ORDER_EXPIRED";
     case OrderStatus.ORDER_ON_HOLD:
       return "ORDER_ON_HOLD";
+    case OrderStatus.ORDER_PAYMENT_PAID:
+      return "ORDER_PAYMENT_PAID";
+    case OrderStatus.ORDER_TRACKING_UPDATED:
+      return "ORDER_TRACKING_UPDATED";
+    case OrderStatus.ORDER_NOTE_ADDED:
+      return "ORDER_NOTE_ADDED";
     case OrderStatus.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
   }
 }
 
+export function orderStatusToNumber(object: OrderStatus): number {
+  switch (object) {
+    case OrderStatus.ORDER_PENDING:
+      return 0;
+    case OrderStatus.ORDER_PROCESSING:
+      return 1;
+    case OrderStatus.ORDER_SHIPPED:
+      return 2;
+    case OrderStatus.ORDER_COMPENSATING:
+      return 3;
+    case OrderStatus.ORDER_DELIVERED:
+      return 4;
+    case OrderStatus.ORDER_CANCELLED:
+      return 5;
+    case OrderStatus.ORDER_COMPLETED:
+      return 6;
+    case OrderStatus.ORDER_FAILED:
+      return 7;
+    case OrderStatus.ORDER_REFUNDED:
+      return 8;
+    case OrderStatus.ORDER_EXPIRED:
+      return 9;
+    case OrderStatus.ORDER_ON_HOLD:
+      return 10;
+    case OrderStatus.ORDER_PAYMENT_PAID:
+      return 11;
+    case OrderStatus.ORDER_TRACKING_UPDATED:
+      return 12;
+    case OrderStatus.ORDER_NOTE_ADDED:
+      return 13;
+    case OrderStatus.UNRECOGNIZED:
+    default:
+      return -1;
+  }
+}
+
 export enum StepStatus {
-  STEP_PENDING = 0,
-  STEP_STARTED = 1,
-  STEP_COMPLETED = 2,
-  STEP_FAILED = 3,
-  STEP_COMPENSATED = 4,
-  UNRECOGNIZED = -1,
+  STEP_PENDING = "STEP_PENDING",
+  STEP_STARTED = "STEP_STARTED",
+  STEP_COMPLETED = "STEP_COMPLETED",
+  STEP_FAILED = "STEP_FAILED",
+  STEP_COMPENSATED = "STEP_COMPENSATED",
+  UNRECOGNIZED = "UNRECOGNIZED",
 }
 
 export function stepStatusFromJSON(object: any): StepStatus {
@@ -273,21 +367,39 @@ export function stepStatusToJSON(object: StepStatus): string {
   }
 }
 
+export function stepStatusToNumber(object: StepStatus): number {
+  switch (object) {
+    case StepStatus.STEP_PENDING:
+      return 0;
+    case StepStatus.STEP_STARTED:
+      return 1;
+    case StepStatus.STEP_COMPLETED:
+      return 2;
+    case StepStatus.STEP_FAILED:
+      return 3;
+    case StepStatus.STEP_COMPENSATED:
+      return 4;
+    case StepStatus.UNRECOGNIZED:
+    default:
+      return -1;
+  }
+}
+
 export enum PaymentProvider {
-  STRIPE = 0,
-  PAYPAL = 1,
-  VNPAY = 2,
-  UNRECOGNIZED = -1,
+  COD = "COD",
+  STRIPE = "STRIPE",
+  VNPAY = "VNPAY",
+  UNRECOGNIZED = "UNRECOGNIZED",
 }
 
 export function paymentProviderFromJSON(object: any): PaymentProvider {
   switch (object) {
     case 0:
+    case "COD":
+      return PaymentProvider.COD;
+    case 1:
     case "STRIPE":
       return PaymentProvider.STRIPE;
-    case 1:
-    case "PAYPAL":
-      return PaymentProvider.PAYPAL;
     case 2:
     case "VNPAY":
       return PaymentProvider.VNPAY;
@@ -300,10 +412,10 @@ export function paymentProviderFromJSON(object: any): PaymentProvider {
 
 export function paymentProviderToJSON(object: PaymentProvider): string {
   switch (object) {
+    case PaymentProvider.COD:
+      return "COD";
     case PaymentProvider.STRIPE:
       return "STRIPE";
-    case PaymentProvider.PAYPAL:
-      return "PAYPAL";
     case PaymentProvider.VNPAY:
       return "VNPAY";
     case PaymentProvider.UNRECOGNIZED:
@@ -312,32 +424,50 @@ export function paymentProviderToJSON(object: PaymentProvider): string {
   }
 }
 
+export function paymentProviderToNumber(object: PaymentProvider): number {
+  switch (object) {
+    case PaymentProvider.COD:
+      return 0;
+    case PaymentProvider.STRIPE:
+      return 1;
+    case PaymentProvider.VNPAY:
+      return 2;
+    case PaymentProvider.UNRECOGNIZED:
+    default:
+      return -1;
+  }
+}
+
 export enum PaymentStatus {
-  PENDING = 0,
-  PAID = 1,
-  FAILED = 2,
-  CANCELLED = 3,
-  REFUNDED = 4,
-  UNRECOGNIZED = -1,
+  PAYMENT_PENDING = "PAYMENT_PENDING",
+  PAYMENT_PAID = "PAYMENT_PAID",
+  PAYMENT_FAILED = "PAYMENT_FAILED",
+  PAYMENT_CANCELLED = "PAYMENT_CANCELLED",
+  PAYMENT_REFUNDED = "PAYMENT_REFUNDED",
+  PAYMENT_EXPIRED = "PAYMENT_EXPIRED",
+  UNRECOGNIZED = "UNRECOGNIZED",
 }
 
 export function paymentStatusFromJSON(object: any): PaymentStatus {
   switch (object) {
     case 0:
-    case "PENDING":
-      return PaymentStatus.PENDING;
+    case "PAYMENT_PENDING":
+      return PaymentStatus.PAYMENT_PENDING;
     case 1:
-    case "PAID":
-      return PaymentStatus.PAID;
+    case "PAYMENT_PAID":
+      return PaymentStatus.PAYMENT_PAID;
     case 2:
-    case "FAILED":
-      return PaymentStatus.FAILED;
+    case "PAYMENT_FAILED":
+      return PaymentStatus.PAYMENT_FAILED;
     case 3:
-    case "CANCELLED":
-      return PaymentStatus.CANCELLED;
+    case "PAYMENT_CANCELLED":
+      return PaymentStatus.PAYMENT_CANCELLED;
     case 4:
-    case "REFUNDED":
-      return PaymentStatus.REFUNDED;
+    case "PAYMENT_REFUNDED":
+      return PaymentStatus.PAYMENT_REFUNDED;
+    case 5:
+    case "PAYMENT_EXPIRED":
+      return PaymentStatus.PAYMENT_EXPIRED;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -347,20 +477,58 @@ export function paymentStatusFromJSON(object: any): PaymentStatus {
 
 export function paymentStatusToJSON(object: PaymentStatus): string {
   switch (object) {
-    case PaymentStatus.PENDING:
-      return "PENDING";
-    case PaymentStatus.PAID:
-      return "PAID";
-    case PaymentStatus.FAILED:
-      return "FAILED";
-    case PaymentStatus.CANCELLED:
-      return "CANCELLED";
-    case PaymentStatus.REFUNDED:
-      return "REFUNDED";
+    case PaymentStatus.PAYMENT_PENDING:
+      return "PAYMENT_PENDING";
+    case PaymentStatus.PAYMENT_PAID:
+      return "PAYMENT_PAID";
+    case PaymentStatus.PAYMENT_FAILED:
+      return "PAYMENT_FAILED";
+    case PaymentStatus.PAYMENT_CANCELLED:
+      return "PAYMENT_CANCELLED";
+    case PaymentStatus.PAYMENT_REFUNDED:
+      return "PAYMENT_REFUNDED";
+    case PaymentStatus.PAYMENT_EXPIRED:
+      return "PAYMENT_EXPIRED";
     case PaymentStatus.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
   }
+}
+
+export function paymentStatusToNumber(object: PaymentStatus): number {
+  switch (object) {
+    case PaymentStatus.PAYMENT_PENDING:
+      return 0;
+    case PaymentStatus.PAYMENT_PAID:
+      return 1;
+    case PaymentStatus.PAYMENT_FAILED:
+      return 2;
+    case PaymentStatus.PAYMENT_CANCELLED:
+      return 3;
+    case PaymentStatus.PAYMENT_REFUNDED:
+      return 4;
+    case PaymentStatus.PAYMENT_EXPIRED:
+      return 5;
+    case PaymentStatus.UNRECOGNIZED:
+    default:
+      return -1;
+  }
+}
+
+export interface GetBatchAddressesRequest {
+  addressIds: string[];
+}
+
+export interface GetBatchAddressesResponse {
+  addresses: ExtendedAddress[];
+}
+
+export interface GetAddressRequest {
+  addressId: string;
+}
+
+export interface GetAddressResponse {
+  address: ExtendedAddress | undefined;
 }
 
 export interface GetAddressesRequest {
@@ -472,6 +640,31 @@ export interface Ward {
   administrativeUnitId: string;
 }
 
+export interface GetBatchUsersRequest {
+  userIds: string[];
+}
+
+export interface GetBatchUsersResponse {
+  users: User[];
+}
+
+export interface GetAllUsersResponse {
+  users: UserWithOrder[];
+}
+
+export interface RegisterUserForAdminRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+}
+
+export interface RegisterUserForAdminResponse {
+  success: boolean;
+  message: string;
+  userId: string;
+}
+
 export interface UpdatePasswordRequest {
   email: string;
   newPassword: string;
@@ -562,6 +755,20 @@ export interface LoginUserResponse {
   accessToken: string;
   refreshToken: string;
   user: User | undefined;
+}
+
+export interface UserWithOrder {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  createdAt: string;
+  isActive: string;
+  address: ExtendedAddress | undefined;
+  totalOrders: number;
+  totalSpent: number;
+  lastOrderDate: string;
 }
 
 export interface User {
@@ -726,6 +933,42 @@ export interface ListRecommendationsResponse {
 export interface Empty {
 }
 
+export interface GetWishlistRequest {
+  userId: string;
+}
+
+export interface GetWishlistResponse {
+  wishlistItems: WishlistItem[];
+}
+
+export interface RemoveWishlistRequest {
+  wishlistId: string;
+  userId: string;
+}
+
+export interface RemoveWishlistResponse {
+  success: boolean;
+}
+
+export interface WishlistItem {
+  id: string;
+  productId: string;
+  productName: string;
+  productImage: string;
+  productPrice: number;
+  productSlug: string;
+}
+
+export interface AddWishlistRequest {
+  userId: string;
+  productId: string;
+}
+
+export interface AddWishlistResponse {
+  success: boolean;
+  message: string;
+}
+
 export interface GetVariantsForCartRequest {
   variantIds: string[];
 }
@@ -734,10 +977,20 @@ export interface GetVariantsForCartResponse {
   variants: VariantCart[];
 }
 
+export interface ChangeProductStatusRequest {
+  productId: string;
+  status: string;
+}
+
+export interface ChangeProductStatusResponse {
+  success: boolean;
+}
+
 export interface VariantCart {
   id: string;
   price: number;
   image: string;
+  sku: string;
   stock?: Stock | undefined;
   variantName: string;
   productName: string;
@@ -814,6 +1067,15 @@ export interface Product {
   variants: ProductVariant[];
   dimensions: Dimensions | undefined;
   sizeCharts: SizeChart[];
+  relatedProducts: Product[];
+}
+
+export interface ProductRelatedProduct {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  image: string;
 }
 
 export interface SizeChart {
@@ -885,6 +1147,7 @@ export interface Seo {
 
 export interface ProductVariant {
   id: string;
+  name: string;
   sku: string;
   price: number;
   lowStockThreshold: number;
@@ -915,6 +1178,7 @@ export interface Image {
 
 export interface CreateProductRequest {
   product: Product | undefined;
+  relatedProductIds: string[];
 }
 
 export interface CreateProductResponse {
@@ -923,10 +1187,11 @@ export interface CreateProductResponse {
 
 export interface UpdateProductRequest {
   product: Product | undefined;
+  relatedProductIds: string[];
 }
 
 export interface UpdateProductResponse {
-  product: Product | undefined;
+  success: boolean;
 }
 
 export interface DeleteProductRequest {
@@ -996,12 +1261,9 @@ export interface ListProductsResponse {
 export interface ListProductsRequest {
 }
 
-export interface GetProductByIdRequest {
-  id: string;
-}
-
-export interface GetProductBySlugRequest {
-  slug: string;
+export interface GetProductRequest {
+  data: string;
+  type: string;
 }
 
 export interface GetProductResponse {
@@ -1043,6 +1305,17 @@ export interface SearchProductsRequest {
 
 export interface SearchProductsResponse {
   results: Product[];
+}
+
+export interface SendNewUserByAdminRequest {
+  email: string;
+  name: string;
+  password: string;
+}
+
+export interface SendNewUserByAdminResponse {
+  success: boolean;
+  message: string;
 }
 
 export interface SendOTPResetPasswordRequest {
@@ -1118,12 +1391,12 @@ export interface HealthCheckResponse {
 }
 
 export enum HealthCheckResponse_ServingStatus {
-  UNKNOWN = 0,
-  SERVING = 1,
-  NOT_SERVING = 2,
+  UNKNOWN = "UNKNOWN",
+  SERVING = "SERVING",
+  NOT_SERVING = "NOT_SERVING",
   /** SERVICE_UNKNOWN - Used when the requested service is not known */
-  SERVICE_UNKNOWN = 3,
-  UNRECOGNIZED = -1,
+  SERVICE_UNKNOWN = "SERVICE_UNKNOWN",
+  UNRECOGNIZED = "UNRECOGNIZED",
 }
 
 export function healthCheckResponse_ServingStatusFromJSON(object: any): HealthCheckResponse_ServingStatus {
@@ -1163,19 +1436,85 @@ export function healthCheckResponse_ServingStatusToJSON(object: HealthCheckRespo
   }
 }
 
+export function healthCheckResponse_ServingStatusToNumber(object: HealthCheckResponse_ServingStatus): number {
+  switch (object) {
+    case HealthCheckResponse_ServingStatus.UNKNOWN:
+      return 0;
+    case HealthCheckResponse_ServingStatus.SERVING:
+      return 1;
+    case HealthCheckResponse_ServingStatus.NOT_SERVING:
+      return 2;
+    case HealthCheckResponse_ServingStatus.SERVICE_UNKNOWN:
+      return 3;
+    case HealthCheckResponse_ServingStatus.UNRECOGNIZED:
+    default:
+      return -1;
+  }
+}
+
+export interface GetOrdersForAdminRequest {
+  userIds: string[];
+}
+
+export interface GetOrdersForAdminResponse {
+  orders: OrderForAdmin[];
+}
+
+export interface OrderForAdmin {
+  userId: string;
+  totalOrders: number;
+  totalSpent: number;
+  lastOrderDate: string;
+}
+
+export interface ListAllOrdersResponse {
+  orders: Order[];
+}
+
+export interface UpdateTrackingNumberRequest {
+  orderId: string;
+  trackingNumber: string;
+}
+
+export interface UpdateTrackingNumberResponse {
+  success: boolean;
+}
+
+export interface AddOrderNoteRequest {
+  orderId: string;
+  note: string;
+}
+
+export interface AddOrderNoteResponse {
+  notes: OrderNote[];
+}
+
+export interface DeleteOrderNoteRequest {
+  orderId: string;
+  noteId: string;
+}
+
+export interface DeleteOrderNoteResponse {
+  success: boolean;
+}
+
+export interface ListOrdersRequest {
+  userId: string;
+}
+
+export interface ListOrdersResponse {
+  orders: Order[];
+}
+
 export interface CreateOrderRequest {
   userId: string;
   cartId: string;
   items: OrderItem[];
-  paymentMethod: string;
-  paymentAmount: number;
-  paymentCurrency: string;
-  shippingAddress: ExtendedAddress | undefined;
-  shippingMethod: string;
-  shippingCost: number;
-  subtotal: number;
+  status: OrderStatus;
+  paymentId: string;
+  payment: Payment | undefined;
+  shipping: Shipping | undefined;
   coupons: Coupon[];
-  total: number;
   currencyCode: string;
 }
 
@@ -1195,20 +1534,37 @@ export interface GetOrderRequest {
   orderId: string;
 }
 
-export interface GetOrderResponse {
-  order: Order | undefined;
-}
-
 export interface Order {
   id: string;
-  userId: string;
-  status: string;
+  user: User | undefined;
   totalAmount: number;
-  shippingAddressId: string;
-  items: OrderItem[];
+  shippingAddress: ExtendedAddress | undefined;
   paymentId: string;
+  status: OrderStatus;
   createdAt: string;
-  updatedAt: string;
+  items: OrderItem[];
+  shipping: Shipping | undefined;
+  payment: Payment | undefined;
+  statusHistory: OrderStatusHistory[];
+  notes: OrderNote[];
+}
+
+export interface OrderNote {
+  id: string;
+  orderId: string;
+  note: string;
+  createdAt: string;
+}
+
+export interface OrderStatusHistory {
+  id: string;
+  status: OrderStatus;
+  description: string;
+  createdAt: string;
+}
+
+export interface GetOrderResponse {
+  order: Order | undefined;
 }
 
 export interface UpdateOrderStatusRequest {
@@ -1242,7 +1598,14 @@ export interface OrderStep {
 
 export interface ValidateAndReserveRequest {
   userId: string;
-  variants: ProductVariant[];
+  items: EnrichedCartItem[];
+}
+
+export interface EnrichedCartItem {
+  id: string;
+  price: number;
+  quantity: number;
+  image: string;
 }
 
 export interface ValidateAndReserveResponse {
@@ -1267,15 +1630,32 @@ export interface ReleaseReservationResponse {
 
 export interface CommitReservationRequest {
   reservationId: string;
+  orderId: string;
 }
 
 export interface CommitReservationResponse {
   success: boolean;
   message: string;
+  orderId: string;
+}
+
+export interface GetBatchPaymentsRequest {
+  paymentIds: string[];
+}
+
+export interface GetBatchPaymentsResponse {
+  payments: Payment[];
+}
+
+export interface GetPaymentRequest {
+  paymentId: string;
+}
+
+export interface GetPaymentResponse {
+  payment: Payment | undefined;
 }
 
 export interface InitiatePaymentRequest {
-  orderId: string;
   amount: number;
   provider: PaymentProvider;
   currency: string;
@@ -1283,6 +1663,7 @@ export interface InitiatePaymentRequest {
 
 export interface InitiatePaymentResponse {
   paymentId: string;
+  provider: PaymentProvider;
   redirectUrl: string;
   status: PaymentStatus;
 }
@@ -1341,16 +1722,310 @@ export interface CreateSagaOrderResponse {
 }
 
 export interface OrderItem {
-  productId: string;
+  id: string;
   variantId: string;
   quantity: number;
   price: number;
+  productId: string;
+  productName: string;
+  productSlug: string;
+  variantName: string;
+  sku: string;
+  image: string;
 }
 
 export interface Coupon {
   code: string;
   discount: number;
 }
+
+export interface Payment {
+  id: string;
+  method: string;
+  subtotal: number;
+  total: number;
+  status: PaymentStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Shipping {
+  method: string;
+  cost: number;
+  shippingAddress: ExtendedAddress | undefined;
+  estimatedDelivery: string;
+  tracking: Tracking | undefined;
+}
+
+export interface Tracking {
+  number: string;
+  carrier: string;
+  status: string;
+  currentLocation: string;
+  history: TrackingEvent[];
+  coordinates: Coordinates | undefined;
+}
+
+export interface TrackingEvent {
+  date: string;
+  time: string;
+  location: string;
+  status: string;
+  description: string;
+}
+
+export interface Coordinates {
+  origin: Point | undefined;
+  current: Point | undefined;
+  destination: Point | undefined;
+}
+
+export interface Point {
+  lat: number;
+  lng: number;
+}
+
+function createBaseGetBatchAddressesRequest(): GetBatchAddressesRequest {
+  return { addressIds: [] };
+}
+
+export const GetBatchAddressesRequest: MessageFns<GetBatchAddressesRequest> = {
+  encode(message: GetBatchAddressesRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.addressIds) {
+      writer.uint32(10).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetBatchAddressesRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetBatchAddressesRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.addressIds.push(reader.string());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetBatchAddressesRequest {
+    return {
+      addressIds: globalThis.Array.isArray(object?.addressIds)
+        ? object.addressIds.map((e: any) => globalThis.String(e))
+        : [],
+    };
+  },
+
+  toJSON(message: GetBatchAddressesRequest): unknown {
+    const obj: any = {};
+    if (message.addressIds?.length) {
+      obj.addressIds = message.addressIds;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetBatchAddressesRequest>, I>>(base?: I): GetBatchAddressesRequest {
+    return GetBatchAddressesRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetBatchAddressesRequest>, I>>(object: I): GetBatchAddressesRequest {
+    const message = createBaseGetBatchAddressesRequest();
+    message.addressIds = object.addressIds?.map((e) => e) || [];
+    return message;
+  },
+};
+
+function createBaseGetBatchAddressesResponse(): GetBatchAddressesResponse {
+  return { addresses: [] };
+}
+
+export const GetBatchAddressesResponse: MessageFns<GetBatchAddressesResponse> = {
+  encode(message: GetBatchAddressesResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.addresses) {
+      ExtendedAddress.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetBatchAddressesResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetBatchAddressesResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.addresses.push(ExtendedAddress.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetBatchAddressesResponse {
+    return {
+      addresses: globalThis.Array.isArray(object?.addresses)
+        ? object.addresses.map((e: any) => ExtendedAddress.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: GetBatchAddressesResponse): unknown {
+    const obj: any = {};
+    if (message.addresses?.length) {
+      obj.addresses = message.addresses.map((e) => ExtendedAddress.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetBatchAddressesResponse>, I>>(base?: I): GetBatchAddressesResponse {
+    return GetBatchAddressesResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetBatchAddressesResponse>, I>>(object: I): GetBatchAddressesResponse {
+    const message = createBaseGetBatchAddressesResponse();
+    message.addresses = object.addresses?.map((e) => ExtendedAddress.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseGetAddressRequest(): GetAddressRequest {
+  return { addressId: "" };
+}
+
+export const GetAddressRequest: MessageFns<GetAddressRequest> = {
+  encode(message: GetAddressRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.addressId !== "") {
+      writer.uint32(10).string(message.addressId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetAddressRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetAddressRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.addressId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetAddressRequest {
+    return { addressId: isSet(object.addressId) ? globalThis.String(object.addressId) : "" };
+  },
+
+  toJSON(message: GetAddressRequest): unknown {
+    const obj: any = {};
+    if (message.addressId !== "") {
+      obj.addressId = message.addressId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetAddressRequest>, I>>(base?: I): GetAddressRequest {
+    return GetAddressRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetAddressRequest>, I>>(object: I): GetAddressRequest {
+    const message = createBaseGetAddressRequest();
+    message.addressId = object.addressId ?? "";
+    return message;
+  },
+};
+
+function createBaseGetAddressResponse(): GetAddressResponse {
+  return { address: undefined };
+}
+
+export const GetAddressResponse: MessageFns<GetAddressResponse> = {
+  encode(message: GetAddressResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.address !== undefined) {
+      ExtendedAddress.encode(message.address, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetAddressResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetAddressResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.address = ExtendedAddress.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetAddressResponse {
+    return { address: isSet(object.address) ? ExtendedAddress.fromJSON(object.address) : undefined };
+  },
+
+  toJSON(message: GetAddressResponse): unknown {
+    const obj: any = {};
+    if (message.address !== undefined) {
+      obj.address = ExtendedAddress.toJSON(message.address);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetAddressResponse>, I>>(base?: I): GetAddressResponse {
+    return GetAddressResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetAddressResponse>, I>>(object: I): GetAddressResponse {
+    const message = createBaseGetAddressResponse();
+    message.address = (object.address !== undefined && object.address !== null)
+      ? ExtendedAddress.fromPartial(object.address)
+      : undefined;
+    return message;
+  },
+};
 
 function createBaseGetAddressesRequest(): GetAddressesRequest {
   return { userId: "" };
@@ -3043,6 +3718,384 @@ export const Ward: MessageFns<Ward> = {
   },
 };
 
+function createBaseGetBatchUsersRequest(): GetBatchUsersRequest {
+  return { userIds: [] };
+}
+
+export const GetBatchUsersRequest: MessageFns<GetBatchUsersRequest> = {
+  encode(message: GetBatchUsersRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.userIds) {
+      writer.uint32(10).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetBatchUsersRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetBatchUsersRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.userIds.push(reader.string());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetBatchUsersRequest {
+    return {
+      userIds: globalThis.Array.isArray(object?.userIds) ? object.userIds.map((e: any) => globalThis.String(e)) : [],
+    };
+  },
+
+  toJSON(message: GetBatchUsersRequest): unknown {
+    const obj: any = {};
+    if (message.userIds?.length) {
+      obj.userIds = message.userIds;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetBatchUsersRequest>, I>>(base?: I): GetBatchUsersRequest {
+    return GetBatchUsersRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetBatchUsersRequest>, I>>(object: I): GetBatchUsersRequest {
+    const message = createBaseGetBatchUsersRequest();
+    message.userIds = object.userIds?.map((e) => e) || [];
+    return message;
+  },
+};
+
+function createBaseGetBatchUsersResponse(): GetBatchUsersResponse {
+  return { users: [] };
+}
+
+export const GetBatchUsersResponse: MessageFns<GetBatchUsersResponse> = {
+  encode(message: GetBatchUsersResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.users) {
+      User.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetBatchUsersResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetBatchUsersResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.users.push(User.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetBatchUsersResponse {
+    return { users: globalThis.Array.isArray(object?.users) ? object.users.map((e: any) => User.fromJSON(e)) : [] };
+  },
+
+  toJSON(message: GetBatchUsersResponse): unknown {
+    const obj: any = {};
+    if (message.users?.length) {
+      obj.users = message.users.map((e) => User.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetBatchUsersResponse>, I>>(base?: I): GetBatchUsersResponse {
+    return GetBatchUsersResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetBatchUsersResponse>, I>>(object: I): GetBatchUsersResponse {
+    const message = createBaseGetBatchUsersResponse();
+    message.users = object.users?.map((e) => User.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseGetAllUsersResponse(): GetAllUsersResponse {
+  return { users: [] };
+}
+
+export const GetAllUsersResponse: MessageFns<GetAllUsersResponse> = {
+  encode(message: GetAllUsersResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.users) {
+      UserWithOrder.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetAllUsersResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetAllUsersResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.users.push(UserWithOrder.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetAllUsersResponse {
+    return {
+      users: globalThis.Array.isArray(object?.users) ? object.users.map((e: any) => UserWithOrder.fromJSON(e)) : [],
+    };
+  },
+
+  toJSON(message: GetAllUsersResponse): unknown {
+    const obj: any = {};
+    if (message.users?.length) {
+      obj.users = message.users.map((e) => UserWithOrder.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetAllUsersResponse>, I>>(base?: I): GetAllUsersResponse {
+    return GetAllUsersResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetAllUsersResponse>, I>>(object: I): GetAllUsersResponse {
+    const message = createBaseGetAllUsersResponse();
+    message.users = object.users?.map((e) => UserWithOrder.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseRegisterUserForAdminRequest(): RegisterUserForAdminRequest {
+  return { firstName: "", lastName: "", email: "", phone: "" };
+}
+
+export const RegisterUserForAdminRequest: MessageFns<RegisterUserForAdminRequest> = {
+  encode(message: RegisterUserForAdminRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.firstName !== "") {
+      writer.uint32(10).string(message.firstName);
+    }
+    if (message.lastName !== "") {
+      writer.uint32(18).string(message.lastName);
+    }
+    if (message.email !== "") {
+      writer.uint32(26).string(message.email);
+    }
+    if (message.phone !== "") {
+      writer.uint32(34).string(message.phone);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RegisterUserForAdminRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRegisterUserForAdminRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.firstName = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.lastName = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.email = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.phone = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RegisterUserForAdminRequest {
+    return {
+      firstName: isSet(object.firstName) ? globalThis.String(object.firstName) : "",
+      lastName: isSet(object.lastName) ? globalThis.String(object.lastName) : "",
+      email: isSet(object.email) ? globalThis.String(object.email) : "",
+      phone: isSet(object.phone) ? globalThis.String(object.phone) : "",
+    };
+  },
+
+  toJSON(message: RegisterUserForAdminRequest): unknown {
+    const obj: any = {};
+    if (message.firstName !== "") {
+      obj.firstName = message.firstName;
+    }
+    if (message.lastName !== "") {
+      obj.lastName = message.lastName;
+    }
+    if (message.email !== "") {
+      obj.email = message.email;
+    }
+    if (message.phone !== "") {
+      obj.phone = message.phone;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<RegisterUserForAdminRequest>, I>>(base?: I): RegisterUserForAdminRequest {
+    return RegisterUserForAdminRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<RegisterUserForAdminRequest>, I>>(object: I): RegisterUserForAdminRequest {
+    const message = createBaseRegisterUserForAdminRequest();
+    message.firstName = object.firstName ?? "";
+    message.lastName = object.lastName ?? "";
+    message.email = object.email ?? "";
+    message.phone = object.phone ?? "";
+    return message;
+  },
+};
+
+function createBaseRegisterUserForAdminResponse(): RegisterUserForAdminResponse {
+  return { success: false, message: "", userId: "" };
+}
+
+export const RegisterUserForAdminResponse: MessageFns<RegisterUserForAdminResponse> = {
+  encode(message: RegisterUserForAdminResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    if (message.message !== "") {
+      writer.uint32(18).string(message.message);
+    }
+    if (message.userId !== "") {
+      writer.uint32(26).string(message.userId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RegisterUserForAdminResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRegisterUserForAdminResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.message = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RegisterUserForAdminResponse {
+    return {
+      success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
+      userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
+    };
+  },
+
+  toJSON(message: RegisterUserForAdminResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<RegisterUserForAdminResponse>, I>>(base?: I): RegisterUserForAdminResponse {
+    return RegisterUserForAdminResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<RegisterUserForAdminResponse>, I>>(object: I): RegisterUserForAdminResponse {
+    const message = createBaseRegisterUserForAdminResponse();
+    message.success = object.success ?? false;
+    message.message = object.message ?? "";
+    message.userId = object.userId ?? "";
+    return message;
+  },
+};
+
 function createBaseUpdatePasswordRequest(): UpdatePasswordRequest {
   return { email: "", newPassword: "" };
 }
@@ -4437,6 +5490,240 @@ export const LoginUserResponse: MessageFns<LoginUserResponse> = {
     message.accessToken = object.accessToken ?? "";
     message.refreshToken = object.refreshToken ?? "";
     message.user = (object.user !== undefined && object.user !== null) ? User.fromPartial(object.user) : undefined;
+    return message;
+  },
+};
+
+function createBaseUserWithOrder(): UserWithOrder {
+  return {
+    id: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    createdAt: "",
+    isActive: "",
+    address: undefined,
+    totalOrders: 0,
+    totalSpent: 0,
+    lastOrderDate: "",
+  };
+}
+
+export const UserWithOrder: MessageFns<UserWithOrder> = {
+  encode(message: UserWithOrder, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.firstName !== "") {
+      writer.uint32(18).string(message.firstName);
+    }
+    if (message.lastName !== "") {
+      writer.uint32(26).string(message.lastName);
+    }
+    if (message.email !== "") {
+      writer.uint32(34).string(message.email);
+    }
+    if (message.phone !== "") {
+      writer.uint32(42).string(message.phone);
+    }
+    if (message.createdAt !== "") {
+      writer.uint32(50).string(message.createdAt);
+    }
+    if (message.isActive !== "") {
+      writer.uint32(58).string(message.isActive);
+    }
+    if (message.address !== undefined) {
+      ExtendedAddress.encode(message.address, writer.uint32(66).fork()).join();
+    }
+    if (message.totalOrders !== 0) {
+      writer.uint32(72).int32(message.totalOrders);
+    }
+    if (message.totalSpent !== 0) {
+      writer.uint32(81).double(message.totalSpent);
+    }
+    if (message.lastOrderDate !== "") {
+      writer.uint32(90).string(message.lastOrderDate);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): UserWithOrder {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUserWithOrder();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.firstName = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.lastName = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.email = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.phone = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.createdAt = reader.string();
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.isActive = reader.string();
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.address = ExtendedAddress.decode(reader, reader.uint32());
+          continue;
+        }
+        case 9: {
+          if (tag !== 72) {
+            break;
+          }
+
+          message.totalOrders = reader.int32();
+          continue;
+        }
+        case 10: {
+          if (tag !== 81) {
+            break;
+          }
+
+          message.totalSpent = reader.double();
+          continue;
+        }
+        case 11: {
+          if (tag !== 90) {
+            break;
+          }
+
+          message.lastOrderDate = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): UserWithOrder {
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      firstName: isSet(object.firstName) ? globalThis.String(object.firstName) : "",
+      lastName: isSet(object.lastName) ? globalThis.String(object.lastName) : "",
+      email: isSet(object.email) ? globalThis.String(object.email) : "",
+      phone: isSet(object.phone) ? globalThis.String(object.phone) : "",
+      createdAt: isSet(object.createdAt) ? globalThis.String(object.createdAt) : "",
+      isActive: isSet(object.isActive) ? globalThis.String(object.isActive) : "",
+      address: isSet(object.address) ? ExtendedAddress.fromJSON(object.address) : undefined,
+      totalOrders: isSet(object.totalOrders) ? globalThis.Number(object.totalOrders) : 0,
+      totalSpent: isSet(object.totalSpent) ? globalThis.Number(object.totalSpent) : 0,
+      lastOrderDate: isSet(object.lastOrderDate) ? globalThis.String(object.lastOrderDate) : "",
+    };
+  },
+
+  toJSON(message: UserWithOrder): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.firstName !== "") {
+      obj.firstName = message.firstName;
+    }
+    if (message.lastName !== "") {
+      obj.lastName = message.lastName;
+    }
+    if (message.email !== "") {
+      obj.email = message.email;
+    }
+    if (message.phone !== "") {
+      obj.phone = message.phone;
+    }
+    if (message.createdAt !== "") {
+      obj.createdAt = message.createdAt;
+    }
+    if (message.isActive !== "") {
+      obj.isActive = message.isActive;
+    }
+    if (message.address !== undefined) {
+      obj.address = ExtendedAddress.toJSON(message.address);
+    }
+    if (message.totalOrders !== 0) {
+      obj.totalOrders = Math.round(message.totalOrders);
+    }
+    if (message.totalSpent !== 0) {
+      obj.totalSpent = message.totalSpent;
+    }
+    if (message.lastOrderDate !== "") {
+      obj.lastOrderDate = message.lastOrderDate;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<UserWithOrder>, I>>(base?: I): UserWithOrder {
+    return UserWithOrder.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<UserWithOrder>, I>>(object: I): UserWithOrder {
+    const message = createBaseUserWithOrder();
+    message.id = object.id ?? "";
+    message.firstName = object.firstName ?? "";
+    message.lastName = object.lastName ?? "";
+    message.email = object.email ?? "";
+    message.phone = object.phone ?? "";
+    message.createdAt = object.createdAt ?? "";
+    message.isActive = object.isActive ?? "";
+    message.address = (object.address !== undefined && object.address !== null)
+      ? ExtendedAddress.fromPartial(object.address)
+      : undefined;
+    message.totalOrders = object.totalOrders ?? 0;
+    message.totalSpent = object.totalSpent ?? 0;
+    message.lastOrderDate = object.lastOrderDate ?? "";
     return message;
   },
 };
@@ -6958,6 +8245,552 @@ export const Empty: MessageFns<Empty> = {
   },
 };
 
+function createBaseGetWishlistRequest(): GetWishlistRequest {
+  return { userId: "" };
+}
+
+export const GetWishlistRequest: MessageFns<GetWishlistRequest> = {
+  encode(message: GetWishlistRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetWishlistRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetWishlistRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetWishlistRequest {
+    return { userId: isSet(object.userId) ? globalThis.String(object.userId) : "" };
+  },
+
+  toJSON(message: GetWishlistRequest): unknown {
+    const obj: any = {};
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetWishlistRequest>, I>>(base?: I): GetWishlistRequest {
+    return GetWishlistRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetWishlistRequest>, I>>(object: I): GetWishlistRequest {
+    const message = createBaseGetWishlistRequest();
+    message.userId = object.userId ?? "";
+    return message;
+  },
+};
+
+function createBaseGetWishlistResponse(): GetWishlistResponse {
+  return { wishlistItems: [] };
+}
+
+export const GetWishlistResponse: MessageFns<GetWishlistResponse> = {
+  encode(message: GetWishlistResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.wishlistItems) {
+      WishlistItem.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetWishlistResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetWishlistResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.wishlistItems.push(WishlistItem.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetWishlistResponse {
+    return {
+      wishlistItems: globalThis.Array.isArray(object?.wishlistItems)
+        ? object.wishlistItems.map((e: any) => WishlistItem.fromJSON(e))
+        : [],
+    };
+  },
+
+  toJSON(message: GetWishlistResponse): unknown {
+    const obj: any = {};
+    if (message.wishlistItems?.length) {
+      obj.wishlistItems = message.wishlistItems.map((e) => WishlistItem.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetWishlistResponse>, I>>(base?: I): GetWishlistResponse {
+    return GetWishlistResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetWishlistResponse>, I>>(object: I): GetWishlistResponse {
+    const message = createBaseGetWishlistResponse();
+    message.wishlistItems = object.wishlistItems?.map((e) => WishlistItem.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseRemoveWishlistRequest(): RemoveWishlistRequest {
+  return { wishlistId: "", userId: "" };
+}
+
+export const RemoveWishlistRequest: MessageFns<RemoveWishlistRequest> = {
+  encode(message: RemoveWishlistRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.wishlistId !== "") {
+      writer.uint32(10).string(message.wishlistId);
+    }
+    if (message.userId !== "") {
+      writer.uint32(18).string(message.userId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RemoveWishlistRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRemoveWishlistRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.wishlistId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RemoveWishlistRequest {
+    return {
+      wishlistId: isSet(object.wishlistId) ? globalThis.String(object.wishlistId) : "",
+      userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
+    };
+  },
+
+  toJSON(message: RemoveWishlistRequest): unknown {
+    const obj: any = {};
+    if (message.wishlistId !== "") {
+      obj.wishlistId = message.wishlistId;
+    }
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<RemoveWishlistRequest>, I>>(base?: I): RemoveWishlistRequest {
+    return RemoveWishlistRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<RemoveWishlistRequest>, I>>(object: I): RemoveWishlistRequest {
+    const message = createBaseRemoveWishlistRequest();
+    message.wishlistId = object.wishlistId ?? "";
+    message.userId = object.userId ?? "";
+    return message;
+  },
+};
+
+function createBaseRemoveWishlistResponse(): RemoveWishlistResponse {
+  return { success: false };
+}
+
+export const RemoveWishlistResponse: MessageFns<RemoveWishlistResponse> = {
+  encode(message: RemoveWishlistResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): RemoveWishlistResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseRemoveWishlistResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): RemoveWishlistResponse {
+    return { success: isSet(object.success) ? globalThis.Boolean(object.success) : false };
+  },
+
+  toJSON(message: RemoveWishlistResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<RemoveWishlistResponse>, I>>(base?: I): RemoveWishlistResponse {
+    return RemoveWishlistResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<RemoveWishlistResponse>, I>>(object: I): RemoveWishlistResponse {
+    const message = createBaseRemoveWishlistResponse();
+    message.success = object.success ?? false;
+    return message;
+  },
+};
+
+function createBaseWishlistItem(): WishlistItem {
+  return { id: "", productId: "", productName: "", productImage: "", productPrice: 0, productSlug: "" };
+}
+
+export const WishlistItem: MessageFns<WishlistItem> = {
+  encode(message: WishlistItem, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.productId !== "") {
+      writer.uint32(18).string(message.productId);
+    }
+    if (message.productName !== "") {
+      writer.uint32(26).string(message.productName);
+    }
+    if (message.productImage !== "") {
+      writer.uint32(34).string(message.productImage);
+    }
+    if (message.productPrice !== 0) {
+      writer.uint32(41).double(message.productPrice);
+    }
+    if (message.productSlug !== "") {
+      writer.uint32(50).string(message.productSlug);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): WishlistItem {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseWishlistItem();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.productId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.productName = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.productImage = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 41) {
+            break;
+          }
+
+          message.productPrice = reader.double();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.productSlug = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): WishlistItem {
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      productId: isSet(object.productId) ? globalThis.String(object.productId) : "",
+      productName: isSet(object.productName) ? globalThis.String(object.productName) : "",
+      productImage: isSet(object.productImage) ? globalThis.String(object.productImage) : "",
+      productPrice: isSet(object.productPrice) ? globalThis.Number(object.productPrice) : 0,
+      productSlug: isSet(object.productSlug) ? globalThis.String(object.productSlug) : "",
+    };
+  },
+
+  toJSON(message: WishlistItem): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.productId !== "") {
+      obj.productId = message.productId;
+    }
+    if (message.productName !== "") {
+      obj.productName = message.productName;
+    }
+    if (message.productImage !== "") {
+      obj.productImage = message.productImage;
+    }
+    if (message.productPrice !== 0) {
+      obj.productPrice = message.productPrice;
+    }
+    if (message.productSlug !== "") {
+      obj.productSlug = message.productSlug;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<WishlistItem>, I>>(base?: I): WishlistItem {
+    return WishlistItem.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<WishlistItem>, I>>(object: I): WishlistItem {
+    const message = createBaseWishlistItem();
+    message.id = object.id ?? "";
+    message.productId = object.productId ?? "";
+    message.productName = object.productName ?? "";
+    message.productImage = object.productImage ?? "";
+    message.productPrice = object.productPrice ?? 0;
+    message.productSlug = object.productSlug ?? "";
+    return message;
+  },
+};
+
+function createBaseAddWishlistRequest(): AddWishlistRequest {
+  return { userId: "", productId: "" };
+}
+
+export const AddWishlistRequest: MessageFns<AddWishlistRequest> = {
+  encode(message: AddWishlistRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
+    }
+    if (message.productId !== "") {
+      writer.uint32(18).string(message.productId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): AddWishlistRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAddWishlistRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.productId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): AddWishlistRequest {
+    return {
+      userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
+      productId: isSet(object.productId) ? globalThis.String(object.productId) : "",
+    };
+  },
+
+  toJSON(message: AddWishlistRequest): unknown {
+    const obj: any = {};
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    if (message.productId !== "") {
+      obj.productId = message.productId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<AddWishlistRequest>, I>>(base?: I): AddWishlistRequest {
+    return AddWishlistRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<AddWishlistRequest>, I>>(object: I): AddWishlistRequest {
+    const message = createBaseAddWishlistRequest();
+    message.userId = object.userId ?? "";
+    message.productId = object.productId ?? "";
+    return message;
+  },
+};
+
+function createBaseAddWishlistResponse(): AddWishlistResponse {
+  return { success: false, message: "" };
+}
+
+export const AddWishlistResponse: MessageFns<AddWishlistResponse> = {
+  encode(message: AddWishlistResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    if (message.message !== "") {
+      writer.uint32(18).string(message.message);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): AddWishlistResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAddWishlistResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.message = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): AddWishlistResponse {
+    return {
+      success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
+    };
+  },
+
+  toJSON(message: AddWishlistResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<AddWishlistResponse>, I>>(base?: I): AddWishlistResponse {
+    return AddWishlistResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<AddWishlistResponse>, I>>(object: I): AddWishlistResponse {
+    const message = createBaseAddWishlistResponse();
+    message.success = object.success ?? false;
+    message.message = object.message ?? "";
+    return message;
+  },
+};
+
 function createBaseGetVariantsForCartRequest(): GetVariantsForCartRequest {
   return { variantIds: [] };
 }
@@ -7082,11 +8915,146 @@ export const GetVariantsForCartResponse: MessageFns<GetVariantsForCartResponse> 
   },
 };
 
+function createBaseChangeProductStatusRequest(): ChangeProductStatusRequest {
+  return { productId: "", status: "" };
+}
+
+export const ChangeProductStatusRequest: MessageFns<ChangeProductStatusRequest> = {
+  encode(message: ChangeProductStatusRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.productId !== "") {
+      writer.uint32(10).string(message.productId);
+    }
+    if (message.status !== "") {
+      writer.uint32(18).string(message.status);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ChangeProductStatusRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseChangeProductStatusRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.productId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.status = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ChangeProductStatusRequest {
+    return {
+      productId: isSet(object.productId) ? globalThis.String(object.productId) : "",
+      status: isSet(object.status) ? globalThis.String(object.status) : "",
+    };
+  },
+
+  toJSON(message: ChangeProductStatusRequest): unknown {
+    const obj: any = {};
+    if (message.productId !== "") {
+      obj.productId = message.productId;
+    }
+    if (message.status !== "") {
+      obj.status = message.status;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ChangeProductStatusRequest>, I>>(base?: I): ChangeProductStatusRequest {
+    return ChangeProductStatusRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ChangeProductStatusRequest>, I>>(object: I): ChangeProductStatusRequest {
+    const message = createBaseChangeProductStatusRequest();
+    message.productId = object.productId ?? "";
+    message.status = object.status ?? "";
+    return message;
+  },
+};
+
+function createBaseChangeProductStatusResponse(): ChangeProductStatusResponse {
+  return { success: false };
+}
+
+export const ChangeProductStatusResponse: MessageFns<ChangeProductStatusResponse> = {
+  encode(message: ChangeProductStatusResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ChangeProductStatusResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseChangeProductStatusResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ChangeProductStatusResponse {
+    return { success: isSet(object.success) ? globalThis.Boolean(object.success) : false };
+  },
+
+  toJSON(message: ChangeProductStatusResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ChangeProductStatusResponse>, I>>(base?: I): ChangeProductStatusResponse {
+    return ChangeProductStatusResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ChangeProductStatusResponse>, I>>(object: I): ChangeProductStatusResponse {
+    const message = createBaseChangeProductStatusResponse();
+    message.success = object.success ?? false;
+    return message;
+  },
+};
+
 function createBaseVariantCart(): VariantCart {
   return {
     id: "",
     price: 0,
     image: "",
+    sku: "",
     stock: undefined,
     variantName: "",
     productName: "",
@@ -7106,20 +9074,23 @@ export const VariantCart: MessageFns<VariantCart> = {
     if (message.image !== "") {
       writer.uint32(26).string(message.image);
     }
+    if (message.sku !== "") {
+      writer.uint32(34).string(message.sku);
+    }
     if (message.stock !== undefined) {
-      Stock.encode(message.stock, writer.uint32(34).fork()).join();
+      Stock.encode(message.stock, writer.uint32(42).fork()).join();
     }
     if (message.variantName !== "") {
-      writer.uint32(42).string(message.variantName);
+      writer.uint32(50).string(message.variantName);
     }
     if (message.productName !== "") {
-      writer.uint32(50).string(message.productName);
+      writer.uint32(58).string(message.productName);
     }
     if (message.productSlug !== "") {
-      writer.uint32(58).string(message.productSlug);
+      writer.uint32(66).string(message.productSlug);
     }
     for (const v of message.attributes) {
-      VariantAttribute.encode(v!, writer.uint32(66).fork()).join();
+      VariantAttribute.encode(v!, writer.uint32(74).fork()).join();
     }
     return writer;
   },
@@ -7160,7 +9131,7 @@ export const VariantCart: MessageFns<VariantCart> = {
             break;
           }
 
-          message.stock = Stock.decode(reader, reader.uint32());
+          message.sku = reader.string();
           continue;
         }
         case 5: {
@@ -7168,7 +9139,7 @@ export const VariantCart: MessageFns<VariantCart> = {
             break;
           }
 
-          message.variantName = reader.string();
+          message.stock = Stock.decode(reader, reader.uint32());
           continue;
         }
         case 6: {
@@ -7176,7 +9147,7 @@ export const VariantCart: MessageFns<VariantCart> = {
             break;
           }
 
-          message.productName = reader.string();
+          message.variantName = reader.string();
           continue;
         }
         case 7: {
@@ -7184,11 +9155,19 @@ export const VariantCart: MessageFns<VariantCart> = {
             break;
           }
 
-          message.productSlug = reader.string();
+          message.productName = reader.string();
           continue;
         }
         case 8: {
           if (tag !== 66) {
+            break;
+          }
+
+          message.productSlug = reader.string();
+          continue;
+        }
+        case 9: {
+          if (tag !== 74) {
             break;
           }
 
@@ -7209,6 +9188,7 @@ export const VariantCart: MessageFns<VariantCart> = {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
       price: isSet(object.price) ? globalThis.Number(object.price) : 0,
       image: isSet(object.image) ? globalThis.String(object.image) : "",
+      sku: isSet(object.sku) ? globalThis.String(object.sku) : "",
       stock: isSet(object.stock) ? Stock.fromJSON(object.stock) : undefined,
       variantName: isSet(object.variantName) ? globalThis.String(object.variantName) : "",
       productName: isSet(object.productName) ? globalThis.String(object.productName) : "",
@@ -7229,6 +9209,9 @@ export const VariantCart: MessageFns<VariantCart> = {
     }
     if (message.image !== "") {
       obj.image = message.image;
+    }
+    if (message.sku !== "") {
+      obj.sku = message.sku;
     }
     if (message.stock !== undefined) {
       obj.stock = Stock.toJSON(message.stock);
@@ -7256,6 +9239,7 @@ export const VariantCart: MessageFns<VariantCart> = {
     message.id = object.id ?? "";
     message.price = object.price ?? 0;
     message.image = object.image ?? "";
+    message.sku = object.sku ?? "";
     message.stock = (object.stock !== undefined && object.stock !== null) ? Stock.fromPartial(object.stock) : undefined;
     message.variantName = object.variantName ?? "";
     message.productName = object.productName ?? "";
@@ -7993,6 +9977,7 @@ function createBaseProduct(): Product {
     variants: [],
     dimensions: undefined,
     sizeCharts: [],
+    relatedProducts: [],
   };
 }
 
@@ -8066,6 +10051,9 @@ export const Product: MessageFns<Product> = {
     }
     for (const v of message.sizeCharts) {
       SizeChart.encode(v!, writer.uint32(186).fork()).join();
+    }
+    for (const v of message.relatedProducts) {
+      Product.encode(v!, writer.uint32(194).fork()).join();
     }
     return writer;
   },
@@ -8261,6 +10249,14 @@ export const Product: MessageFns<Product> = {
           message.sizeCharts.push(SizeChart.decode(reader, reader.uint32()));
           continue;
         }
+        case 24: {
+          if (tag !== 194) {
+            break;
+          }
+
+          message.relatedProducts.push(Product.decode(reader, reader.uint32()));
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -8304,6 +10300,9 @@ export const Product: MessageFns<Product> = {
       dimensions: isSet(object.dimensions) ? Dimensions.fromJSON(object.dimensions) : undefined,
       sizeCharts: globalThis.Array.isArray(object?.sizeCharts)
         ? object.sizeCharts.map((e: any) => SizeChart.fromJSON(e))
+        : [],
+      relatedProducts: globalThis.Array.isArray(object?.relatedProducts)
+        ? object.relatedProducts.map((e: any) => Product.fromJSON(e))
         : [],
     };
   },
@@ -8379,6 +10378,9 @@ export const Product: MessageFns<Product> = {
     if (message.sizeCharts?.length) {
       obj.sizeCharts = message.sizeCharts.map((e) => SizeChart.toJSON(e));
     }
+    if (message.relatedProducts?.length) {
+      obj.relatedProducts = message.relatedProducts.map((e) => Product.toJSON(e));
+    }
     return obj;
   },
 
@@ -8412,6 +10414,131 @@ export const Product: MessageFns<Product> = {
       ? Dimensions.fromPartial(object.dimensions)
       : undefined;
     message.sizeCharts = object.sizeCharts?.map((e) => SizeChart.fromPartial(e)) || [];
+    message.relatedProducts = object.relatedProducts?.map((e) => Product.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseProductRelatedProduct(): ProductRelatedProduct {
+  return { id: "", name: "", slug: "", price: 0, image: "" };
+}
+
+export const ProductRelatedProduct: MessageFns<ProductRelatedProduct> = {
+  encode(message: ProductRelatedProduct, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.name !== "") {
+      writer.uint32(18).string(message.name);
+    }
+    if (message.slug !== "") {
+      writer.uint32(26).string(message.slug);
+    }
+    if (message.price !== 0) {
+      writer.uint32(37).float(message.price);
+    }
+    if (message.image !== "") {
+      writer.uint32(42).string(message.image);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ProductRelatedProduct {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseProductRelatedProduct();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.slug = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 37) {
+            break;
+          }
+
+          message.price = reader.float();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.image = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ProductRelatedProduct {
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      name: isSet(object.name) ? globalThis.String(object.name) : "",
+      slug: isSet(object.slug) ? globalThis.String(object.slug) : "",
+      price: isSet(object.price) ? globalThis.Number(object.price) : 0,
+      image: isSet(object.image) ? globalThis.String(object.image) : "",
+    };
+  },
+
+  toJSON(message: ProductRelatedProduct): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.name !== "") {
+      obj.name = message.name;
+    }
+    if (message.slug !== "") {
+      obj.slug = message.slug;
+    }
+    if (message.price !== 0) {
+      obj.price = message.price;
+    }
+    if (message.image !== "") {
+      obj.image = message.image;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ProductRelatedProduct>, I>>(base?: I): ProductRelatedProduct {
+    return ProductRelatedProduct.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ProductRelatedProduct>, I>>(object: I): ProductRelatedProduct {
+    const message = createBaseProductRelatedProduct();
+    message.id = object.id ?? "";
+    message.name = object.name ?? "";
+    message.slug = object.slug ?? "";
+    message.price = object.price ?? 0;
+    message.image = object.image ?? "";
     return message;
   },
 };
@@ -9468,6 +11595,7 @@ export const Seo: MessageFns<Seo> = {
 function createBaseProductVariant(): ProductVariant {
   return {
     id: "",
+    name: "",
     sku: "",
     price: 0,
     lowStockThreshold: 0,
@@ -9483,26 +11611,29 @@ export const ProductVariant: MessageFns<ProductVariant> = {
     if (message.id !== "") {
       writer.uint32(10).string(message.id);
     }
+    if (message.name !== "") {
+      writer.uint32(18).string(message.name);
+    }
     if (message.sku !== "") {
-      writer.uint32(18).string(message.sku);
+      writer.uint32(26).string(message.sku);
     }
     if (message.price !== 0) {
-      writer.uint32(29).float(message.price);
+      writer.uint32(37).float(message.price);
     }
     if (message.lowStockThreshold !== 0) {
-      writer.uint32(37).float(message.lowStockThreshold);
+      writer.uint32(45).float(message.lowStockThreshold);
     }
     if (message.stock !== undefined) {
-      Stock.encode(message.stock, writer.uint32(42).fork()).join();
+      Stock.encode(message.stock, writer.uint32(50).fork()).join();
     }
     if (message.warehouseId !== "") {
-      writer.uint32(50).string(message.warehouseId);
+      writer.uint32(58).string(message.warehouseId);
     }
     for (const v of message.imageIds) {
-      writer.uint32(58).string(v!);
+      writer.uint32(66).string(v!);
     }
     for (const v of message.attributes) {
-      VariantAttribute.encode(v!, writer.uint32(66).fork()).join();
+      VariantAttribute.encode(v!, writer.uint32(74).fork()).join();
     }
     return writer;
   },
@@ -9527,15 +11658,15 @@ export const ProductVariant: MessageFns<ProductVariant> = {
             break;
           }
 
-          message.sku = reader.string();
+          message.name = reader.string();
           continue;
         }
         case 3: {
-          if (tag !== 29) {
+          if (tag !== 26) {
             break;
           }
 
-          message.price = reader.float();
+          message.sku = reader.string();
           continue;
         }
         case 4: {
@@ -9543,15 +11674,15 @@ export const ProductVariant: MessageFns<ProductVariant> = {
             break;
           }
 
-          message.lowStockThreshold = reader.float();
+          message.price = reader.float();
           continue;
         }
         case 5: {
-          if (tag !== 42) {
+          if (tag !== 45) {
             break;
           }
 
-          message.stock = Stock.decode(reader, reader.uint32());
+          message.lowStockThreshold = reader.float();
           continue;
         }
         case 6: {
@@ -9559,7 +11690,7 @@ export const ProductVariant: MessageFns<ProductVariant> = {
             break;
           }
 
-          message.warehouseId = reader.string();
+          message.stock = Stock.decode(reader, reader.uint32());
           continue;
         }
         case 7: {
@@ -9567,11 +11698,19 @@ export const ProductVariant: MessageFns<ProductVariant> = {
             break;
           }
 
-          message.imageIds.push(reader.string());
+          message.warehouseId = reader.string();
           continue;
         }
         case 8: {
           if (tag !== 66) {
+            break;
+          }
+
+          message.imageIds.push(reader.string());
+          continue;
+        }
+        case 9: {
+          if (tag !== 74) {
             break;
           }
 
@@ -9590,6 +11729,7 @@ export const ProductVariant: MessageFns<ProductVariant> = {
   fromJSON(object: any): ProductVariant {
     return {
       id: isSet(object.id) ? globalThis.String(object.id) : "",
+      name: isSet(object.name) ? globalThis.String(object.name) : "",
       sku: isSet(object.sku) ? globalThis.String(object.sku) : "",
       price: isSet(object.price) ? globalThis.Number(object.price) : 0,
       lowStockThreshold: isSet(object.lowStockThreshold) ? globalThis.Number(object.lowStockThreshold) : 0,
@@ -9606,6 +11746,9 @@ export const ProductVariant: MessageFns<ProductVariant> = {
     const obj: any = {};
     if (message.id !== "") {
       obj.id = message.id;
+    }
+    if (message.name !== "") {
+      obj.name = message.name;
     }
     if (message.sku !== "") {
       obj.sku = message.sku;
@@ -9637,6 +11780,7 @@ export const ProductVariant: MessageFns<ProductVariant> = {
   fromPartial<I extends Exact<DeepPartial<ProductVariant>, I>>(object: I): ProductVariant {
     const message = createBaseProductVariant();
     message.id = object.id ?? "";
+    message.name = object.name ?? "";
     message.sku = object.sku ?? "";
     message.price = object.price ?? 0;
     message.lowStockThreshold = object.lowStockThreshold ?? 0;
@@ -9941,13 +12085,16 @@ export const Image: MessageFns<Image> = {
 };
 
 function createBaseCreateProductRequest(): CreateProductRequest {
-  return { product: undefined };
+  return { product: undefined, relatedProductIds: [] };
 }
 
 export const CreateProductRequest: MessageFns<CreateProductRequest> = {
   encode(message: CreateProductRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.product !== undefined) {
       Product.encode(message.product, writer.uint32(10).fork()).join();
+    }
+    for (const v of message.relatedProductIds) {
+      writer.uint32(18).string(v!);
     }
     return writer;
   },
@@ -9967,6 +12114,14 @@ export const CreateProductRequest: MessageFns<CreateProductRequest> = {
           message.product = Product.decode(reader, reader.uint32());
           continue;
         }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.relatedProductIds.push(reader.string());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -9977,13 +12132,21 @@ export const CreateProductRequest: MessageFns<CreateProductRequest> = {
   },
 
   fromJSON(object: any): CreateProductRequest {
-    return { product: isSet(object.product) ? Product.fromJSON(object.product) : undefined };
+    return {
+      product: isSet(object.product) ? Product.fromJSON(object.product) : undefined,
+      relatedProductIds: globalThis.Array.isArray(object?.relatedProductIds)
+        ? object.relatedProductIds.map((e: any) => globalThis.String(e))
+        : [],
+    };
   },
 
   toJSON(message: CreateProductRequest): unknown {
     const obj: any = {};
     if (message.product !== undefined) {
       obj.product = Product.toJSON(message.product);
+    }
+    if (message.relatedProductIds?.length) {
+      obj.relatedProductIds = message.relatedProductIds;
     }
     return obj;
   },
@@ -9996,6 +12159,7 @@ export const CreateProductRequest: MessageFns<CreateProductRequest> = {
     message.product = (object.product !== undefined && object.product !== null)
       ? Product.fromPartial(object.product)
       : undefined;
+    message.relatedProductIds = object.relatedProductIds?.map((e) => e) || [];
     return message;
   },
 };
@@ -10061,13 +12225,16 @@ export const CreateProductResponse: MessageFns<CreateProductResponse> = {
 };
 
 function createBaseUpdateProductRequest(): UpdateProductRequest {
-  return { product: undefined };
+  return { product: undefined, relatedProductIds: [] };
 }
 
 export const UpdateProductRequest: MessageFns<UpdateProductRequest> = {
   encode(message: UpdateProductRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.product !== undefined) {
       Product.encode(message.product, writer.uint32(10).fork()).join();
+    }
+    for (const v of message.relatedProductIds) {
+      writer.uint32(18).string(v!);
     }
     return writer;
   },
@@ -10087,6 +12254,14 @@ export const UpdateProductRequest: MessageFns<UpdateProductRequest> = {
           message.product = Product.decode(reader, reader.uint32());
           continue;
         }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.relatedProductIds.push(reader.string());
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -10097,13 +12272,21 @@ export const UpdateProductRequest: MessageFns<UpdateProductRequest> = {
   },
 
   fromJSON(object: any): UpdateProductRequest {
-    return { product: isSet(object.product) ? Product.fromJSON(object.product) : undefined };
+    return {
+      product: isSet(object.product) ? Product.fromJSON(object.product) : undefined,
+      relatedProductIds: globalThis.Array.isArray(object?.relatedProductIds)
+        ? object.relatedProductIds.map((e: any) => globalThis.String(e))
+        : [],
+    };
   },
 
   toJSON(message: UpdateProductRequest): unknown {
     const obj: any = {};
     if (message.product !== undefined) {
       obj.product = Product.toJSON(message.product);
+    }
+    if (message.relatedProductIds?.length) {
+      obj.relatedProductIds = message.relatedProductIds;
     }
     return obj;
   },
@@ -10116,18 +12299,19 @@ export const UpdateProductRequest: MessageFns<UpdateProductRequest> = {
     message.product = (object.product !== undefined && object.product !== null)
       ? Product.fromPartial(object.product)
       : undefined;
+    message.relatedProductIds = object.relatedProductIds?.map((e) => e) || [];
     return message;
   },
 };
 
 function createBaseUpdateProductResponse(): UpdateProductResponse {
-  return { product: undefined };
+  return { success: false };
 }
 
 export const UpdateProductResponse: MessageFns<UpdateProductResponse> = {
   encode(message: UpdateProductResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.product !== undefined) {
-      Product.encode(message.product, writer.uint32(10).fork()).join();
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
     }
     return writer;
   },
@@ -10140,11 +12324,11 @@ export const UpdateProductResponse: MessageFns<UpdateProductResponse> = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
-          if (tag !== 10) {
+          if (tag !== 8) {
             break;
           }
 
-          message.product = Product.decode(reader, reader.uint32());
+          message.success = reader.bool();
           continue;
         }
       }
@@ -10157,13 +12341,13 @@ export const UpdateProductResponse: MessageFns<UpdateProductResponse> = {
   },
 
   fromJSON(object: any): UpdateProductResponse {
-    return { product: isSet(object.product) ? Product.fromJSON(object.product) : undefined };
+    return { success: isSet(object.success) ? globalThis.Boolean(object.success) : false };
   },
 
   toJSON(message: UpdateProductResponse): unknown {
     const obj: any = {};
-    if (message.product !== undefined) {
-      obj.product = Product.toJSON(message.product);
+    if (message.success !== false) {
+      obj.success = message.success;
     }
     return obj;
   },
@@ -10173,9 +12357,7 @@ export const UpdateProductResponse: MessageFns<UpdateProductResponse> = {
   },
   fromPartial<I extends Exact<DeepPartial<UpdateProductResponse>, I>>(object: I): UpdateProductResponse {
     const message = createBaseUpdateProductResponse();
-    message.product = (object.product !== undefined && object.product !== null)
-      ? Product.fromPartial(object.product)
-      : undefined;
+    message.success = object.success ?? false;
     return message;
   },
 };
@@ -11169,22 +13351,25 @@ export const ListProductsRequest: MessageFns<ListProductsRequest> = {
   },
 };
 
-function createBaseGetProductByIdRequest(): GetProductByIdRequest {
-  return { id: "" };
+function createBaseGetProductRequest(): GetProductRequest {
+  return { data: "", type: "" };
 }
 
-export const GetProductByIdRequest: MessageFns<GetProductByIdRequest> = {
-  encode(message: GetProductByIdRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.id !== "") {
-      writer.uint32(10).string(message.id);
+export const GetProductRequest: MessageFns<GetProductRequest> = {
+  encode(message: GetProductRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.data !== "") {
+      writer.uint32(10).string(message.data);
+    }
+    if (message.type !== "") {
+      writer.uint32(18).string(message.type);
     }
     return writer;
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): GetProductByIdRequest {
+  decode(input: BinaryReader | Uint8Array, length?: number): GetProductRequest {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGetProductByIdRequest();
+    const message = createBaseGetProductRequest();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -11193,7 +13378,15 @@ export const GetProductByIdRequest: MessageFns<GetProductByIdRequest> = {
             break;
           }
 
-          message.id = reader.string();
+          message.data = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.type = reader.string();
           continue;
         }
       }
@@ -11205,82 +13398,31 @@ export const GetProductByIdRequest: MessageFns<GetProductByIdRequest> = {
     return message;
   },
 
-  fromJSON(object: any): GetProductByIdRequest {
-    return { id: isSet(object.id) ? globalThis.String(object.id) : "" };
+  fromJSON(object: any): GetProductRequest {
+    return {
+      data: isSet(object.data) ? globalThis.String(object.data) : "",
+      type: isSet(object.type) ? globalThis.String(object.type) : "",
+    };
   },
 
-  toJSON(message: GetProductByIdRequest): unknown {
+  toJSON(message: GetProductRequest): unknown {
     const obj: any = {};
-    if (message.id !== "") {
-      obj.id = message.id;
+    if (message.data !== "") {
+      obj.data = message.data;
+    }
+    if (message.type !== "") {
+      obj.type = message.type;
     }
     return obj;
   },
 
-  create<I extends Exact<DeepPartial<GetProductByIdRequest>, I>>(base?: I): GetProductByIdRequest {
-    return GetProductByIdRequest.fromPartial(base ?? ({} as any));
+  create<I extends Exact<DeepPartial<GetProductRequest>, I>>(base?: I): GetProductRequest {
+    return GetProductRequest.fromPartial(base ?? ({} as any));
   },
-  fromPartial<I extends Exact<DeepPartial<GetProductByIdRequest>, I>>(object: I): GetProductByIdRequest {
-    const message = createBaseGetProductByIdRequest();
-    message.id = object.id ?? "";
-    return message;
-  },
-};
-
-function createBaseGetProductBySlugRequest(): GetProductBySlugRequest {
-  return { slug: "" };
-}
-
-export const GetProductBySlugRequest: MessageFns<GetProductBySlugRequest> = {
-  encode(message: GetProductBySlugRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.slug !== "") {
-      writer.uint32(10).string(message.slug);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): GetProductBySlugRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseGetProductBySlugRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.slug = reader.string();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): GetProductBySlugRequest {
-    return { slug: isSet(object.slug) ? globalThis.String(object.slug) : "" };
-  },
-
-  toJSON(message: GetProductBySlugRequest): unknown {
-    const obj: any = {};
-    if (message.slug !== "") {
-      obj.slug = message.slug;
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<GetProductBySlugRequest>, I>>(base?: I): GetProductBySlugRequest {
-    return GetProductBySlugRequest.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<GetProductBySlugRequest>, I>>(object: I): GetProductBySlugRequest {
-    const message = createBaseGetProductBySlugRequest();
-    message.slug = object.slug ?? "";
+  fromPartial<I extends Exact<DeepPartial<GetProductRequest>, I>>(object: I): GetProductRequest {
+    const message = createBaseGetProductRequest();
+    message.data = object.data ?? "";
+    message.type = object.type ?? "";
     return message;
   },
 };
@@ -11920,6 +14062,174 @@ export const SearchProductsResponse: MessageFns<SearchProductsResponse> = {
   fromPartial<I extends Exact<DeepPartial<SearchProductsResponse>, I>>(object: I): SearchProductsResponse {
     const message = createBaseSearchProductsResponse();
     message.results = object.results?.map((e) => Product.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseSendNewUserByAdminRequest(): SendNewUserByAdminRequest {
+  return { email: "", name: "", password: "" };
+}
+
+export const SendNewUserByAdminRequest: MessageFns<SendNewUserByAdminRequest> = {
+  encode(message: SendNewUserByAdminRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.email !== "") {
+      writer.uint32(10).string(message.email);
+    }
+    if (message.name !== "") {
+      writer.uint32(18).string(message.name);
+    }
+    if (message.password !== "") {
+      writer.uint32(26).string(message.password);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): SendNewUserByAdminRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSendNewUserByAdminRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.email = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.name = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.password = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): SendNewUserByAdminRequest {
+    return {
+      email: isSet(object.email) ? globalThis.String(object.email) : "",
+      name: isSet(object.name) ? globalThis.String(object.name) : "",
+      password: isSet(object.password) ? globalThis.String(object.password) : "",
+    };
+  },
+
+  toJSON(message: SendNewUserByAdminRequest): unknown {
+    const obj: any = {};
+    if (message.email !== "") {
+      obj.email = message.email;
+    }
+    if (message.name !== "") {
+      obj.name = message.name;
+    }
+    if (message.password !== "") {
+      obj.password = message.password;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<SendNewUserByAdminRequest>, I>>(base?: I): SendNewUserByAdminRequest {
+    return SendNewUserByAdminRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<SendNewUserByAdminRequest>, I>>(object: I): SendNewUserByAdminRequest {
+    const message = createBaseSendNewUserByAdminRequest();
+    message.email = object.email ?? "";
+    message.name = object.name ?? "";
+    message.password = object.password ?? "";
+    return message;
+  },
+};
+
+function createBaseSendNewUserByAdminResponse(): SendNewUserByAdminResponse {
+  return { success: false, message: "" };
+}
+
+export const SendNewUserByAdminResponse: MessageFns<SendNewUserByAdminResponse> = {
+  encode(message: SendNewUserByAdminResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    if (message.message !== "") {
+      writer.uint32(18).string(message.message);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): SendNewUserByAdminResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSendNewUserByAdminResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.message = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): SendNewUserByAdminResponse {
+    return {
+      success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
+      message: isSet(object.message) ? globalThis.String(object.message) : "",
+    };
+  },
+
+  toJSON(message: SendNewUserByAdminResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    if (message.message !== "") {
+      obj.message = message.message;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<SendNewUserByAdminResponse>, I>>(base?: I): SendNewUserByAdminResponse {
+    return SendNewUserByAdminResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<SendNewUserByAdminResponse>, I>>(object: I): SendNewUserByAdminResponse {
+    const message = createBaseSendNewUserByAdminResponse();
+    message.success = object.success ?? false;
+    message.message = object.message ?? "";
     return message;
   },
 };
@@ -12891,13 +15201,13 @@ export const HealthCheckRequest: MessageFns<HealthCheckRequest> = {
 };
 
 function createBaseHealthCheckResponse(): HealthCheckResponse {
-  return { status: 0 };
+  return { status: HealthCheckResponse_ServingStatus.UNKNOWN };
 }
 
 export const HealthCheckResponse: MessageFns<HealthCheckResponse> = {
   encode(message: HealthCheckResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.status !== 0) {
-      writer.uint32(8).int32(message.status);
+    if (message.status !== HealthCheckResponse_ServingStatus.UNKNOWN) {
+      writer.uint32(8).int32(healthCheckResponse_ServingStatusToNumber(message.status));
     }
     return writer;
   },
@@ -12914,7 +15224,7 @@ export const HealthCheckResponse: MessageFns<HealthCheckResponse> = {
             break;
           }
 
-          message.status = reader.int32() as any;
+          message.status = healthCheckResponse_ServingStatusFromJSON(reader.int32());
           continue;
         }
       }
@@ -12927,12 +15237,16 @@ export const HealthCheckResponse: MessageFns<HealthCheckResponse> = {
   },
 
   fromJSON(object: any): HealthCheckResponse {
-    return { status: isSet(object.status) ? healthCheckResponse_ServingStatusFromJSON(object.status) : 0 };
+    return {
+      status: isSet(object.status)
+        ? healthCheckResponse_ServingStatusFromJSON(object.status)
+        : HealthCheckResponse_ServingStatus.UNKNOWN,
+    };
   },
 
   toJSON(message: HealthCheckResponse): unknown {
     const obj: any = {};
-    if (message.status !== 0) {
+    if (message.status !== HealthCheckResponse_ServingStatus.UNKNOWN) {
       obj.status = healthCheckResponse_ServingStatusToJSON(message.status);
     }
     return obj;
@@ -12943,7 +15257,813 @@ export const HealthCheckResponse: MessageFns<HealthCheckResponse> = {
   },
   fromPartial<I extends Exact<DeepPartial<HealthCheckResponse>, I>>(object: I): HealthCheckResponse {
     const message = createBaseHealthCheckResponse();
-    message.status = object.status ?? 0;
+    message.status = object.status ?? HealthCheckResponse_ServingStatus.UNKNOWN;
+    return message;
+  },
+};
+
+function createBaseGetOrdersForAdminRequest(): GetOrdersForAdminRequest {
+  return { userIds: [] };
+}
+
+export const GetOrdersForAdminRequest: MessageFns<GetOrdersForAdminRequest> = {
+  encode(message: GetOrdersForAdminRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.userIds) {
+      writer.uint32(10).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetOrdersForAdminRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetOrdersForAdminRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.userIds.push(reader.string());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetOrdersForAdminRequest {
+    return {
+      userIds: globalThis.Array.isArray(object?.userIds) ? object.userIds.map((e: any) => globalThis.String(e)) : [],
+    };
+  },
+
+  toJSON(message: GetOrdersForAdminRequest): unknown {
+    const obj: any = {};
+    if (message.userIds?.length) {
+      obj.userIds = message.userIds;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetOrdersForAdminRequest>, I>>(base?: I): GetOrdersForAdminRequest {
+    return GetOrdersForAdminRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetOrdersForAdminRequest>, I>>(object: I): GetOrdersForAdminRequest {
+    const message = createBaseGetOrdersForAdminRequest();
+    message.userIds = object.userIds?.map((e) => e) || [];
+    return message;
+  },
+};
+
+function createBaseGetOrdersForAdminResponse(): GetOrdersForAdminResponse {
+  return { orders: [] };
+}
+
+export const GetOrdersForAdminResponse: MessageFns<GetOrdersForAdminResponse> = {
+  encode(message: GetOrdersForAdminResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.orders) {
+      OrderForAdmin.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetOrdersForAdminResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetOrdersForAdminResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orders.push(OrderForAdmin.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetOrdersForAdminResponse {
+    return {
+      orders: globalThis.Array.isArray(object?.orders) ? object.orders.map((e: any) => OrderForAdmin.fromJSON(e)) : [],
+    };
+  },
+
+  toJSON(message: GetOrdersForAdminResponse): unknown {
+    const obj: any = {};
+    if (message.orders?.length) {
+      obj.orders = message.orders.map((e) => OrderForAdmin.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetOrdersForAdminResponse>, I>>(base?: I): GetOrdersForAdminResponse {
+    return GetOrdersForAdminResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetOrdersForAdminResponse>, I>>(object: I): GetOrdersForAdminResponse {
+    const message = createBaseGetOrdersForAdminResponse();
+    message.orders = object.orders?.map((e) => OrderForAdmin.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseOrderForAdmin(): OrderForAdmin {
+  return { userId: "", totalOrders: 0, totalSpent: 0, lastOrderDate: "" };
+}
+
+export const OrderForAdmin: MessageFns<OrderForAdmin> = {
+  encode(message: OrderForAdmin, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
+    }
+    if (message.totalOrders !== 0) {
+      writer.uint32(16).int32(message.totalOrders);
+    }
+    if (message.totalSpent !== 0) {
+      writer.uint32(25).double(message.totalSpent);
+    }
+    if (message.lastOrderDate !== "") {
+      writer.uint32(34).string(message.lastOrderDate);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): OrderForAdmin {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOrderForAdmin();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.totalOrders = reader.int32();
+          continue;
+        }
+        case 3: {
+          if (tag !== 25) {
+            break;
+          }
+
+          message.totalSpent = reader.double();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.lastOrderDate = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): OrderForAdmin {
+    return {
+      userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
+      totalOrders: isSet(object.totalOrders) ? globalThis.Number(object.totalOrders) : 0,
+      totalSpent: isSet(object.totalSpent) ? globalThis.Number(object.totalSpent) : 0,
+      lastOrderDate: isSet(object.lastOrderDate) ? globalThis.String(object.lastOrderDate) : "",
+    };
+  },
+
+  toJSON(message: OrderForAdmin): unknown {
+    const obj: any = {};
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    if (message.totalOrders !== 0) {
+      obj.totalOrders = Math.round(message.totalOrders);
+    }
+    if (message.totalSpent !== 0) {
+      obj.totalSpent = message.totalSpent;
+    }
+    if (message.lastOrderDate !== "") {
+      obj.lastOrderDate = message.lastOrderDate;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<OrderForAdmin>, I>>(base?: I): OrderForAdmin {
+    return OrderForAdmin.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<OrderForAdmin>, I>>(object: I): OrderForAdmin {
+    const message = createBaseOrderForAdmin();
+    message.userId = object.userId ?? "";
+    message.totalOrders = object.totalOrders ?? 0;
+    message.totalSpent = object.totalSpent ?? 0;
+    message.lastOrderDate = object.lastOrderDate ?? "";
+    return message;
+  },
+};
+
+function createBaseListAllOrdersResponse(): ListAllOrdersResponse {
+  return { orders: [] };
+}
+
+export const ListAllOrdersResponse: MessageFns<ListAllOrdersResponse> = {
+  encode(message: ListAllOrdersResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.orders) {
+      Order.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ListAllOrdersResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseListAllOrdersResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orders.push(Order.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ListAllOrdersResponse {
+    return { orders: globalThis.Array.isArray(object?.orders) ? object.orders.map((e: any) => Order.fromJSON(e)) : [] };
+  },
+
+  toJSON(message: ListAllOrdersResponse): unknown {
+    const obj: any = {};
+    if (message.orders?.length) {
+      obj.orders = message.orders.map((e) => Order.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ListAllOrdersResponse>, I>>(base?: I): ListAllOrdersResponse {
+    return ListAllOrdersResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ListAllOrdersResponse>, I>>(object: I): ListAllOrdersResponse {
+    const message = createBaseListAllOrdersResponse();
+    message.orders = object.orders?.map((e) => Order.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseUpdateTrackingNumberRequest(): UpdateTrackingNumberRequest {
+  return { orderId: "", trackingNumber: "" };
+}
+
+export const UpdateTrackingNumberRequest: MessageFns<UpdateTrackingNumberRequest> = {
+  encode(message: UpdateTrackingNumberRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    if (message.trackingNumber !== "") {
+      writer.uint32(18).string(message.trackingNumber);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): UpdateTrackingNumberRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUpdateTrackingNumberRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.trackingNumber = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): UpdateTrackingNumberRequest {
+    return {
+      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
+      trackingNumber: isSet(object.trackingNumber) ? globalThis.String(object.trackingNumber) : "",
+    };
+  },
+
+  toJSON(message: UpdateTrackingNumberRequest): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.trackingNumber !== "") {
+      obj.trackingNumber = message.trackingNumber;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<UpdateTrackingNumberRequest>, I>>(base?: I): UpdateTrackingNumberRequest {
+    return UpdateTrackingNumberRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<UpdateTrackingNumberRequest>, I>>(object: I): UpdateTrackingNumberRequest {
+    const message = createBaseUpdateTrackingNumberRequest();
+    message.orderId = object.orderId ?? "";
+    message.trackingNumber = object.trackingNumber ?? "";
+    return message;
+  },
+};
+
+function createBaseUpdateTrackingNumberResponse(): UpdateTrackingNumberResponse {
+  return { success: false };
+}
+
+export const UpdateTrackingNumberResponse: MessageFns<UpdateTrackingNumberResponse> = {
+  encode(message: UpdateTrackingNumberResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): UpdateTrackingNumberResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseUpdateTrackingNumberResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): UpdateTrackingNumberResponse {
+    return { success: isSet(object.success) ? globalThis.Boolean(object.success) : false };
+  },
+
+  toJSON(message: UpdateTrackingNumberResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<UpdateTrackingNumberResponse>, I>>(base?: I): UpdateTrackingNumberResponse {
+    return UpdateTrackingNumberResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<UpdateTrackingNumberResponse>, I>>(object: I): UpdateTrackingNumberResponse {
+    const message = createBaseUpdateTrackingNumberResponse();
+    message.success = object.success ?? false;
+    return message;
+  },
+};
+
+function createBaseAddOrderNoteRequest(): AddOrderNoteRequest {
+  return { orderId: "", note: "" };
+}
+
+export const AddOrderNoteRequest: MessageFns<AddOrderNoteRequest> = {
+  encode(message: AddOrderNoteRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    if (message.note !== "") {
+      writer.uint32(18).string(message.note);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): AddOrderNoteRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAddOrderNoteRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.note = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): AddOrderNoteRequest {
+    return {
+      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
+      note: isSet(object.note) ? globalThis.String(object.note) : "",
+    };
+  },
+
+  toJSON(message: AddOrderNoteRequest): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.note !== "") {
+      obj.note = message.note;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<AddOrderNoteRequest>, I>>(base?: I): AddOrderNoteRequest {
+    return AddOrderNoteRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<AddOrderNoteRequest>, I>>(object: I): AddOrderNoteRequest {
+    const message = createBaseAddOrderNoteRequest();
+    message.orderId = object.orderId ?? "";
+    message.note = object.note ?? "";
+    return message;
+  },
+};
+
+function createBaseAddOrderNoteResponse(): AddOrderNoteResponse {
+  return { notes: [] };
+}
+
+export const AddOrderNoteResponse: MessageFns<AddOrderNoteResponse> = {
+  encode(message: AddOrderNoteResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.notes) {
+      OrderNote.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): AddOrderNoteResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseAddOrderNoteResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.notes.push(OrderNote.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): AddOrderNoteResponse {
+    return {
+      notes: globalThis.Array.isArray(object?.notes) ? object.notes.map((e: any) => OrderNote.fromJSON(e)) : [],
+    };
+  },
+
+  toJSON(message: AddOrderNoteResponse): unknown {
+    const obj: any = {};
+    if (message.notes?.length) {
+      obj.notes = message.notes.map((e) => OrderNote.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<AddOrderNoteResponse>, I>>(base?: I): AddOrderNoteResponse {
+    return AddOrderNoteResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<AddOrderNoteResponse>, I>>(object: I): AddOrderNoteResponse {
+    const message = createBaseAddOrderNoteResponse();
+    message.notes = object.notes?.map((e) => OrderNote.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseDeleteOrderNoteRequest(): DeleteOrderNoteRequest {
+  return { orderId: "", noteId: "" };
+}
+
+export const DeleteOrderNoteRequest: MessageFns<DeleteOrderNoteRequest> = {
+  encode(message: DeleteOrderNoteRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.orderId !== "") {
+      writer.uint32(10).string(message.orderId);
+    }
+    if (message.noteId !== "") {
+      writer.uint32(18).string(message.noteId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): DeleteOrderNoteRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDeleteOrderNoteRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.noteId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): DeleteOrderNoteRequest {
+    return {
+      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
+      noteId: isSet(object.noteId) ? globalThis.String(object.noteId) : "",
+    };
+  },
+
+  toJSON(message: DeleteOrderNoteRequest): unknown {
+    const obj: any = {};
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.noteId !== "") {
+      obj.noteId = message.noteId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<DeleteOrderNoteRequest>, I>>(base?: I): DeleteOrderNoteRequest {
+    return DeleteOrderNoteRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<DeleteOrderNoteRequest>, I>>(object: I): DeleteOrderNoteRequest {
+    const message = createBaseDeleteOrderNoteRequest();
+    message.orderId = object.orderId ?? "";
+    message.noteId = object.noteId ?? "";
+    return message;
+  },
+};
+
+function createBaseDeleteOrderNoteResponse(): DeleteOrderNoteResponse {
+  return { success: false };
+}
+
+export const DeleteOrderNoteResponse: MessageFns<DeleteOrderNoteResponse> = {
+  encode(message: DeleteOrderNoteResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.success !== false) {
+      writer.uint32(8).bool(message.success);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): DeleteOrderNoteResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseDeleteOrderNoteResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break;
+          }
+
+          message.success = reader.bool();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): DeleteOrderNoteResponse {
+    return { success: isSet(object.success) ? globalThis.Boolean(object.success) : false };
+  },
+
+  toJSON(message: DeleteOrderNoteResponse): unknown {
+    const obj: any = {};
+    if (message.success !== false) {
+      obj.success = message.success;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<DeleteOrderNoteResponse>, I>>(base?: I): DeleteOrderNoteResponse {
+    return DeleteOrderNoteResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<DeleteOrderNoteResponse>, I>>(object: I): DeleteOrderNoteResponse {
+    const message = createBaseDeleteOrderNoteResponse();
+    message.success = object.success ?? false;
+    return message;
+  },
+};
+
+function createBaseListOrdersRequest(): ListOrdersRequest {
+  return { userId: "" };
+}
+
+export const ListOrdersRequest: MessageFns<ListOrdersRequest> = {
+  encode(message: ListOrdersRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.userId !== "") {
+      writer.uint32(10).string(message.userId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ListOrdersRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseListOrdersRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.userId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ListOrdersRequest {
+    return { userId: isSet(object.userId) ? globalThis.String(object.userId) : "" };
+  },
+
+  toJSON(message: ListOrdersRequest): unknown {
+    const obj: any = {};
+    if (message.userId !== "") {
+      obj.userId = message.userId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ListOrdersRequest>, I>>(base?: I): ListOrdersRequest {
+    return ListOrdersRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ListOrdersRequest>, I>>(object: I): ListOrdersRequest {
+    const message = createBaseListOrdersRequest();
+    message.userId = object.userId ?? "";
+    return message;
+  },
+};
+
+function createBaseListOrdersResponse(): ListOrdersResponse {
+  return { orders: [] };
+}
+
+export const ListOrdersResponse: MessageFns<ListOrdersResponse> = {
+  encode(message: ListOrdersResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.orders) {
+      Order.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ListOrdersResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseListOrdersResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.orders.push(Order.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): ListOrdersResponse {
+    return { orders: globalThis.Array.isArray(object?.orders) ? object.orders.map((e: any) => Order.fromJSON(e)) : [] };
+  },
+
+  toJSON(message: ListOrdersResponse): unknown {
+    const obj: any = {};
+    if (message.orders?.length) {
+      obj.orders = message.orders.map((e) => Order.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<ListOrdersResponse>, I>>(base?: I): ListOrdersResponse {
+    return ListOrdersResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<ListOrdersResponse>, I>>(object: I): ListOrdersResponse {
+    const message = createBaseListOrdersResponse();
+    message.orders = object.orders?.map((e) => Order.fromPartial(e)) || [];
     return message;
   },
 };
@@ -12953,15 +16073,11 @@ function createBaseCreateOrderRequest(): CreateOrderRequest {
     userId: "",
     cartId: "",
     items: [],
-    paymentMethod: "",
-    paymentAmount: 0,
-    paymentCurrency: "",
-    shippingAddress: undefined,
-    shippingMethod: "",
-    shippingCost: 0,
-    subtotal: 0,
+    status: OrderStatus.ORDER_PENDING,
+    paymentId: "",
+    payment: undefined,
+    shipping: undefined,
     coupons: [],
-    total: 0,
     currencyCode: "",
   };
 }
@@ -12977,35 +16093,23 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
     for (const v of message.items) {
       OrderItem.encode(v!, writer.uint32(26).fork()).join();
     }
-    if (message.paymentMethod !== "") {
-      writer.uint32(34).string(message.paymentMethod);
+    if (message.status !== OrderStatus.ORDER_PENDING) {
+      writer.uint32(32).int32(orderStatusToNumber(message.status));
     }
-    if (message.paymentAmount !== 0) {
-      writer.uint32(41).double(message.paymentAmount);
+    if (message.paymentId !== "") {
+      writer.uint32(42).string(message.paymentId);
     }
-    if (message.paymentCurrency !== "") {
-      writer.uint32(50).string(message.paymentCurrency);
+    if (message.payment !== undefined) {
+      Payment.encode(message.payment, writer.uint32(66).fork()).join();
     }
-    if (message.shippingAddress !== undefined) {
-      ExtendedAddress.encode(message.shippingAddress, writer.uint32(58).fork()).join();
-    }
-    if (message.shippingMethod !== "") {
-      writer.uint32(66).string(message.shippingMethod);
-    }
-    if (message.shippingCost !== 0) {
-      writer.uint32(73).double(message.shippingCost);
-    }
-    if (message.subtotal !== 0) {
-      writer.uint32(81).double(message.subtotal);
+    if (message.shipping !== undefined) {
+      Shipping.encode(message.shipping, writer.uint32(74).fork()).join();
     }
     for (const v of message.coupons) {
-      Coupon.encode(v!, writer.uint32(90).fork()).join();
-    }
-    if (message.total !== 0) {
-      writer.uint32(97).double(message.total);
+      Coupon.encode(v!, writer.uint32(82).fork()).join();
     }
     if (message.currencyCode !== "") {
-      writer.uint32(106).string(message.currencyCode);
+      writer.uint32(90).string(message.currencyCode);
     }
     return writer;
   },
@@ -13042,35 +16146,19 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
           continue;
         }
         case 4: {
-          if (tag !== 34) {
+          if (tag !== 32) {
             break;
           }
 
-          message.paymentMethod = reader.string();
+          message.status = orderStatusFromJSON(reader.int32());
           continue;
         }
         case 5: {
-          if (tag !== 41) {
+          if (tag !== 42) {
             break;
           }
 
-          message.paymentAmount = reader.double();
-          continue;
-        }
-        case 6: {
-          if (tag !== 50) {
-            break;
-          }
-
-          message.paymentCurrency = reader.string();
-          continue;
-        }
-        case 7: {
-          if (tag !== 58) {
-            break;
-          }
-
-          message.shippingAddress = ExtendedAddress.decode(reader, reader.uint32());
+          message.paymentId = reader.string();
           continue;
         }
         case 8: {
@@ -13078,43 +16166,27 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
             break;
           }
 
-          message.shippingMethod = reader.string();
+          message.payment = Payment.decode(reader, reader.uint32());
           continue;
         }
         case 9: {
-          if (tag !== 73) {
+          if (tag !== 74) {
             break;
           }
 
-          message.shippingCost = reader.double();
+          message.shipping = Shipping.decode(reader, reader.uint32());
           continue;
         }
         case 10: {
-          if (tag !== 81) {
-            break;
-          }
-
-          message.subtotal = reader.double();
-          continue;
-        }
-        case 11: {
-          if (tag !== 90) {
+          if (tag !== 82) {
             break;
           }
 
           message.coupons.push(Coupon.decode(reader, reader.uint32()));
           continue;
         }
-        case 12: {
-          if (tag !== 97) {
-            break;
-          }
-
-          message.total = reader.double();
-          continue;
-        }
-        case 13: {
-          if (tag !== 106) {
+        case 11: {
+          if (tag !== 90) {
             break;
           }
 
@@ -13135,15 +16207,11 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
       userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
       cartId: isSet(object.cartId) ? globalThis.String(object.cartId) : "",
       items: globalThis.Array.isArray(object?.items) ? object.items.map((e: any) => OrderItem.fromJSON(e)) : [],
-      paymentMethod: isSet(object.paymentMethod) ? globalThis.String(object.paymentMethod) : "",
-      paymentAmount: isSet(object.paymentAmount) ? globalThis.Number(object.paymentAmount) : 0,
-      paymentCurrency: isSet(object.paymentCurrency) ? globalThis.String(object.paymentCurrency) : "",
-      shippingAddress: isSet(object.shippingAddress) ? ExtendedAddress.fromJSON(object.shippingAddress) : undefined,
-      shippingMethod: isSet(object.shippingMethod) ? globalThis.String(object.shippingMethod) : "",
-      shippingCost: isSet(object.shippingCost) ? globalThis.Number(object.shippingCost) : 0,
-      subtotal: isSet(object.subtotal) ? globalThis.Number(object.subtotal) : 0,
+      status: isSet(object.status) ? orderStatusFromJSON(object.status) : OrderStatus.ORDER_PENDING,
+      paymentId: isSet(object.paymentId) ? globalThis.String(object.paymentId) : "",
+      payment: isSet(object.payment) ? Payment.fromJSON(object.payment) : undefined,
+      shipping: isSet(object.shipping) ? Shipping.fromJSON(object.shipping) : undefined,
       coupons: globalThis.Array.isArray(object?.coupons) ? object.coupons.map((e: any) => Coupon.fromJSON(e)) : [],
-      total: isSet(object.total) ? globalThis.Number(object.total) : 0,
       currencyCode: isSet(object.currencyCode) ? globalThis.String(object.currencyCode) : "",
     };
   },
@@ -13159,32 +16227,20 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
     if (message.items?.length) {
       obj.items = message.items.map((e) => OrderItem.toJSON(e));
     }
-    if (message.paymentMethod !== "") {
-      obj.paymentMethod = message.paymentMethod;
+    if (message.status !== OrderStatus.ORDER_PENDING) {
+      obj.status = orderStatusToJSON(message.status);
     }
-    if (message.paymentAmount !== 0) {
-      obj.paymentAmount = message.paymentAmount;
+    if (message.paymentId !== "") {
+      obj.paymentId = message.paymentId;
     }
-    if (message.paymentCurrency !== "") {
-      obj.paymentCurrency = message.paymentCurrency;
+    if (message.payment !== undefined) {
+      obj.payment = Payment.toJSON(message.payment);
     }
-    if (message.shippingAddress !== undefined) {
-      obj.shippingAddress = ExtendedAddress.toJSON(message.shippingAddress);
-    }
-    if (message.shippingMethod !== "") {
-      obj.shippingMethod = message.shippingMethod;
-    }
-    if (message.shippingCost !== 0) {
-      obj.shippingCost = message.shippingCost;
-    }
-    if (message.subtotal !== 0) {
-      obj.subtotal = message.subtotal;
+    if (message.shipping !== undefined) {
+      obj.shipping = Shipping.toJSON(message.shipping);
     }
     if (message.coupons?.length) {
       obj.coupons = message.coupons.map((e) => Coupon.toJSON(e));
-    }
-    if (message.total !== 0) {
-      obj.total = message.total;
     }
     if (message.currencyCode !== "") {
       obj.currencyCode = message.currencyCode;
@@ -13200,17 +16256,15 @@ export const CreateOrderRequest: MessageFns<CreateOrderRequest> = {
     message.userId = object.userId ?? "";
     message.cartId = object.cartId ?? "";
     message.items = object.items?.map((e) => OrderItem.fromPartial(e)) || [];
-    message.paymentMethod = object.paymentMethod ?? "";
-    message.paymentAmount = object.paymentAmount ?? 0;
-    message.paymentCurrency = object.paymentCurrency ?? "";
-    message.shippingAddress = (object.shippingAddress !== undefined && object.shippingAddress !== null)
-      ? ExtendedAddress.fromPartial(object.shippingAddress)
+    message.status = object.status ?? OrderStatus.ORDER_PENDING;
+    message.paymentId = object.paymentId ?? "";
+    message.payment = (object.payment !== undefined && object.payment !== null)
+      ? Payment.fromPartial(object.payment)
       : undefined;
-    message.shippingMethod = object.shippingMethod ?? "";
-    message.shippingCost = object.shippingCost ?? 0;
-    message.subtotal = object.subtotal ?? 0;
+    message.shipping = (object.shipping !== undefined && object.shipping !== null)
+      ? Shipping.fromPartial(object.shipping)
+      : undefined;
     message.coupons = object.coupons?.map((e) => Coupon.fromPartial(e)) || [];
-    message.total = object.total ?? 0;
     message.currencyCode = object.currencyCode ?? "";
     return message;
   },
@@ -13333,13 +16387,13 @@ export const GetOrderStatusRequest: MessageFns<GetOrderStatusRequest> = {
 };
 
 function createBaseGetOrderStatusResponse(): GetOrderStatusResponse {
-  return { status: 0 };
+  return { status: OrderStatus.ORDER_PENDING };
 }
 
 export const GetOrderStatusResponse: MessageFns<GetOrderStatusResponse> = {
   encode(message: GetOrderStatusResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.status !== 0) {
-      writer.uint32(8).int32(message.status);
+    if (message.status !== OrderStatus.ORDER_PENDING) {
+      writer.uint32(8).int32(orderStatusToNumber(message.status));
     }
     return writer;
   },
@@ -13356,7 +16410,7 @@ export const GetOrderStatusResponse: MessageFns<GetOrderStatusResponse> = {
             break;
           }
 
-          message.status = reader.int32() as any;
+          message.status = orderStatusFromJSON(reader.int32());
           continue;
         }
       }
@@ -13369,12 +16423,12 @@ export const GetOrderStatusResponse: MessageFns<GetOrderStatusResponse> = {
   },
 
   fromJSON(object: any): GetOrderStatusResponse {
-    return { status: isSet(object.status) ? orderStatusFromJSON(object.status) : 0 };
+    return { status: isSet(object.status) ? orderStatusFromJSON(object.status) : OrderStatus.ORDER_PENDING };
   },
 
   toJSON(message: GetOrderStatusResponse): unknown {
     const obj: any = {};
-    if (message.status !== 0) {
+    if (message.status !== OrderStatus.ORDER_PENDING) {
       obj.status = orderStatusToJSON(message.status);
     }
     return obj;
@@ -13385,7 +16439,7 @@ export const GetOrderStatusResponse: MessageFns<GetOrderStatusResponse> = {
   },
   fromPartial<I extends Exact<DeepPartial<GetOrderStatusResponse>, I>>(object: I): GetOrderStatusResponse {
     const message = createBaseGetOrderStatusResponse();
-    message.status = object.status ?? 0;
+    message.status = object.status ?? OrderStatus.ORDER_PENDING;
     return message;
   },
 };
@@ -13448,6 +16502,479 @@ export const GetOrderRequest: MessageFns<GetOrderRequest> = {
   },
 };
 
+function createBaseOrder(): Order {
+  return {
+    id: "",
+    user: undefined,
+    totalAmount: 0,
+    shippingAddress: undefined,
+    paymentId: "",
+    status: OrderStatus.ORDER_PENDING,
+    createdAt: "",
+    items: [],
+    shipping: undefined,
+    payment: undefined,
+    statusHistory: [],
+    notes: [],
+  };
+}
+
+export const Order: MessageFns<Order> = {
+  encode(message: Order, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.user !== undefined) {
+      User.encode(message.user, writer.uint32(18).fork()).join();
+    }
+    if (message.totalAmount !== 0) {
+      writer.uint32(25).double(message.totalAmount);
+    }
+    if (message.shippingAddress !== undefined) {
+      ExtendedAddress.encode(message.shippingAddress, writer.uint32(34).fork()).join();
+    }
+    if (message.paymentId !== "") {
+      writer.uint32(42).string(message.paymentId);
+    }
+    if (message.status !== OrderStatus.ORDER_PENDING) {
+      writer.uint32(48).int32(orderStatusToNumber(message.status));
+    }
+    if (message.createdAt !== "") {
+      writer.uint32(58).string(message.createdAt);
+    }
+    for (const v of message.items) {
+      OrderItem.encode(v!, writer.uint32(66).fork()).join();
+    }
+    if (message.shipping !== undefined) {
+      Shipping.encode(message.shipping, writer.uint32(74).fork()).join();
+    }
+    if (message.payment !== undefined) {
+      Payment.encode(message.payment, writer.uint32(82).fork()).join();
+    }
+    for (const v of message.statusHistory) {
+      OrderStatusHistory.encode(v!, writer.uint32(90).fork()).join();
+    }
+    for (const v of message.notes) {
+      OrderNote.encode(v!, writer.uint32(98).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Order {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOrder();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.user = User.decode(reader, reader.uint32());
+          continue;
+        }
+        case 3: {
+          if (tag !== 25) {
+            break;
+          }
+
+          message.totalAmount = reader.double();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.shippingAddress = ExtendedAddress.decode(reader, reader.uint32());
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.paymentId = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 48) {
+            break;
+          }
+
+          message.status = orderStatusFromJSON(reader.int32());
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.createdAt = reader.string();
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.items.push(OrderItem.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 9: {
+          if (tag !== 74) {
+            break;
+          }
+
+          message.shipping = Shipping.decode(reader, reader.uint32());
+          continue;
+        }
+        case 10: {
+          if (tag !== 82) {
+            break;
+          }
+
+          message.payment = Payment.decode(reader, reader.uint32());
+          continue;
+        }
+        case 11: {
+          if (tag !== 90) {
+            break;
+          }
+
+          message.statusHistory.push(OrderStatusHistory.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 12: {
+          if (tag !== 98) {
+            break;
+          }
+
+          message.notes.push(OrderNote.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Order {
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      user: isSet(object.user) ? User.fromJSON(object.user) : undefined,
+      totalAmount: isSet(object.totalAmount) ? globalThis.Number(object.totalAmount) : 0,
+      shippingAddress: isSet(object.shippingAddress) ? ExtendedAddress.fromJSON(object.shippingAddress) : undefined,
+      paymentId: isSet(object.paymentId) ? globalThis.String(object.paymentId) : "",
+      status: isSet(object.status) ? orderStatusFromJSON(object.status) : OrderStatus.ORDER_PENDING,
+      createdAt: isSet(object.createdAt) ? globalThis.String(object.createdAt) : "",
+      items: globalThis.Array.isArray(object?.items) ? object.items.map((e: any) => OrderItem.fromJSON(e)) : [],
+      shipping: isSet(object.shipping) ? Shipping.fromJSON(object.shipping) : undefined,
+      payment: isSet(object.payment) ? Payment.fromJSON(object.payment) : undefined,
+      statusHistory: globalThis.Array.isArray(object?.statusHistory)
+        ? object.statusHistory.map((e: any) => OrderStatusHistory.fromJSON(e))
+        : [],
+      notes: globalThis.Array.isArray(object?.notes) ? object.notes.map((e: any) => OrderNote.fromJSON(e)) : [],
+    };
+  },
+
+  toJSON(message: Order): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.user !== undefined) {
+      obj.user = User.toJSON(message.user);
+    }
+    if (message.totalAmount !== 0) {
+      obj.totalAmount = message.totalAmount;
+    }
+    if (message.shippingAddress !== undefined) {
+      obj.shippingAddress = ExtendedAddress.toJSON(message.shippingAddress);
+    }
+    if (message.paymentId !== "") {
+      obj.paymentId = message.paymentId;
+    }
+    if (message.status !== OrderStatus.ORDER_PENDING) {
+      obj.status = orderStatusToJSON(message.status);
+    }
+    if (message.createdAt !== "") {
+      obj.createdAt = message.createdAt;
+    }
+    if (message.items?.length) {
+      obj.items = message.items.map((e) => OrderItem.toJSON(e));
+    }
+    if (message.shipping !== undefined) {
+      obj.shipping = Shipping.toJSON(message.shipping);
+    }
+    if (message.payment !== undefined) {
+      obj.payment = Payment.toJSON(message.payment);
+    }
+    if (message.statusHistory?.length) {
+      obj.statusHistory = message.statusHistory.map((e) => OrderStatusHistory.toJSON(e));
+    }
+    if (message.notes?.length) {
+      obj.notes = message.notes.map((e) => OrderNote.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Order>, I>>(base?: I): Order {
+    return Order.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Order>, I>>(object: I): Order {
+    const message = createBaseOrder();
+    message.id = object.id ?? "";
+    message.user = (object.user !== undefined && object.user !== null) ? User.fromPartial(object.user) : undefined;
+    message.totalAmount = object.totalAmount ?? 0;
+    message.shippingAddress = (object.shippingAddress !== undefined && object.shippingAddress !== null)
+      ? ExtendedAddress.fromPartial(object.shippingAddress)
+      : undefined;
+    message.paymentId = object.paymentId ?? "";
+    message.status = object.status ?? OrderStatus.ORDER_PENDING;
+    message.createdAt = object.createdAt ?? "";
+    message.items = object.items?.map((e) => OrderItem.fromPartial(e)) || [];
+    message.shipping = (object.shipping !== undefined && object.shipping !== null)
+      ? Shipping.fromPartial(object.shipping)
+      : undefined;
+    message.payment = (object.payment !== undefined && object.payment !== null)
+      ? Payment.fromPartial(object.payment)
+      : undefined;
+    message.statusHistory = object.statusHistory?.map((e) => OrderStatusHistory.fromPartial(e)) || [];
+    message.notes = object.notes?.map((e) => OrderNote.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseOrderNote(): OrderNote {
+  return { id: "", orderId: "", note: "", createdAt: "" };
+}
+
+export const OrderNote: MessageFns<OrderNote> = {
+  encode(message: OrderNote, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.orderId !== "") {
+      writer.uint32(18).string(message.orderId);
+    }
+    if (message.note !== "") {
+      writer.uint32(26).string(message.note);
+    }
+    if (message.createdAt !== "") {
+      writer.uint32(34).string(message.createdAt);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): OrderNote {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOrderNote();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.note = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.createdAt = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): OrderNote {
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
+      note: isSet(object.note) ? globalThis.String(object.note) : "",
+      createdAt: isSet(object.createdAt) ? globalThis.String(object.createdAt) : "",
+    };
+  },
+
+  toJSON(message: OrderNote): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
+    if (message.note !== "") {
+      obj.note = message.note;
+    }
+    if (message.createdAt !== "") {
+      obj.createdAt = message.createdAt;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<OrderNote>, I>>(base?: I): OrderNote {
+    return OrderNote.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<OrderNote>, I>>(object: I): OrderNote {
+    const message = createBaseOrderNote();
+    message.id = object.id ?? "";
+    message.orderId = object.orderId ?? "";
+    message.note = object.note ?? "";
+    message.createdAt = object.createdAt ?? "";
+    return message;
+  },
+};
+
+function createBaseOrderStatusHistory(): OrderStatusHistory {
+  return { id: "", status: OrderStatus.ORDER_PENDING, description: "", createdAt: "" };
+}
+
+export const OrderStatusHistory: MessageFns<OrderStatusHistory> = {
+  encode(message: OrderStatusHistory, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.status !== OrderStatus.ORDER_PENDING) {
+      writer.uint32(16).int32(orderStatusToNumber(message.status));
+    }
+    if (message.description !== "") {
+      writer.uint32(26).string(message.description);
+    }
+    if (message.createdAt !== "") {
+      writer.uint32(34).string(message.createdAt);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): OrderStatusHistory {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseOrderStatusHistory();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.status = orderStatusFromJSON(reader.int32());
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.description = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.createdAt = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): OrderStatusHistory {
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      status: isSet(object.status) ? orderStatusFromJSON(object.status) : OrderStatus.ORDER_PENDING,
+      description: isSet(object.description) ? globalThis.String(object.description) : "",
+      createdAt: isSet(object.createdAt) ? globalThis.String(object.createdAt) : "",
+    };
+  },
+
+  toJSON(message: OrderStatusHistory): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.status !== OrderStatus.ORDER_PENDING) {
+      obj.status = orderStatusToJSON(message.status);
+    }
+    if (message.description !== "") {
+      obj.description = message.description;
+    }
+    if (message.createdAt !== "") {
+      obj.createdAt = message.createdAt;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<OrderStatusHistory>, I>>(base?: I): OrderStatusHistory {
+    return OrderStatusHistory.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<OrderStatusHistory>, I>>(object: I): OrderStatusHistory {
+    const message = createBaseOrderStatusHistory();
+    message.id = object.id ?? "";
+    message.status = object.status ?? OrderStatus.ORDER_PENDING;
+    message.description = object.description ?? "";
+    message.createdAt = object.createdAt ?? "";
+    return message;
+  },
+};
+
 function createBaseGetOrderResponse(): GetOrderResponse {
   return { order: undefined };
 }
@@ -13506,206 +17033,8 @@ export const GetOrderResponse: MessageFns<GetOrderResponse> = {
   },
 };
 
-function createBaseOrder(): Order {
-  return {
-    id: "",
-    userId: "",
-    status: "",
-    totalAmount: 0,
-    shippingAddressId: "",
-    items: [],
-    paymentId: "",
-    createdAt: "",
-    updatedAt: "",
-  };
-}
-
-export const Order: MessageFns<Order> = {
-  encode(message: Order, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.id !== "") {
-      writer.uint32(10).string(message.id);
-    }
-    if (message.userId !== "") {
-      writer.uint32(18).string(message.userId);
-    }
-    if (message.status !== "") {
-      writer.uint32(26).string(message.status);
-    }
-    if (message.totalAmount !== 0) {
-      writer.uint32(33).double(message.totalAmount);
-    }
-    if (message.shippingAddressId !== "") {
-      writer.uint32(42).string(message.shippingAddressId);
-    }
-    for (const v of message.items) {
-      OrderItem.encode(v!, writer.uint32(50).fork()).join();
-    }
-    if (message.paymentId !== "") {
-      writer.uint32(58).string(message.paymentId);
-    }
-    if (message.createdAt !== "") {
-      writer.uint32(66).string(message.createdAt);
-    }
-    if (message.updatedAt !== "") {
-      writer.uint32(74).string(message.updatedAt);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): Order {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseOrder();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.id = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.userId = reader.string();
-          continue;
-        }
-        case 3: {
-          if (tag !== 26) {
-            break;
-          }
-
-          message.status = reader.string();
-          continue;
-        }
-        case 4: {
-          if (tag !== 33) {
-            break;
-          }
-
-          message.totalAmount = reader.double();
-          continue;
-        }
-        case 5: {
-          if (tag !== 42) {
-            break;
-          }
-
-          message.shippingAddressId = reader.string();
-          continue;
-        }
-        case 6: {
-          if (tag !== 50) {
-            break;
-          }
-
-          message.items.push(OrderItem.decode(reader, reader.uint32()));
-          continue;
-        }
-        case 7: {
-          if (tag !== 58) {
-            break;
-          }
-
-          message.paymentId = reader.string();
-          continue;
-        }
-        case 8: {
-          if (tag !== 66) {
-            break;
-          }
-
-          message.createdAt = reader.string();
-          continue;
-        }
-        case 9: {
-          if (tag !== 74) {
-            break;
-          }
-
-          message.updatedAt = reader.string();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): Order {
-    return {
-      id: isSet(object.id) ? globalThis.String(object.id) : "",
-      userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
-      status: isSet(object.status) ? globalThis.String(object.status) : "",
-      totalAmount: isSet(object.totalAmount) ? globalThis.Number(object.totalAmount) : 0,
-      shippingAddressId: isSet(object.shippingAddressId) ? globalThis.String(object.shippingAddressId) : "",
-      items: globalThis.Array.isArray(object?.items) ? object.items.map((e: any) => OrderItem.fromJSON(e)) : [],
-      paymentId: isSet(object.paymentId) ? globalThis.String(object.paymentId) : "",
-      createdAt: isSet(object.createdAt) ? globalThis.String(object.createdAt) : "",
-      updatedAt: isSet(object.updatedAt) ? globalThis.String(object.updatedAt) : "",
-    };
-  },
-
-  toJSON(message: Order): unknown {
-    const obj: any = {};
-    if (message.id !== "") {
-      obj.id = message.id;
-    }
-    if (message.userId !== "") {
-      obj.userId = message.userId;
-    }
-    if (message.status !== "") {
-      obj.status = message.status;
-    }
-    if (message.totalAmount !== 0) {
-      obj.totalAmount = message.totalAmount;
-    }
-    if (message.shippingAddressId !== "") {
-      obj.shippingAddressId = message.shippingAddressId;
-    }
-    if (message.items?.length) {
-      obj.items = message.items.map((e) => OrderItem.toJSON(e));
-    }
-    if (message.paymentId !== "") {
-      obj.paymentId = message.paymentId;
-    }
-    if (message.createdAt !== "") {
-      obj.createdAt = message.createdAt;
-    }
-    if (message.updatedAt !== "") {
-      obj.updatedAt = message.updatedAt;
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<Order>, I>>(base?: I): Order {
-    return Order.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<Order>, I>>(object: I): Order {
-    const message = createBaseOrder();
-    message.id = object.id ?? "";
-    message.userId = object.userId ?? "";
-    message.status = object.status ?? "";
-    message.totalAmount = object.totalAmount ?? 0;
-    message.shippingAddressId = object.shippingAddressId ?? "";
-    message.items = object.items?.map((e) => OrderItem.fromPartial(e)) || [];
-    message.paymentId = object.paymentId ?? "";
-    message.createdAt = object.createdAt ?? "";
-    message.updatedAt = object.updatedAt ?? "";
-    return message;
-  },
-};
-
 function createBaseUpdateOrderStatusRequest(): UpdateOrderStatusRequest {
-  return { orderId: "", status: 0 };
+  return { orderId: "", status: OrderStatus.ORDER_PENDING };
 }
 
 export const UpdateOrderStatusRequest: MessageFns<UpdateOrderStatusRequest> = {
@@ -13713,8 +17042,8 @@ export const UpdateOrderStatusRequest: MessageFns<UpdateOrderStatusRequest> = {
     if (message.orderId !== "") {
       writer.uint32(10).string(message.orderId);
     }
-    if (message.status !== 0) {
-      writer.uint32(16).int32(message.status);
+    if (message.status !== OrderStatus.ORDER_PENDING) {
+      writer.uint32(16).int32(orderStatusToNumber(message.status));
     }
     return writer;
   },
@@ -13739,7 +17068,7 @@ export const UpdateOrderStatusRequest: MessageFns<UpdateOrderStatusRequest> = {
             break;
           }
 
-          message.status = reader.int32() as any;
+          message.status = orderStatusFromJSON(reader.int32());
           continue;
         }
       }
@@ -13754,7 +17083,7 @@ export const UpdateOrderStatusRequest: MessageFns<UpdateOrderStatusRequest> = {
   fromJSON(object: any): UpdateOrderStatusRequest {
     return {
       orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
-      status: isSet(object.status) ? orderStatusFromJSON(object.status) : 0,
+      status: isSet(object.status) ? orderStatusFromJSON(object.status) : OrderStatus.ORDER_PENDING,
     };
   },
 
@@ -13763,7 +17092,7 @@ export const UpdateOrderStatusRequest: MessageFns<UpdateOrderStatusRequest> = {
     if (message.orderId !== "") {
       obj.orderId = message.orderId;
     }
-    if (message.status !== 0) {
+    if (message.status !== OrderStatus.ORDER_PENDING) {
       obj.status = orderStatusToJSON(message.status);
     }
     return obj;
@@ -13775,13 +17104,13 @@ export const UpdateOrderStatusRequest: MessageFns<UpdateOrderStatusRequest> = {
   fromPartial<I extends Exact<DeepPartial<UpdateOrderStatusRequest>, I>>(object: I): UpdateOrderStatusRequest {
     const message = createBaseUpdateOrderStatusRequest();
     message.orderId = object.orderId ?? "";
-    message.status = object.status ?? 0;
+    message.status = object.status ?? OrderStatus.ORDER_PENDING;
     return message;
   },
 };
 
 function createBaseUpdateOrderStatusResponse(): UpdateOrderStatusResponse {
-  return { orderId: "", status: 0, steps: [], message: "" };
+  return { orderId: "", status: OrderStatus.ORDER_PENDING, steps: [], message: "" };
 }
 
 export const UpdateOrderStatusResponse: MessageFns<UpdateOrderStatusResponse> = {
@@ -13789,8 +17118,8 @@ export const UpdateOrderStatusResponse: MessageFns<UpdateOrderStatusResponse> = 
     if (message.orderId !== "") {
       writer.uint32(10).string(message.orderId);
     }
-    if (message.status !== 0) {
-      writer.uint32(16).int32(message.status);
+    if (message.status !== OrderStatus.ORDER_PENDING) {
+      writer.uint32(16).int32(orderStatusToNumber(message.status));
     }
     for (const v of message.steps) {
       OrderStep.encode(v!, writer.uint32(26).fork()).join();
@@ -13821,7 +17150,7 @@ export const UpdateOrderStatusResponse: MessageFns<UpdateOrderStatusResponse> = 
             break;
           }
 
-          message.status = reader.int32() as any;
+          message.status = orderStatusFromJSON(reader.int32());
           continue;
         }
         case 3: {
@@ -13852,7 +17181,7 @@ export const UpdateOrderStatusResponse: MessageFns<UpdateOrderStatusResponse> = 
   fromJSON(object: any): UpdateOrderStatusResponse {
     return {
       orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
-      status: isSet(object.status) ? orderStatusFromJSON(object.status) : 0,
+      status: isSet(object.status) ? orderStatusFromJSON(object.status) : OrderStatus.ORDER_PENDING,
       steps: globalThis.Array.isArray(object?.steps) ? object.steps.map((e: any) => OrderStep.fromJSON(e)) : [],
       message: isSet(object.message) ? globalThis.String(object.message) : "",
     };
@@ -13863,7 +17192,7 @@ export const UpdateOrderStatusResponse: MessageFns<UpdateOrderStatusResponse> = 
     if (message.orderId !== "") {
       obj.orderId = message.orderId;
     }
-    if (message.status !== 0) {
+    if (message.status !== OrderStatus.ORDER_PENDING) {
       obj.status = orderStatusToJSON(message.status);
     }
     if (message.steps?.length) {
@@ -13881,7 +17210,7 @@ export const UpdateOrderStatusResponse: MessageFns<UpdateOrderStatusResponse> = 
   fromPartial<I extends Exact<DeepPartial<UpdateOrderStatusResponse>, I>>(object: I): UpdateOrderStatusResponse {
     const message = createBaseUpdateOrderStatusResponse();
     message.orderId = object.orderId ?? "";
-    message.status = object.status ?? 0;
+    message.status = object.status ?? OrderStatus.ORDER_PENDING;
     message.steps = object.steps?.map((e) => OrderStep.fromPartial(e)) || [];
     message.message = object.message ?? "";
     return message;
@@ -13947,7 +17276,7 @@ export const CancelOrderRequest: MessageFns<CancelOrderRequest> = {
 };
 
 function createBaseCancelOrderResponse(): CancelOrderResponse {
-  return { orderId: "", status: 0, message: "" };
+  return { orderId: "", status: OrderStatus.ORDER_PENDING, message: "" };
 }
 
 export const CancelOrderResponse: MessageFns<CancelOrderResponse> = {
@@ -13955,8 +17284,8 @@ export const CancelOrderResponse: MessageFns<CancelOrderResponse> = {
     if (message.orderId !== "") {
       writer.uint32(10).string(message.orderId);
     }
-    if (message.status !== 0) {
-      writer.uint32(16).int32(message.status);
+    if (message.status !== OrderStatus.ORDER_PENDING) {
+      writer.uint32(16).int32(orderStatusToNumber(message.status));
     }
     if (message.message !== "") {
       writer.uint32(26).string(message.message);
@@ -13984,7 +17313,7 @@ export const CancelOrderResponse: MessageFns<CancelOrderResponse> = {
             break;
           }
 
-          message.status = reader.int32() as any;
+          message.status = orderStatusFromJSON(reader.int32());
           continue;
         }
         case 3: {
@@ -14007,7 +17336,7 @@ export const CancelOrderResponse: MessageFns<CancelOrderResponse> = {
   fromJSON(object: any): CancelOrderResponse {
     return {
       orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
-      status: isSet(object.status) ? orderStatusFromJSON(object.status) : 0,
+      status: isSet(object.status) ? orderStatusFromJSON(object.status) : OrderStatus.ORDER_PENDING,
       message: isSet(object.message) ? globalThis.String(object.message) : "",
     };
   },
@@ -14017,7 +17346,7 @@ export const CancelOrderResponse: MessageFns<CancelOrderResponse> = {
     if (message.orderId !== "") {
       obj.orderId = message.orderId;
     }
-    if (message.status !== 0) {
+    if (message.status !== OrderStatus.ORDER_PENDING) {
       obj.status = orderStatusToJSON(message.status);
     }
     if (message.message !== "") {
@@ -14032,14 +17361,14 @@ export const CancelOrderResponse: MessageFns<CancelOrderResponse> = {
   fromPartial<I extends Exact<DeepPartial<CancelOrderResponse>, I>>(object: I): CancelOrderResponse {
     const message = createBaseCancelOrderResponse();
     message.orderId = object.orderId ?? "";
-    message.status = object.status ?? 0;
+    message.status = object.status ?? OrderStatus.ORDER_PENDING;
     message.message = object.message ?? "";
     return message;
   },
 };
 
 function createBaseOrderStep(): OrderStep {
-  return { service: "", status: 0, error: "", timestamp: "" };
+  return { service: "", status: StepStatus.STEP_PENDING, error: "", timestamp: "" };
 }
 
 export const OrderStep: MessageFns<OrderStep> = {
@@ -14047,8 +17376,8 @@ export const OrderStep: MessageFns<OrderStep> = {
     if (message.service !== "") {
       writer.uint32(10).string(message.service);
     }
-    if (message.status !== 0) {
-      writer.uint32(16).int32(message.status);
+    if (message.status !== StepStatus.STEP_PENDING) {
+      writer.uint32(16).int32(stepStatusToNumber(message.status));
     }
     if (message.error !== "") {
       writer.uint32(26).string(message.error);
@@ -14079,7 +17408,7 @@ export const OrderStep: MessageFns<OrderStep> = {
             break;
           }
 
-          message.status = reader.int32() as any;
+          message.status = stepStatusFromJSON(reader.int32());
           continue;
         }
         case 3: {
@@ -14110,7 +17439,7 @@ export const OrderStep: MessageFns<OrderStep> = {
   fromJSON(object: any): OrderStep {
     return {
       service: isSet(object.service) ? globalThis.String(object.service) : "",
-      status: isSet(object.status) ? stepStatusFromJSON(object.status) : 0,
+      status: isSet(object.status) ? stepStatusFromJSON(object.status) : StepStatus.STEP_PENDING,
       error: isSet(object.error) ? globalThis.String(object.error) : "",
       timestamp: isSet(object.timestamp) ? globalThis.String(object.timestamp) : "",
     };
@@ -14121,7 +17450,7 @@ export const OrderStep: MessageFns<OrderStep> = {
     if (message.service !== "") {
       obj.service = message.service;
     }
-    if (message.status !== 0) {
+    if (message.status !== StepStatus.STEP_PENDING) {
       obj.status = stepStatusToJSON(message.status);
     }
     if (message.error !== "") {
@@ -14139,7 +17468,7 @@ export const OrderStep: MessageFns<OrderStep> = {
   fromPartial<I extends Exact<DeepPartial<OrderStep>, I>>(object: I): OrderStep {
     const message = createBaseOrderStep();
     message.service = object.service ?? "";
-    message.status = object.status ?? 0;
+    message.status = object.status ?? StepStatus.STEP_PENDING;
     message.error = object.error ?? "";
     message.timestamp = object.timestamp ?? "";
     return message;
@@ -14147,7 +17476,7 @@ export const OrderStep: MessageFns<OrderStep> = {
 };
 
 function createBaseValidateAndReserveRequest(): ValidateAndReserveRequest {
-  return { userId: "", variants: [] };
+  return { userId: "", items: [] };
 }
 
 export const ValidateAndReserveRequest: MessageFns<ValidateAndReserveRequest> = {
@@ -14155,8 +17484,8 @@ export const ValidateAndReserveRequest: MessageFns<ValidateAndReserveRequest> = 
     if (message.userId !== "") {
       writer.uint32(10).string(message.userId);
     }
-    for (const v of message.variants) {
-      ProductVariant.encode(v!, writer.uint32(18).fork()).join();
+    for (const v of message.items) {
+      EnrichedCartItem.encode(v!, writer.uint32(18).fork()).join();
     }
     return writer;
   },
@@ -14181,7 +17510,7 @@ export const ValidateAndReserveRequest: MessageFns<ValidateAndReserveRequest> = 
             break;
           }
 
-          message.variants.push(ProductVariant.decode(reader, reader.uint32()));
+          message.items.push(EnrichedCartItem.decode(reader, reader.uint32()));
           continue;
         }
       }
@@ -14196,9 +17525,7 @@ export const ValidateAndReserveRequest: MessageFns<ValidateAndReserveRequest> = 
   fromJSON(object: any): ValidateAndReserveRequest {
     return {
       userId: isSet(object.userId) ? globalThis.String(object.userId) : "",
-      variants: globalThis.Array.isArray(object?.variants)
-        ? object.variants.map((e: any) => ProductVariant.fromJSON(e))
-        : [],
+      items: globalThis.Array.isArray(object?.items) ? object.items.map((e: any) => EnrichedCartItem.fromJSON(e)) : [],
     };
   },
 
@@ -14207,8 +17534,8 @@ export const ValidateAndReserveRequest: MessageFns<ValidateAndReserveRequest> = 
     if (message.userId !== "") {
       obj.userId = message.userId;
     }
-    if (message.variants?.length) {
-      obj.variants = message.variants.map((e) => ProductVariant.toJSON(e));
+    if (message.items?.length) {
+      obj.items = message.items.map((e) => EnrichedCartItem.toJSON(e));
     }
     return obj;
   },
@@ -14219,7 +17546,115 @@ export const ValidateAndReserveRequest: MessageFns<ValidateAndReserveRequest> = 
   fromPartial<I extends Exact<DeepPartial<ValidateAndReserveRequest>, I>>(object: I): ValidateAndReserveRequest {
     const message = createBaseValidateAndReserveRequest();
     message.userId = object.userId ?? "";
-    message.variants = object.variants?.map((e) => ProductVariant.fromPartial(e)) || [];
+    message.items = object.items?.map((e) => EnrichedCartItem.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseEnrichedCartItem(): EnrichedCartItem {
+  return { id: "", price: 0, quantity: 0, image: "" };
+}
+
+export const EnrichedCartItem: MessageFns<EnrichedCartItem> = {
+  encode(message: EnrichedCartItem, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.price !== 0) {
+      writer.uint32(17).double(message.price);
+    }
+    if (message.quantity !== 0) {
+      writer.uint32(24).int32(message.quantity);
+    }
+    if (message.image !== "") {
+      writer.uint32(34).string(message.image);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): EnrichedCartItem {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseEnrichedCartItem();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 17) {
+            break;
+          }
+
+          message.price = reader.double();
+          continue;
+        }
+        case 3: {
+          if (tag !== 24) {
+            break;
+          }
+
+          message.quantity = reader.int32();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.image = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): EnrichedCartItem {
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      price: isSet(object.price) ? globalThis.Number(object.price) : 0,
+      quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
+      image: isSet(object.image) ? globalThis.String(object.image) : "",
+    };
+  },
+
+  toJSON(message: EnrichedCartItem): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.price !== 0) {
+      obj.price = message.price;
+    }
+    if (message.quantity !== 0) {
+      obj.quantity = Math.round(message.quantity);
+    }
+    if (message.image !== "") {
+      obj.image = message.image;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<EnrichedCartItem>, I>>(base?: I): EnrichedCartItem {
+    return EnrichedCartItem.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<EnrichedCartItem>, I>>(object: I): EnrichedCartItem {
+    const message = createBaseEnrichedCartItem();
+    message.id = object.id ?? "";
+    message.price = object.price ?? 0;
+    message.quantity = object.quantity ?? 0;
+    message.image = object.image ?? "";
     return message;
   },
 };
@@ -14529,13 +17964,16 @@ export const ReleaseReservationResponse: MessageFns<ReleaseReservationResponse> 
 };
 
 function createBaseCommitReservationRequest(): CommitReservationRequest {
-  return { reservationId: "" };
+  return { reservationId: "", orderId: "" };
 }
 
 export const CommitReservationRequest: MessageFns<CommitReservationRequest> = {
   encode(message: CommitReservationRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.reservationId !== "") {
       writer.uint32(10).string(message.reservationId);
+    }
+    if (message.orderId !== "") {
+      writer.uint32(18).string(message.orderId);
     }
     return writer;
   },
@@ -14555,6 +17993,14 @@ export const CommitReservationRequest: MessageFns<CommitReservationRequest> = {
           message.reservationId = reader.string();
           continue;
         }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -14565,13 +18011,19 @@ export const CommitReservationRequest: MessageFns<CommitReservationRequest> = {
   },
 
   fromJSON(object: any): CommitReservationRequest {
-    return { reservationId: isSet(object.reservationId) ? globalThis.String(object.reservationId) : "" };
+    return {
+      reservationId: isSet(object.reservationId) ? globalThis.String(object.reservationId) : "",
+      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
+    };
   },
 
   toJSON(message: CommitReservationRequest): unknown {
     const obj: any = {};
     if (message.reservationId !== "") {
       obj.reservationId = message.reservationId;
+    }
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
     }
     return obj;
   },
@@ -14582,12 +18034,13 @@ export const CommitReservationRequest: MessageFns<CommitReservationRequest> = {
   fromPartial<I extends Exact<DeepPartial<CommitReservationRequest>, I>>(object: I): CommitReservationRequest {
     const message = createBaseCommitReservationRequest();
     message.reservationId = object.reservationId ?? "";
+    message.orderId = object.orderId ?? "";
     return message;
   },
 };
 
 function createBaseCommitReservationResponse(): CommitReservationResponse {
-  return { success: false, message: "" };
+  return { success: false, message: "", orderId: "" };
 }
 
 export const CommitReservationResponse: MessageFns<CommitReservationResponse> = {
@@ -14597,6 +18050,9 @@ export const CommitReservationResponse: MessageFns<CommitReservationResponse> = 
     }
     if (message.message !== "") {
       writer.uint32(18).string(message.message);
+    }
+    if (message.orderId !== "") {
+      writer.uint32(26).string(message.orderId);
     }
     return writer;
   },
@@ -14624,6 +18080,14 @@ export const CommitReservationResponse: MessageFns<CommitReservationResponse> = 
           message.message = reader.string();
           continue;
         }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.orderId = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -14637,6 +18101,7 @@ export const CommitReservationResponse: MessageFns<CommitReservationResponse> = 
     return {
       success: isSet(object.success) ? globalThis.Boolean(object.success) : false,
       message: isSet(object.message) ? globalThis.String(object.message) : "",
+      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
     };
   },
 
@@ -14648,6 +18113,9 @@ export const CommitReservationResponse: MessageFns<CommitReservationResponse> = 
     if (message.message !== "") {
       obj.message = message.message;
     }
+    if (message.orderId !== "") {
+      obj.orderId = message.orderId;
+    }
     return obj;
   },
 
@@ -14658,27 +18126,265 @@ export const CommitReservationResponse: MessageFns<CommitReservationResponse> = 
     const message = createBaseCommitReservationResponse();
     message.success = object.success ?? false;
     message.message = object.message ?? "";
+    message.orderId = object.orderId ?? "";
+    return message;
+  },
+};
+
+function createBaseGetBatchPaymentsRequest(): GetBatchPaymentsRequest {
+  return { paymentIds: [] };
+}
+
+export const GetBatchPaymentsRequest: MessageFns<GetBatchPaymentsRequest> = {
+  encode(message: GetBatchPaymentsRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.paymentIds) {
+      writer.uint32(10).string(v!);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetBatchPaymentsRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetBatchPaymentsRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.paymentIds.push(reader.string());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetBatchPaymentsRequest {
+    return {
+      paymentIds: globalThis.Array.isArray(object?.paymentIds)
+        ? object.paymentIds.map((e: any) => globalThis.String(e))
+        : [],
+    };
+  },
+
+  toJSON(message: GetBatchPaymentsRequest): unknown {
+    const obj: any = {};
+    if (message.paymentIds?.length) {
+      obj.paymentIds = message.paymentIds;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetBatchPaymentsRequest>, I>>(base?: I): GetBatchPaymentsRequest {
+    return GetBatchPaymentsRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetBatchPaymentsRequest>, I>>(object: I): GetBatchPaymentsRequest {
+    const message = createBaseGetBatchPaymentsRequest();
+    message.paymentIds = object.paymentIds?.map((e) => e) || [];
+    return message;
+  },
+};
+
+function createBaseGetBatchPaymentsResponse(): GetBatchPaymentsResponse {
+  return { payments: [] };
+}
+
+export const GetBatchPaymentsResponse: MessageFns<GetBatchPaymentsResponse> = {
+  encode(message: GetBatchPaymentsResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    for (const v of message.payments) {
+      Payment.encode(v!, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetBatchPaymentsResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetBatchPaymentsResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.payments.push(Payment.decode(reader, reader.uint32()));
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetBatchPaymentsResponse {
+    return {
+      payments: globalThis.Array.isArray(object?.payments) ? object.payments.map((e: any) => Payment.fromJSON(e)) : [],
+    };
+  },
+
+  toJSON(message: GetBatchPaymentsResponse): unknown {
+    const obj: any = {};
+    if (message.payments?.length) {
+      obj.payments = message.payments.map((e) => Payment.toJSON(e));
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetBatchPaymentsResponse>, I>>(base?: I): GetBatchPaymentsResponse {
+    return GetBatchPaymentsResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetBatchPaymentsResponse>, I>>(object: I): GetBatchPaymentsResponse {
+    const message = createBaseGetBatchPaymentsResponse();
+    message.payments = object.payments?.map((e) => Payment.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseGetPaymentRequest(): GetPaymentRequest {
+  return { paymentId: "" };
+}
+
+export const GetPaymentRequest: MessageFns<GetPaymentRequest> = {
+  encode(message: GetPaymentRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.paymentId !== "") {
+      writer.uint32(10).string(message.paymentId);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetPaymentRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetPaymentRequest();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.paymentId = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetPaymentRequest {
+    return { paymentId: isSet(object.paymentId) ? globalThis.String(object.paymentId) : "" };
+  },
+
+  toJSON(message: GetPaymentRequest): unknown {
+    const obj: any = {};
+    if (message.paymentId !== "") {
+      obj.paymentId = message.paymentId;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetPaymentRequest>, I>>(base?: I): GetPaymentRequest {
+    return GetPaymentRequest.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetPaymentRequest>, I>>(object: I): GetPaymentRequest {
+    const message = createBaseGetPaymentRequest();
+    message.paymentId = object.paymentId ?? "";
+    return message;
+  },
+};
+
+function createBaseGetPaymentResponse(): GetPaymentResponse {
+  return { payment: undefined };
+}
+
+export const GetPaymentResponse: MessageFns<GetPaymentResponse> = {
+  encode(message: GetPaymentResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.payment !== undefined) {
+      Payment.encode(message.payment, writer.uint32(10).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): GetPaymentResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetPaymentResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.payment = Payment.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): GetPaymentResponse {
+    return { payment: isSet(object.payment) ? Payment.fromJSON(object.payment) : undefined };
+  },
+
+  toJSON(message: GetPaymentResponse): unknown {
+    const obj: any = {};
+    if (message.payment !== undefined) {
+      obj.payment = Payment.toJSON(message.payment);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<GetPaymentResponse>, I>>(base?: I): GetPaymentResponse {
+    return GetPaymentResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<GetPaymentResponse>, I>>(object: I): GetPaymentResponse {
+    const message = createBaseGetPaymentResponse();
+    message.payment = (object.payment !== undefined && object.payment !== null)
+      ? Payment.fromPartial(object.payment)
+      : undefined;
     return message;
   },
 };
 
 function createBaseInitiatePaymentRequest(): InitiatePaymentRequest {
-  return { orderId: "", amount: 0, provider: 0, currency: "" };
+  return { amount: 0, provider: PaymentProvider.COD, currency: "" };
 }
 
 export const InitiatePaymentRequest: MessageFns<InitiatePaymentRequest> = {
   encode(message: InitiatePaymentRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.orderId !== "") {
-      writer.uint32(10).string(message.orderId);
-    }
     if (message.amount !== 0) {
-      writer.uint32(17).double(message.amount);
+      writer.uint32(9).double(message.amount);
     }
-    if (message.provider !== 0) {
-      writer.uint32(24).int32(message.provider);
+    if (message.provider !== PaymentProvider.COD) {
+      writer.uint32(16).int32(paymentProviderToNumber(message.provider));
     }
     if (message.currency !== "") {
-      writer.uint32(34).string(message.currency);
+      writer.uint32(26).string(message.currency);
     }
     return writer;
   },
@@ -14691,31 +18397,23 @@ export const InitiatePaymentRequest: MessageFns<InitiatePaymentRequest> = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.orderId = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 17) {
+          if (tag !== 9) {
             break;
           }
 
           message.amount = reader.double();
           continue;
         }
-        case 3: {
-          if (tag !== 24) {
+        case 2: {
+          if (tag !== 16) {
             break;
           }
 
-          message.provider = reader.int32() as any;
+          message.provider = paymentProviderFromJSON(reader.int32());
           continue;
         }
-        case 4: {
-          if (tag !== 34) {
+        case 3: {
+          if (tag !== 26) {
             break;
           }
 
@@ -14733,22 +18431,18 @@ export const InitiatePaymentRequest: MessageFns<InitiatePaymentRequest> = {
 
   fromJSON(object: any): InitiatePaymentRequest {
     return {
-      orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
       amount: isSet(object.amount) ? globalThis.Number(object.amount) : 0,
-      provider: isSet(object.provider) ? paymentProviderFromJSON(object.provider) : 0,
+      provider: isSet(object.provider) ? paymentProviderFromJSON(object.provider) : PaymentProvider.COD,
       currency: isSet(object.currency) ? globalThis.String(object.currency) : "",
     };
   },
 
   toJSON(message: InitiatePaymentRequest): unknown {
     const obj: any = {};
-    if (message.orderId !== "") {
-      obj.orderId = message.orderId;
-    }
     if (message.amount !== 0) {
       obj.amount = message.amount;
     }
-    if (message.provider !== 0) {
+    if (message.provider !== PaymentProvider.COD) {
       obj.provider = paymentProviderToJSON(message.provider);
     }
     if (message.currency !== "") {
@@ -14762,16 +18456,15 @@ export const InitiatePaymentRequest: MessageFns<InitiatePaymentRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<InitiatePaymentRequest>, I>>(object: I): InitiatePaymentRequest {
     const message = createBaseInitiatePaymentRequest();
-    message.orderId = object.orderId ?? "";
     message.amount = object.amount ?? 0;
-    message.provider = object.provider ?? 0;
+    message.provider = object.provider ?? PaymentProvider.COD;
     message.currency = object.currency ?? "";
     return message;
   },
 };
 
 function createBaseInitiatePaymentResponse(): InitiatePaymentResponse {
-  return { paymentId: "", redirectUrl: "", status: 0 };
+  return { paymentId: "", provider: PaymentProvider.COD, redirectUrl: "", status: PaymentStatus.PAYMENT_PENDING };
 }
 
 export const InitiatePaymentResponse: MessageFns<InitiatePaymentResponse> = {
@@ -14779,11 +18472,14 @@ export const InitiatePaymentResponse: MessageFns<InitiatePaymentResponse> = {
     if (message.paymentId !== "") {
       writer.uint32(10).string(message.paymentId);
     }
-    if (message.redirectUrl !== "") {
-      writer.uint32(18).string(message.redirectUrl);
+    if (message.provider !== PaymentProvider.COD) {
+      writer.uint32(16).int32(paymentProviderToNumber(message.provider));
     }
-    if (message.status !== 0) {
-      writer.uint32(24).int32(message.status);
+    if (message.redirectUrl !== "") {
+      writer.uint32(26).string(message.redirectUrl);
+    }
+    if (message.status !== PaymentStatus.PAYMENT_PENDING) {
+      writer.uint32(32).int32(paymentStatusToNumber(message.status));
     }
     return writer;
   },
@@ -14804,19 +18500,27 @@ export const InitiatePaymentResponse: MessageFns<InitiatePaymentResponse> = {
           continue;
         }
         case 2: {
-          if (tag !== 18) {
+          if (tag !== 16) {
+            break;
+          }
+
+          message.provider = paymentProviderFromJSON(reader.int32());
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
             break;
           }
 
           message.redirectUrl = reader.string();
           continue;
         }
-        case 3: {
-          if (tag !== 24) {
+        case 4: {
+          if (tag !== 32) {
             break;
           }
 
-          message.status = reader.int32() as any;
+          message.status = paymentStatusFromJSON(reader.int32());
           continue;
         }
       }
@@ -14831,8 +18535,9 @@ export const InitiatePaymentResponse: MessageFns<InitiatePaymentResponse> = {
   fromJSON(object: any): InitiatePaymentResponse {
     return {
       paymentId: isSet(object.paymentId) ? globalThis.String(object.paymentId) : "",
+      provider: isSet(object.provider) ? paymentProviderFromJSON(object.provider) : PaymentProvider.COD,
       redirectUrl: isSet(object.redirectUrl) ? globalThis.String(object.redirectUrl) : "",
-      status: isSet(object.status) ? paymentStatusFromJSON(object.status) : 0,
+      status: isSet(object.status) ? paymentStatusFromJSON(object.status) : PaymentStatus.PAYMENT_PENDING,
     };
   },
 
@@ -14841,10 +18546,13 @@ export const InitiatePaymentResponse: MessageFns<InitiatePaymentResponse> = {
     if (message.paymentId !== "") {
       obj.paymentId = message.paymentId;
     }
+    if (message.provider !== PaymentProvider.COD) {
+      obj.provider = paymentProviderToJSON(message.provider);
+    }
     if (message.redirectUrl !== "") {
       obj.redirectUrl = message.redirectUrl;
     }
-    if (message.status !== 0) {
+    if (message.status !== PaymentStatus.PAYMENT_PENDING) {
       obj.status = paymentStatusToJSON(message.status);
     }
     return obj;
@@ -14856,8 +18564,9 @@ export const InitiatePaymentResponse: MessageFns<InitiatePaymentResponse> = {
   fromPartial<I extends Exact<DeepPartial<InitiatePaymentResponse>, I>>(object: I): InitiatePaymentResponse {
     const message = createBaseInitiatePaymentResponse();
     message.paymentId = object.paymentId ?? "";
+    message.provider = object.provider ?? PaymentProvider.COD;
     message.redirectUrl = object.redirectUrl ?? "";
-    message.status = object.status ?? 0;
+    message.status = object.status ?? PaymentStatus.PAYMENT_PENDING;
     return message;
   },
 };
@@ -14921,13 +18630,13 @@ export const VerifyPaymentRequest: MessageFns<VerifyPaymentRequest> = {
 };
 
 function createBaseVerifyPaymentResponse(): VerifyPaymentResponse {
-  return { status: 0 };
+  return { status: PaymentStatus.PAYMENT_PENDING };
 }
 
 export const VerifyPaymentResponse: MessageFns<VerifyPaymentResponse> = {
   encode(message: VerifyPaymentResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.status !== 0) {
-      writer.uint32(8).int32(message.status);
+    if (message.status !== PaymentStatus.PAYMENT_PENDING) {
+      writer.uint32(8).int32(paymentStatusToNumber(message.status));
     }
     return writer;
   },
@@ -14944,7 +18653,7 @@ export const VerifyPaymentResponse: MessageFns<VerifyPaymentResponse> = {
             break;
           }
 
-          message.status = reader.int32() as any;
+          message.status = paymentStatusFromJSON(reader.int32());
           continue;
         }
       }
@@ -14957,12 +18666,12 @@ export const VerifyPaymentResponse: MessageFns<VerifyPaymentResponse> = {
   },
 
   fromJSON(object: any): VerifyPaymentResponse {
-    return { status: isSet(object.status) ? paymentStatusFromJSON(object.status) : 0 };
+    return { status: isSet(object.status) ? paymentStatusFromJSON(object.status) : PaymentStatus.PAYMENT_PENDING };
   },
 
   toJSON(message: VerifyPaymentResponse): unknown {
     const obj: any = {};
-    if (message.status !== 0) {
+    if (message.status !== PaymentStatus.PAYMENT_PENDING) {
       obj.status = paymentStatusToJSON(message.status);
     }
     return obj;
@@ -14973,7 +18682,7 @@ export const VerifyPaymentResponse: MessageFns<VerifyPaymentResponse> = {
   },
   fromPartial<I extends Exact<DeepPartial<VerifyPaymentResponse>, I>>(object: I): VerifyPaymentResponse {
     const message = createBaseVerifyPaymentResponse();
-    message.status = object.status ?? 0;
+    message.status = object.status ?? PaymentStatus.PAYMENT_PENDING;
     return message;
   },
 };
@@ -15269,13 +18978,13 @@ export const GetPaymentStatusRequest: MessageFns<GetPaymentStatusRequest> = {
 };
 
 function createBaseGetPaymentStatusResponse(): GetPaymentStatusResponse {
-  return { status: 0 };
+  return { status: PaymentStatus.PAYMENT_PENDING };
 }
 
 export const GetPaymentStatusResponse: MessageFns<GetPaymentStatusResponse> = {
   encode(message: GetPaymentStatusResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.status !== 0) {
-      writer.uint32(8).int32(message.status);
+    if (message.status !== PaymentStatus.PAYMENT_PENDING) {
+      writer.uint32(8).int32(paymentStatusToNumber(message.status));
     }
     return writer;
   },
@@ -15292,7 +19001,7 @@ export const GetPaymentStatusResponse: MessageFns<GetPaymentStatusResponse> = {
             break;
           }
 
-          message.status = reader.int32() as any;
+          message.status = paymentStatusFromJSON(reader.int32());
           continue;
         }
       }
@@ -15305,12 +19014,12 @@ export const GetPaymentStatusResponse: MessageFns<GetPaymentStatusResponse> = {
   },
 
   fromJSON(object: any): GetPaymentStatusResponse {
-    return { status: isSet(object.status) ? paymentStatusFromJSON(object.status) : 0 };
+    return { status: isSet(object.status) ? paymentStatusFromJSON(object.status) : PaymentStatus.PAYMENT_PENDING };
   },
 
   toJSON(message: GetPaymentStatusResponse): unknown {
     const obj: any = {};
-    if (message.status !== 0) {
+    if (message.status !== PaymentStatus.PAYMENT_PENDING) {
       obj.status = paymentStatusToJSON(message.status);
     }
     return obj;
@@ -15321,7 +19030,7 @@ export const GetPaymentStatusResponse: MessageFns<GetPaymentStatusResponse> = {
   },
   fromPartial<I extends Exact<DeepPartial<GetPaymentStatusResponse>, I>>(object: I): GetPaymentStatusResponse {
     const message = createBaseGetPaymentStatusResponse();
-    message.status = object.status ?? 0;
+    message.status = object.status ?? PaymentStatus.PAYMENT_PENDING;
     return message;
   },
 };
@@ -15595,7 +19304,7 @@ export const CreateSagaOrderRequest: MessageFns<CreateSagaOrderRequest> = {
 };
 
 function createBaseCreateSagaOrderResponse(): CreateSagaOrderResponse {
-  return { orderId: "", status: 0 };
+  return { orderId: "", status: OrderStatus.ORDER_PENDING };
 }
 
 export const CreateSagaOrderResponse: MessageFns<CreateSagaOrderResponse> = {
@@ -15603,8 +19312,8 @@ export const CreateSagaOrderResponse: MessageFns<CreateSagaOrderResponse> = {
     if (message.orderId !== "") {
       writer.uint32(10).string(message.orderId);
     }
-    if (message.status !== 0) {
-      writer.uint32(16).int32(message.status);
+    if (message.status !== OrderStatus.ORDER_PENDING) {
+      writer.uint32(16).int32(orderStatusToNumber(message.status));
     }
     return writer;
   },
@@ -15629,7 +19338,7 @@ export const CreateSagaOrderResponse: MessageFns<CreateSagaOrderResponse> = {
             break;
           }
 
-          message.status = reader.int32() as any;
+          message.status = orderStatusFromJSON(reader.int32());
           continue;
         }
       }
@@ -15644,7 +19353,7 @@ export const CreateSagaOrderResponse: MessageFns<CreateSagaOrderResponse> = {
   fromJSON(object: any): CreateSagaOrderResponse {
     return {
       orderId: isSet(object.orderId) ? globalThis.String(object.orderId) : "",
-      status: isSet(object.status) ? orderStatusFromJSON(object.status) : 0,
+      status: isSet(object.status) ? orderStatusFromJSON(object.status) : OrderStatus.ORDER_PENDING,
     };
   },
 
@@ -15653,7 +19362,7 @@ export const CreateSagaOrderResponse: MessageFns<CreateSagaOrderResponse> = {
     if (message.orderId !== "") {
       obj.orderId = message.orderId;
     }
-    if (message.status !== 0) {
+    if (message.status !== OrderStatus.ORDER_PENDING) {
       obj.status = orderStatusToJSON(message.status);
     }
     return obj;
@@ -15665,19 +19374,30 @@ export const CreateSagaOrderResponse: MessageFns<CreateSagaOrderResponse> = {
   fromPartial<I extends Exact<DeepPartial<CreateSagaOrderResponse>, I>>(object: I): CreateSagaOrderResponse {
     const message = createBaseCreateSagaOrderResponse();
     message.orderId = object.orderId ?? "";
-    message.status = object.status ?? 0;
+    message.status = object.status ?? OrderStatus.ORDER_PENDING;
     return message;
   },
 };
 
 function createBaseOrderItem(): OrderItem {
-  return { productId: "", variantId: "", quantity: 0, price: 0 };
+  return {
+    id: "",
+    variantId: "",
+    quantity: 0,
+    price: 0,
+    productId: "",
+    productName: "",
+    productSlug: "",
+    variantName: "",
+    sku: "",
+    image: "",
+  };
 }
 
 export const OrderItem: MessageFns<OrderItem> = {
   encode(message: OrderItem, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.productId !== "") {
-      writer.uint32(10).string(message.productId);
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
     }
     if (message.variantId !== "") {
       writer.uint32(18).string(message.variantId);
@@ -15687,6 +19407,24 @@ export const OrderItem: MessageFns<OrderItem> = {
     }
     if (message.price !== 0) {
       writer.uint32(33).double(message.price);
+    }
+    if (message.productId !== "") {
+      writer.uint32(42).string(message.productId);
+    }
+    if (message.productName !== "") {
+      writer.uint32(50).string(message.productName);
+    }
+    if (message.productSlug !== "") {
+      writer.uint32(58).string(message.productSlug);
+    }
+    if (message.variantName !== "") {
+      writer.uint32(66).string(message.variantName);
+    }
+    if (message.sku !== "") {
+      writer.uint32(74).string(message.sku);
+    }
+    if (message.image !== "") {
+      writer.uint32(82).string(message.image);
     }
     return writer;
   },
@@ -15703,7 +19441,7 @@ export const OrderItem: MessageFns<OrderItem> = {
             break;
           }
 
-          message.productId = reader.string();
+          message.id = reader.string();
           continue;
         }
         case 2: {
@@ -15730,6 +19468,54 @@ export const OrderItem: MessageFns<OrderItem> = {
           message.price = reader.double();
           continue;
         }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.productId = reader.string();
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.productName = reader.string();
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.productSlug = reader.string();
+          continue;
+        }
+        case 8: {
+          if (tag !== 66) {
+            break;
+          }
+
+          message.variantName = reader.string();
+          continue;
+        }
+        case 9: {
+          if (tag !== 74) {
+            break;
+          }
+
+          message.sku = reader.string();
+          continue;
+        }
+        case 10: {
+          if (tag !== 82) {
+            break;
+          }
+
+          message.image = reader.string();
+          continue;
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break;
@@ -15741,17 +19527,23 @@ export const OrderItem: MessageFns<OrderItem> = {
 
   fromJSON(object: any): OrderItem {
     return {
-      productId: isSet(object.productId) ? globalThis.String(object.productId) : "",
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
       variantId: isSet(object.variantId) ? globalThis.String(object.variantId) : "",
       quantity: isSet(object.quantity) ? globalThis.Number(object.quantity) : 0,
       price: isSet(object.price) ? globalThis.Number(object.price) : 0,
+      productId: isSet(object.productId) ? globalThis.String(object.productId) : "",
+      productName: isSet(object.productName) ? globalThis.String(object.productName) : "",
+      productSlug: isSet(object.productSlug) ? globalThis.String(object.productSlug) : "",
+      variantName: isSet(object.variantName) ? globalThis.String(object.variantName) : "",
+      sku: isSet(object.sku) ? globalThis.String(object.sku) : "",
+      image: isSet(object.image) ? globalThis.String(object.image) : "",
     };
   },
 
   toJSON(message: OrderItem): unknown {
     const obj: any = {};
-    if (message.productId !== "") {
-      obj.productId = message.productId;
+    if (message.id !== "") {
+      obj.id = message.id;
     }
     if (message.variantId !== "") {
       obj.variantId = message.variantId;
@@ -15762,6 +19554,24 @@ export const OrderItem: MessageFns<OrderItem> = {
     if (message.price !== 0) {
       obj.price = message.price;
     }
+    if (message.productId !== "") {
+      obj.productId = message.productId;
+    }
+    if (message.productName !== "") {
+      obj.productName = message.productName;
+    }
+    if (message.productSlug !== "") {
+      obj.productSlug = message.productSlug;
+    }
+    if (message.variantName !== "") {
+      obj.variantName = message.variantName;
+    }
+    if (message.sku !== "") {
+      obj.sku = message.sku;
+    }
+    if (message.image !== "") {
+      obj.image = message.image;
+    }
     return obj;
   },
 
@@ -15770,10 +19580,16 @@ export const OrderItem: MessageFns<OrderItem> = {
   },
   fromPartial<I extends Exact<DeepPartial<OrderItem>, I>>(object: I): OrderItem {
     const message = createBaseOrderItem();
-    message.productId = object.productId ?? "";
+    message.id = object.id ?? "";
     message.variantId = object.variantId ?? "";
     message.quantity = object.quantity ?? 0;
     message.price = object.price ?? 0;
+    message.productId = object.productId ?? "";
+    message.productName = object.productName ?? "";
+    message.productSlug = object.productSlug ?? "";
+    message.variantName = object.variantName ?? "";
+    message.sku = object.sku ?? "";
+    message.image = object.image ?? "";
     return message;
   },
 };
@@ -15854,6 +19670,832 @@ export const Coupon: MessageFns<Coupon> = {
   },
 };
 
+function createBasePayment(): Payment {
+  return {
+    id: "",
+    method: "",
+    subtotal: 0,
+    total: 0,
+    status: PaymentStatus.PAYMENT_PENDING,
+    createdAt: "",
+    updatedAt: "",
+  };
+}
+
+export const Payment: MessageFns<Payment> = {
+  encode(message: Payment, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.method !== "") {
+      writer.uint32(18).string(message.method);
+    }
+    if (message.subtotal !== 0) {
+      writer.uint32(25).double(message.subtotal);
+    }
+    if (message.total !== 0) {
+      writer.uint32(33).double(message.total);
+    }
+    if (message.status !== PaymentStatus.PAYMENT_PENDING) {
+      writer.uint32(40).int32(paymentStatusToNumber(message.status));
+    }
+    if (message.createdAt !== "") {
+      writer.uint32(50).string(message.createdAt);
+    }
+    if (message.updatedAt !== "") {
+      writer.uint32(58).string(message.updatedAt);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Payment {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePayment();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.id = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.method = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 25) {
+            break;
+          }
+
+          message.subtotal = reader.double();
+          continue;
+        }
+        case 4: {
+          if (tag !== 33) {
+            break;
+          }
+
+          message.total = reader.double();
+          continue;
+        }
+        case 5: {
+          if (tag !== 40) {
+            break;
+          }
+
+          message.status = paymentStatusFromJSON(reader.int32());
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.createdAt = reader.string();
+          continue;
+        }
+        case 7: {
+          if (tag !== 58) {
+            break;
+          }
+
+          message.updatedAt = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Payment {
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : "",
+      method: isSet(object.method) ? globalThis.String(object.method) : "",
+      subtotal: isSet(object.subtotal) ? globalThis.Number(object.subtotal) : 0,
+      total: isSet(object.total) ? globalThis.Number(object.total) : 0,
+      status: isSet(object.status) ? paymentStatusFromJSON(object.status) : PaymentStatus.PAYMENT_PENDING,
+      createdAt: isSet(object.createdAt) ? globalThis.String(object.createdAt) : "",
+      updatedAt: isSet(object.updatedAt) ? globalThis.String(object.updatedAt) : "",
+    };
+  },
+
+  toJSON(message: Payment): unknown {
+    const obj: any = {};
+    if (message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.method !== "") {
+      obj.method = message.method;
+    }
+    if (message.subtotal !== 0) {
+      obj.subtotal = message.subtotal;
+    }
+    if (message.total !== 0) {
+      obj.total = message.total;
+    }
+    if (message.status !== PaymentStatus.PAYMENT_PENDING) {
+      obj.status = paymentStatusToJSON(message.status);
+    }
+    if (message.createdAt !== "") {
+      obj.createdAt = message.createdAt;
+    }
+    if (message.updatedAt !== "") {
+      obj.updatedAt = message.updatedAt;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Payment>, I>>(base?: I): Payment {
+    return Payment.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Payment>, I>>(object: I): Payment {
+    const message = createBasePayment();
+    message.id = object.id ?? "";
+    message.method = object.method ?? "";
+    message.subtotal = object.subtotal ?? 0;
+    message.total = object.total ?? 0;
+    message.status = object.status ?? PaymentStatus.PAYMENT_PENDING;
+    message.createdAt = object.createdAt ?? "";
+    message.updatedAt = object.updatedAt ?? "";
+    return message;
+  },
+};
+
+function createBaseShipping(): Shipping {
+  return { method: "", cost: 0, shippingAddress: undefined, estimatedDelivery: "", tracking: undefined };
+}
+
+export const Shipping: MessageFns<Shipping> = {
+  encode(message: Shipping, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.method !== "") {
+      writer.uint32(10).string(message.method);
+    }
+    if (message.cost !== 0) {
+      writer.uint32(17).double(message.cost);
+    }
+    if (message.shippingAddress !== undefined) {
+      ExtendedAddress.encode(message.shippingAddress, writer.uint32(26).fork()).join();
+    }
+    if (message.estimatedDelivery !== "") {
+      writer.uint32(34).string(message.estimatedDelivery);
+    }
+    if (message.tracking !== undefined) {
+      Tracking.encode(message.tracking, writer.uint32(42).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Shipping {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseShipping();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.method = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 17) {
+            break;
+          }
+
+          message.cost = reader.double();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.shippingAddress = ExtendedAddress.decode(reader, reader.uint32());
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.estimatedDelivery = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.tracking = Tracking.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Shipping {
+    return {
+      method: isSet(object.method) ? globalThis.String(object.method) : "",
+      cost: isSet(object.cost) ? globalThis.Number(object.cost) : 0,
+      shippingAddress: isSet(object.shippingAddress) ? ExtendedAddress.fromJSON(object.shippingAddress) : undefined,
+      estimatedDelivery: isSet(object.estimatedDelivery) ? globalThis.String(object.estimatedDelivery) : "",
+      tracking: isSet(object.tracking) ? Tracking.fromJSON(object.tracking) : undefined,
+    };
+  },
+
+  toJSON(message: Shipping): unknown {
+    const obj: any = {};
+    if (message.method !== "") {
+      obj.method = message.method;
+    }
+    if (message.cost !== 0) {
+      obj.cost = message.cost;
+    }
+    if (message.shippingAddress !== undefined) {
+      obj.shippingAddress = ExtendedAddress.toJSON(message.shippingAddress);
+    }
+    if (message.estimatedDelivery !== "") {
+      obj.estimatedDelivery = message.estimatedDelivery;
+    }
+    if (message.tracking !== undefined) {
+      obj.tracking = Tracking.toJSON(message.tracking);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Shipping>, I>>(base?: I): Shipping {
+    return Shipping.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Shipping>, I>>(object: I): Shipping {
+    const message = createBaseShipping();
+    message.method = object.method ?? "";
+    message.cost = object.cost ?? 0;
+    message.shippingAddress = (object.shippingAddress !== undefined && object.shippingAddress !== null)
+      ? ExtendedAddress.fromPartial(object.shippingAddress)
+      : undefined;
+    message.estimatedDelivery = object.estimatedDelivery ?? "";
+    message.tracking = (object.tracking !== undefined && object.tracking !== null)
+      ? Tracking.fromPartial(object.tracking)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseTracking(): Tracking {
+  return { number: "", carrier: "", status: "", currentLocation: "", history: [], coordinates: undefined };
+}
+
+export const Tracking: MessageFns<Tracking> = {
+  encode(message: Tracking, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.number !== "") {
+      writer.uint32(10).string(message.number);
+    }
+    if (message.carrier !== "") {
+      writer.uint32(18).string(message.carrier);
+    }
+    if (message.status !== "") {
+      writer.uint32(26).string(message.status);
+    }
+    if (message.currentLocation !== "") {
+      writer.uint32(34).string(message.currentLocation);
+    }
+    for (const v of message.history) {
+      TrackingEvent.encode(v!, writer.uint32(42).fork()).join();
+    }
+    if (message.coordinates !== undefined) {
+      Coordinates.encode(message.coordinates, writer.uint32(50).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Tracking {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTracking();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.number = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.carrier = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.status = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.currentLocation = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.history.push(TrackingEvent.decode(reader, reader.uint32()));
+          continue;
+        }
+        case 6: {
+          if (tag !== 50) {
+            break;
+          }
+
+          message.coordinates = Coordinates.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Tracking {
+    return {
+      number: isSet(object.number) ? globalThis.String(object.number) : "",
+      carrier: isSet(object.carrier) ? globalThis.String(object.carrier) : "",
+      status: isSet(object.status) ? globalThis.String(object.status) : "",
+      currentLocation: isSet(object.currentLocation) ? globalThis.String(object.currentLocation) : "",
+      history: globalThis.Array.isArray(object?.history)
+        ? object.history.map((e: any) => TrackingEvent.fromJSON(e))
+        : [],
+      coordinates: isSet(object.coordinates) ? Coordinates.fromJSON(object.coordinates) : undefined,
+    };
+  },
+
+  toJSON(message: Tracking): unknown {
+    const obj: any = {};
+    if (message.number !== "") {
+      obj.number = message.number;
+    }
+    if (message.carrier !== "") {
+      obj.carrier = message.carrier;
+    }
+    if (message.status !== "") {
+      obj.status = message.status;
+    }
+    if (message.currentLocation !== "") {
+      obj.currentLocation = message.currentLocation;
+    }
+    if (message.history?.length) {
+      obj.history = message.history.map((e) => TrackingEvent.toJSON(e));
+    }
+    if (message.coordinates !== undefined) {
+      obj.coordinates = Coordinates.toJSON(message.coordinates);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Tracking>, I>>(base?: I): Tracking {
+    return Tracking.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Tracking>, I>>(object: I): Tracking {
+    const message = createBaseTracking();
+    message.number = object.number ?? "";
+    message.carrier = object.carrier ?? "";
+    message.status = object.status ?? "";
+    message.currentLocation = object.currentLocation ?? "";
+    message.history = object.history?.map((e) => TrackingEvent.fromPartial(e)) || [];
+    message.coordinates = (object.coordinates !== undefined && object.coordinates !== null)
+      ? Coordinates.fromPartial(object.coordinates)
+      : undefined;
+    return message;
+  },
+};
+
+function createBaseTrackingEvent(): TrackingEvent {
+  return { date: "", time: "", location: "", status: "", description: "" };
+}
+
+export const TrackingEvent: MessageFns<TrackingEvent> = {
+  encode(message: TrackingEvent, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.date !== "") {
+      writer.uint32(10).string(message.date);
+    }
+    if (message.time !== "") {
+      writer.uint32(18).string(message.time);
+    }
+    if (message.location !== "") {
+      writer.uint32(26).string(message.location);
+    }
+    if (message.status !== "") {
+      writer.uint32(34).string(message.status);
+    }
+    if (message.description !== "") {
+      writer.uint32(42).string(message.description);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): TrackingEvent {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseTrackingEvent();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.date = reader.string();
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.time = reader.string();
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.location = reader.string();
+          continue;
+        }
+        case 4: {
+          if (tag !== 34) {
+            break;
+          }
+
+          message.status = reader.string();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.description = reader.string();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): TrackingEvent {
+    return {
+      date: isSet(object.date) ? globalThis.String(object.date) : "",
+      time: isSet(object.time) ? globalThis.String(object.time) : "",
+      location: isSet(object.location) ? globalThis.String(object.location) : "",
+      status: isSet(object.status) ? globalThis.String(object.status) : "",
+      description: isSet(object.description) ? globalThis.String(object.description) : "",
+    };
+  },
+
+  toJSON(message: TrackingEvent): unknown {
+    const obj: any = {};
+    if (message.date !== "") {
+      obj.date = message.date;
+    }
+    if (message.time !== "") {
+      obj.time = message.time;
+    }
+    if (message.location !== "") {
+      obj.location = message.location;
+    }
+    if (message.status !== "") {
+      obj.status = message.status;
+    }
+    if (message.description !== "") {
+      obj.description = message.description;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<TrackingEvent>, I>>(base?: I): TrackingEvent {
+    return TrackingEvent.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<TrackingEvent>, I>>(object: I): TrackingEvent {
+    const message = createBaseTrackingEvent();
+    message.date = object.date ?? "";
+    message.time = object.time ?? "";
+    message.location = object.location ?? "";
+    message.status = object.status ?? "";
+    message.description = object.description ?? "";
+    return message;
+  },
+};
+
+function createBaseCoordinates(): Coordinates {
+  return { origin: undefined, current: undefined, destination: undefined };
+}
+
+export const Coordinates: MessageFns<Coordinates> = {
+  encode(message: Coordinates, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.origin !== undefined) {
+      Point.encode(message.origin, writer.uint32(10).fork()).join();
+    }
+    if (message.current !== undefined) {
+      Point.encode(message.current, writer.uint32(18).fork()).join();
+    }
+    if (message.destination !== undefined) {
+      Point.encode(message.destination, writer.uint32(26).fork()).join();
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Coordinates {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCoordinates();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break;
+          }
+
+          message.origin = Point.decode(reader, reader.uint32());
+          continue;
+        }
+        case 2: {
+          if (tag !== 18) {
+            break;
+          }
+
+          message.current = Point.decode(reader, reader.uint32());
+          continue;
+        }
+        case 3: {
+          if (tag !== 26) {
+            break;
+          }
+
+          message.destination = Point.decode(reader, reader.uint32());
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Coordinates {
+    return {
+      origin: isSet(object.origin) ? Point.fromJSON(object.origin) : undefined,
+      current: isSet(object.current) ? Point.fromJSON(object.current) : undefined,
+      destination: isSet(object.destination) ? Point.fromJSON(object.destination) : undefined,
+    };
+  },
+
+  toJSON(message: Coordinates): unknown {
+    const obj: any = {};
+    if (message.origin !== undefined) {
+      obj.origin = Point.toJSON(message.origin);
+    }
+    if (message.current !== undefined) {
+      obj.current = Point.toJSON(message.current);
+    }
+    if (message.destination !== undefined) {
+      obj.destination = Point.toJSON(message.destination);
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Coordinates>, I>>(base?: I): Coordinates {
+    return Coordinates.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Coordinates>, I>>(object: I): Coordinates {
+    const message = createBaseCoordinates();
+    message.origin = (object.origin !== undefined && object.origin !== null)
+      ? Point.fromPartial(object.origin)
+      : undefined;
+    message.current = (object.current !== undefined && object.current !== null)
+      ? Point.fromPartial(object.current)
+      : undefined;
+    message.destination = (object.destination !== undefined && object.destination !== null)
+      ? Point.fromPartial(object.destination)
+      : undefined;
+    return message;
+  },
+};
+
+function createBasePoint(): Point {
+  return { lat: 0, lng: 0 };
+}
+
+export const Point: MessageFns<Point> = {
+  encode(message: Point, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.lat !== 0) {
+      writer.uint32(9).double(message.lat);
+    }
+    if (message.lng !== 0) {
+      writer.uint32(17).double(message.lng);
+    }
+    return writer;
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): Point {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePoint();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 9) {
+            break;
+          }
+
+          message.lat = reader.double();
+          continue;
+        }
+        case 2: {
+          if (tag !== 17) {
+            break;
+          }
+
+          message.lng = reader.double();
+          continue;
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skip(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): Point {
+    return {
+      lat: isSet(object.lat) ? globalThis.Number(object.lat) : 0,
+      lng: isSet(object.lng) ? globalThis.Number(object.lng) : 0,
+    };
+  },
+
+  toJSON(message: Point): unknown {
+    const obj: any = {};
+    if (message.lat !== 0) {
+      obj.lat = message.lat;
+    }
+    if (message.lng !== 0) {
+      obj.lng = message.lng;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<Point>, I>>(base?: I): Point {
+    return Point.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Point>, I>>(object: I): Point {
+    const message = createBasePoint();
+    message.lat = object.lat ?? 0;
+    message.lng = object.lng ?? 0;
+    return message;
+  },
+};
+
+export interface AddressService {
+  getCountries(request: Empty): Promise<GetCountriesResponse>;
+  getProvincesByCountry(request: GetProvincesByCountryRequest): Promise<GetProvincesResponse>;
+  getDistrictsByProvince(request: GetDistrictsByProvinceRequest): Promise<GetDistrictsResponse>;
+  getWardsByDistrict(request: GetWardsByDistrictRequest): Promise<GetWardsResponse>;
+  addAddress(request: AddAddressRequest): Promise<AddressResponse>;
+  updateAddress(request: UpdateAddressRequest): Promise<AddressResponse>;
+  deleteAddress(request: DeleteAddressRequest): Promise<DeleteAddressResponse>;
+  getAddresses(request: GetAddressesRequest): Promise<GetAddressesResponse>;
+  getAddress(request: GetAddressRequest): Promise<GetAddressResponse>;
+  getBatchAddresses(request: GetBatchAddressesRequest): Promise<GetBatchAddressesResponse>;
+}
+
+export const AddressServiceServiceName = "nexuraTelemetry.AddressService";
+export class AddressServiceClientImpl implements AddressService {
+  private readonly rpc: Rpc;
+  private readonly service: string;
+  constructor(rpc: Rpc, opts?: { service?: string }) {
+    this.service = opts?.service || AddressServiceServiceName;
+    this.rpc = rpc;
+    this.getCountries = this.getCountries.bind(this);
+    this.getProvincesByCountry = this.getProvincesByCountry.bind(this);
+    this.getDistrictsByProvince = this.getDistrictsByProvince.bind(this);
+    this.getWardsByDistrict = this.getWardsByDistrict.bind(this);
+    this.addAddress = this.addAddress.bind(this);
+    this.updateAddress = this.updateAddress.bind(this);
+    this.deleteAddress = this.deleteAddress.bind(this);
+    this.getAddresses = this.getAddresses.bind(this);
+    this.getAddress = this.getAddress.bind(this);
+    this.getBatchAddresses = this.getBatchAddresses.bind(this);
+  }
+  getCountries(request: Empty): Promise<GetCountriesResponse> {
+    const data = Empty.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetCountries", data);
+    return promise.then((data) => GetCountriesResponse.decode(new BinaryReader(data)));
+  }
+
+  getProvincesByCountry(request: GetProvincesByCountryRequest): Promise<GetProvincesResponse> {
+    const data = GetProvincesByCountryRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetProvincesByCountry", data);
+    return promise.then((data) => GetProvincesResponse.decode(new BinaryReader(data)));
+  }
+
+  getDistrictsByProvince(request: GetDistrictsByProvinceRequest): Promise<GetDistrictsResponse> {
+    const data = GetDistrictsByProvinceRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetDistrictsByProvince", data);
+    return promise.then((data) => GetDistrictsResponse.decode(new BinaryReader(data)));
+  }
+
+  getWardsByDistrict(request: GetWardsByDistrictRequest): Promise<GetWardsResponse> {
+    const data = GetWardsByDistrictRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetWardsByDistrict", data);
+    return promise.then((data) => GetWardsResponse.decode(new BinaryReader(data)));
+  }
+
+  addAddress(request: AddAddressRequest): Promise<AddressResponse> {
+    const data = AddAddressRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "AddAddress", data);
+    return promise.then((data) => AddressResponse.decode(new BinaryReader(data)));
+  }
+
+  updateAddress(request: UpdateAddressRequest): Promise<AddressResponse> {
+    const data = UpdateAddressRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "UpdateAddress", data);
+    return promise.then((data) => AddressResponse.decode(new BinaryReader(data)));
+  }
+
+  deleteAddress(request: DeleteAddressRequest): Promise<DeleteAddressResponse> {
+    const data = DeleteAddressRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "DeleteAddress", data);
+    return promise.then((data) => DeleteAddressResponse.decode(new BinaryReader(data)));
+  }
+
+  getAddresses(request: GetAddressesRequest): Promise<GetAddressesResponse> {
+    const data = GetAddressesRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetAddresses", data);
+    return promise.then((data) => GetAddressesResponse.decode(new BinaryReader(data)));
+  }
+
+  getAddress(request: GetAddressRequest): Promise<GetAddressResponse> {
+    const data = GetAddressRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetAddress", data);
+    return promise.then((data) => GetAddressResponse.decode(new BinaryReader(data)));
+  }
+
+  getBatchAddresses(request: GetBatchAddressesRequest): Promise<GetBatchAddressesResponse> {
+    const data = GetBatchAddressesRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetBatchAddresses", data);
+    return promise.then((data) => GetBatchAddressesResponse.decode(new BinaryReader(data)));
+  }
+}
+
 export type AddressServiceService = typeof AddressServiceService;
 export const AddressServiceService = {
   getCountries: {
@@ -15931,6 +20573,25 @@ export const AddressServiceService = {
     responseSerialize: (value: GetAddressesResponse) => Buffer.from(GetAddressesResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => GetAddressesResponse.decode(value),
   },
+  getAddress: {
+    path: "/nexuraTelemetry.AddressService/GetAddress",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: GetAddressRequest) => Buffer.from(GetAddressRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetAddressRequest.decode(value),
+    responseSerialize: (value: GetAddressResponse) => Buffer.from(GetAddressResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetAddressResponse.decode(value),
+  },
+  getBatchAddresses: {
+    path: "/nexuraTelemetry.AddressService/GetBatchAddresses",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: GetBatchAddressesRequest) => Buffer.from(GetBatchAddressesRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetBatchAddressesRequest.decode(value),
+    responseSerialize: (value: GetBatchAddressesResponse) =>
+      Buffer.from(GetBatchAddressesResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetBatchAddressesResponse.decode(value),
+  },
 } as const;
 
 export interface AddressServiceServer extends UntypedServiceImplementation {
@@ -15942,6 +20603,8 @@ export interface AddressServiceServer extends UntypedServiceImplementation {
   updateAddress: handleUnaryCall<UpdateAddressRequest, AddressResponse>;
   deleteAddress: handleUnaryCall<DeleteAddressRequest, DeleteAddressResponse>;
   getAddresses: handleUnaryCall<GetAddressesRequest, GetAddressesResponse>;
+  getAddress: handleUnaryCall<GetAddressRequest, GetAddressResponse>;
+  getBatchAddresses: handleUnaryCall<GetBatchAddressesRequest, GetBatchAddressesResponse>;
 }
 
 export interface AddressServiceClient extends Client {
@@ -16065,6 +20728,36 @@ export interface AddressServiceClient extends Client {
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: GetAddressesResponse) => void,
   ): ClientUnaryCall;
+  getAddress(
+    request: GetAddressRequest,
+    callback: (error: ServiceError | null, response: GetAddressResponse) => void,
+  ): ClientUnaryCall;
+  getAddress(
+    request: GetAddressRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: GetAddressResponse) => void,
+  ): ClientUnaryCall;
+  getAddress(
+    request: GetAddressRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: GetAddressResponse) => void,
+  ): ClientUnaryCall;
+  getBatchAddresses(
+    request: GetBatchAddressesRequest,
+    callback: (error: ServiceError | null, response: GetBatchAddressesResponse) => void,
+  ): ClientUnaryCall;
+  getBatchAddresses(
+    request: GetBatchAddressesRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: GetBatchAddressesResponse) => void,
+  ): ClientUnaryCall;
+  getBatchAddresses(
+    request: GetBatchAddressesRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: GetBatchAddressesResponse) => void,
+  ): ClientUnaryCall;
 }
 
 export const AddressServiceClient = makeGenericClientConstructor(
@@ -16076,8 +20769,133 @@ export const AddressServiceClient = makeGenericClientConstructor(
   serviceName: string;
 };
 
+export interface UserService {
+  getBatchUsers(request: GetBatchUsersRequest): Promise<GetBatchUsersResponse>;
+  getUser(request: GetUserRequest): Promise<GetUserResponse>;
+  getAllUsers(request: Empty): Promise<GetAllUsersResponse>;
+  updateUser(request: UpdateUserRequest): Promise<UpdateUserResponse>;
+  deleteUser(request: DeleteUserRequest): Promise<DeleteUserResponse>;
+  registerUser(request: RegisterUserRequest): Promise<RegisterUserResponse>;
+  loginUser(request: LoginUserRequest): Promise<LoginUserResponse>;
+  forgotPassword(request: ForgotPasswordRequest): Promise<ForgotPasswordResponse>;
+  validateOtp(request: ValidateOTPRequest): Promise<ValidateOTPResponse>;
+  resetPassword(request: ResetPasswordRequest): Promise<ResetPasswordResponse>;
+  verifyAccount(request: VerifyAccountRequest): Promise<VerifyAccountResponse>;
+  updatePassword(request: UpdatePasswordRequest): Promise<UpdatePasswordResponse>;
+  registerUserForAdmin(request: RegisterUserForAdminRequest): Promise<RegisterUserForAdminResponse>;
+}
+
+export const UserServiceServiceName = "nexuraTelemetry.UserService";
+export class UserServiceClientImpl implements UserService {
+  private readonly rpc: Rpc;
+  private readonly service: string;
+  constructor(rpc: Rpc, opts?: { service?: string }) {
+    this.service = opts?.service || UserServiceServiceName;
+    this.rpc = rpc;
+    this.getBatchUsers = this.getBatchUsers.bind(this);
+    this.getUser = this.getUser.bind(this);
+    this.getAllUsers = this.getAllUsers.bind(this);
+    this.updateUser = this.updateUser.bind(this);
+    this.deleteUser = this.deleteUser.bind(this);
+    this.registerUser = this.registerUser.bind(this);
+    this.loginUser = this.loginUser.bind(this);
+    this.forgotPassword = this.forgotPassword.bind(this);
+    this.validateOtp = this.validateOtp.bind(this);
+    this.resetPassword = this.resetPassword.bind(this);
+    this.verifyAccount = this.verifyAccount.bind(this);
+    this.updatePassword = this.updatePassword.bind(this);
+    this.registerUserForAdmin = this.registerUserForAdmin.bind(this);
+  }
+  getBatchUsers(request: GetBatchUsersRequest): Promise<GetBatchUsersResponse> {
+    const data = GetBatchUsersRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetBatchUsers", data);
+    return promise.then((data) => GetBatchUsersResponse.decode(new BinaryReader(data)));
+  }
+
+  getUser(request: GetUserRequest): Promise<GetUserResponse> {
+    const data = GetUserRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetUser", data);
+    return promise.then((data) => GetUserResponse.decode(new BinaryReader(data)));
+  }
+
+  getAllUsers(request: Empty): Promise<GetAllUsersResponse> {
+    const data = Empty.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetAllUsers", data);
+    return promise.then((data) => GetAllUsersResponse.decode(new BinaryReader(data)));
+  }
+
+  updateUser(request: UpdateUserRequest): Promise<UpdateUserResponse> {
+    const data = UpdateUserRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "UpdateUser", data);
+    return promise.then((data) => UpdateUserResponse.decode(new BinaryReader(data)));
+  }
+
+  deleteUser(request: DeleteUserRequest): Promise<DeleteUserResponse> {
+    const data = DeleteUserRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "DeleteUser", data);
+    return promise.then((data) => DeleteUserResponse.decode(new BinaryReader(data)));
+  }
+
+  registerUser(request: RegisterUserRequest): Promise<RegisterUserResponse> {
+    const data = RegisterUserRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "RegisterUser", data);
+    return promise.then((data) => RegisterUserResponse.decode(new BinaryReader(data)));
+  }
+
+  loginUser(request: LoginUserRequest): Promise<LoginUserResponse> {
+    const data = LoginUserRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "LoginUser", data);
+    return promise.then((data) => LoginUserResponse.decode(new BinaryReader(data)));
+  }
+
+  forgotPassword(request: ForgotPasswordRequest): Promise<ForgotPasswordResponse> {
+    const data = ForgotPasswordRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ForgotPassword", data);
+    return promise.then((data) => ForgotPasswordResponse.decode(new BinaryReader(data)));
+  }
+
+  validateOtp(request: ValidateOTPRequest): Promise<ValidateOTPResponse> {
+    const data = ValidateOTPRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ValidateOTP", data);
+    return promise.then((data) => ValidateOTPResponse.decode(new BinaryReader(data)));
+  }
+
+  resetPassword(request: ResetPasswordRequest): Promise<ResetPasswordResponse> {
+    const data = ResetPasswordRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ResetPassword", data);
+    return promise.then((data) => ResetPasswordResponse.decode(new BinaryReader(data)));
+  }
+
+  verifyAccount(request: VerifyAccountRequest): Promise<VerifyAccountResponse> {
+    const data = VerifyAccountRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "VerifyAccount", data);
+    return promise.then((data) => VerifyAccountResponse.decode(new BinaryReader(data)));
+  }
+
+  updatePassword(request: UpdatePasswordRequest): Promise<UpdatePasswordResponse> {
+    const data = UpdatePasswordRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "UpdatePassword", data);
+    return promise.then((data) => UpdatePasswordResponse.decode(new BinaryReader(data)));
+  }
+
+  registerUserForAdmin(request: RegisterUserForAdminRequest): Promise<RegisterUserForAdminResponse> {
+    const data = RegisterUserForAdminRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "RegisterUserForAdmin", data);
+    return promise.then((data) => RegisterUserForAdminResponse.decode(new BinaryReader(data)));
+  }
+}
+
 export type UserServiceService = typeof UserServiceService;
 export const UserServiceService = {
+  getBatchUsers: {
+    path: "/nexuraTelemetry.UserService/GetBatchUsers",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: GetBatchUsersRequest) => Buffer.from(GetBatchUsersRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetBatchUsersRequest.decode(value),
+    responseSerialize: (value: GetBatchUsersResponse) => Buffer.from(GetBatchUsersResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetBatchUsersResponse.decode(value),
+  },
   getUser: {
     path: "/nexuraTelemetry.UserService/GetUser",
     requestStream: false,
@@ -16086,6 +20904,15 @@ export const UserServiceService = {
     requestDeserialize: (value: Buffer) => GetUserRequest.decode(value),
     responseSerialize: (value: GetUserResponse) => Buffer.from(GetUserResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => GetUserResponse.decode(value),
+  },
+  getAllUsers: {
+    path: "/nexuraTelemetry.UserService/GetAllUsers",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: Empty) => Buffer.from(Empty.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => Empty.decode(value),
+    responseSerialize: (value: GetAllUsersResponse) => Buffer.from(GetAllUsersResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetAllUsersResponse.decode(value),
   },
   updateUser: {
     path: "/nexuraTelemetry.UserService/UpdateUser",
@@ -16168,10 +20995,23 @@ export const UserServiceService = {
     responseSerialize: (value: UpdatePasswordResponse) => Buffer.from(UpdatePasswordResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => UpdatePasswordResponse.decode(value),
   },
+  registerUserForAdmin: {
+    path: "/nexuraTelemetry.UserService/RegisterUserForAdmin",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: RegisterUserForAdminRequest) =>
+      Buffer.from(RegisterUserForAdminRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => RegisterUserForAdminRequest.decode(value),
+    responseSerialize: (value: RegisterUserForAdminResponse) =>
+      Buffer.from(RegisterUserForAdminResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => RegisterUserForAdminResponse.decode(value),
+  },
 } as const;
 
 export interface UserServiceServer extends UntypedServiceImplementation {
+  getBatchUsers: handleUnaryCall<GetBatchUsersRequest, GetBatchUsersResponse>;
   getUser: handleUnaryCall<GetUserRequest, GetUserResponse>;
+  getAllUsers: handleUnaryCall<Empty, GetAllUsersResponse>;
   updateUser: handleUnaryCall<UpdateUserRequest, UpdateUserResponse>;
   deleteUser: handleUnaryCall<DeleteUserRequest, DeleteUserResponse>;
   registerUser: handleUnaryCall<RegisterUserRequest, RegisterUserResponse>;
@@ -16181,9 +21021,25 @@ export interface UserServiceServer extends UntypedServiceImplementation {
   resetPassword: handleUnaryCall<ResetPasswordRequest, ResetPasswordResponse>;
   verifyAccount: handleUnaryCall<VerifyAccountRequest, VerifyAccountResponse>;
   updatePassword: handleUnaryCall<UpdatePasswordRequest, UpdatePasswordResponse>;
+  registerUserForAdmin: handleUnaryCall<RegisterUserForAdminRequest, RegisterUserForAdminResponse>;
 }
 
 export interface UserServiceClient extends Client {
+  getBatchUsers(
+    request: GetBatchUsersRequest,
+    callback: (error: ServiceError | null, response: GetBatchUsersResponse) => void,
+  ): ClientUnaryCall;
+  getBatchUsers(
+    request: GetBatchUsersRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: GetBatchUsersResponse) => void,
+  ): ClientUnaryCall;
+  getBatchUsers(
+    request: GetBatchUsersRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: GetBatchUsersResponse) => void,
+  ): ClientUnaryCall;
   getUser(
     request: GetUserRequest,
     callback: (error: ServiceError | null, response: GetUserResponse) => void,
@@ -16198,6 +21054,21 @@ export interface UserServiceClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: GetUserResponse) => void,
+  ): ClientUnaryCall;
+  getAllUsers(
+    request: Empty,
+    callback: (error: ServiceError | null, response: GetAllUsersResponse) => void,
+  ): ClientUnaryCall;
+  getAllUsers(
+    request: Empty,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: GetAllUsersResponse) => void,
+  ): ClientUnaryCall;
+  getAllUsers(
+    request: Empty,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: GetAllUsersResponse) => void,
   ): ClientUnaryCall;
   updateUser(
     request: UpdateUserRequest,
@@ -16333,6 +21204,21 @@ export interface UserServiceClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: UpdatePasswordResponse) => void,
+  ): ClientUnaryCall;
+  registerUserForAdmin(
+    request: RegisterUserForAdminRequest,
+    callback: (error: ServiceError | null, response: RegisterUserForAdminResponse) => void,
+  ): ClientUnaryCall;
+  registerUserForAdmin(
+    request: RegisterUserForAdminRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: RegisterUserForAdminResponse) => void,
+  ): ClientUnaryCall;
+  registerUserForAdmin(
+    request: RegisterUserForAdminRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: RegisterUserForAdminResponse) => void,
   ): ClientUnaryCall;
 }
 
@@ -16344,6 +21230,66 @@ export const UserServiceClient = makeGenericClientConstructor(
   service: typeof UserServiceService;
   serviceName: string;
 };
+
+export interface CartService {
+  getCart(request: GetCartRequest): Promise<GetCartResponse>;
+  addItem(request: AddItemRequest): Promise<AddItemResponse>;
+  updateItem(request: UpdateItemRequest): Promise<UpdateItemResponse>;
+  removeItem(request: RemoveItemRequest): Promise<RemoveItemResponse>;
+  clearCart(request: ClearCartRequest): Promise<ClearCartResponse>;
+  validateCart(request: ValidateCartRequest): Promise<ValidateCartResponse>;
+}
+
+export const CartServiceServiceName = "nexuraTelemetry.CartService";
+export class CartServiceClientImpl implements CartService {
+  private readonly rpc: Rpc;
+  private readonly service: string;
+  constructor(rpc: Rpc, opts?: { service?: string }) {
+    this.service = opts?.service || CartServiceServiceName;
+    this.rpc = rpc;
+    this.getCart = this.getCart.bind(this);
+    this.addItem = this.addItem.bind(this);
+    this.updateItem = this.updateItem.bind(this);
+    this.removeItem = this.removeItem.bind(this);
+    this.clearCart = this.clearCart.bind(this);
+    this.validateCart = this.validateCart.bind(this);
+  }
+  getCart(request: GetCartRequest): Promise<GetCartResponse> {
+    const data = GetCartRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetCart", data);
+    return promise.then((data) => GetCartResponse.decode(new BinaryReader(data)));
+  }
+
+  addItem(request: AddItemRequest): Promise<AddItemResponse> {
+    const data = AddItemRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "AddItem", data);
+    return promise.then((data) => AddItemResponse.decode(new BinaryReader(data)));
+  }
+
+  updateItem(request: UpdateItemRequest): Promise<UpdateItemResponse> {
+    const data = UpdateItemRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "UpdateItem", data);
+    return promise.then((data) => UpdateItemResponse.decode(new BinaryReader(data)));
+  }
+
+  removeItem(request: RemoveItemRequest): Promise<RemoveItemResponse> {
+    const data = RemoveItemRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "RemoveItem", data);
+    return promise.then((data) => RemoveItemResponse.decode(new BinaryReader(data)));
+  }
+
+  clearCart(request: ClearCartRequest): Promise<ClearCartResponse> {
+    const data = ClearCartRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ClearCart", data);
+    return promise.then((data) => ClearCartResponse.decode(new BinaryReader(data)));
+  }
+
+  validateCart(request: ValidateCartRequest): Promise<ValidateCartResponse> {
+    const data = ValidateCartRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ValidateCart", data);
+    return promise.then((data) => ValidateCartResponse.decode(new BinaryReader(data)));
+  }
+}
 
 export type CartServiceService = typeof CartServiceService;
 export const CartServiceService = {
@@ -16514,6 +21460,26 @@ export const CartServiceClient = makeGenericClientConstructor(
   serviceName: string;
 };
 
+export interface RecommendationService {
+  listRecommendations(request: ListRecommendationsRequest): Promise<ListRecommendationsResponse>;
+}
+
+export const RecommendationServiceServiceName = "nexuraTelemetry.RecommendationService";
+export class RecommendationServiceClientImpl implements RecommendationService {
+  private readonly rpc: Rpc;
+  private readonly service: string;
+  constructor(rpc: Rpc, opts?: { service?: string }) {
+    this.service = opts?.service || RecommendationServiceServiceName;
+    this.rpc = rpc;
+    this.listRecommendations = this.listRecommendations.bind(this);
+  }
+  listRecommendations(request: ListRecommendationsRequest): Promise<ListRecommendationsResponse> {
+    const data = ListRecommendationsRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ListRecommendations", data);
+    return promise.then((data) => ListRecommendationsResponse.decode(new BinaryReader(data)));
+  }
+}
+
 export type RecommendationServiceService = typeof RecommendationServiceService;
 export const RecommendationServiceService = {
   listRecommendations: {
@@ -16560,6 +21526,234 @@ export const RecommendationServiceClient = makeGenericClientConstructor(
   serviceName: string;
 };
 
+export interface ProductCatalogService {
+  createProduct(request: CreateProductRequest): Promise<CreateProductResponse>;
+  updateProduct(request: UpdateProductRequest): Promise<UpdateProductResponse>;
+  deleteProduct(request: DeleteProductRequest): Promise<DeleteProductResponse>;
+  createVariant(request: CreateVariantRequest): Promise<CreateVariantResponse>;
+  getProduct(request: GetProductRequest): Promise<GetProductResponse>;
+  listProducts(request: ListProductsRequest): Promise<ListProductsResponse>;
+  createBrand(request: CreateBrandRequest): Promise<CreateBrandResponse>;
+  newBrand(request: NewBrandRequest): Promise<NewBrandResponse>;
+  removeBrand(request: RemoveBrandRequest): Promise<RemoveBrandResponse>;
+  getAllBrand(request: Empty): Promise<GetAllBrandResponse>;
+  getVariantsForCart(request: GetVariantsForCartRequest): Promise<GetVariantsForCartResponse>;
+  changeProductStatus(request: ChangeProductStatusRequest): Promise<ChangeProductStatusResponse>;
+  createCategory(request: CreateCategoryRequest): Promise<CreateCategoryResponse>;
+  updateCategory(request: UpdateCategoryRequest): Promise<UpdateCategoryResponse>;
+  deleteCategory(request: DeleteCategoryRequest): Promise<DeleteCategoryResponse>;
+  getAllCategory(request: Empty): Promise<GetAllCategoryResponse>;
+  getProductAttributes(request: GetProductAttributesRequest): Promise<GetProductAttributesResponse>;
+  updateProductAttributes(request: UpdateProductAttributesRequest): Promise<UpdateProductAttributesResponse>;
+  deleteProductAttributes(request: DeleteProductAttributesRequest): Promise<DeleteProductAttributesResponse>;
+  createProductAttribute(request: CreateProductAttributeRequest): Promise<CreateProductAttributeResponse>;
+  getWarehouses(request: Empty): Promise<GetWarehousesResponse>;
+  validateAndReserve(request: ValidateAndReserveRequest): Promise<ValidateAndReserveResponse>;
+  releaseReservation(request: ReleaseReservationRequest): Promise<ReleaseReservationResponse>;
+  commitReservation(request: CommitReservationRequest): Promise<CommitReservationResponse>;
+  addWishlist(request: AddWishlistRequest): Promise<AddWishlistResponse>;
+  getWishlist(request: GetWishlistRequest): Promise<GetWishlistResponse>;
+  removeWishlist(request: RemoveWishlistRequest): Promise<RemoveWishlistResponse>;
+}
+
+export const ProductCatalogServiceServiceName = "nexuraTelemetry.ProductCatalogService";
+export class ProductCatalogServiceClientImpl implements ProductCatalogService {
+  private readonly rpc: Rpc;
+  private readonly service: string;
+  constructor(rpc: Rpc, opts?: { service?: string }) {
+    this.service = opts?.service || ProductCatalogServiceServiceName;
+    this.rpc = rpc;
+    this.createProduct = this.createProduct.bind(this);
+    this.updateProduct = this.updateProduct.bind(this);
+    this.deleteProduct = this.deleteProduct.bind(this);
+    this.createVariant = this.createVariant.bind(this);
+    this.getProduct = this.getProduct.bind(this);
+    this.listProducts = this.listProducts.bind(this);
+    this.createBrand = this.createBrand.bind(this);
+    this.newBrand = this.newBrand.bind(this);
+    this.removeBrand = this.removeBrand.bind(this);
+    this.getAllBrand = this.getAllBrand.bind(this);
+    this.getVariantsForCart = this.getVariantsForCart.bind(this);
+    this.changeProductStatus = this.changeProductStatus.bind(this);
+    this.createCategory = this.createCategory.bind(this);
+    this.updateCategory = this.updateCategory.bind(this);
+    this.deleteCategory = this.deleteCategory.bind(this);
+    this.getAllCategory = this.getAllCategory.bind(this);
+    this.getProductAttributes = this.getProductAttributes.bind(this);
+    this.updateProductAttributes = this.updateProductAttributes.bind(this);
+    this.deleteProductAttributes = this.deleteProductAttributes.bind(this);
+    this.createProductAttribute = this.createProductAttribute.bind(this);
+    this.getWarehouses = this.getWarehouses.bind(this);
+    this.validateAndReserve = this.validateAndReserve.bind(this);
+    this.releaseReservation = this.releaseReservation.bind(this);
+    this.commitReservation = this.commitReservation.bind(this);
+    this.addWishlist = this.addWishlist.bind(this);
+    this.getWishlist = this.getWishlist.bind(this);
+    this.removeWishlist = this.removeWishlist.bind(this);
+  }
+  createProduct(request: CreateProductRequest): Promise<CreateProductResponse> {
+    const data = CreateProductRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "CreateProduct", data);
+    return promise.then((data) => CreateProductResponse.decode(new BinaryReader(data)));
+  }
+
+  updateProduct(request: UpdateProductRequest): Promise<UpdateProductResponse> {
+    const data = UpdateProductRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "UpdateProduct", data);
+    return promise.then((data) => UpdateProductResponse.decode(new BinaryReader(data)));
+  }
+
+  deleteProduct(request: DeleteProductRequest): Promise<DeleteProductResponse> {
+    const data = DeleteProductRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "DeleteProduct", data);
+    return promise.then((data) => DeleteProductResponse.decode(new BinaryReader(data)));
+  }
+
+  createVariant(request: CreateVariantRequest): Promise<CreateVariantResponse> {
+    const data = CreateVariantRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "CreateVariant", data);
+    return promise.then((data) => CreateVariantResponse.decode(new BinaryReader(data)));
+  }
+
+  getProduct(request: GetProductRequest): Promise<GetProductResponse> {
+    const data = GetProductRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetProduct", data);
+    return promise.then((data) => GetProductResponse.decode(new BinaryReader(data)));
+  }
+
+  listProducts(request: ListProductsRequest): Promise<ListProductsResponse> {
+    const data = ListProductsRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ListProducts", data);
+    return promise.then((data) => ListProductsResponse.decode(new BinaryReader(data)));
+  }
+
+  createBrand(request: CreateBrandRequest): Promise<CreateBrandResponse> {
+    const data = CreateBrandRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "CreateBrand", data);
+    return promise.then((data) => CreateBrandResponse.decode(new BinaryReader(data)));
+  }
+
+  newBrand(request: NewBrandRequest): Promise<NewBrandResponse> {
+    const data = NewBrandRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "NewBrand", data);
+    return promise.then((data) => NewBrandResponse.decode(new BinaryReader(data)));
+  }
+
+  removeBrand(request: RemoveBrandRequest): Promise<RemoveBrandResponse> {
+    const data = RemoveBrandRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "RemoveBrand", data);
+    return promise.then((data) => RemoveBrandResponse.decode(new BinaryReader(data)));
+  }
+
+  getAllBrand(request: Empty): Promise<GetAllBrandResponse> {
+    const data = Empty.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetAllBrand", data);
+    return promise.then((data) => GetAllBrandResponse.decode(new BinaryReader(data)));
+  }
+
+  getVariantsForCart(request: GetVariantsForCartRequest): Promise<GetVariantsForCartResponse> {
+    const data = GetVariantsForCartRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetVariantsForCart", data);
+    return promise.then((data) => GetVariantsForCartResponse.decode(new BinaryReader(data)));
+  }
+
+  changeProductStatus(request: ChangeProductStatusRequest): Promise<ChangeProductStatusResponse> {
+    const data = ChangeProductStatusRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ChangeProductStatus", data);
+    return promise.then((data) => ChangeProductStatusResponse.decode(new BinaryReader(data)));
+  }
+
+  createCategory(request: CreateCategoryRequest): Promise<CreateCategoryResponse> {
+    const data = CreateCategoryRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "CreateCategory", data);
+    return promise.then((data) => CreateCategoryResponse.decode(new BinaryReader(data)));
+  }
+
+  updateCategory(request: UpdateCategoryRequest): Promise<UpdateCategoryResponse> {
+    const data = UpdateCategoryRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "UpdateCategory", data);
+    return promise.then((data) => UpdateCategoryResponse.decode(new BinaryReader(data)));
+  }
+
+  deleteCategory(request: DeleteCategoryRequest): Promise<DeleteCategoryResponse> {
+    const data = DeleteCategoryRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "DeleteCategory", data);
+    return promise.then((data) => DeleteCategoryResponse.decode(new BinaryReader(data)));
+  }
+
+  getAllCategory(request: Empty): Promise<GetAllCategoryResponse> {
+    const data = Empty.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetAllCategory", data);
+    return promise.then((data) => GetAllCategoryResponse.decode(new BinaryReader(data)));
+  }
+
+  getProductAttributes(request: GetProductAttributesRequest): Promise<GetProductAttributesResponse> {
+    const data = GetProductAttributesRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetProductAttributes", data);
+    return promise.then((data) => GetProductAttributesResponse.decode(new BinaryReader(data)));
+  }
+
+  updateProductAttributes(request: UpdateProductAttributesRequest): Promise<UpdateProductAttributesResponse> {
+    const data = UpdateProductAttributesRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "UpdateProductAttributes", data);
+    return promise.then((data) => UpdateProductAttributesResponse.decode(new BinaryReader(data)));
+  }
+
+  deleteProductAttributes(request: DeleteProductAttributesRequest): Promise<DeleteProductAttributesResponse> {
+    const data = DeleteProductAttributesRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "DeleteProductAttributes", data);
+    return promise.then((data) => DeleteProductAttributesResponse.decode(new BinaryReader(data)));
+  }
+
+  createProductAttribute(request: CreateProductAttributeRequest): Promise<CreateProductAttributeResponse> {
+    const data = CreateProductAttributeRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "CreateProductAttribute", data);
+    return promise.then((data) => CreateProductAttributeResponse.decode(new BinaryReader(data)));
+  }
+
+  getWarehouses(request: Empty): Promise<GetWarehousesResponse> {
+    const data = Empty.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetWarehouses", data);
+    return promise.then((data) => GetWarehousesResponse.decode(new BinaryReader(data)));
+  }
+
+  validateAndReserve(request: ValidateAndReserveRequest): Promise<ValidateAndReserveResponse> {
+    const data = ValidateAndReserveRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ValidateAndReserve", data);
+    return promise.then((data) => ValidateAndReserveResponse.decode(new BinaryReader(data)));
+  }
+
+  releaseReservation(request: ReleaseReservationRequest): Promise<ReleaseReservationResponse> {
+    const data = ReleaseReservationRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ReleaseReservation", data);
+    return promise.then((data) => ReleaseReservationResponse.decode(new BinaryReader(data)));
+  }
+
+  commitReservation(request: CommitReservationRequest): Promise<CommitReservationResponse> {
+    const data = CommitReservationRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "CommitReservation", data);
+    return promise.then((data) => CommitReservationResponse.decode(new BinaryReader(data)));
+  }
+
+  addWishlist(request: AddWishlistRequest): Promise<AddWishlistResponse> {
+    const data = AddWishlistRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "AddWishlist", data);
+    return promise.then((data) => AddWishlistResponse.decode(new BinaryReader(data)));
+  }
+
+  getWishlist(request: GetWishlistRequest): Promise<GetWishlistResponse> {
+    const data = GetWishlistRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetWishlist", data);
+    return promise.then((data) => GetWishlistResponse.decode(new BinaryReader(data)));
+  }
+
+  removeWishlist(request: RemoveWishlistRequest): Promise<RemoveWishlistResponse> {
+    const data = RemoveWishlistRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "RemoveWishlist", data);
+    return promise.then((data) => RemoveWishlistResponse.decode(new BinaryReader(data)));
+  }
+}
+
 export type ProductCatalogServiceService = typeof ProductCatalogServiceService;
 export const ProductCatalogServiceService = {
   createProduct: {
@@ -16598,21 +21792,12 @@ export const ProductCatalogServiceService = {
     responseSerialize: (value: CreateVariantResponse) => Buffer.from(CreateVariantResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => CreateVariantResponse.decode(value),
   },
-  getProductById: {
-    path: "/nexuraTelemetry.ProductCatalogService/GetProductById",
+  getProduct: {
+    path: "/nexuraTelemetry.ProductCatalogService/GetProduct",
     requestStream: false,
     responseStream: false,
-    requestSerialize: (value: GetProductByIdRequest) => Buffer.from(GetProductByIdRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => GetProductByIdRequest.decode(value),
-    responseSerialize: (value: GetProductResponse) => Buffer.from(GetProductResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => GetProductResponse.decode(value),
-  },
-  getProductBySlug: {
-    path: "/nexuraTelemetry.ProductCatalogService/GetProductBySlug",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: GetProductBySlugRequest) => Buffer.from(GetProductBySlugRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => GetProductBySlugRequest.decode(value),
+    requestSerialize: (value: GetProductRequest) => Buffer.from(GetProductRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetProductRequest.decode(value),
     responseSerialize: (value: GetProductResponse) => Buffer.from(GetProductResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => GetProductResponse.decode(value),
   },
@@ -16671,6 +21856,17 @@ export const ProductCatalogServiceService = {
     responseSerialize: (value: GetVariantsForCartResponse) =>
       Buffer.from(GetVariantsForCartResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => GetVariantsForCartResponse.decode(value),
+  },
+  changeProductStatus: {
+    path: "/nexuraTelemetry.ProductCatalogService/ChangeProductStatus",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: ChangeProductStatusRequest) =>
+      Buffer.from(ChangeProductStatusRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => ChangeProductStatusRequest.decode(value),
+    responseSerialize: (value: ChangeProductStatusResponse) =>
+      Buffer.from(ChangeProductStatusResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => ChangeProductStatusResponse.decode(value),
   },
   createCategory: {
     path: "/nexuraTelemetry.ProductCatalogService/CreateCategory",
@@ -16793,6 +21989,33 @@ export const ProductCatalogServiceService = {
       Buffer.from(CommitReservationResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => CommitReservationResponse.decode(value),
   },
+  addWishlist: {
+    path: "/nexuraTelemetry.ProductCatalogService/AddWishlist",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: AddWishlistRequest) => Buffer.from(AddWishlistRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => AddWishlistRequest.decode(value),
+    responseSerialize: (value: AddWishlistResponse) => Buffer.from(AddWishlistResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => AddWishlistResponse.decode(value),
+  },
+  getWishlist: {
+    path: "/nexuraTelemetry.ProductCatalogService/GetWishlist",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: GetWishlistRequest) => Buffer.from(GetWishlistRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetWishlistRequest.decode(value),
+    responseSerialize: (value: GetWishlistResponse) => Buffer.from(GetWishlistResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetWishlistResponse.decode(value),
+  },
+  removeWishlist: {
+    path: "/nexuraTelemetry.ProductCatalogService/RemoveWishlist",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: RemoveWishlistRequest) => Buffer.from(RemoveWishlistRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => RemoveWishlistRequest.decode(value),
+    responseSerialize: (value: RemoveWishlistResponse) => Buffer.from(RemoveWishlistResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => RemoveWishlistResponse.decode(value),
+  },
 } as const;
 
 export interface ProductCatalogServiceServer extends UntypedServiceImplementation {
@@ -16800,14 +22023,14 @@ export interface ProductCatalogServiceServer extends UntypedServiceImplementatio
   updateProduct: handleUnaryCall<UpdateProductRequest, UpdateProductResponse>;
   deleteProduct: handleUnaryCall<DeleteProductRequest, DeleteProductResponse>;
   createVariant: handleUnaryCall<CreateVariantRequest, CreateVariantResponse>;
-  getProductById: handleUnaryCall<GetProductByIdRequest, GetProductResponse>;
-  getProductBySlug: handleUnaryCall<GetProductBySlugRequest, GetProductResponse>;
+  getProduct: handleUnaryCall<GetProductRequest, GetProductResponse>;
   listProducts: handleUnaryCall<ListProductsRequest, ListProductsResponse>;
   createBrand: handleUnaryCall<CreateBrandRequest, CreateBrandResponse>;
   newBrand: handleUnaryCall<NewBrandRequest, NewBrandResponse>;
   removeBrand: handleUnaryCall<RemoveBrandRequest, RemoveBrandResponse>;
   getAllBrand: handleUnaryCall<Empty, GetAllBrandResponse>;
   getVariantsForCart: handleUnaryCall<GetVariantsForCartRequest, GetVariantsForCartResponse>;
+  changeProductStatus: handleUnaryCall<ChangeProductStatusRequest, ChangeProductStatusResponse>;
   createCategory: handleUnaryCall<CreateCategoryRequest, CreateCategoryResponse>;
   updateCategory: handleUnaryCall<UpdateCategoryRequest, UpdateCategoryResponse>;
   deleteCategory: handleUnaryCall<DeleteCategoryRequest, DeleteCategoryResponse>;
@@ -16820,6 +22043,9 @@ export interface ProductCatalogServiceServer extends UntypedServiceImplementatio
   validateAndReserve: handleUnaryCall<ValidateAndReserveRequest, ValidateAndReserveResponse>;
   releaseReservation: handleUnaryCall<ReleaseReservationRequest, ReleaseReservationResponse>;
   commitReservation: handleUnaryCall<CommitReservationRequest, CommitReservationResponse>;
+  addWishlist: handleUnaryCall<AddWishlistRequest, AddWishlistResponse>;
+  getWishlist: handleUnaryCall<GetWishlistRequest, GetWishlistResponse>;
+  removeWishlist: handleUnaryCall<RemoveWishlistRequest, RemoveWishlistResponse>;
 }
 
 export interface ProductCatalogServiceClient extends Client {
@@ -16883,32 +22109,17 @@ export interface ProductCatalogServiceClient extends Client {
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: CreateVariantResponse) => void,
   ): ClientUnaryCall;
-  getProductById(
-    request: GetProductByIdRequest,
+  getProduct(
+    request: GetProductRequest,
     callback: (error: ServiceError | null, response: GetProductResponse) => void,
   ): ClientUnaryCall;
-  getProductById(
-    request: GetProductByIdRequest,
+  getProduct(
+    request: GetProductRequest,
     metadata: Metadata,
     callback: (error: ServiceError | null, response: GetProductResponse) => void,
   ): ClientUnaryCall;
-  getProductById(
-    request: GetProductByIdRequest,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: GetProductResponse) => void,
-  ): ClientUnaryCall;
-  getProductBySlug(
-    request: GetProductBySlugRequest,
-    callback: (error: ServiceError | null, response: GetProductResponse) => void,
-  ): ClientUnaryCall;
-  getProductBySlug(
-    request: GetProductBySlugRequest,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: GetProductResponse) => void,
-  ): ClientUnaryCall;
-  getProductBySlug(
-    request: GetProductBySlugRequest,
+  getProduct(
+    request: GetProductRequest,
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: GetProductResponse) => void,
@@ -17002,6 +22213,21 @@ export interface ProductCatalogServiceClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: GetVariantsForCartResponse) => void,
+  ): ClientUnaryCall;
+  changeProductStatus(
+    request: ChangeProductStatusRequest,
+    callback: (error: ServiceError | null, response: ChangeProductStatusResponse) => void,
+  ): ClientUnaryCall;
+  changeProductStatus(
+    request: ChangeProductStatusRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: ChangeProductStatusResponse) => void,
+  ): ClientUnaryCall;
+  changeProductStatus(
+    request: ChangeProductStatusRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: ChangeProductStatusResponse) => void,
   ): ClientUnaryCall;
   createCategory(
     request: CreateCategoryRequest,
@@ -17182,6 +22408,51 @@ export interface ProductCatalogServiceClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: CommitReservationResponse) => void,
+  ): ClientUnaryCall;
+  addWishlist(
+    request: AddWishlistRequest,
+    callback: (error: ServiceError | null, response: AddWishlistResponse) => void,
+  ): ClientUnaryCall;
+  addWishlist(
+    request: AddWishlistRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: AddWishlistResponse) => void,
+  ): ClientUnaryCall;
+  addWishlist(
+    request: AddWishlistRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: AddWishlistResponse) => void,
+  ): ClientUnaryCall;
+  getWishlist(
+    request: GetWishlistRequest,
+    callback: (error: ServiceError | null, response: GetWishlistResponse) => void,
+  ): ClientUnaryCall;
+  getWishlist(
+    request: GetWishlistRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: GetWishlistResponse) => void,
+  ): ClientUnaryCall;
+  getWishlist(
+    request: GetWishlistRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: GetWishlistResponse) => void,
+  ): ClientUnaryCall;
+  removeWishlist(
+    request: RemoveWishlistRequest,
+    callback: (error: ServiceError | null, response: RemoveWishlistResponse) => void,
+  ): ClientUnaryCall;
+  removeWishlist(
+    request: RemoveWishlistRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: RemoveWishlistResponse) => void,
+  ): ClientUnaryCall;
+  removeWishlist(
+    request: RemoveWishlistRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: RemoveWishlistResponse) => void,
   ): ClientUnaryCall;
 }
 
@@ -17193,6 +22464,43 @@ export const ProductCatalogServiceClient = makeGenericClientConstructor(
   service: typeof ProductCatalogServiceService;
   serviceName: string;
 };
+
+export interface EmailService {
+  /** rpc SendOrderConfirmation(SendOrderConfirmationRequest) returns (Empty) {} */
+  sendOtpResetPassword(request: SendOTPResetPasswordRequest): Promise<SendOTPResetPasswordResponse>;
+  sendWelcomeEmail(request: SendWelcomeEmailRequest): Promise<SendWelcomeEmailResponse>;
+  sendNewUserByAdmin(request: SendNewUserByAdminRequest): Promise<SendNewUserByAdminResponse>;
+}
+
+export const EmailServiceServiceName = "nexuraTelemetry.EmailService";
+export class EmailServiceClientImpl implements EmailService {
+  private readonly rpc: Rpc;
+  private readonly service: string;
+  constructor(rpc: Rpc, opts?: { service?: string }) {
+    this.service = opts?.service || EmailServiceServiceName;
+    this.rpc = rpc;
+    this.sendOtpResetPassword = this.sendOtpResetPassword.bind(this);
+    this.sendWelcomeEmail = this.sendWelcomeEmail.bind(this);
+    this.sendNewUserByAdmin = this.sendNewUserByAdmin.bind(this);
+  }
+  sendOtpResetPassword(request: SendOTPResetPasswordRequest): Promise<SendOTPResetPasswordResponse> {
+    const data = SendOTPResetPasswordRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "SendOTPResetPassword", data);
+    return promise.then((data) => SendOTPResetPasswordResponse.decode(new BinaryReader(data)));
+  }
+
+  sendWelcomeEmail(request: SendWelcomeEmailRequest): Promise<SendWelcomeEmailResponse> {
+    const data = SendWelcomeEmailRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "SendWelcomeEmail", data);
+    return promise.then((data) => SendWelcomeEmailResponse.decode(new BinaryReader(data)));
+  }
+
+  sendNewUserByAdmin(request: SendNewUserByAdminRequest): Promise<SendNewUserByAdminResponse> {
+    const data = SendNewUserByAdminRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "SendNewUserByAdmin", data);
+    return promise.then((data) => SendNewUserByAdminResponse.decode(new BinaryReader(data)));
+  }
+}
 
 export type EmailServiceService = typeof EmailServiceService;
 export const EmailServiceService = {
@@ -17218,12 +22526,24 @@ export const EmailServiceService = {
       Buffer.from(SendWelcomeEmailResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => SendWelcomeEmailResponse.decode(value),
   },
+  sendNewUserByAdmin: {
+    path: "/nexuraTelemetry.EmailService/SendNewUserByAdmin",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: SendNewUserByAdminRequest) =>
+      Buffer.from(SendNewUserByAdminRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => SendNewUserByAdminRequest.decode(value),
+    responseSerialize: (value: SendNewUserByAdminResponse) =>
+      Buffer.from(SendNewUserByAdminResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => SendNewUserByAdminResponse.decode(value),
+  },
 } as const;
 
 export interface EmailServiceServer extends UntypedServiceImplementation {
   /** rpc SendOrderConfirmation(SendOrderConfirmationRequest) returns (Empty) {} */
   sendOtpResetPassword: handleUnaryCall<SendOTPResetPasswordRequest, SendOTPResetPasswordResponse>;
   sendWelcomeEmail: handleUnaryCall<SendWelcomeEmailRequest, SendWelcomeEmailResponse>;
+  sendNewUserByAdmin: handleUnaryCall<SendNewUserByAdminRequest, SendNewUserByAdminResponse>;
 }
 
 export interface EmailServiceClient extends Client {
@@ -17258,6 +22578,21 @@ export interface EmailServiceClient extends Client {
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: SendWelcomeEmailResponse) => void,
   ): ClientUnaryCall;
+  sendNewUserByAdmin(
+    request: SendNewUserByAdminRequest,
+    callback: (error: ServiceError | null, response: SendNewUserByAdminResponse) => void,
+  ): ClientUnaryCall;
+  sendNewUserByAdmin(
+    request: SendNewUserByAdminRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: SendNewUserByAdminResponse) => void,
+  ): ClientUnaryCall;
+  sendNewUserByAdmin(
+    request: SendNewUserByAdminRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: SendNewUserByAdminResponse) => void,
+  ): ClientUnaryCall;
 }
 
 export const EmailServiceClient = makeGenericClientConstructor(
@@ -17268,6 +22603,26 @@ export const EmailServiceClient = makeGenericClientConstructor(
   service: typeof EmailServiceService;
   serviceName: string;
 };
+
+export interface AdService {
+  getAds(request: AdRequest): Promise<AdResponse>;
+}
+
+export const AdServiceServiceName = "nexuraTelemetry.AdService";
+export class AdServiceClientImpl implements AdService {
+  private readonly rpc: Rpc;
+  private readonly service: string;
+  constructor(rpc: Rpc, opts?: { service?: string }) {
+    this.service = opts?.service || AdServiceServiceName;
+    this.rpc = rpc;
+    this.getAds = this.getAds.bind(this);
+  }
+  getAds(request: AdRequest): Promise<AdResponse> {
+    const data = AdRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetAds", data);
+    return promise.then((data) => AdResponse.decode(new BinaryReader(data)));
+  }
+}
 
 export type AdServiceService = typeof AdServiceService;
 export const AdServiceService = {
@@ -17309,6 +22664,37 @@ export const AdServiceClient = makeGenericClientConstructor(
   service: typeof AdServiceService;
   serviceName: string;
 };
+
+/** Health service definition */
+export interface HealthService {
+  /** Check is the health checking method for all services */
+  check(request: HealthCheckRequest): Promise<HealthCheckResponse>;
+  /** Watch is for watching health status changes */
+  watch(request: HealthCheckRequest): Observable<HealthCheckResponse>;
+}
+
+export const HealthServiceServiceName = "nexuraTelemetry.HealthService";
+export class HealthServiceClientImpl implements HealthService {
+  private readonly rpc: Rpc;
+  private readonly service: string;
+  constructor(rpc: Rpc, opts?: { service?: string }) {
+    this.service = opts?.service || HealthServiceServiceName;
+    this.rpc = rpc;
+    this.check = this.check.bind(this);
+    this.watch = this.watch.bind(this);
+  }
+  check(request: HealthCheckRequest): Promise<HealthCheckResponse> {
+    const data = HealthCheckRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "Check", data);
+    return promise.then((data) => HealthCheckResponse.decode(new BinaryReader(data)));
+  }
+
+  watch(request: HealthCheckRequest): Observable<HealthCheckResponse> {
+    const data = HealthCheckRequest.encode(request).finish();
+    const result = this.rpc.serverStreamingRequest(this.service, "Watch", data);
+    return result.pipe(map((data) => HealthCheckResponse.decode(new BinaryReader(data))));
+  }
+}
 
 /** Health service definition */
 export type HealthServiceService = typeof HealthServiceService;
@@ -17377,6 +22763,106 @@ export const HealthServiceClient = makeGenericClientConstructor(
   serviceName: string;
 };
 
+export interface OrderService {
+  createOrder(request: CreateOrderRequest): Promise<CreateOrderResponse>;
+  getOrderStatus(request: GetOrderStatusRequest): Promise<GetOrderStatusResponse>;
+  getOrder(request: GetOrderRequest): Promise<GetOrderResponse>;
+  getOrdersForAdmin(request: GetOrdersForAdminRequest): Promise<GetOrdersForAdminResponse>;
+  cancelOrder(request: CancelOrderRequest): Promise<CancelOrderResponse>;
+  updateOrderStatus(request: UpdateOrderStatusRequest): Promise<UpdateOrderStatusResponse>;
+  listOrders(request: ListOrdersRequest): Promise<ListOrdersResponse>;
+  addOrderNote(request: AddOrderNoteRequest): Promise<AddOrderNoteResponse>;
+  deleteOrderNote(request: DeleteOrderNoteRequest): Promise<DeleteOrderNoteResponse>;
+  updateTrackingNumber(request: UpdateTrackingNumberRequest): Promise<UpdateTrackingNumberResponse>;
+  listAllOrders(request: Empty): Promise<ListAllOrdersResponse>;
+}
+
+export const OrderServiceServiceName = "nexuraTelemetry.OrderService";
+export class OrderServiceClientImpl implements OrderService {
+  private readonly rpc: Rpc;
+  private readonly service: string;
+  constructor(rpc: Rpc, opts?: { service?: string }) {
+    this.service = opts?.service || OrderServiceServiceName;
+    this.rpc = rpc;
+    this.createOrder = this.createOrder.bind(this);
+    this.getOrderStatus = this.getOrderStatus.bind(this);
+    this.getOrder = this.getOrder.bind(this);
+    this.getOrdersForAdmin = this.getOrdersForAdmin.bind(this);
+    this.cancelOrder = this.cancelOrder.bind(this);
+    this.updateOrderStatus = this.updateOrderStatus.bind(this);
+    this.listOrders = this.listOrders.bind(this);
+    this.addOrderNote = this.addOrderNote.bind(this);
+    this.deleteOrderNote = this.deleteOrderNote.bind(this);
+    this.updateTrackingNumber = this.updateTrackingNumber.bind(this);
+    this.listAllOrders = this.listAllOrders.bind(this);
+  }
+  createOrder(request: CreateOrderRequest): Promise<CreateOrderResponse> {
+    const data = CreateOrderRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "createOrder", data);
+    return promise.then((data) => CreateOrderResponse.decode(new BinaryReader(data)));
+  }
+
+  getOrderStatus(request: GetOrderStatusRequest): Promise<GetOrderStatusResponse> {
+    const data = GetOrderStatusRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetOrderStatus", data);
+    return promise.then((data) => GetOrderStatusResponse.decode(new BinaryReader(data)));
+  }
+
+  getOrder(request: GetOrderRequest): Promise<GetOrderResponse> {
+    const data = GetOrderRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetOrder", data);
+    return promise.then((data) => GetOrderResponse.decode(new BinaryReader(data)));
+  }
+
+  getOrdersForAdmin(request: GetOrdersForAdminRequest): Promise<GetOrdersForAdminResponse> {
+    const data = GetOrdersForAdminRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetOrdersForAdmin", data);
+    return promise.then((data) => GetOrdersForAdminResponse.decode(new BinaryReader(data)));
+  }
+
+  cancelOrder(request: CancelOrderRequest): Promise<CancelOrderResponse> {
+    const data = CancelOrderRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "CancelOrder", data);
+    return promise.then((data) => CancelOrderResponse.decode(new BinaryReader(data)));
+  }
+
+  updateOrderStatus(request: UpdateOrderStatusRequest): Promise<UpdateOrderStatusResponse> {
+    const data = UpdateOrderStatusRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "UpdateOrderStatus", data);
+    return promise.then((data) => UpdateOrderStatusResponse.decode(new BinaryReader(data)));
+  }
+
+  listOrders(request: ListOrdersRequest): Promise<ListOrdersResponse> {
+    const data = ListOrdersRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ListOrders", data);
+    return promise.then((data) => ListOrdersResponse.decode(new BinaryReader(data)));
+  }
+
+  addOrderNote(request: AddOrderNoteRequest): Promise<AddOrderNoteResponse> {
+    const data = AddOrderNoteRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "AddOrderNote", data);
+    return promise.then((data) => AddOrderNoteResponse.decode(new BinaryReader(data)));
+  }
+
+  deleteOrderNote(request: DeleteOrderNoteRequest): Promise<DeleteOrderNoteResponse> {
+    const data = DeleteOrderNoteRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "DeleteOrderNote", data);
+    return promise.then((data) => DeleteOrderNoteResponse.decode(new BinaryReader(data)));
+  }
+
+  updateTrackingNumber(request: UpdateTrackingNumberRequest): Promise<UpdateTrackingNumberResponse> {
+    const data = UpdateTrackingNumberRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "UpdateTrackingNumber", data);
+    return promise.then((data) => UpdateTrackingNumberResponse.decode(new BinaryReader(data)));
+  }
+
+  listAllOrders(request: Empty): Promise<ListAllOrdersResponse> {
+    const data = Empty.encode(request).finish();
+    const promise = this.rpc.request(this.service, "ListAllOrders", data);
+    return promise.then((data) => ListAllOrdersResponse.decode(new BinaryReader(data)));
+  }
+}
+
 export type OrderServiceService = typeof OrderServiceService;
 export const OrderServiceService = {
   createOrder: {
@@ -17406,6 +22892,16 @@ export const OrderServiceService = {
     responseSerialize: (value: GetOrderResponse) => Buffer.from(GetOrderResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => GetOrderResponse.decode(value),
   },
+  getOrdersForAdmin: {
+    path: "/nexuraTelemetry.OrderService/GetOrdersForAdmin",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: GetOrdersForAdminRequest) => Buffer.from(GetOrdersForAdminRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetOrdersForAdminRequest.decode(value),
+    responseSerialize: (value: GetOrdersForAdminResponse) =>
+      Buffer.from(GetOrdersForAdminResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetOrdersForAdminResponse.decode(value),
+  },
   cancelOrder: {
     path: "/nexuraTelemetry.OrderService/CancelOrder",
     requestStream: false,
@@ -17425,14 +22921,67 @@ export const OrderServiceService = {
       Buffer.from(UpdateOrderStatusResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => UpdateOrderStatusResponse.decode(value),
   },
+  listOrders: {
+    path: "/nexuraTelemetry.OrderService/ListOrders",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: ListOrdersRequest) => Buffer.from(ListOrdersRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => ListOrdersRequest.decode(value),
+    responseSerialize: (value: ListOrdersResponse) => Buffer.from(ListOrdersResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => ListOrdersResponse.decode(value),
+  },
+  addOrderNote: {
+    path: "/nexuraTelemetry.OrderService/AddOrderNote",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: AddOrderNoteRequest) => Buffer.from(AddOrderNoteRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => AddOrderNoteRequest.decode(value),
+    responseSerialize: (value: AddOrderNoteResponse) => Buffer.from(AddOrderNoteResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => AddOrderNoteResponse.decode(value),
+  },
+  deleteOrderNote: {
+    path: "/nexuraTelemetry.OrderService/DeleteOrderNote",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: DeleteOrderNoteRequest) => Buffer.from(DeleteOrderNoteRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => DeleteOrderNoteRequest.decode(value),
+    responseSerialize: (value: DeleteOrderNoteResponse) => Buffer.from(DeleteOrderNoteResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => DeleteOrderNoteResponse.decode(value),
+  },
+  updateTrackingNumber: {
+    path: "/nexuraTelemetry.OrderService/UpdateTrackingNumber",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: UpdateTrackingNumberRequest) =>
+      Buffer.from(UpdateTrackingNumberRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => UpdateTrackingNumberRequest.decode(value),
+    responseSerialize: (value: UpdateTrackingNumberResponse) =>
+      Buffer.from(UpdateTrackingNumberResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => UpdateTrackingNumberResponse.decode(value),
+  },
+  listAllOrders: {
+    path: "/nexuraTelemetry.OrderService/ListAllOrders",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: Empty) => Buffer.from(Empty.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => Empty.decode(value),
+    responseSerialize: (value: ListAllOrdersResponse) => Buffer.from(ListAllOrdersResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => ListAllOrdersResponse.decode(value),
+  },
 } as const;
 
 export interface OrderServiceServer extends UntypedServiceImplementation {
   createOrder: handleUnaryCall<CreateOrderRequest, CreateOrderResponse>;
   getOrderStatus: handleUnaryCall<GetOrderStatusRequest, GetOrderStatusResponse>;
   getOrder: handleUnaryCall<GetOrderRequest, GetOrderResponse>;
+  getOrdersForAdmin: handleUnaryCall<GetOrdersForAdminRequest, GetOrdersForAdminResponse>;
   cancelOrder: handleUnaryCall<CancelOrderRequest, CancelOrderResponse>;
   updateOrderStatus: handleUnaryCall<UpdateOrderStatusRequest, UpdateOrderStatusResponse>;
+  listOrders: handleUnaryCall<ListOrdersRequest, ListOrdersResponse>;
+  addOrderNote: handleUnaryCall<AddOrderNoteRequest, AddOrderNoteResponse>;
+  deleteOrderNote: handleUnaryCall<DeleteOrderNoteRequest, DeleteOrderNoteResponse>;
+  updateTrackingNumber: handleUnaryCall<UpdateTrackingNumberRequest, UpdateTrackingNumberResponse>;
+  listAllOrders: handleUnaryCall<Empty, ListAllOrdersResponse>;
 }
 
 export interface OrderServiceClient extends Client {
@@ -17481,6 +23030,21 @@ export interface OrderServiceClient extends Client {
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: GetOrderResponse) => void,
   ): ClientUnaryCall;
+  getOrdersForAdmin(
+    request: GetOrdersForAdminRequest,
+    callback: (error: ServiceError | null, response: GetOrdersForAdminResponse) => void,
+  ): ClientUnaryCall;
+  getOrdersForAdmin(
+    request: GetOrdersForAdminRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: GetOrdersForAdminResponse) => void,
+  ): ClientUnaryCall;
+  getOrdersForAdmin(
+    request: GetOrdersForAdminRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: GetOrdersForAdminResponse) => void,
+  ): ClientUnaryCall;
   cancelOrder(
     request: CancelOrderRequest,
     callback: (error: ServiceError | null, response: CancelOrderResponse) => void,
@@ -17510,6 +23074,81 @@ export interface OrderServiceClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: UpdateOrderStatusResponse) => void,
+  ): ClientUnaryCall;
+  listOrders(
+    request: ListOrdersRequest,
+    callback: (error: ServiceError | null, response: ListOrdersResponse) => void,
+  ): ClientUnaryCall;
+  listOrders(
+    request: ListOrdersRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: ListOrdersResponse) => void,
+  ): ClientUnaryCall;
+  listOrders(
+    request: ListOrdersRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: ListOrdersResponse) => void,
+  ): ClientUnaryCall;
+  addOrderNote(
+    request: AddOrderNoteRequest,
+    callback: (error: ServiceError | null, response: AddOrderNoteResponse) => void,
+  ): ClientUnaryCall;
+  addOrderNote(
+    request: AddOrderNoteRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: AddOrderNoteResponse) => void,
+  ): ClientUnaryCall;
+  addOrderNote(
+    request: AddOrderNoteRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: AddOrderNoteResponse) => void,
+  ): ClientUnaryCall;
+  deleteOrderNote(
+    request: DeleteOrderNoteRequest,
+    callback: (error: ServiceError | null, response: DeleteOrderNoteResponse) => void,
+  ): ClientUnaryCall;
+  deleteOrderNote(
+    request: DeleteOrderNoteRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: DeleteOrderNoteResponse) => void,
+  ): ClientUnaryCall;
+  deleteOrderNote(
+    request: DeleteOrderNoteRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: DeleteOrderNoteResponse) => void,
+  ): ClientUnaryCall;
+  updateTrackingNumber(
+    request: UpdateTrackingNumberRequest,
+    callback: (error: ServiceError | null, response: UpdateTrackingNumberResponse) => void,
+  ): ClientUnaryCall;
+  updateTrackingNumber(
+    request: UpdateTrackingNumberRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: UpdateTrackingNumberResponse) => void,
+  ): ClientUnaryCall;
+  updateTrackingNumber(
+    request: UpdateTrackingNumberRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: UpdateTrackingNumberResponse) => void,
+  ): ClientUnaryCall;
+  listAllOrders(
+    request: Empty,
+    callback: (error: ServiceError | null, response: ListAllOrdersResponse) => void,
+  ): ClientUnaryCall;
+  listAllOrders(
+    request: Empty,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: ListAllOrdersResponse) => void,
+  ): ClientUnaryCall;
+  listAllOrders(
+    request: Empty,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: ListAllOrdersResponse) => void,
   ): ClientUnaryCall;
 }
 
@@ -17521,6 +23160,74 @@ export const OrderServiceClient = makeGenericClientConstructor(
   service: typeof OrderServiceService;
   serviceName: string;
 };
+
+export interface PaymentService {
+  initiatePayment(request: InitiatePaymentRequest): Promise<InitiatePaymentResponse>;
+  verifyPayment(request: VerifyPaymentRequest): Promise<VerifyPaymentResponse>;
+  cancelPayment(request: CancelPaymentRequest): Promise<CancelPaymentResponse>;
+  refundPayment(request: RefundPaymentRequest): Promise<RefundPaymentResponse>;
+  getPayment(request: GetPaymentRequest): Promise<GetPaymentResponse>;
+  getPaymentStatus(request: GetPaymentStatusRequest): Promise<GetPaymentStatusResponse>;
+  getBatchPayments(request: GetBatchPaymentsRequest): Promise<GetBatchPaymentsResponse>;
+}
+
+export const PaymentServiceServiceName = "nexuraTelemetry.PaymentService";
+export class PaymentServiceClientImpl implements PaymentService {
+  private readonly rpc: Rpc;
+  private readonly service: string;
+  constructor(rpc: Rpc, opts?: { service?: string }) {
+    this.service = opts?.service || PaymentServiceServiceName;
+    this.rpc = rpc;
+    this.initiatePayment = this.initiatePayment.bind(this);
+    this.verifyPayment = this.verifyPayment.bind(this);
+    this.cancelPayment = this.cancelPayment.bind(this);
+    this.refundPayment = this.refundPayment.bind(this);
+    this.getPayment = this.getPayment.bind(this);
+    this.getPaymentStatus = this.getPaymentStatus.bind(this);
+    this.getBatchPayments = this.getBatchPayments.bind(this);
+  }
+  initiatePayment(request: InitiatePaymentRequest): Promise<InitiatePaymentResponse> {
+    const data = InitiatePaymentRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "InitiatePayment", data);
+    return promise.then((data) => InitiatePaymentResponse.decode(new BinaryReader(data)));
+  }
+
+  verifyPayment(request: VerifyPaymentRequest): Promise<VerifyPaymentResponse> {
+    const data = VerifyPaymentRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "VerifyPayment", data);
+    return promise.then((data) => VerifyPaymentResponse.decode(new BinaryReader(data)));
+  }
+
+  cancelPayment(request: CancelPaymentRequest): Promise<CancelPaymentResponse> {
+    const data = CancelPaymentRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "CancelPayment", data);
+    return promise.then((data) => CancelPaymentResponse.decode(new BinaryReader(data)));
+  }
+
+  refundPayment(request: RefundPaymentRequest): Promise<RefundPaymentResponse> {
+    const data = RefundPaymentRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "RefundPayment", data);
+    return promise.then((data) => RefundPaymentResponse.decode(new BinaryReader(data)));
+  }
+
+  getPayment(request: GetPaymentRequest): Promise<GetPaymentResponse> {
+    const data = GetPaymentRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetPayment", data);
+    return promise.then((data) => GetPaymentResponse.decode(new BinaryReader(data)));
+  }
+
+  getPaymentStatus(request: GetPaymentStatusRequest): Promise<GetPaymentStatusResponse> {
+    const data = GetPaymentStatusRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetPaymentStatus", data);
+    return promise.then((data) => GetPaymentStatusResponse.decode(new BinaryReader(data)));
+  }
+
+  getBatchPayments(request: GetBatchPaymentsRequest): Promise<GetBatchPaymentsResponse> {
+    const data = GetBatchPaymentsRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "GetBatchPayments", data);
+    return promise.then((data) => GetBatchPaymentsResponse.decode(new BinaryReader(data)));
+  }
+}
 
 export type PaymentServiceService = typeof PaymentServiceService;
 export const PaymentServiceService = {
@@ -17560,6 +23267,15 @@ export const PaymentServiceService = {
     responseSerialize: (value: RefundPaymentResponse) => Buffer.from(RefundPaymentResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => RefundPaymentResponse.decode(value),
   },
+  getPayment: {
+    path: "/nexuraTelemetry.PaymentService/GetPayment",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: GetPaymentRequest) => Buffer.from(GetPaymentRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetPaymentRequest.decode(value),
+    responseSerialize: (value: GetPaymentResponse) => Buffer.from(GetPaymentResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetPaymentResponse.decode(value),
+  },
   getPaymentStatus: {
     path: "/nexuraTelemetry.PaymentService/GetPaymentStatus",
     requestStream: false,
@@ -17570,6 +23286,16 @@ export const PaymentServiceService = {
       Buffer.from(GetPaymentStatusResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => GetPaymentStatusResponse.decode(value),
   },
+  getBatchPayments: {
+    path: "/nexuraTelemetry.PaymentService/GetBatchPayments",
+    requestStream: false,
+    responseStream: false,
+    requestSerialize: (value: GetBatchPaymentsRequest) => Buffer.from(GetBatchPaymentsRequest.encode(value).finish()),
+    requestDeserialize: (value: Buffer) => GetBatchPaymentsRequest.decode(value),
+    responseSerialize: (value: GetBatchPaymentsResponse) =>
+      Buffer.from(GetBatchPaymentsResponse.encode(value).finish()),
+    responseDeserialize: (value: Buffer) => GetBatchPaymentsResponse.decode(value),
+  },
 } as const;
 
 export interface PaymentServiceServer extends UntypedServiceImplementation {
@@ -17577,7 +23303,9 @@ export interface PaymentServiceServer extends UntypedServiceImplementation {
   verifyPayment: handleUnaryCall<VerifyPaymentRequest, VerifyPaymentResponse>;
   cancelPayment: handleUnaryCall<CancelPaymentRequest, CancelPaymentResponse>;
   refundPayment: handleUnaryCall<RefundPaymentRequest, RefundPaymentResponse>;
+  getPayment: handleUnaryCall<GetPaymentRequest, GetPaymentResponse>;
   getPaymentStatus: handleUnaryCall<GetPaymentStatusRequest, GetPaymentStatusResponse>;
+  getBatchPayments: handleUnaryCall<GetBatchPaymentsRequest, GetBatchPaymentsResponse>;
 }
 
 export interface PaymentServiceClient extends Client {
@@ -17641,6 +23369,21 @@ export interface PaymentServiceClient extends Client {
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: RefundPaymentResponse) => void,
   ): ClientUnaryCall;
+  getPayment(
+    request: GetPaymentRequest,
+    callback: (error: ServiceError | null, response: GetPaymentResponse) => void,
+  ): ClientUnaryCall;
+  getPayment(
+    request: GetPaymentRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: GetPaymentResponse) => void,
+  ): ClientUnaryCall;
+  getPayment(
+    request: GetPaymentRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: GetPaymentResponse) => void,
+  ): ClientUnaryCall;
   getPaymentStatus(
     request: GetPaymentStatusRequest,
     callback: (error: ServiceError | null, response: GetPaymentStatusResponse) => void,
@@ -17656,6 +23399,21 @@ export interface PaymentServiceClient extends Client {
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: GetPaymentStatusResponse) => void,
   ): ClientUnaryCall;
+  getBatchPayments(
+    request: GetBatchPaymentsRequest,
+    callback: (error: ServiceError | null, response: GetBatchPaymentsResponse) => void,
+  ): ClientUnaryCall;
+  getBatchPayments(
+    request: GetBatchPaymentsRequest,
+    metadata: Metadata,
+    callback: (error: ServiceError | null, response: GetBatchPaymentsResponse) => void,
+  ): ClientUnaryCall;
+  getBatchPayments(
+    request: GetBatchPaymentsRequest,
+    metadata: Metadata,
+    options: Partial<CallOptions>,
+    callback: (error: ServiceError | null, response: GetBatchPaymentsResponse) => void,
+  ): ClientUnaryCall;
 }
 
 export const PaymentServiceClient = makeGenericClientConstructor(
@@ -17666,6 +23424,26 @@ export const PaymentServiceClient = makeGenericClientConstructor(
   service: typeof PaymentServiceService;
   serviceName: string;
 };
+
+export interface OrchestratorService {
+  createSagaOrder(request: CreateSagaOrderRequest): Promise<CreateSagaOrderResponse>;
+}
+
+export const OrchestratorServiceServiceName = "nexuraTelemetry.OrchestratorService";
+export class OrchestratorServiceClientImpl implements OrchestratorService {
+  private readonly rpc: Rpc;
+  private readonly service: string;
+  constructor(rpc: Rpc, opts?: { service?: string }) {
+    this.service = opts?.service || OrchestratorServiceServiceName;
+    this.rpc = rpc;
+    this.createSagaOrder = this.createSagaOrder.bind(this);
+  }
+  createSagaOrder(request: CreateSagaOrderRequest): Promise<CreateSagaOrderResponse> {
+    const data = CreateSagaOrderRequest.encode(request).finish();
+    const promise = this.rpc.request(this.service, "CreateSagaOrder", data);
+    return promise.then((data) => CreateSagaOrderResponse.decode(new BinaryReader(data)));
+  }
+}
 
 export type OrchestratorServiceService = typeof OrchestratorServiceService;
 export const OrchestratorServiceService = {
@@ -17710,6 +23488,13 @@ export const OrchestratorServiceClient = makeGenericClientConstructor(
   service: typeof OrchestratorServiceService;
   serviceName: string;
 };
+
+interface Rpc {
+  request(service: string, method: string, data: Uint8Array): Promise<Uint8Array>;
+  clientStreamingRequest(service: string, method: string, data: Observable<Uint8Array>): Promise<Uint8Array>;
+  serverStreamingRequest(service: string, method: string, data: Uint8Array): Observable<Uint8Array>;
+  bidirectionalStreamingRequest(service: string, method: string, data: Observable<Uint8Array>): Observable<Uint8Array>;
+}
 
 type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 

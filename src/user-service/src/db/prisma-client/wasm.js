@@ -137,6 +137,18 @@ exports.Prisma.UserScalarFieldEnum = {
   profilePictureUrl: 'profilePictureUrl'
 };
 
+exports.Prisma.WishlistScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  productId: 'productId',
+  productImage: 'productImage',
+  productName: 'productName',
+  productPrice: 'productPrice',
+  productSlug: 'productSlug',
+  categoryName: 'categoryName',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.AddressScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -245,6 +257,16 @@ exports.Prisma.UserOrderByRelevanceFieldEnum = {
   profilePictureUrl: 'profilePictureUrl'
 };
 
+exports.Prisma.WishlistOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  productId: 'productId',
+  productImage: 'productImage',
+  productName: 'productName',
+  productSlug: 'productSlug',
+  categoryName: 'categoryName'
+};
+
 exports.Prisma.AddressOrderByRelevanceFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -324,6 +346,7 @@ exports.Prisma.OTPOrderByRelevanceFieldEnum = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  Wishlist: 'Wishlist',
   Address: 'Address',
   Country: 'Country',
   AddressProvinces: 'AddressProvinces',

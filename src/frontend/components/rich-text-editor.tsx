@@ -63,7 +63,7 @@ export function RichTextEditor({ initialContent = "", onChange }: RichTextEditor
     onChange(content)
 
     if (editorRef.current && activeTab === "visual") {
-      editorRef.current.innerHTML = content
+      editorRef.current.innerText = content
     }
   }
 
@@ -71,7 +71,7 @@ export function RichTextEditor({ initialContent = "", onChange }: RichTextEditor
     setActiveTab(value as "visual" | "html")
 
     if (value === "visual" && editorRef.current) {
-      editorRef.current.innerHTML = htmlContent
+      editorRef.current.innerText = htmlContent
     }
   }
 

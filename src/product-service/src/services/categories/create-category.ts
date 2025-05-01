@@ -7,7 +7,6 @@ const prisma = new PrismaClient()
 
 export const createCategory = async (call: ServerUnaryCall<CreateCategoryRequest, CreateCategoryResponse>, callback: sendUnaryData<CreateCategoryResponse>) => {
     try {
-      console.log("Creating category", call.request)
       const categoryData = call.request.category
       if (categoryData == undefined) {
         throw new Error("Category data is required")

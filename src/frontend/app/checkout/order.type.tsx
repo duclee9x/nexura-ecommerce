@@ -1,4 +1,4 @@
-import { ExtendedAddress, OrderItem, Coupon, PaymentStatus, CreateOrderRequest } from "@nexura/grpc_gateway/protos"
+import { ExtendedAddress, OrderItem, Coupon, CreateOrderRequest } from "@nexura/grpc_gateway/protos"
 
 export type ExtendedAddressType = ExtendedAddress
 export type OrderItemType = OrderItem

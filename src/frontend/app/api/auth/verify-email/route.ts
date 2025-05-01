@@ -1,9 +1,10 @@
 'use server'
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAccountGateway } from '@/gateway/gateway';
-
+import UserHooks from "@/hooks/user-hooks"
 export async function GET(request: NextRequest) {
+    const { useVerifyAccount } = UserHooks()
+    const { mutateAsync: verifyAccount } = useVerifyAccount
     try {
         const searchParams = request.nextUrl.searchParams;
         const token = searchParams.get('token');
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const response = await verifyAccountGateway(token);
+        const response = await verifyAccount({ token });
 
         if (!response.success) {
             return NextResponse.json(

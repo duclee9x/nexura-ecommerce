@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
@@ -48,13 +48,7 @@ export function AttributesManager({ attributes, onChange, showAdvancedOptions = 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [shouldAddAttribute, setShouldAddAttribute] = useState(false)
 
-  useEffect(() => {
-    if (shouldAddAttribute) {
-      handleAddAttribute()
-      setShouldAddAttribute(false)
-    }
-  }, [shouldAddAttribute, newAttribute])
-
+  
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -62,7 +56,7 @@ export function AttributesManager({ attributes, onChange, showAdvancedOptions = 
     }),
   )
 
-  const handleAddAttribute = () => {
+  const handleAddAttribute = useCallback(() => {
     const validationErrors: Record<string, string> = {}
     if (!newAttribute.name.trim()) {
       validationErrors.name = "Attribute name is required"
@@ -102,9 +96,16 @@ export function AttributesManager({ attributes, onChange, showAdvancedOptions = 
       title: "Attribute Added",
       description: `${attributeToAdd.name} has been added to product attributes.`,
     })
-  }
+  }, [attributes, newAttribute, onChange])
+  
+  useEffect(() => {
+    if (shouldAddAttribute) {
+      handleAddAttribute()
+      setShouldAddAttribute(false)
+    }
+  }, [shouldAddAttribute, newAttribute, handleAddAttribute])
 
-  const handleDeleteAttribute = (attributeId: string) => {
+  const handleDeleteAttribute = useCallback((attributeId: string) => {
     const updatedAttributes = attributes.filter((attr) => attr.id !== attributeId)
     onChange(updatedAttributes)
 
@@ -112,9 +113,9 @@ export function AttributesManager({ attributes, onChange, showAdvancedOptions = 
       title: "Attribute Deleted",
       description: "The attribute has been removed.",
     })
-  }
+  }, [attributes, onChange])
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event
 
     if (over && active.id !== over.id) {
@@ -133,7 +134,7 @@ export function AttributesManager({ attributes, onChange, showAdvancedOptions = 
         description: "The display order of attributes has been updated.",
       })
     }
-  }
+  }, [attributes, onChange])
 
   return (
     <div className="attributes-manager space-y-4">

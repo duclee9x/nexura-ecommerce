@@ -157,7 +157,7 @@ export const GET = async (request: Request) => {
         return new Response(JSON.stringify({ urls }), { 
             headers: { "Content-Type": "application/json" } 
         });
-    } catch (error) {
+    } catch {
         return new Response("Failed to generate presigned URLs", { status: 500 });
     }
 }

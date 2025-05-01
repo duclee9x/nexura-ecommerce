@@ -130,6 +130,12 @@ exports.Prisma.ProductScalarFieldEnum = {
   brandId: 'brandId'
 };
 
+exports.Prisma.RelatedProductScalarFieldEnum = {
+  id: 'id',
+  fromProductId: 'fromProductId',
+  toProductId: 'toProductId'
+};
+
 exports.Prisma.ProductImageScalarFieldEnum = {
   id: 'id',
   url: 'url',
@@ -137,6 +143,14 @@ exports.Prisma.ProductImageScalarFieldEnum = {
   isMain: 'isMain',
   productId: 'productId',
   createdAt: 'createdAt'
+};
+
+exports.Prisma.WishlistScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  productId: 'productId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.StockScalarFieldEnum = {
@@ -150,15 +164,23 @@ exports.Prisma.StockScalarFieldEnum = {
 
 exports.Prisma.ReservationScalarFieldEnum = {
   id: 'id',
-  quantity: 'quantity',
   userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ReservationItemScalarFieldEnum = {
+  id: 'id',
+  quantity: 'quantity',
   variantId: 'variantId',
+  reservationId: 'reservationId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
 
 exports.Prisma.ProductVariantScalarFieldEnum = {
   id: 'id',
+  name: 'name',
   sku: 'sku',
   price: 'price',
   lowStockThreshold: 'lowStockThreshold',
@@ -308,9 +330,12 @@ exports.Prisma.QueryMode = {
 
 exports.Prisma.ModelName = {
   Product: 'Product',
+  RelatedProduct: 'RelatedProduct',
   ProductImage: 'ProductImage',
+  Wishlist: 'Wishlist',
   Stock: 'Stock',
   Reservation: 'Reservation',
+  ReservationItem: 'ReservationItem',
   ProductVariant: 'ProductVariant',
   VariantAttribute: 'VariantAttribute',
   ProductAttribute: 'ProductAttribute',

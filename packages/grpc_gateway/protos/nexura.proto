@@ -11,8 +11,24 @@ service AddressService {
     rpc UpdateAddress (UpdateAddressRequest) returns (AddressResponse);
     rpc DeleteAddress (DeleteAddressRequest) returns (DeleteAddressResponse);
     rpc GetAddresses (GetAddressesRequest) returns (GetAddressesResponse);
+    rpc GetAddress (GetAddressRequest) returns (GetAddressResponse);
+    rpc GetBatchAddresses (GetBatchAddressesRequest) returns (GetBatchAddressesResponse);
 }
 
+message GetBatchAddressesRequest {
+  repeated string addressIds = 1;
+}
+
+message GetBatchAddressesResponse {
+  repeated ExtendedAddress addresses = 1;
+}
+message GetAddressRequest {
+  string addressId = 1;
+}
+
+message GetAddressResponse {
+  ExtendedAddress address = 1;
+}
 message GetAddressesRequest {
   string userId = 1;
 }
@@ -122,7 +138,9 @@ message Ward {
 // -----------------User service-----------------
 
 service UserService {
+    rpc GetBatchUsers (GetBatchUsersRequest) returns (GetBatchUsersResponse);
     rpc GetUser (GetUserRequest) returns (GetUserResponse);
+    rpc GetAllUsers (Empty) returns (GetAllUsersResponse);
     rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse);
     rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse);
     rpc RegisterUser (RegisterUserRequest) returns (RegisterUserResponse);
@@ -132,8 +150,32 @@ service UserService {
     rpc ResetPassword (ResetPasswordRequest) returns (ResetPasswordResponse);
     rpc VerifyAccount (VerifyAccountRequest) returns (VerifyAccountResponse);
     rpc UpdatePassword (UpdatePasswordRequest) returns (UpdatePasswordResponse);
+    rpc RegisterUserForAdmin (RegisterUserForAdminRequest) returns (RegisterUserForAdminResponse);
+}
+
+  message GetBatchUsersRequest {
+    repeated string userIds = 1;
   }
- 
+
+  message GetBatchUsersResponse {
+    repeated User users = 1;
+  }
+  message GetAllUsersResponse {
+    repeated UserWithOrder users = 1;
+  }
+
+  message RegisterUserForAdminRequest {
+    string firstName = 1;
+    string lastName = 2;
+    string email = 3;
+    string phone = 4;
+  }
+
+  message RegisterUserForAdminResponse {
+    bool success = 1;
+    string message = 2;
+    string userId = 3;
+  }
 
   message UpdatePasswordRequest {
     string email = 1;
@@ -221,7 +263,19 @@ service UserService {
     string refreshToken = 4;
     User user = 5;
   }
-  
+  message UserWithOrder {
+    string id = 1;
+    string firstName = 2;
+    string lastName = 3;
+    string email = 4;
+    string phone = 5;
+    string createdAt = 6;
+    string isActive = 7;
+    ExtendedAddress address = 8;
+    int32 totalOrders = 9;
+    double totalSpent = 10;
+    string lastOrderDate = 11;
+  }
   message User {
     string id = 1;
     string firstName = 2;
@@ -406,15 +460,14 @@ service ProductCatalogService {
     rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse) {}
     rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse) {}
     rpc CreateVariant(CreateVariantRequest) returns (CreateVariantResponse) {}
-    rpc GetProductById(GetProductByIdRequest) returns (GetProductResponse) {}
-    rpc GetProductBySlug(GetProductBySlugRequest) returns (GetProductResponse) {}
+    rpc GetProduct(GetProductRequest) returns (GetProductResponse) {}
     rpc ListProducts(ListProductsRequest) returns (ListProductsResponse) {}
     rpc CreateBrand(CreateBrandRequest) returns (CreateBrandResponse) {}
     rpc NewBrand(NewBrandRequest) returns (NewBrandResponse) {}
     rpc RemoveBrand(RemoveBrandRequest) returns (RemoveBrandResponse) {}
     rpc GetAllBrand(Empty) returns (GetAllBrandResponse) {}
     rpc GetVariantsForCart(GetVariantsForCartRequest) returns (GetVariantsForCartResponse) {}
-    
+    rpc ChangeProductStatus(ChangeProductStatusRequest) returns (ChangeProductStatusResponse) {}
     rpc CreateCategory(CreateCategoryRequest) returns (CreateCategoryResponse) {}
     rpc UpdateCategory(UpdateCategoryRequest) returns (UpdateCategoryResponse) {}
     rpc DeleteCategory(DeleteCategoryRequest) returns (DeleteCategoryResponse) {}
@@ -429,7 +482,42 @@ service ProductCatalogService {
     rpc ValidateAndReserve(ValidateAndReserveRequest) returns (ValidateAndReserveResponse);
     rpc ReleaseReservation(ReleaseReservationRequest) returns (ReleaseReservationResponse);
     rpc CommitReservation(CommitReservationRequest) returns (CommitReservationResponse);
+
+    rpc AddWishlist (AddWishlistRequest) returns (AddWishlistResponse);
+    rpc GetWishlist (GetWishlistRequest) returns (GetWishlistResponse);
+    rpc RemoveWishlist (RemoveWishlistRequest) returns (RemoveWishlistResponse);
   }
+  message GetWishlistRequest {
+    string userId = 1;
+  }
+  message GetWishlistResponse {
+    repeated WishlistItem wishlistItems = 1;
+  }
+  message RemoveWishlistRequest {
+    string wishlistId = 1;
+    string userId = 2;
+  }
+  message RemoveWishlistResponse {
+    bool success = 1;
+  }
+  message WishlistItem {
+    string id = 1;
+    string productId = 2;
+    string productName = 3;
+    string productImage = 4;
+    double productPrice = 5;
+    string productSlug = 6;
+  }
+  message AddWishlistRequest {
+    string userId = 1;
+    string productId = 2;
+  }
+
+  message AddWishlistResponse {
+    bool success = 1;
+    string message = 2;
+  }
+
 
 message GetVariantsForCartRequest {
   repeated string variant_ids = 1;
@@ -439,15 +527,25 @@ message GetVariantsForCartResponse {
   repeated VariantCart variants = 1;
 }
 
+message ChangeProductStatusRequest {
+  string product_id = 1;
+  string status = 2;
+}
+
+message ChangeProductStatusResponse {
+  bool success = 1;
+
+}
 message VariantCart {
   string id = 1;
   float price = 2;
   string image = 3;
-  optional Stock stock = 4;
-  string variant_name = 5;
-  string product_name = 6;
-  string product_slug = 7;
-  repeated VariantAttribute attributes = 8;
+  string sku = 4;
+  optional Stock stock = 5;
+  string variant_name = 6;
+  string product_name = 7;
+  string product_slug = 8;
+  repeated VariantAttribute attributes = 9;
 }
 message GetProductAttributesRequest {
     string product_id = 1;
@@ -518,6 +616,15 @@ message Product {
     repeated ProductVariant variants = 21;
     Dimensions dimensions = 22;
     repeated SizeChart sizeCharts = 23;
+    repeated Product relatedProducts = 24;
+}
+
+message ProductRelatedProduct {
+  string id = 1;
+  string name = 2;
+  string slug = 3;
+  float price = 4;
+  string image = 5;
 }
 
 message SizeChart {
@@ -588,13 +695,14 @@ message Seo {
 
 message ProductVariant {
     string id = 1;
-    string sku = 2;
-    float price = 3;
-    float lowStockThreshold = 4;
-    Stock stock = 5;
-    string warehouseId = 6;
-    repeated string imageIds = 7;
-    repeated VariantAttribute attributes = 8;
+    string name = 2;
+    string sku = 3;
+    float price = 4;
+    float lowStockThreshold = 5;
+    Stock stock = 6;
+    string warehouseId = 7;
+    repeated string imageIds = 8;
+    repeated VariantAttribute attributes = 9;
 }
 
 message Stock {
@@ -618,6 +726,7 @@ message Image {
 
 message CreateProductRequest {
     Product product = 1;
+    repeated string relatedProductIds = 2;
 }
 
 message CreateProductResponse {
@@ -626,10 +735,11 @@ message CreateProductResponse {
 
 message UpdateProductRequest {
     Product product = 1;
+    repeated string relatedProductIds = 2;
 }
 
 message UpdateProductResponse {
-    Product product = 1;
+    bool success = 1;
 }
 
 message DeleteProductRequest {
@@ -698,12 +808,9 @@ message ListProductsResponse {
 message ListProductsRequest {
 }
 
-message GetProductByIdRequest {
-    string id = 1;
-}
-
-message GetProductBySlugRequest {
-    string slug = 1;
+message GetProductRequest {
+    string data = 1;
+    string type = 2;
 }
 
 
@@ -757,8 +864,19 @@ service EmailService {
     // rpc SendOrderConfirmation(SendOrderConfirmationRequest) returns (Empty) {}
     rpc SendOTPResetPassword (SendOTPResetPasswordRequest) returns (SendOTPResetPasswordResponse) {}
     rpc SendWelcomeEmail (SendWelcomeEmailRequest) returns (SendWelcomeEmailResponse) {}
+    rpc SendNewUserByAdmin (SendNewUserByAdminRequest) returns (SendNewUserByAdminResponse) {}
 }
 
+message SendNewUserByAdminRequest {
+    string email = 1;
+    string name = 2;
+    string password = 3;
+}
+
+message SendNewUserByAdminResponse {
+    bool success = 1;
+    string message = 2;
+}
 
 
 
@@ -881,24 +999,79 @@ service OrderService {
   rpc createOrder (CreateOrderRequest) returns (CreateOrderResponse) {}
   rpc GetOrderStatus(GetOrderStatusRequest) returns (GetOrderStatusResponse) {}
   rpc GetOrder(GetOrderRequest) returns (GetOrderResponse) {}
+  rpc GetOrdersForAdmin(GetOrdersForAdminRequest) returns (GetOrdersForAdminResponse) {}
   rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse) {}
   rpc UpdateOrderStatus(UpdateOrderStatusRequest) returns (UpdateOrderStatusResponse) {}
+  rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse) {}
+  rpc AddOrderNote(AddOrderNoteRequest) returns (AddOrderNoteResponse) {}
+  rpc DeleteOrderNote(DeleteOrderNoteRequest) returns (DeleteOrderNoteResponse) {}
+  rpc UpdateTrackingNumber(UpdateTrackingNumberRequest) returns (UpdateTrackingNumberResponse) {}
+  rpc ListAllOrders(Empty) returns (ListAllOrdersResponse) {}
+}
+
+message GetOrdersForAdminRequest {
+  repeated string user_ids = 1;
+}
+
+message GetOrdersForAdminResponse {
+  repeated OrderForAdmin orders = 1;
+}
+
+message OrderForAdmin {
+  string userId = 1;
+  int32 total_orders = 2;
+  double total_spent = 3;
+  string last_order_date = 4;
+}
+
+message ListAllOrdersResponse {
+  repeated Order orders = 1;
+}
+message UpdateTrackingNumberRequest {
+  string order_id = 1;
+  string tracking_number = 2;
+}
+
+message UpdateTrackingNumberResponse {
+  bool success = 1;
+}
+message AddOrderNoteRequest {
+  string order_id = 1;
+  string note = 2;
+}
+
+message AddOrderNoteResponse {
+  repeated OrderNote notes = 1;
+}
+
+message DeleteOrderNoteRequest {
+  string order_id = 1;
+  string note_id = 2;
+}
+
+message DeleteOrderNoteResponse {
+  bool success = 1;
+}
+
+
+message ListOrdersRequest {
+  string user_id = 1;
+}
+
+message ListOrdersResponse {
+  repeated Order orders = 1;
 }
 
 message CreateOrderRequest {
   string user_id = 1;
   string cart_id = 2;
   repeated OrderItem items = 3;
-  string payment_method = 4;
-  double payment_amount = 5;
-  string payment_currency = 6;
-  ExtendedAddress shipping_address = 7;
-  string shipping_method = 8;
-  double shipping_cost = 9;
-  double subtotal = 10;
-  repeated Coupon coupons = 11;
-  double total = 12;
-  string currency_code = 13;
+  OrderStatus status = 4;
+  string paymentId = 5;
+  Payment payment = 8;
+  Shipping shipping = 9;
+  repeated Coupon coupons = 10;
+  string currency_code = 11;
 }
 
 message CreateOrderResponse {
@@ -917,20 +1090,39 @@ message GetOrderRequest {
   string order_id = 1;
 }
 
+message Order {
+  string id = 1;
+  User user = 2;
+  double totalAmount = 3;
+  ExtendedAddress shippingAddress = 4;
+  string paymentId = 5;
+  OrderStatus status = 6;
+  string createdAt = 7;
+  repeated OrderItem items = 8;
+  Shipping shipping = 9;
+  Payment payment = 10;
+  repeated OrderStatusHistory statusHistory = 11;
+  repeated OrderNote notes = 12;
+}
+
+message OrderNote {
+  string id = 1;
+  string orderId = 2;
+  string note = 3;
+  string createdAt = 4;
+}
+
+message OrderStatusHistory {
+  string id = 1;
+  OrderStatus status = 2;
+  string description = 3;
+  string createdAt = 4;
+}
+
 message GetOrderResponse {
   Order order = 1;
 }
-message Order {
-  string id = 1;
-  string userId = 2;
-  string status = 3;
-  double totalAmount = 4;
-  string shippingAddressId = 5;
-  repeated OrderItem items = 6;
-  string paymentId = 7;
-  string createdAt = 8;
-  string updatedAt = 9;
-}
+
 
 message UpdateOrderStatusRequest {
   string order_id = 1;
@@ -973,6 +1165,9 @@ enum OrderStatus {
   ORDER_REFUNDED = 8;
   ORDER_EXPIRED = 9;
   ORDER_ON_HOLD = 10;
+  ORDER_PAYMENT_PAID = 11;
+  ORDER_TRACKING_UPDATED = 12;
+  ORDER_NOTE_ADDED = 13;
 }
 
 enum StepStatus {
@@ -985,7 +1180,14 @@ enum StepStatus {
 
 message ValidateAndReserveRequest {
   string user_id = 1;
-  repeated ProductVariant variants = 2;
+  repeated EnrichedCartItem items = 2;
+}
+
+message EnrichedCartItem {
+  string id = 1;
+  double price = 2;
+  int32 quantity = 3;
+  string image = 4;
 }
 
 message ValidateAndReserveResponse {
@@ -1010,11 +1212,13 @@ message ReleaseReservationResponse {
 
 message CommitReservationRequest {
   string reservation_id = 1;
+  string order_id = 2;
 }
 
 message CommitReservationResponse {
   bool success = 1;
   string message = 2;
+  string order_id = 3;
 }
 
 // ---------------Payment service-----------------
@@ -1024,35 +1228,55 @@ service PaymentService {
   rpc VerifyPayment(VerifyPaymentRequest) returns (VerifyPaymentResponse);
   rpc CancelPayment(CancelPaymentRequest) returns (CancelPaymentResponse);
   rpc RefundPayment(RefundPaymentRequest) returns (RefundPaymentResponse);
+  rpc GetPayment(GetPaymentRequest) returns (GetPaymentResponse);
   rpc GetPaymentStatus(GetPaymentStatusRequest) returns (GetPaymentStatusResponse);
+  rpc GetBatchPayments(GetBatchPaymentsRequest) returns (GetBatchPaymentsResponse);
+}
+
+message GetBatchPaymentsRequest {
+  repeated string paymentIds = 1;
+}
+
+message GetBatchPaymentsResponse {
+  repeated Payment payments = 1;
 }
 
 enum PaymentProvider {
-  STRIPE = 0;
-  PAYPAL = 1;
+  COD = 0;
+  STRIPE = 1;
   VNPAY = 2;
 }
 
+message GetPaymentRequest {
+  string paymentId = 1;
+}
+
+message GetPaymentResponse {
+  Payment payment = 1;
+}
+
 enum PaymentStatus {
-  PENDING = 0;
-  PAID = 1;
-  FAILED = 2;
-  CANCELLED = 3;
-  REFUNDED = 4;
+  PAYMENT_PENDING = 0;
+  PAYMENT_PAID = 1;
+  PAYMENT_FAILED = 2;
+  PAYMENT_CANCELLED = 3;
+  PAYMENT_REFUNDED = 4;
+  PAYMENT_EXPIRED = 5;
 }
 
 message InitiatePaymentRequest {
-  string orderId = 1;
-  double amount = 2;
-  PaymentProvider provider = 3;
-  string currency = 4;
+  double amount = 1;
+  PaymentProvider provider = 2;
+  string currency = 3;
 }
 
 message InitiatePaymentResponse {
   string paymentId = 1;
-  string redirectUrl = 2;
-  PaymentStatus status = 3;
+  PaymentProvider provider = 2;
+  string redirectUrl = 3;
+  PaymentStatus status = 4;
 }
+
 
 message VerifyPaymentRequest {
   string paymentId = 1;
@@ -1113,13 +1337,65 @@ message CreateSagaOrderResponse {
 }
 
 message OrderItem {
-  string product_id = 1;
-  string variant_id = 2;
+  string id = 1;
+  string variantId = 2;
   int32 quantity = 3;
   double price = 4;
+  string productId = 5;
+  string productName = 6;
+  string productSlug = 7;
+  string variantName = 8;
+  string sku = 9;
+  string image = 10;
 }
 
 message Coupon {
   string code = 1;
   double discount = 2;
+}
+
+message Payment {
+  string id = 1;
+  string method = 2;
+  double subtotal = 3;
+  double total = 4;
+  PaymentStatus status = 5;
+  string createdAt = 6;
+  string updatedAt = 7;
+}
+
+message Shipping {
+  string method = 1;
+  double cost = 2;
+  ExtendedAddress shippingAddress = 3;
+  string estimatedDelivery = 4;
+  Tracking tracking = 5;
+}
+
+message Tracking {
+  string number = 1;
+  string carrier = 2;
+  string status = 3;
+  string currentLocation = 4;
+  repeated TrackingEvent history = 5;
+  Coordinates coordinates = 6;
+}
+
+message TrackingEvent {
+  string date = 1;
+  string time = 2;
+  string location = 3;
+  string status = 4;
+  string description = 5;
+}
+
+message Coordinates {
+  Point origin = 1;
+  Point current = 2;
+  Point destination = 3;
+}
+
+message Point {
+  double lat = 1;
+  double lng = 2;
 }

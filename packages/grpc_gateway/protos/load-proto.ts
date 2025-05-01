@@ -1,4 +1,3 @@
-import path from "path"
 import { loadSync } from "@grpc/proto-loader"
 import { fileURLToPath } from "url";
 import { dirname, resolve } from "path";

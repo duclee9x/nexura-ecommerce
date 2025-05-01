@@ -3,8 +3,9 @@
   "private": true,
   "main": "./gateway.ts",
   "exports": {
-    "./protos": "./protos/index.ts",
-    "./gateway": "./gateway.ts"
+    "./gateway": "./gateway.ts",
+    "./protos/lib": "./protos/lib.ts",
+    "./protos": "./protos/generated/nexura.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"

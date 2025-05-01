@@ -29,8 +29,20 @@ model User {
   dateOfBirth DateTime?
   profilePictureUrl String?
   address Address[]
+  wishlist Wishlist[]
 }
-
+model Wishlist {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  productId String
+  productImage String
+  productName String
+  productPrice Float
+  productSlug String
+  categoryName String
+  createdAt DateTime @default(now())
+}
 model Address {
   id String @id @default(uuid())
   userId String

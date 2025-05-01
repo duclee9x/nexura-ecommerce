@@ -10,7 +10,7 @@ import { toast } from "@/hooks/use-toast"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import type { ProductAttribute, ProductVariant } from "@/types/product"
+import type { ProductAttribute, ProductVariant, VariantAttribute } from "@nexura/grpc_gateway/protos"
 
 interface VariantGeneratorProps {
   attributes: ProductAttribute[]
@@ -39,7 +39,7 @@ export function VariantGenerator({
     if (variantableAttributes.length > 0 && selectedAttributes.length === 0) {
       setSelectedAttributes(variantableAttributes.map((attr) => attr.id))
     }
-  }, [variantableAttributes])
+  }, [variantableAttributes, selectedAttributes])
 
   // Toggle attribute selection
   const toggleAttributeSelection = (attributeId: string) => {
@@ -80,7 +80,7 @@ export function VariantGenerator({
     const combinations = generateCombinations(selectedAttributesWithValues)
 
     // Create variants for each combination
-    const newVariants = combinations.map((combination, index) => {
+    const newVariants: ProductVariant[] = combinations.map((combination, index) => {
       // Create a descriptive name and SKU
       const variantName = createVariantName(combination)
       const variantSku = createVariantSku(combination, baseSku)
@@ -97,14 +97,17 @@ export function VariantGenerator({
       return {
         id: `var-gen-${Date.now()}-${index}`,
         productId: "temp-product-id", // Will be replaced when added to product
+        name: variantName,
         sku: variantSku,
         price: basePrice,
-        inventory: 0,
+        stock: {
+          quantity: 0,
+          reserved: 0,
+        },
         lowStockThreshold: 5,
-        attributeValues: combination,
-        images: [],
-        isDefault: false,
-        status: "active" as const
+        imageIds: [],
+        attributes: combination,
+        warehouseId: "",
       }
     })
 
@@ -114,14 +117,22 @@ export function VariantGenerator({
 
   // Generate all possible combinations of attribute values
   const generateCombinations = (attributesWithValues: ProductAttribute[]) => {
-    let combinations: { attributeId: string; valueId: string }[][] = [[]]
+    let combinations: VariantAttribute[][] = [[]]
 
     attributesWithValues.forEach((attribute) => {
-      const newCombinations: { attributeId: string; valueId: string }[][] = []
+      const newCombinations: VariantAttribute[][] = []
 
       combinations.forEach((combination) => {
         attribute.values.forEach((value) => {
-          newCombinations.push([...combination, { attributeId: attribute.id, valueId: value.id }])
+          newCombinations.push([
+            ...combination,
+            {
+              id: attribute.id,
+              name: attribute.name,
+              value: value,
+              extraValue: "",
+            },
+          ])
         })
       })
 
@@ -132,32 +143,26 @@ export function VariantGenerator({
   }
 
   // Create a descriptive name for a variant based on its attribute values
-  const createVariantName = (combination: { attributeId: string; valueId: string }[]) => {
+  const createVariantName = (combination: VariantAttribute[]) => {
     return combination
-      .map(({ attributeId, valueId }) => {
-        const attribute = attributes.find((a) => a.id === attributeId)
-        const value = attribute?.values.find((v) => v.id === valueId)
-        return value?.name || ""
-      })
+      .map((attr) => attr.value)
       .filter(Boolean)
       .join(" / ")
   }
 
   // Create a SKU for a variant based on its attribute values
-  const createVariantSku = (combination: { attributeId: string; valueId: string }[], baseSku: string) => {
+  const createVariantSku = (combination: VariantAttribute[], baseSku: string) => {
     const suffix = combination
-      .map(({ attributeId, valueId }) => {
-        const attribute = attributes.find((a) => a.id === attributeId)
-        const value = attribute?.values.find((v) => v.id === valueId)
-        if (!value) return ""
+      .map((attr) => {
+        if (!attr.value) return ""
 
-        // For color attributes, use the first 3 chars of the name
-        if (attribute?.type === "color") {
-          return value.name.substring(0, 3).toUpperCase()
+        // For color attributes, use the first 3 chars of the value
+        if (attr.name.toLowerCase() === "color") {
+          return attr.value.substring(0, 3).toUpperCase()
         }
 
         // For other attributes, take first 3 chars
-        return value.name.substring(0, 3).toUpperCase()
+        return attr.value.substring(0, 3).toUpperCase()
       })
       .filter(Boolean)
       .join("-")
@@ -166,14 +171,14 @@ export function VariantGenerator({
   }
 
   // Find if a combination already exists in existing variants
-  const findExistingVariant = (combination: { attributeId: string; valueId: string }[], variants: ProductVariant[]) => {
+  const findExistingVariant = (combination: VariantAttribute[], variants: ProductVariant[]) => {
     return variants.find((variant) => {
       // If lengths don't match, it's not the same combination
-      if (variant.attributeValues.length !== combination.length) return false
+      if (variant.attributes.length !== combination.length) return false
 
       // Check if all attribute values match
-      return combination.every(({ attributeId, valueId }) =>
-        variant.attributeValues.some((av) => av.attributeId === attributeId && av.valueId === valueId),
+      return combination.every((attr) =>
+        variant.attributes.some((v) => v.name === attr.name && v.value === attr.value),
       )
     })
   }
@@ -184,7 +189,7 @@ export function VariantGenerator({
 
     // Filter out variants that already exist
     const newVariants = generatedVariants.filter(
-      (genVariant) => !findExistingVariant(genVariant.attributeValues, existingVariants),
+      (genVariant) => !findExistingVariant(genVariant.attributes, existingVariants),
     )
 
     if (newVariants.length === 0) {
@@ -210,12 +215,6 @@ export function VariantGenerator({
     return attribute ? attribute.name : attributeId
   }
 
-  // Get attribute value by ID
-  const getAttributeValue = (attributeId: string, valueId: string) => {
-    const attribute = attributes.find((attr) => attr.id === attributeId)
-    const value = attribute?.values.find((v) => v.id === valueId)
-    return value
-  }
 
   return (
     <div className="variant-generator space-y-4">
@@ -292,27 +291,27 @@ export function VariantGenerator({
                   </TableHeader>
                   <TableBody>
                     {generatedVariants.map((variant) => {
-                      const exists = findExistingVariant(variant.attributeValues, existingVariants)
+                      const exists = findExistingVariant(variant.attributes, existingVariants)
 
                       return (
                         <TableRow key={variant.id}>
                           {selectedAttributes.map((attrId) => {
-                            const valueObj = variant.attributeValues.find((av) => av.attributeId === attrId)
-                            const value = valueObj ? getAttributeValue(attrId, valueObj.valueId) : null
+                            const attribute = variant.attributes.find((attr) => attr.id === attrId)
+                            const value = attribute?.value
 
                             return (
                               <TableCell key={attrId}>
                                 {value ? (
-                                  attributes.find((a) => a.id === attrId)?.type === "color" && value.color ? (
+                                  attributes.find((a) => a.id === attrId)?.name.toLowerCase() === "color" ? (
                                     <div className="flex items-center gap-2">
                                       <div
                                         className="w-5 h-5 rounded-full border"
-                                        style={{ backgroundColor: value.color }}
+                                        style={{ backgroundColor: value }}
                                       />
-                                      <span>{value.name}</span>
+                                      <span>{value}</span>
                                     </div>
                                   ) : (
-                                    value.name
+                                    value
                                   )
                                 ) : (
                                   "-"

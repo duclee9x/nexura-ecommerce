@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -35,7 +35,7 @@ export default function VerifyEmailPage() {
                 }
             } catch (error) {
                 setStatus("error")
-                setMessage("An error occurred while verifying your email")
+                setMessage(error instanceof Error ? error.message : "An error occurred while verifying your email")
             } finally {
                 setIsPending(false)
             }
@@ -47,12 +47,13 @@ export default function VerifyEmailPage() {
     return (
         <div className="container max-w-lg mx-auto px-4 py-8">
             <div className="bg-card rounded-lg shadow-lg p-6">
-                <Suspense fallback={
+                {isPending ? (
                     <div className="flex flex-col items-center justify-center space-y-4">
                         <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         <p className="text-text-base">Verifying your email...</p>
-                    </div>}
-                >
+                    </div>
+                ) : (    
+                    <>
                     {status === "success" && (
                         <div className="text-center space-y-4">
                             <div className="text-success text-4xl">✓</div>
@@ -78,8 +79,9 @@ export default function VerifyEmailPage() {
                                 Back to Registration
                             </Button>
                         </div>
-                    )}
-                </Suspense>
+                        )}
+                    </>
+                )}
             </div>
         </div>
     )

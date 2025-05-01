@@ -7,7 +7,6 @@ const prisma = new PrismaClient()
 
 export const createProductAttribute: handleUnaryCall<CreateProductAttributeRequest, CreateProductAttributeResponse> = async (call: ServerUnaryCall<CreateProductAttributeRequest, CreateProductAttributeResponse>, callback: sendUnaryData<CreateProductAttributeResponse>) => {
     try {
-      console.log("Creating product attribute", call.request)
       const attributeData = call.request.attribute
       if (attributeData == undefined) {
         throw new Error("Attribute data is required")
