@@ -1,4 +1,4 @@
-import { PrismaClient } from "../../db/prisma-client";
+import { PrismaClient } from '@nexura/product-service/src/db/prisma-client'
 import type { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js'
 import { RemoveWishlistRequest, RemoveWishlistResponse } from '@nexura/grpc_gateway/protos'
 import { Status } from '@grpc/grpc-js/build/src/constants'

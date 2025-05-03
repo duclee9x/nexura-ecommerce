@@ -1,11 +1,11 @@
-import { PrismaClient, Prisma } from '../../db/prisma-client'
-import { generateOTP, logger, SpanStatusCode, api, withTracing, defaultTracer, createToken } from '@nexura/common/utils'
+import { PrismaClient, Prisma } from '@nexura/user-service/src/db/prisma-client'
+import { generateOTP, logger, SpanStatusCode, api, withTracing, createToken } from '@nexura/common/utils'
 import type { LoginUserRequest, ResetPasswordResponse } from '@nexura/grpc_gateway/protos'
 import type { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js'
 import { sendOTPResetPasswordGateway } from '@nexura/grpc_gateway/gateway'
 import { isServiceError } from '@nexura/common/utils'
 
-const tracer = defaultTracer('forgotPassword')
+const tracer = api.trace.getTracer('forgotPassword')
 const prisma = new PrismaClient()
 
 

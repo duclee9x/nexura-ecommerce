@@ -1,5 +1,5 @@
   import { ValidateAndReserveRequest, ValidateAndReserveResponse } from "@nexura/grpc_gateway/protos"
-  import { PrismaClient, Prisma } from '../../db/prisma-client'
+  import { PrismaClient, Prisma } from '@nexura/product-service/src/db/prisma-client'
   import type { ServerUnaryCall } from '@grpc/grpc-js'
   import type { sendUnaryData } from '@grpc/grpc-js'
 
@@ -42,7 +42,7 @@
             return
           }
           console.log("variants exist", variants.length === variantsRequest.length)
-          const validationErrors = []
+          const validationErrors: {variantId: string, error: string}[] = []
           
           // Validate each variant
           for (const variant of variants) {

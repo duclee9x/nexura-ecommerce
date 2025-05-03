@@ -2,15 +2,14 @@ import { SpanStatusCode } from "@opentelemetry/api";
 import type { ServerUnaryCall, sendUnaryData } from "@grpc/grpc-js";
 import { status } from "@grpc/grpc-js";
 
-import { GetUserSchema } from "@nexura/common/validators";
 
-import { logger } from "@nexura/common/utils";
+import { api, logger } from "@nexura/common/utils";
 
-import { defaultTracer } from "@nexura/common/utils";
 import { GetBatchUsersRequest, GetBatchUsersResponse } from "@nexura/grpc_gateway/protos";
-import { PrismaClient, Prisma } from "../../db/prisma-client";
+import { PrismaClient, Prisma } from '@nexura/user-service/src/db/prisma-client'
 
-const tracer = defaultTracer('getUser')
+
+const tracer = api.trace.getTracer('getUser')
 const prisma = new PrismaClient()
 
 export const GetBatchUsers = async (

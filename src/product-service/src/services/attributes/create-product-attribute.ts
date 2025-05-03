@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../db/prisma-client'
+import { PrismaClient } from '@nexura/product-service/src/db/prisma-client'
 import { handleError } from '@nexura/common/utils'
 import type { handleUnaryCall, sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js'
 import { CreateProductAttributeRequest, CreateProductAttributeResponse } from '@nexura/grpc_gateway/protos'

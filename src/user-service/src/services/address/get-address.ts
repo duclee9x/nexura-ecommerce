@@ -1,7 +1,7 @@
 import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js';
-import type { GetAddressesRequest, GetAddressesResponse, GetAddressRequest, GetAddressResponse } from '@nexura/grpc_gateway/protos';
-import { PrismaClient } from '../../db/prisma-client'
-import { defaultTracer, handleError, SpanStatusCode } from '@nexura/common/utils';
+import type { GetAddressRequest, GetAddressResponse } from '@nexura/grpc_gateway/protos';
+import { PrismaClient } from '@nexura/user-service/src/db/prisma-client'
+import { api, handleError, SpanStatusCode } from '@nexura/common/utils';
 import { Status } from '@grpc/grpc-js/build/src/constants';
 
 const prisma = new PrismaClient()
@@ -11,7 +11,7 @@ export async function getAddress(
   callback: sendUnaryData<GetAddressResponse>
 ): Promise<void> {
   try {
-    const tracer = defaultTracer('getAddresses');
+    const tracer = api.trace.getTracer('getAddresses');
     const { addressId } = call.request;
     if (!addressId) {
       callback({

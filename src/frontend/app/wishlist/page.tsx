@@ -11,6 +11,8 @@ import ProductHooks from "@/hooks/product-hooks"
 import { useCurrency } from "@/contexts/currency-context"
 import { useSession } from "@/contexts/session-context"
 import { useRouter } from "next/navigation"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ErrorBoundary } from "@/components/error-boundary"
 
 // Sample wishlist data
 // const wishlistItems = [
@@ -48,32 +50,64 @@ import { useRouter } from "next/navigation"
 //   },
 // ]
 
-export default function WishlistPage() {
+function WishlistContent() {
   const { wishlistItems } = useWishlist()
   const { useRemoveWishlist } = ProductHooks()
   const { mutateAsync: removeWishlist } = useRemoveWishlist
   const { formatPrice } = useCurrency()
   const { toast } = useToast()
-  const { user } = useSession()
+  const { user, isLoading } = useSession()
   const router = useRouter()
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col">
+        <main className="flex-1 container py-10">
+          <div className="mb-8">
+            <Skeleton className="h-8 w-48 mb-2" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="overflow-hidden">
+                <div className="aspect-square relative">
+                  <Skeleton className="w-full h-full" />
+                </div>
+                <CardContent className="p-4">
+                  <Skeleton className="h-5 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-1/2" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </main>
+      </div>
+    )
+  }
 
   if (!user) {
     router.push("/login")
     return null
   }
 
-  const handleRemoveItem = (id: string) => {
-    removeWishlist({ wishlistId: id, userId: user.id })
-    toast({
-      title: "Item removed",
-      description: "The item has been removed from your wishlist.",
-    })
+  const handleRemoveItem = async (id: string) => {
+    try {
+      await removeWishlist({ wishlistId: id, userId: user.id })
+      toast({
+        title: "Item removed",
+        description: "The item has been removed from your wishlist.",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to remove item from wishlist. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
-
 
   return (
     <div className="flex flex-col">
-
       <main className="flex-1 container py-10">
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">My Wishlist</h1>
@@ -98,13 +132,13 @@ export default function WishlistPage() {
             {wishlistItems.map((item) => (
               <Card key={item.id} className="overflow-hidden relative">
                 <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute z-10 top-2 right-2 bg-background/50 backdrop-blur-sm hover:bg-background/100"
-                      onClick={() => handleRemoveItem(item.id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                  variant="ghost"
+                  size="icon"
+                  className="absolute z-10 top-2 right-2 bg-background/50 backdrop-blur-sm hover:bg-background/100"
+                  onClick={() => handleRemoveItem(item.id)}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
                 <Link href={`/products/${item.productSlug}`}>
                   <div className="relative">
                     <div className="aspect-square relative">
@@ -124,6 +158,14 @@ export default function WishlistPage() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function WishlistPage() {
+  return (
+    <ErrorBoundary>
+      <WishlistContent />
+    </ErrorBoundary>
   )
 }
 

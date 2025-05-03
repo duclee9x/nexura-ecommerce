@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../db/prisma-client'
+import { PrismaClient} from "@nexura/order-service/src/db/prisma-client";
 import { logger } from '@nexura/common/utils'
 import { AddOrderNoteRequest, AddOrderNoteResponse } from '@nexura/grpc_gateway/protos'
 import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js'

@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import path from 'path';
 
 const nextConfig: NextConfig = {
   webpack: (config, { isServer }) => {
@@ -40,9 +41,9 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  output: 'standalone',
+  outputFileTracingRoot: path.resolve(__dirname, '../../'),
   experimental: {
-    
-
     turbo: {
       memoryLimit: 1024,
     },

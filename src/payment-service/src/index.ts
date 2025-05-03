@@ -1,4 +1,4 @@
-import { gracefulShutdown, startServer, type ServiceDefinition } from '@nexura/common/utils';
+import { gracefulShutdown, startServer } from '@nexura/grpc_gateway/server';
 import { PaymentServiceService } from '@nexura/grpc_gateway/protos';
 import { paymentService } from '../services/payment.service';
 

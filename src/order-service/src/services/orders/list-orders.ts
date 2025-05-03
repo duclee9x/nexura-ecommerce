@@ -1,6 +1,6 @@
-import { PrismaClient } from '../../db/prisma-client';
-import { ListOrdersRequest, ListOrdersResponse, Order, OrderStatus } from '@nexura/grpc_gateway/protos';
-import type { ServerUnaryCall, sendUnaryData, ServiceError } from '@grpc/grpc-js';
+import { PrismaClient } from '@nexura/order-service/src/db/prisma-client';
+import { ListOrdersRequest, ListOrdersResponse, OrderStatus } from '@nexura/grpc_gateway/protos';
+import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
 import { Status } from '@grpc/grpc-js/build/src/constants';
 import { getAddressGateway, getPaymentGateway, getUserGateway, getBatchUsersGateway, getBatchPaymentsGateway, getBatchAddressesGateway } from '@nexura/grpc_gateway/gateway';
 import { User, Payment, ExtendedAddress } from '@nexura/grpc_gateway/protos';

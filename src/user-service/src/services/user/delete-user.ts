@@ -2,15 +2,12 @@ import { SpanStatusCode } from "@opentelemetry/api";
 import type { ServerUnaryCall, sendUnaryData } from "@grpc/grpc-js";
 import { status } from "@grpc/grpc-js";
 
-import { DeleteUserSchema } from "@nexura/common/validators";
-import { validateToken } from "@nexura/common/utils";
-
 import { logger } from "@nexura/common/utils";
-import { defaultTracer } from "@nexura/common/utils";
+import { api } from "@nexura/common/utils";
 import { DeleteUserResponse, DeleteUserRequest } from "@nexura/grpc_gateway/protos";
-import { PrismaClient } from "../../db/prisma-client";
+import { PrismaClient } from '@nexura/user-service/src/db/prisma-client'
 
-const tracer = defaultTracer('deleteUser')
+const tracer = api.trace.getTracer('deleteUser')
 const prisma = new PrismaClient()
 
 export const DeleteUser = async (

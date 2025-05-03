@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../db/prisma-client';
+import { PrismaClient } from '@nexura/order-service/src/db/prisma-client';
 import { Empty, ListAllOrdersResponse, OrderStatus } from '@nexura/grpc_gateway/protos';
 import type { ServerUnaryCall, sendUnaryData, ServiceError } from '@grpc/grpc-js';
 import { Status } from '@grpc/grpc-js/build/src/constants';

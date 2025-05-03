@@ -1,6 +1,6 @@
 import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js';
 import type { GetDistrictsByProvinceRequest, GetDistrictsResponse } from '@nexura/grpc_gateway/protos';
-import { PrismaClient } from '../../db/prisma-client'
+import { PrismaClient } from '@nexura/user-service/src/db/prisma-client'
 import { handleError } from '@nexura/common/utils';
 
 const prisma = new PrismaClient()

@@ -1,7 +1,7 @@
 import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js';
 import type { AddressResponse, UpdateAddressRequest } from '@nexura/grpc_gateway/protos';
-import { PrismaClient } from '../../db/prisma-client';
-import { defaultTracer, handleError, withTracing } from '@nexura/common/utils';
+import { PrismaClient } from '@nexura/user-service/src/db/prisma-client'
+import { api, handleError, withTracing } from '@nexura/common/utils';
 import { AddAndUpdateAddressSchema } from './validator-address';
 
 const prisma = new PrismaClient()
@@ -20,7 +20,7 @@ export async function updateAddress(
       });
       return;
     }
-    const tracer = defaultTracer('updateAddress');
+    const tracer = api.trace.getTracer('updateAddress');
     const validatedData = await withTracing(tracer, 'Validate Request', async (span) => {
       const result = AddAndUpdateAddressSchema.safeParse({
         id: address.id,

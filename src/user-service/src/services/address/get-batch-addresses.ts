@@ -1,7 +1,7 @@
 import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js';
 import type { GetBatchAddressesRequest, GetBatchAddressesResponse } from '@nexura/grpc_gateway/protos';
-import { PrismaClient } from '../../db/prisma-client'
-import { defaultTracer, handleError, SpanStatusCode } from '@nexura/common/utils';
+import { PrismaClient } from '@nexura/user-service/src/db/prisma-client'
+import { api, handleError, SpanStatusCode } from '@nexura/common/utils';
 
 const prisma = new PrismaClient()
 
@@ -10,7 +10,7 @@ export async function getBatchAddresses(
   callback: sendUnaryData<GetBatchAddressesResponse>
 ): Promise<void> {
   try {
-    const tracer = defaultTracer('getAddresses');
+    const tracer = api.trace.getTracer('getBatchAddresses');
     const { addressIds } = call.request;
     if (!addressIds) {
       callback(null, {

@@ -19,6 +19,7 @@
     "@grpc/grpc-js": "^1.13.2",
     "@grpc/proto-loader": "0.7.13",
     "@grpc/reflection": "^1.0.4",
+    "@nexura/grpc_gateway": "workspace:*",
     "@opentelemetry/api": "^1.7.0",
     "@opentelemetry/auto-instrumentations-node": "^0.41.1",
     "@opentelemetry/exporter-trace-otlp-grpc": "^0.200.0",
@@ -28,20 +29,24 @@
     "@opentelemetry/sdk-trace-base": "^2.0.0",
     "@opentelemetry/semantic-conventions": "^1.17.0",
     "@prisma/client": "^6.6.0",
+    "@prisma/instrumentation": "^6.7.0",
     "dotenv": "^16.4.5",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^16.0.0",
     "grpc-health-check": "^2.0.2",
     "grpc-js-health-check": "1.2.2",
+    "grpc-server-reflection": "^0.1.5",
     "jsonwebtoken": "^9.0.2",
     "slugify": "^1.6.6",
     "typescript-eslint": "^8.31.1",
     "winston": "^3.11.0",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "effect": "^3.14.18"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.2",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "prisma": "^6.6.0"
   },
   "peerDependencies": {
     "typescript": "^5"

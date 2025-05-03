@@ -2,7 +2,7 @@
   "name": "@nexura/order-service",
   "version": "1.0.0",
   "description": "Order service for Nexura Ecommerce",
-  "main": "dist/index.js",
+  "main": "src/index.js",
   "prisma": {
     "schema": "prisma/schema.prisma"
   },
@@ -11,14 +11,17 @@
     "start": "node dist/index.js",
     "dev": "bun src/index.ts",
     "test": "jest",
-    "build": "bun build src/index.ts --target bun --outdir dist",
+    "build": "bun build --bytecode --sourcemap src/index.ts --target bun --outdir dist && mkdir -p dist/generated && cp ../../packages/grpc_gateway/utils/generated/nexura_reflection_descriptor.pb dist/generated/",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {
-    "@nexura/common": "workspace:*",
-    "@prisma/client": "^6.6.0"
+    "@nexura/common": "workspace:*"
+  },
+  "devDependencies": {
+    "@nexura/common": "workspace:*"
   }
+
 }
