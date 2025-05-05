@@ -1,13 +1,14 @@
 generator client {
   provider = "prisma-client-js"
-  output = "../src/db/prisma-client"
+  output = "@nexura/user-service/src/db/prisma-client"
   binaryTargets   = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
   provider = "mysql"
-  url      = "mysql://root:nexura-root-password@localhost:3306/user"
+  // url      = "mysql://root:nexura-root-password@localhost:3306/user"
   // url      = env("DATABASE_URL")
+  url      = "mysql://user@127.0.0.1:15306"
 }
 
 model User {
@@ -29,8 +30,20 @@ model User {
   dateOfBirth DateTime?
   profilePictureUrl String?
   address Address[]
+  wishlist Wishlist[]
 }
-
+model Wishlist {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  productId String
+  productImage String
+  productName String
+  productPrice Float
+  productSlug String
+  categoryName String
+  createdAt DateTime @default(now())
+}
 model Address {
   id String @id @default(uuid())
   userId String

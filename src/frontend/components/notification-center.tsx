@@ -12,57 +12,81 @@ import type { Notification } from "@/types/schema"
 // Sample notifications
 const initialNotifications: Notification[] = [
   {
-    id: 1,
+    id: "1",
     type: "order",
     title: "New Order Received",
     content: "Order #ORD-2023-1234 has been placed for $156.99",
     link: "/admin/orders/ORD-2023-1234",
     read: false,
     dateCreated: new Date(Date.now() - 1000 * 60 * 15).toISOString(), // 15 minutes ago
+    userId: "1",
+    priority: "low",
+    createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
   },
   {
-    id: 2,
+    id: "2",
     type: "stock",
     title: "Low Stock Alert",
     content: "Pro Traveler Backpack (BP-PRO-001) is running low with only 3 items left",
     link: "/admin/inventory/edit/101",
     read: false,
     dateCreated: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
+    userId: "1",
+    priority: "low",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
   },
   {
-    id: 3,
+    id: "3",
     type: "review",
     title: "New Product Review",
     content: "A new 5-star review has been submitted for Weekend Duffle Bag",
     link: "/admin/products/reviews",
     read: false,
     dateCreated: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
+    userId: "1",
+    priority: "low",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
   },
   {
-    id: 4,
+    id: "4",
     type: "customer",
     title: "New Customer Registration",
     content: "Emily Davis has created a new account",
     link: "/admin/customers/4",
     read: true,
     dateCreated: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
+    userId: "1",
+    priority: "low",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
   },
   {
-    id: 5,
+    id: "5",
     type: "system",
     title: "System Update",
     content: "The system will undergo maintenance on Sunday at 2:00 AM",
     read: true,
     dateCreated: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), // 2 days ago
+    userId: "1",
+    priority: "low",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
   },
   {
-    id: 6,
+    id: "6",
     type: "order",
     title: "Order Shipped",
     content: "Order #ORD-2023-1198 has been shipped",
     link: "/admin/orders/ORD-2023-1198",
     read: true,
     dateCreated: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(), // 3 days ago
+    userId: "1",
+    priority: "low",
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
+    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
   },
 ]
 
@@ -102,7 +126,7 @@ export function NotificationCenter() {
   }
 
   // Mark notification as read
-  const markAsRead = (id: number) => {
+  const markAsRead = (id: string) => {
     setNotifications((prev) =>
       prev.map((notification) => (notification.id === id ? { ...notification, read: true } : notification)),
     )
@@ -179,13 +203,17 @@ export function NotificationCenter() {
         }
 
         const newNotification: Notification = {
-          id: Date.now(),
-          type,
+          id: Date.now().toString(),
+          type: type as "order" | "inventory" | "customer" | "system" | "chat" | "blog" | "review",
           title,
           content,
           link,
           read: false,
           dateCreated: new Date().toISOString(),
+          userId: "1",
+          priority: "low",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         }
 
         setNotifications((prev) => [newNotification, ...prev])
@@ -277,7 +305,9 @@ export function NotificationCenter() {
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   markAsRead(notification.id)
-                                  window.location.href = notification.link
+                                  if (notification.link) {
+                                    window.location.href = notification.link
+                                  }
                                   setIsOpen(false)
                                 }}
                               >

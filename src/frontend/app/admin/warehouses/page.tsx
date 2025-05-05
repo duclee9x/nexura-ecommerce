@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { AdminSidebar } from "@/components/admin-sidebar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -229,7 +228,6 @@ const initialInventory = [
 ]
 
 export default function WarehousesPage() {
-  const router = useRouter()
   const { toast } = useToast()
 
   const [activeTab, setActiveTab] = useState("warehouses")

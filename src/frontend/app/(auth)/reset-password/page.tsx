@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import type { Metadata } from "next"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -9,7 +8,7 @@ import { useReducer, useState, useEffect } from "react"
 import { RefreshCw, Loader2, Eye, EyeOff } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter, useSearchParams } from "next/navigation"
-import { handleSubmitResetPasswordAction } from "../forgot-password/forgotPasswordSubmitAction"
+import { handleSubmitResetPasswordAction } from "./resetPasswordSubmitAction"
 import { useActionState } from "react"
 
 type PasswordState = {
@@ -56,7 +55,7 @@ export default function ResetPasswordPage() {
     email: "",
   })
 
-  const [state, formAction] = useActionState(handleSubmitResetPasswordAction, {message: "", success: false})
+  const [state] = useActionState(handleSubmitResetPasswordAction, {message: "", success: false})
 
   useEffect(() => {
     const token = searchParams.get("token")
@@ -108,7 +107,7 @@ export default function ResetPasswordPage() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "An error occurred while resetting your password. Please try again.",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       })
     } finally {

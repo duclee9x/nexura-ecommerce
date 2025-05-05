@@ -35,7 +35,7 @@ export function VerifyEmailContent() {
         }
       } catch (error) {
         setStatus("error")
-        setMessage("An error occurred while verifying your email")
+        setMessage(error instanceof Error ? error.message : "An error occurred while verifying your email")
       } finally {
         setIsPending(false)
       }
@@ -43,7 +43,14 @@ export function VerifyEmailContent() {
 
     verify()
   }, [token])
-
+  if (isPending) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-text-base">Verifying your email...</p>
+      </div>
+    )
+  }
   return (
     <div className="bg-card rounded-lg shadow-lg p-6">
       {status === "loading" && (

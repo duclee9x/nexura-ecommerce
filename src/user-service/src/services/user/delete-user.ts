@@ -2,100 +2,32 @@ import { SpanStatusCode } from "@opentelemetry/api";
 import type { ServerUnaryCall, sendUnaryData } from "@grpc/grpc-js";
 import { status } from "@grpc/grpc-js";
 
-import { DeleteUserSchema } from "@nexura/common/validators";
-import { validateToken } from "@nexura/common/utils";
-
 import { logger } from "@nexura/common/utils";
-import { defaultTracer } from "@nexura/common/utils";
+import { api } from "@nexura/common/utils";
 import { DeleteUserResponse, DeleteUserRequest } from "@nexura/grpc_gateway/protos";
-import { PrismaClient } from "../../db/prisma-client";
+import { PrismaClient } from '@nexura/user-service/src/db/prisma-client'
 
-const tracer = defaultTracer('deleteUser')
+const tracer = api.trace.getTracer('deleteUser')
 const prisma = new PrismaClient()
 
 export const DeleteUser = async (
     call: ServerUnaryCall<DeleteUserRequest, DeleteUserResponse>,
     callback: sendUnaryData<DeleteUserResponse>
 ) => {
+    console.log('DeleteUser request received', { userId: call.request });
     const span = tracer.startSpan('Request received');
     try {
-        span.addEvent('Request received', {
-            id: call.request.id
-        });
-        logger.info('DeleteUser request received', { userId: call.request.id });
-
-        const authenticateSpan = tracer.startSpan("authenticateToken")
-        const authHeader = call.metadata.get('authorization');
-        if (!authHeader || authHeader.length === 0) {
-            logger.warn('Authentication failed: Missing token');
-            authenticateSpan.setStatus({
-                code: SpanStatusCode.ERROR,
-                message: 'Missing token'
-            });
-            callback({
-                code: status.UNAUTHENTICATED,
-                message: 'Missing token',
-            });
-            return authenticateSpan.end();
-        }
-        const token = authHeader[0]?.toString();
-        if (!token) {
-            logger.warn('Authentication failed: Missing token');
-            authenticateSpan.setStatus({
-                code: SpanStatusCode.ERROR,
-                message: 'Missing token'
-            });
-            callback({
-                code: status.UNAUTHENTICATED,
-                message: 'Missing token',
-            });
-            return authenticateSpan.end();
-        }
-        const userId = validateToken(token);
-        if (!userId) {
-            logger.warn('Authentication failed: Invalid token');
-            authenticateSpan.setStatus({
-                code: SpanStatusCode.ERROR,
-                message: 'Invalid token'
-            });
-            callback({
-                code: status.UNAUTHENTICATED,
-                message: 'Invalid token',
-            });
-            return authenticateSpan.end();
-        }
-
-        span?.setAttribute('user.id', userId.userIdFromToken);
-        logger.debug('User authenticated', { authenticatedUserId: userId.userIdFromToken });
-
-        const validateSpan = tracer.startSpan("validateRequest")
-        const validatedData = DeleteUserSchema.safeParse(call.request);
-        if (!validatedData.success) {
-            logger.warn('Invalid request data', {
-                errors: validatedData.error.errors
-            });
-            validateSpan.setStatus({
-                code: SpanStatusCode.ERROR,
-                message: 'Invalid request data'
-            });
-            
-            callback({
-                code: status.INVALID_ARGUMENT,
-                message: 'Invalid request data',
-            });
-            return validateSpan.end();
-        }
-
+        
         const deleteSpan = tracer.startSpan("deleteUser")
-        logger.debug('Deleting user from database', { userId: validatedData.data.id });
+        logger.debug('Deleting user from database', { userId: call.request.id });
         await prisma.user.update({
-            where: { id: validatedData.data.id },
+            where: { id: call.request.id },
             data: {
                 isActive: false
             }
         });
 
-        logger.info('User deleted successfully', { userId: validatedData.data.id });
+        logger.info('User deleted successfully', { userId: call.request.id });
         deleteSpan.setStatus({ code: SpanStatusCode.OK });
 
         callback(null, {
@@ -104,7 +36,7 @@ export const DeleteUser = async (
         });
         deleteSpan.end();
     } catch (error) {
-        logger.error('Error in DeleteUser', {
+        logger.error('Error in DeleteUser' + error, {
             error: error instanceof Error ? error.message : 'Unknown error',
             stack: error instanceof Error ? error.stack : undefined
         });

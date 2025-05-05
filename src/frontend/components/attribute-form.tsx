@@ -20,12 +20,10 @@ interface AttributeFormProps {
 }
 
 export function AttributeForm({ 
-  mode, 
   attribute,
   onSave, 
   onCancel, 
   showAdvancedOptions = true, 
-  errors = {},
   title = "Attribute Details"
 }: AttributeFormProps) {
   const [inputValue, setInputValue] = useState("")

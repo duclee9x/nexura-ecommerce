@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/dialog"
 import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-
+import UserHooks from "@/hooks/user-hooks"
 // Sample customer data
 const sampleCustomer = {
   id: 1,
@@ -136,7 +136,8 @@ export default function CustomerEditPage() {
   const router = useRouter()
   const params = useParams()
   const customerId = params.id
-
+  const { useDeleteUser } = UserHooks()
+  const { mutateAsync: deleteUser } = useDeleteUser
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("profile")
   const [customer, setCustomer] = useState(sampleCustomer)
@@ -189,7 +190,7 @@ export default function CustomerEditPage() {
         return {
           ...prev,
           [parent]: {
-            ...prev[parent as keyof typeof prev],
+            ...(prev[parent as keyof typeof prev] as Record<string, any>),
             [child]: value,
           },
         }
@@ -201,11 +202,7 @@ export default function CustomerEditPage() {
     setHasChanges(true)
   }
 
-  // Handle select changes
-  const handleSelectChange = (name: string, value: string) => {
-    setCustomer((prev) => ({ ...prev, [name]: value }))
-    setHasChanges(true)
-  }
+ 
 
   // Handle email template change
   const handleEmailTemplateChange = (value: string) => {
@@ -270,13 +267,21 @@ export default function CustomerEditPage() {
 
   // Handle delete
   const handleDelete = () => {
-    // In a real app, this would delete from the database
-    toast({
-      title: "Customer Deleted",
-      description: "Customer has been permanently deleted.",
+    console.log('customerId', customerId)
+    try {
+      deleteUser({ id: customerId as string })
+      toast({
+        title: "Customer Deleted",
+        description: "Customer has been deleted (In Inactive Status).",
     })
 
-    router.push("/admin/customers")
+      router.push("/admin/customers")
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete customer.",
+      })
+    }
   }
 
   // Handle send email
@@ -520,11 +525,10 @@ export default function CustomerEditPage() {
 
           <div className="flex items-center mb-6">
             <Badge
-              className={`${
-                customer.status === "active"
+              className={`${customer.status === "active"
                   ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
                   : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-              }`}
+                }`}
             >
               {customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}
             </Badge>
@@ -677,15 +681,14 @@ export default function CustomerEditPage() {
                               </TableCell>
                               <TableCell>
                                 <Badge
-                                  className={`${
-                                    order.status === "delivered"
+                                  className={`${order.status === "delivered"
                                       ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
                                       : order.status === "processing"
                                         ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
                                         : order.status === "shipped"
                                           ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
                                           : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                                  }`}
+                                    }`}
                                 >
                                   {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                                 </Badge>

@@ -1,12 +1,13 @@
 import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
 import { status } from '@grpc/grpc-js';
 import { LoginUserRequest, LoginUserResponse } from "@nexura/grpc_gateway/protos";
-import { SpanStatusCode, logger, verifyPassword, generateAccessToken, generateRefreshToken, defaultTracer, withTracing } from "@nexura/common/utils";
+import { SpanStatusCode, logger, verifyPassword, generateAccessToken, generateRefreshToken, withTracing, api, type Span } from "@nexura/common/utils";
 import { LoginUserSchema } from "@nexura/common/validators";
 
-import { PrismaClient } from "../../db/prisma-client";
+import { PrismaClient } from '@nexura/user-service/src/db/prisma-client'
 
-const tracer = defaultTracer('loginUser')
+// const tracer = defaultTracer('loginUser')
+const tracer = api.trace.getTracer('loginUser')
 const prisma = new PrismaClient()
 
 export const LoginUser = async (
@@ -15,7 +16,7 @@ export const LoginUser = async (
 ) => {
     try {
         // Validate request
-        const validatedData = await withTracing(tracer, 'Validate Request', async (span) => {
+        const validatedData = await withTracing(tracer, 'Validate Request', async (span: Span) => {
             const result = LoginUserSchema.safeParse(call.request);
             if (!result.success) {
                 logger.warn('Invalid request data', {
@@ -40,7 +41,7 @@ export const LoginUser = async (
         if (!validatedData) throw new Error('Invalid request data');
 
         // Find the user by email
-        const user = await withTracing(tracer, 'Find User', async (span) => {
+        const user = await withTracing(tracer, 'Find User', async (span: Span) => {
             logger.debug('Finding user by email', { email: validatedData.email });
             const foundUser = await prisma.user.findUnique({
                 where: { email: validatedData.email },
@@ -75,7 +76,7 @@ export const LoginUser = async (
         if (!user) return;
 
         // Verify the password
-        const isPasswordValid = await withTracing(tracer, 'Verify Password', async (span) => {
+        const isPasswordValid = await withTracing(tracer, 'Verify Password', async (span: Span) => {
             logger.debug('Verifying password');
             const isValid = verifyPassword(validatedData.password, user.password);
             if (!isValid) {
@@ -103,7 +104,7 @@ export const LoginUser = async (
 
 
         // Check if user is verified or active
-        const isVerified = await withTracing(tracer, 'Check if user is verified', async (span) => {
+        const isVerified = await withTracing(tracer, 'Check if user is verified', async (span: Span) => {
         if (!user.isVerified || !user.isActive) {
             const message = `User is ${user.isVerified ? 'not finish creating account' : 'deactivated'}`
             logger.warn(message, { userId: user.id });
@@ -127,7 +128,7 @@ export const LoginUser = async (
         if (!isVerified) return;
 
         // Generate tokens
-        const tokens = await withTracing(tracer, 'Generate Tokens', async (span) => {
+        const tokens = await withTracing(tracer, 'Generate Tokens', async (span: Span) => {
             logger.debug('Generating tokens', { userId: user.id });
             const payload = { userId: user.id.toString(), email: user.email };
             const accessToken = generateAccessToken(payload);

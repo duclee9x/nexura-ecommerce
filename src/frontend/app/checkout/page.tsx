@@ -8,7 +8,7 @@ import { ChevronLeft, X, CreditCard, Wallet, Banknote } from "lucide-react"
 import { useCart } from "@/contexts/cart-context"
 import { useSession } from "@/contexts/session-context"
 import { useCurrency } from "@/contexts/currency-context"
-import { CreateSagaOrderRequest } from "@nexura/grpc_gateway/protos"
+import type { CreateSagaOrderRequest } from "@nexura/grpc_gateway/protos"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,45 +21,54 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import AddressTab from "@/app/profile/tabs/address-tab"
 import { toast } from "@/components/ui/use-toast"
 import { ExtendedAddressType } from "@/app/checkout/order.type"
-import { useOrderActions } from "@/hooks/use-order"
+import OrderHooks from "@/hooks/order-hooks"
+import CartHooks from "@/hooks/cart-hooks"
 
 export default function CheckoutPage() {
-  const { createSagaOrder } = useOrderActions()
+  const { useCreateSagaOrder } = OrderHooks()
+  const { mutateAsync: createSagaOrder } = useCreateSagaOrder
   const router = useRouter()
-  const { items, clearCart, getVariants } = useCart()
+  const { items } = useCart()
+  const { useGetVariants, useClearCart } = CartHooks()
+  const { mutateAsync: clearCart } = useClearCart
   const { user } = useSession()
   const { cartId } = useCart()
   const { formatPrice, currency } = useCurrency()
-  const [paymentMethod, setPaymentMethod] = useState("stripe")
+  const [paymentMethod, setPaymentMethod] = useState<"STRIPE" | "VNPAY" | "COD">("STRIPE")
   const [shippingMethod, setShippingMethod] = useState("standard")
   const [isProcessing, setIsProcessing] = useState(false)
   const [address, setAddress] = useState<ExtendedAddressType | null>(null)
   const [subtotal, setSubtotal] = useState(0)
   const [shipping, setShipping] = useState(0)
   const [orderTotal, setOrderTotal] = useState(0)
-  const { data: variants } = getVariants(items.map((item) => item.variantId))
+  const { data: variants } = useGetVariants(items.map((item) => item.variantId))
   const [coupons, setCoupons] = useState<{code: string, discount: number}[]>([])
   const [newCoupon, setNewCoupon] = useState("")
 
+ 
   const variantsPrice = useMemo(() => 
     items.map((item) => ({
       id: item.variantId, 
       price: (variants?.find((v) => v.id === item.variantId)?.price || 0) * item.quantity,
       variantName: variants?.find((v) => v.id === item.variantId)?.variantName,
       productName: variants?.find((v) => v.id === item.variantId)?.productName,
+      productSlug: variants?.find((v) => v.id === item.variantId)?.productSlug,
+      image: variants?.find((v) => v.id === item.variantId)?.image,
+      sku: variants?.find((v) => v.id === item.variantId)?.sku,
     }))
   , [items, variants])
 
   useEffect(() => {
     const shipping = shippingMethod === "express" ? 20 : 12
-    setShipping(shipping)
     const total = items.reduce((acc, item) => acc + (variants?.find((v) => v.id === item.variantId)?.price || 0) * item.quantity, 0)
-    setSubtotal(total)
     const orderTotal = total + shipping
+
+    setShipping(shipping)
+    setSubtotal(total)
     setOrderTotal(orderTotal)
   }, [shippingMethod, items, variants])
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!user) {
       router.push("/login")
       return
@@ -80,15 +89,23 @@ export default function CheckoutPage() {
       })
       return
     }
+
+    setIsProcessing(true)
     const order: CreateSagaOrderRequest = {
       userId: user.id,
       cartId: cartId,
       shippingAddress: address,
       items: variantsPrice.map((item) => ({
+        id: item.id,
         productId: item.id,
         variantId: item.id,
         quantity: items.find((i) => i.variantId === item.id)?.quantity || 0,
         price: item.price,
+        productName: item.productName || "",
+        productSlug: item.productSlug || "",
+        variantName: item.variantName || "",
+        image: item.image || "",
+        sku: item.sku || "",
       })),
       shippingMethod: shippingMethod,
       shippingCost: shipping,
@@ -105,15 +122,25 @@ export default function CheckoutPage() {
     }
 
     try {
-      createSagaOrder(order)
+      const result = await createSagaOrder(order)
+      if (result.orderId) {
+        await clearCart(user.id)
+        router.push(`/checkout/success?order=${result.orderId}`)
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create order",
+        })
+      }
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to create order",
       })
-      console.log(error)
+      console.error(error)
+    } finally {
+      setIsProcessing(false)
     }
-    setIsProcessing(false)
   }
 
   const handleApplyCoupon = () => {
@@ -132,7 +159,11 @@ export default function CheckoutPage() {
   const handleRemoveCoupon = (code: string) => {
     setCoupons(coupons.filter(c => c.code !== code))
   }
-
+  if (!user) {
+    router.push("/login")
+    return null
+  }
+  
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
@@ -320,26 +351,26 @@ export default function CheckoutPage() {
                 <h3 className="font-medium">Payment Method</h3>
                 <RadioGroup 
                   value={paymentMethod} 
-                  onValueChange={setPaymentMethod}
+                  onValueChange={(value) => setPaymentMethod(value as "STRIPE" | "VNPAY" | "COD")}
                   className="space-y-3"
                 >
-                  <div className={`flex items-center space-x-3 rounded-lg border p-4 hover:border-primary cursor-pointer ${paymentMethod === "stripe" ? "bg-primary/5" : ""}`} onClick={() => setPaymentMethod("stripe")}>
-                    <RadioGroupItem value="stripe" id="stripe" />
-                    <Label htmlFor="stripe" className="flex items-center gap-2 cursor-pointer">
+                  <div className={`flex items-center space-x-3 rounded-lg border p-4 hover:border-primary cursor-pointer ${paymentMethod === "STRIPE" ? "bg-primary/5" : ""}`} onClick={() => setPaymentMethod("STRIPE")}>
+                    <RadioGroupItem value="STRIPE" id="STRIPE" />
+                    <Label htmlFor="STRIPE" className="flex items-center gap-2 cursor-pointer">
                       <CreditCard className="h-5 w-5" />
                       <span>Global payment gateway (Stripe)</span>
                     </Label>
                   </div>
-                  <div className={`flex items-center space-x-3 rounded-lg border p-4 hover:border-primary cursor-pointer ${paymentMethod === "vnpay" ? "bg-primary/5" : ""}`} onClick={() => setPaymentMethod("vnpay")}>
-                    <RadioGroupItem value="vnpay" id="vnpay" />
-                    <Label htmlFor="vnpay" className="flex items-center gap-2 cursor-pointer">
+                  <div className={`flex items-center space-x-3 rounded-lg border p-4 hover:border-primary cursor-pointer ${paymentMethod === "VNPAY" ? "bg-primary/5" : ""}`} onClick={() => setPaymentMethod("VNPAY")}>
+                    <RadioGroupItem value="VNPAY" id="VNPAY" />
+                    <Label htmlFor="VNPAY" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="h-5 w-5" />
                       <span>Vietnam payment gateway (VNPay)</span>
                     </Label>
                   </div>
-                  <div className={`flex items-center space-x-3 rounded-lg border p-4 hover:border-primary cursor-pointer ${paymentMethod === "cod" ? "bg-primary/5" : ""}`} onClick={() => setPaymentMethod("cod")}>
-                    <RadioGroupItem value="cod" id="cod" />
-                    <Label htmlFor="cod" className="flex items-center gap-2 cursor-pointer">
+                  <div className={`flex items-center space-x-3 rounded-lg border p-4 hover:border-primary cursor-pointer ${paymentMethod === "COD" ? "bg-primary/5" : ""}`} onClick={() => setPaymentMethod("COD")}>
+                    <RadioGroupItem value="COD" id="COD" />
+                    <Label htmlFor="COD" className="flex items-center gap-2 cursor-pointer">
                       <Banknote className="h-5 w-5" />
                       <span>Cash on Delivery</span>
                     </Label>

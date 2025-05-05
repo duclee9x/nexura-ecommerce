@@ -6,14 +6,14 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "@/hooks/use-toast"
-import { ChevronLeft, Loader2, Save } from "lucide-react"
+import { ChevronLeft, Loader2, Save, LinkIcon, Search } from "lucide-react"
 import { CategoryTree, type Category } from "@/components/category-tree"
 import { VariantManager } from "@/components/variant-manager"
 import { TagCombobox } from "@/components/tag-combobox"
@@ -22,33 +22,20 @@ import { BrandSelector } from "@/components/brand-selector"
 import { AttributesManager } from "@/components/attributes-manager"
 import { SizeInstructionEditor, type SizeChart } from "@/components/size-instruction-editor"
 import { Product, ProductAttribute, ProductVariant, CreateCategoryRequest, CreateBrandRequest, Brand } from "@nexura/grpc_gateway/protos"
-import { useQueryClient } from "@tanstack/react-query"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useProductActions } from "@/hooks/use-product"
+import ProductHooks from "@/hooks/product-hooks"
+import { Checkbox } from "@/components/ui/checkbox"
+import Link from "next/link"
+
 interface ProductFormProps {
-  productId?: string
-  categoriesData: {
-    categories: Category[] | undefined
-    isLoadingCategories: boolean
-  }
-  brandsData: {
-    brands: Brand[] | undefined
-    isLoadingBrands: boolean
-  }
-  onSave: (product: Product) => void
-  onCancel?: () => void
+  productSlug?: string
   mode: "add" | "edit"
 }
 
 export function ProductForm({
-  productId,
-  categoriesData,
-  brandsData,
-  onSave,
-  onCancel,
+  productSlug,
   mode,
 }: ProductFormProps) {
-  const router = useRouter()
   const [product, setProduct] = useState<Product>(
     {
       id: "",
@@ -82,29 +69,38 @@ export function ProductForm({
         keywords: "",
       },
       taxable: false,
-      shippable: false
+      shippable: false,
+      relatedProducts: []
     }
   )
+  const [relatedProductIds, setRelatedProductIds] = useState<string[]>([])
   const [sizeCharts, setSizeCharts] = useState<SizeChart[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("details")
   const [isSaving, setIsSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  // console.log(JSON.stringify(product, null, 2), "product")
-  const { getProductById, createCategory, updateCategory, createBrand } = useProductActions()
-  const { data: productData, isLoading: isLoadingProduct } = getProductById(productId || "")
-  const { mutate: createCategoryMutation } = createCategory
-  const { mutate: updateCategoryMutation } = updateCategory
-  const { mutate: createBrandMutation } = createBrand
-  const queryClient = useQueryClient()
-  const { categories, isLoadingCategories } = categoriesData
-  const { brands, isLoadingBrands } = brandsData
+  const [relatedProductSearch, setRelatedProductSearch] = useState("")
+  const { useGetProduct, useCreateCategory, useUpdateCategory, useCreateBrand, useListProducts, useGetCategories, useGetBrands, useUpdateProduct, useCreateProduct } = ProductHooks()
+  const { mutateAsync: createCategory } = useCreateCategory
+  const { mutateAsync: updateCategory } = useUpdateCategory
+  const { mutateAsync: createBrand } = useCreateBrand
+  const { mutateAsync: createProduct } = useCreateProduct
+  const { mutateAsync: updateProduct } = useUpdateProduct
+  const { data: productData, isLoading: isLoadingProduct } = useGetProduct(productSlug || "", "slug")
+  const { data: categories, isLoading: isLoadingCategories } = useGetCategories()
+  const { data: brands, isLoading: isLoadingBrands } = useGetBrands()
+  const { data: allProducts, isLoading: isLoadingProducts } = useListProducts()
+  const router = useRouter()
   useEffect(() => {
     if (productData) {
       setProduct(productData)
     }
   }, [productData])
-
+  useEffect(() => {
+    if (product.relatedProducts) {
+      setRelatedProductIds(product.relatedProducts.map(product => product.id))
+    }
+  }, [product.relatedProducts])
   // Get product category names for size chart
   const productCategoryNames = useMemo(() => {
     const getCategoryName = (categoryId: string): string | null => {
@@ -256,11 +252,11 @@ export function ProductForm({
       }
     }
     try {
-      createCategoryMutation(newCategory)
+      createCategory(newCategory)
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to create category. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to create category. Please try again.",
         variant: "destructive",
       })
     }
@@ -269,7 +265,7 @@ export function ProductForm({
   // Handle category update
   const handleCategoryUpdate = async (updatedCategory: Category) => {
     try {
-      updateCategoryMutation({
+      updateCategory({
         category: {
           id: updatedCategory.id,
           name: updatedCategory.name,
@@ -279,7 +275,7 @@ export function ProductForm({
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update category. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to update category. Please try again.",
         variant: "destructive",
       })
     }
@@ -400,9 +396,6 @@ export function ProductForm({
     setSizeCharts(updatedSizeCharts)
   }
 
-  const calculateTotalStock = () => {
-    return product.variants.reduce((total, variant) => total + (variant.stock?.quantity || 0), 0)
-  }
 
   const getPriceRange = () => {
     if (product.variants.length === 0) {
@@ -436,11 +429,11 @@ export function ProductForm({
           logo: brand.logo,
         }
       }
-      createBrandMutation(newBrand);
+      createBrand(newBrand);
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to create brand. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to create brand. Please try again.",
         variant: "destructive",
       });
     }
@@ -536,6 +529,19 @@ export function ProductForm({
     }
   }
 
+  // Filter related products based on search
+  const filteredRelatedProducts = useMemo(() => {
+    if (!allProducts) return []
+    const searchTerm = relatedProductSearch.toLowerCase()
+    return allProducts
+      .filter((product) => product.slug !== productSlug) // Exclude current product
+      .filter(
+        (product) =>
+          product.name.toLowerCase().includes(searchTerm) ||
+          product.sku.toLowerCase().includes(searchTerm)
+      )
+  }, [allProducts, relatedProductSearch, productSlug])
+
   // Update handleSave function
   const handleSave = async () => {
     setIsSaving(true)
@@ -552,17 +558,18 @@ export function ProductForm({
     }
 
     try {
-      await onSave(product)
-      toast({
-        title: "Product Saved",
-        description: "Your product has been saved successfully.",
-      })
+      if (mode === "add") {
+        await createProduct({product, relatedProductIds})
+      } else {
+        await updateProduct({product, relatedProductIds})
+      }
+      router.push(`/admin/inventory/`)
       setIsLoading(false)
       setIsSaving(false)
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to save the product. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to save the product. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -579,25 +586,44 @@ export function ProductForm({
     )
   }
 
+  // Handle related product toggle
+  const handleRelatedProductToggle = (productId: string) => {
+    setRelatedProductIds((prev) => {
+      if (prev.includes(productId)) {
+        // Remove the product if it's already in the list
+        return prev.filter(id => id !== productId);
+      } else {
+        // Add the product if it's not in the list
+        return [...prev, productId];
+      }
+    });
+  }
+
   return (
     <div className="flex flex-col min-h-screen w-full">
       <div className="flex flex-1">
         <main className="flex-1 p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center">
-              <Button variant="ghost" size="sm" className="mr-4" onClick={onCancel || (() => router.back())}>
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Back
-              </Button>
+              <Link href="/admin/inventory">
+                <Button variant="ghost" size="sm" className="mr-4">
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Back
+                </Button>
+              </Link>
               <h1 className="text-3xl font-bold dark:text-white">
                 {mode === "add" ? "Add New Product" : "Edit Product"}
               </h1>
             </div>
 
             <div className="flex items-center gap-2">
+              {mode === "edit" && (
+                <Button variant="outline" size="sm" onClick={() => window.open(`/products/${product.slug}`, "_blank")}>View Product</Button>
+              )}
               {isLoadingProduct ? (
                 <Skeleton className="h-10 w-[180px]" />
               ) : (
+                
                 <Select
                   value={product.status}
                   onValueChange={(value: "draft" | "published" | "archived") =>
@@ -975,6 +1001,64 @@ export function ProductForm({
                           rows={3}
                         />
                         <p className="text-xs text-muted-foreground">Recommended length: 150-160 characters</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Related Products</CardTitle>
+                      <CardDescription>Select products to show as related items</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="relative">
+                          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Search products..."
+                            value={relatedProductSearch}
+                            onChange={(e) => setRelatedProductSearch(e.target.value)}
+                            className="pl-8"
+                          />
+                        </div>
+                        {isLoadingProducts ? (
+                          <div className="flex items-center justify-center py-4">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          </div>
+                        ) : filteredRelatedProducts.length === 0 ? (
+                          <p className="text-sm text-muted-foreground text-center py-4">
+                            No products found matching your search
+                          </p>
+                        ) : (
+                          filteredRelatedProducts.map((relatedProduct) => (
+                            <div
+                              key={relatedProduct.id}
+                              className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0"
+                            >
+                              <div className="flex items-center gap-3">
+                                <Checkbox
+                                  id={`related-${relatedProduct.id}`}
+                                  checked={relatedProductIds.includes(relatedProduct.id)}
+                                  onCheckedChange={() => handleRelatedProductToggle(relatedProduct.id)}
+                                />
+                                <Label htmlFor={`related-${relatedProduct.id}`} className="font-normal cursor-pointer">
+                                  {relatedProduct.name}
+                                  <span className="text-sm text-muted-foreground block">
+                                    {relatedProduct.sku} • ${relatedProduct.basePrice}
+                                  </span>
+                                </Label>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => window.open(`/products/${relatedProduct.slug}`, "_blank")}
+                              >
+                                <LinkIcon className="h-4 w-4 mr-1" />
+                                View
+                              </Button>
+                            </div>
+                          ))
+                        )}
                       </div>
                     </CardContent>
                   </Card>

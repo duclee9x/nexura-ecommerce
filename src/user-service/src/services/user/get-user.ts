@@ -5,14 +5,14 @@ import { status } from "@grpc/grpc-js";
 import { GetUserSchema } from "@nexura/common/validators";
 
 import { logger } from "@nexura/common/utils";
-
-import { defaultTracer } from "@nexura/common/utils";
+import { api } from "@nexura/common/utils";
+// import { defaultTracer } from "@nexura/common/utils";
 import { GetUserResponse, GetUserRequest } from "@nexura/grpc_gateway/protos";
-import { PrismaClient, Prisma } from "../../db/prisma-client";
+import { PrismaClient, Prisma } from '@nexura/user-service/src/db/prisma-client'
 
-const tracer = defaultTracer('getUser')
+// const tracer = defaultTracer('getUser')
 const prisma = new PrismaClient()
-
+const tracer = api.trace.getTracer('user-service')
 export const GetUser = async (
     call: ServerUnaryCall<GetUserRequest, GetUserResponse>,
     callback: sendUnaryData<GetUserResponse>

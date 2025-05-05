@@ -1,7 +1,6 @@
 import Image, { StaticImageData } from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import heroImage from "@/public/landing-page-hero.jpg"
 import backpackImage from "@/public/backpack.jpg"
 import backpack_1 from "@/public/backpack-1.webp"
 import backpack_2 from "@/public/backpack-2.jpg"
@@ -9,8 +8,6 @@ import backpack_3 from "@/public/backpack-3.jpg"
 import backpack_4 from "@/public/backpack-4.jpg"
 import TravelBackpack from "@/public/travel-backpack.webp"
 import { Icon } from "@iconify/react";
-import { getSession } from "./api/auth/route"
-import { useSession } from "@/contexts/session-context"
 interface Product {
   id: string;
   name: string;
@@ -78,7 +75,6 @@ const products: Product[] = [
   }
 ]
 export default async function Home() {
-  const session = await getSession()
   return (
     <div className="container mx-auto px-4">
       <main className="flex-1">
@@ -127,47 +123,6 @@ export default async function Home() {
         </div>
       )
     }
-  }
-
-  function HeroSection() {
-    return (
-      <section className="relative py-8 bg-white dark:bg-gray-950">
-        <div className="container lg:h-[50vh] mx-auto px-4 flex flex-col md:flex-row gap-4">
-          <div className="flex flex-col md:w-1/2 justify-center gap-3">
-            <div className="p-6 border bg-gray-100 h-2/3 rounded-3xl flex flex-col justify-center">
-              <h1 className="text-4xl md:text-5xl dark:text-gray-800 font-bold uppercase tracking-tight leading-tight mb-4 ">
-                GET READY FOR YEAR-END
-                <br />
-                BUSINESS TRAVEL
-              </h1>
-              <p className="text-gray-700 text-justify dark:text-gray-800 mb-6 ">
-                Prepare for year-end business travel with ease. Maximize your productivity,
-                streamline plans, and enjoy stress-free journeys.
-              </p>
-              <div>
-                <CTAButton text="Shop Now" href="/products" />
-              </div>
-            </div>
-            <section className="bg-white dark:bg-gray-950 h-1/3">
-              <div className="grid grid-cols-2 md:grid-cols-2 gap-4 h-full">
-                <InfoSection icon="hugeicons:delivery-truck-01" title="FREE SHIPPING" description="Enjoy free shipping on all orders over $50 for continental locations." />
-                <InfoSection icon="hugeicons:shield-user" title="SECURE CHECKOUT" description="Shop with confidence knowing your personal information is always secure." />
-              </div>
-            </section>
-          </div>
-          <div className="flex justify-center  md:mt-0">
-            <Image
-              loader={({ src }) => src}
-              src={heroImage}
-              alt="Business traveler with backpack"
-              sizes="100%" priority
-              className="rounded-3xl"
-            />
-          </div>
-        </div>
-
-      </section>
-    )
   }
 
   function FeatureSection() {

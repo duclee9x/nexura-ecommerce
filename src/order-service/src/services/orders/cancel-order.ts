@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../db/prisma-client';
+import { PrismaClient } from "@nexura/order-service/src/db/prisma-client";
 import { CancelOrderRequest, CancelOrderResponse, OrderStatus } from '@nexura/grpc_gateway/protos';
 import type { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js';
 import { Status } from '@grpc/grpc-js/build/src/constants';
@@ -10,10 +10,6 @@ function toOrderStatus(status: string): OrderStatus {
   return OrderStatus[status as keyof typeof OrderStatus] || OrderStatus.ORDER_FAILED;
 }
 
-// Helper function to convert OrderStatus to string
-function fromOrderStatus(status: OrderStatus): string {
-  return OrderStatus[status];
-}
 
 export async function cancelOrder(call: ServerUnaryCall<CancelOrderRequest, CancelOrderResponse>, callback: sendUnaryData<CancelOrderResponse>) {
   try {
@@ -44,7 +40,10 @@ export async function cancelOrder(call: ServerUnaryCall<CancelOrderRequest, Canc
     const updatedOrder = await prisma.order.update({
       where: { id: call.request.orderId },
       data: {
-        status: fromOrderStatus(OrderStatus.ORDER_CANCELLED)
+        status: OrderStatus.ORDER_CANCELLED
+      },
+      include: {
+        statusHistory: true
       }
     });
 

@@ -1,4 +1,4 @@
-import { AddressServiceClient, Address, ExtendedAddress, DeleteAddressRequest, GetCountriesResponse, GetProvincesResponse, GetDistrictsResponse, GetWardsResponse, AddressResponse, DeleteAddressResponse, GetAddressesResponse, GetProvincesByCountryRequest, GetDistrictsByProvinceRequest, GetWardsByDistrictRequest, AddAddressRequest, UpdateAddressRequest, GetAddressesRequest } from '@nexura/grpc_gateway/protos';
+import { AddressServiceClient, GetAddressRequest, GetAddressResponse, DeleteAddressRequest, GetCountriesResponse, GetProvincesResponse, GetDistrictsResponse, GetWardsResponse, AddressResponse, DeleteAddressResponse, GetAddressesResponse, GetProvincesByCountryRequest, GetDistrictsByProvinceRequest, GetWardsByDistrictRequest, AddAddressRequest, UpdateAddressRequest, GetAddressesRequest, GetBatchAddressesResponse, GetBatchAddressesRequest } from '@nexura/grpc_gateway/protos';
 import { createServiceConfig, createClient, promisifyGrpcCall } from './baseAdapter';
 
 const addressConfig = createServiceConfig('AddressService', 50051);
@@ -35,5 +35,13 @@ export const addressService = {
 
     getAddresses: async (getAddressesRequest: GetAddressesRequest): Promise<GetAddressesResponse> => {
         return promisifyGrpcCall(addressClient, 'getAddresses', getAddressesRequest);
+    },
+
+    getAddress: async (getAddressRequest: GetAddressRequest): Promise<GetAddressResponse> => {
+        return promisifyGrpcCall(addressClient, 'getAddress', getAddressRequest);
+    },
+
+    getBatchAddresses: async (getBatchAddressesRequest: GetBatchAddressesRequest): Promise<GetBatchAddressesResponse> => {
+        return promisifyGrpcCall(addressClient, 'getBatchAddresses', getBatchAddressesRequest);
     }
 }; 

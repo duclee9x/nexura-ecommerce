@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ImageIcon, X, Star, StarOff, Loader2 } from "lucide-react"
@@ -26,8 +26,7 @@ import {
 import { CSS } from "@dnd-kit/utilities"
 import { encode } from "blurhash"
 import { useToast } from "@/hooks/use-toast"
-import path from "path"
-import { ObjectId } from 'bson'
+import ObjectID from "bson-objectid"
 import { uploadToImageKit, deleteFromImageKit } from "@/lib/imagekit"
 
 export interface ProductImage {
@@ -183,7 +182,7 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
 
     // Create temporary images with loading states
     const newUploads = Array.from(files).map(file => {
-      const tempId = new ObjectId().toString()
+      const tempId = new ObjectID().toString()
       const tempUrl = URL.createObjectURL(file)
       return { file, tempUrl, id: tempId }
     })

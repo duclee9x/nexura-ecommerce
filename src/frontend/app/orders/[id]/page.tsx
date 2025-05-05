@@ -2,7 +2,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import {
   ChevronLeft,
   Package,
@@ -10,9 +10,9 @@ import {
   CheckCircle,
   MapPin,
   CreditCard,
-  Download,
-  ArrowUpRight,
   Star,
+  AlertCircle,
+  Clock,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -20,115 +20,63 @@ import { Separator } from "@/components/ui/separator"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
+import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "@/hooks/use-toast"
-
-// Sample order data
-const orderData = {
-  id: "123456789",
-  date: "March 15, 2024",
-  status: "Processing",
-  items: [
-    {
-      id: 1,
-      name: "Urban Backpack",
-      price: 120,
-      quantity: 1,
-      color: "black",
-      image: "/placeholder.svg?height=300&width=300",
-    },
-    {
-      id: 8,
-      name: "Laptop Sleeve",
-      price: 45,
-      quantity: 1,
-      color: "gray",
-      image: "/placeholder.svg?height=300&width=300",
-    },
-  ],
-  shipping: {
-    method: "Standard Shipping",
-    cost: 12,
-    address: {
-      name: "John Doe",
-      street: "278 Treadgold Dr",
-      city: "Sarasota",
-      state: "FL",
-      zip: "34238",
-      country: "United States",
-    },
-    estimatedDelivery: "March 20, 2024",
-    tracking: {
-      number: "1Z999AA10123456784",
-      carrier: "UPS",
-      status: "In Transit",
-      currentLocation: "Tampa, FL",
-      history: [
-        {
-          date: "March 16, 2024",
-          time: "10:30 AM",
-          location: "Miami, FL",
-          status: "Shipped",
-          description: "Package has left the seller facility",
-        },
-        {
-          date: "March 17, 2024",
-          time: "2:45 PM",
-          location: "Orlando, FL",
-          status: "In Transit",
-          description: "Package arrived at carrier facility",
-        },
-        {
-          date: "March 18, 2024",
-          time: "8:15 AM",
-          location: "Tampa, FL",
-          status: "In Transit",
-          description: "Package in transit to destination",
-        },
-      ],
-      coordinates: {
-        origin: { lat: 25.7617, lng: -80.1918 }, // Miami
-        current: { lat: 27.9506, lng: -82.4572 }, // Tampa
-        destination: { lat: 27.3364, lng: -82.5307 }, // Sarasota
-      },
-    },
-  },
-  payment: {
-    method: "Credit Card",
-    last4: "4242",
-    subtotal: 165,
-    tax: 13.2,
-    total: 190.2,
-  },
+import OrderHooks from "@/hooks/order-hooks"
+import type { OrderItem, OrderStatus, TrackingEvent } from "@nexura/grpc_gateway/protos"
+import { useCurrency } from "@/contexts/currency-context"
+const mapOrderStatus = (status: OrderStatus) => {
+  return status.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, (char: string) => char.toUpperCase());
+}
+// Define types for the review state
+type ReviewState = {
+  ratings: Record<string, number>;
+  comments: Record<string, string>;
+  hoveredRatings: Record<string, number>;
 }
 
-export default function OrderDetailsPage({ params }: { params: { id: string } }) {
+
+export default function OrderDetailsPage() {
   const router = useRouter()
-  const orderId = params.id
-  const order = orderData // In a real app, fetch order data based on orderId
+  const { id } = useParams()
+  const { useGetOrder } = OrderHooks()
+  const { formatPrice, formatDate } = useCurrency()
+  const { data: order, isPending } = useGetOrder(id as string)
   const [activeTab, setActiveTab] = useState("details")
-  const [reviewRatings, setReviewRatings] = useState<Record<number, number>>({})
-  const [reviewComments, setReviewComments] = useState<Record<number, string>>({})
-  const [hoveredRatings, setHoveredRatings] = useState<Record<number, number>>({})
+  const [reviewState, setReviewState] = useState<ReviewState>({
+    ratings: {},
+    comments: {},
+    hoveredRatings: {}
+  })
   const [submittingReview, setSubmittingReview] = useState(false)
 
   // Handle rating hover
-  const handleRatingHover = (itemId: number, rating: number) => {
-    setHoveredRatings((prev) => ({ ...prev, [itemId]: rating }))
+  const handleRatingHover = (itemId: string, rating: number) => {
+    setReviewState(prev => ({
+      ...prev,
+      hoveredRatings: { ...prev.hoveredRatings, [itemId]: rating }
+    }))
   }
 
   // Handle rating click
-  const handleRatingClick = (itemId: number, rating: number) => {
-    setReviewRatings((prev) => ({ ...prev, [itemId]: rating }))
+  const handleRatingClick = (itemId: string, rating: number) => {
+    setReviewState(prev => ({
+      ...prev,
+      ratings: { ...prev.ratings, [itemId]: rating }
+    }))
   }
 
   // Handle comment change
-  const handleCommentChange = (itemId: number, comment: string) => {
-    setReviewComments((prev) => ({ ...prev, [itemId]: comment }))
+  const handleCommentChange = (itemId: string, comment: string) => {
+    setReviewState(prev => ({
+      ...prev,
+      comments: { ...prev.comments, [itemId]: comment }
+    }))
   }
 
   // Handle submit review
-  const handleSubmitReview = (itemId: number) => {
-    if (!reviewRatings[itemId]) {
+  const handleSubmitReview = (itemId: string) => {
+    if (!reviewState.ratings[itemId]) {
       toast({
         title: "Rating Required",
         description: "Please select a star rating for your review.",
@@ -149,23 +97,157 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
     }, 1000)
   }
 
+  if (isPending) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex items-center gap-1 mb-4"
+            onClick={() => router.push("/orders")}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Back to Orders
+          </Button>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <Skeleton className="h-8 w-48 mb-2" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+          </div>
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="w-full justify-start mb-6">
+            <TabsTrigger value="details">Order Details</TabsTrigger>
+            <TabsTrigger value="tracking">Tracking & Delivery</TabsTrigger>
+            <TabsTrigger value="reviews">Reviews & Feedback</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="details">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-8">
+                {/* Order Status Skeleton */}
+                <div className="border dark:border-gray-800 rounded-lg p-6">
+                  <div className="flex items-center gap-4 mb-6">
+                    <Skeleton className="w-12 h-12 rounded-full" />
+                    <div>
+                      <Skeleton className="h-6 w-32 mb-2" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-8">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-start gap-4">
+                        <Skeleton className="w-12 h-12 rounded-full" />
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-3 w-48" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Order Items Skeleton */}
+                <div className="border dark:border-gray-800 rounded-lg p-6">
+                  <Skeleton className="h-8 w-32 mb-6" />
+                  <div className="space-y-6">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="flex gap-4 pb-6 border-b dark:border-gray-800 last:border-0 last:pb-0">
+                        <Skeleton className="w-20 h-20" />
+                        <div className="flex-1">
+                          <div className="flex justify-between">
+                            <Skeleton className="h-5 w-48" />
+                            <Skeleton className="h-5 w-20" />
+                          </div>
+                          <div className="space-y-2 mt-2">
+                            <Skeleton className="h-4 w-32" />
+                            <Skeleton className="h-4 w-24" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Summary Skeleton */}
+              <div className="lg:col-span-1">
+                <div className="border dark:border-gray-800 rounded-lg p-6 space-y-6 sticky top-8">
+                  <Skeleton className="h-8 w-32 mb-4" />
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex justify-between">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-16" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    )
+  }
+
+  if (!order) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex items-center gap-1 mb-4"
+            onClick={() => router.push("/orders")}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Back to Orders
+          </Button>
+        </div>
+
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-900 mb-4">
+            <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+          </div>
+          <h1 className="text-3xl font-bold mb-2 dark:text-white">Order Not Found</h1>
+          <p className="text-muted-foreground mb-8">
+            We couldn't find an order with the provided order number. Please check your order number and try again.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild>
+              <Link href="/orders">View All Orders</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/products">Continue Shopping</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // Render a review form for a product
-  const renderReviewForm = (item: (typeof order.items)[0]) => (
+  const renderReviewForm = (item: OrderItem) => (
     <div
-      key={item.id}
-      id={`review-item-${item.id}`}
+      key={item.variantId}
+      id={`review-item-${item.variantId}`}
       className="border-b dark:border-gray-800 pb-8 last:border-b-0 last:pb-0"
     >
       <div className="flex gap-4">
         <div className="relative w-20 h-20 border dark:border-gray-800 flex-shrink-0">
-          <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
+          <Image src={item.image || "/placeholder.svg"} alt={item.productName} fill className="object-cover" />
         </div>
         <div className="flex-1">
-          <h3 className="font-medium text-lg">{item.name}</h3>
+          <h3 className="font-medium text-lg">{item.productName}</h3>
           <p className="text-sm text-muted-foreground">
-            Color: <span className="capitalize">{item.color}</span> • Quantity: {item.quantity}
+            Color: <span className="capitalize">{item.variantName}</span> •
           </p>
-
+          <p>Quantity: {item.quantity}</p>
           <div className="mt-4 space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">Your Rating</label>
@@ -173,25 +255,24 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
                     key={star}
-                    className={`h-6 w-6 cursor-pointer transition-colors ${
-                      star <= (hoveredRatings[item.id] || reviewRatings[item.id] || 0)
-                        ? "text-yellow-400 fill-yellow-400"
-                        : "text-gray-300 dark:text-gray-600"
-                    }`}
+                    className={`h-6 w-6 cursor-pointer transition-colors ${star <= (reviewState.hoveredRatings[item.id] || reviewState.ratings[item.id] || 0)
+                      ? "text-yellow-400 fill-yellow-400"
+                      : "text-gray-300 dark:text-gray-600"
+                      }`}
                     onMouseEnter={() => handleRatingHover(item.id, star)}
                     onMouseLeave={() => handleRatingHover(item.id, 0)}
                     onClick={() => handleRatingClick(item.id, star)}
                   />
                 ))}
                 <span className="ml-2 text-sm text-muted-foreground">
-                  {reviewRatings[item.id]
-                    ? reviewRatings[item.id] === 5
+                  {reviewState.ratings[item.id]
+                    ? reviewState.ratings[item.id] === 5
                       ? "Excellent"
-                      : reviewRatings[item.id] === 4
+                      : reviewState.ratings[item.id] === 4
                         ? "Very Good"
-                        : reviewRatings[item.id] === 3
+                        : reviewState.ratings[item.id] === 3
                           ? "Good"
-                          : reviewRatings[item.id] === 2
+                          : reviewState.ratings[item.id] === 2
                             ? "Fair"
                             : "Poor"
                     : "Select a rating"}
@@ -204,7 +285,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
               <Textarea
                 placeholder="What did you like or dislike about this product? How was the quality? Would you recommend it to others?"
                 rows={4}
-                value={reviewComments[item.id] || ""}
+                value={reviewState.comments[item.id] || ""}
                 onChange={(e) => handleCommentChange(item.id, e.target.value)}
               />
             </div>
@@ -232,10 +313,10 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
         </Button>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold mb-1 dark:text-white">Order #{order.id}</h1>
-            <p className="text-muted-foreground">Placed on {order.date}</p>
+            <h1 className="text-3xl font-bold mb-1 dark:text-white">Order #{order.id.slice(0, 8)}</h1>
+            <p className="text-muted-foreground">Placed on {formatDate(order.createdAt)}</p>
           </div>
-          <div className="flex gap-2">
+          {/* <div className="flex gap-2">
             <Button variant="outline" size="sm" className="flex items-center gap-1">
               <Download className="h-4 w-4" />
               Invoice
@@ -244,15 +325,15 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
               <ArrowUpRight className="h-4 w-4" />
               Track Order
             </Button>
-          </div>
+          </div> */}
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full justify-start mb-6">
           <TabsTrigger value="details">Order Details</TabsTrigger>
-          <TabsTrigger value="tracking">Tracking & Delivery</TabsTrigger>
-          <TabsTrigger value="reviews">Reviews & Feedback</TabsTrigger>
+          <TabsTrigger disabled={order.status !== "ORDER_SHIPPED"} value="tracking">Tracking & Delivery</TabsTrigger>
+          <TabsTrigger disabled={order.status !== "ORDER_COMPLETED"} value="reviews">Reviews & Feedback</TabsTrigger>
         </TabsList>
 
         <TabsContent value="details">
@@ -265,43 +346,54 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                     <Package className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold">Order Status: {order.status}</h2>
-                    <p className="text-muted-foreground">Estimated delivery: {order.shipping.estimatedDelivery}</p>
+                    <h2 className="text-xl font-bold">{mapOrderStatus(order.status)}</h2>
+                    <p className="text-sm text-muted-foreground">Placed on {formatDate(order.createdAt)}</p>
                   </div>
                 </div>
 
                 <div className="relative">
                   <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-800"></div>
 
-                  <div className="relative flex items-start mb-8 pl-12">
-                    <div className="absolute left-0 w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                      <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+                  {order.statusHistory?.map((history, index) => (
+                    <div key={history.id} className="relative flex items-start mb-8 pl-12">
+                      <div className={`absolute left-0 -translate-x-1/2 w-6 h-6 rounded-full flex items-center justify-center ${
+                        index === 0 
+                          ? 'bg-primary' 
+                          : index === order.statusHistory.length - 1 && order.status === history.status
+                          ? 'bg-primary'
+                          : 'bg-gray-200 dark:bg-gray-800'
+                      }`}>
+                        {index === 0 ? (
+                          <CheckCircle className="h-4 w-4 text-primary-foreground" />
+                        ) : history.status === 'ORDER_SHIPPED' ? (
+                          <Truck className="h-4 w-4 text-muted-foreground" />
+                        ) : history.status === 'ORDER_DELIVERED' ? (
+                          <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Package className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{mapOrderStatus(history.status)}</h3>
+                        <p className="text-sm text-muted-foreground">{history.description || 'Status updated'}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{formatDate(history.createdAt)}</p>
+                      </div>
                     </div>
-                    <div className="ml-4">
-                      <h3 className="font-medium">Order Confirmed</h3>
-                      <p className="text-sm text-muted-foreground">March 15, 2024 at 10:30 AM</p>
-                    </div>
-                  </div>
+                  ))}
 
-                  <div className="relative flex items-start mb-8 pl-12">
-                    <div className="absolute left-0 w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                      <Package className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  {order.status === 'ORDER_SHIPPED' && order.shipping?.estimatedDelivery && (
+                    <div className="relative flex items-start pl-12">
+                      <div className="absolute left-0 -translate-x-1/2 w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">Estimated Delivery</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {formatDate(order.shipping.estimatedDelivery)}
+                        </p>
+                      </div>
                     </div>
-                    <div className="ml-4">
-                      <h3 className="font-medium">Processing</h3>
-                      <p className="text-sm text-muted-foreground">March 16, 2024 at 9:15 AM</p>
-                    </div>
-                  </div>
-
-                  <div className="relative flex items-start pl-12">
-                    <div className="absolute left-0 w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
-                      <Truck className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="font-medium">Shipped</h3>
-                      <p className="text-sm text-muted-foreground">Estimated: March 18, 2024</p>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
@@ -316,32 +408,34 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                       className="flex gap-4 pb-6 border-b dark:border-gray-800 last:border-0 last:pb-0"
                     >
                       <div className="relative w-20 h-20 border dark:border-gray-800 flex-shrink-0">
-                        <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
+                        <Image src={item.image || "/placeholder.svg"} alt={item.productName} fill className="object-cover" />
                       </div>
                       <div className="flex-1">
                         <div className="flex justify-between">
-                          <Link href={`/products/${item.id}`} className="font-medium hover:underline">
-                            {item.name}
+                          <Link href={`/products/${item.productId}`} className="font-medium hover:underline">
+                            {item.productName}
                           </Link>
-                          <span className="font-medium">${(item.price * item.quantity).toFixed(2)}</span>
+                          <span className="font-medium">{formatPrice(item.price * item.quantity)}</span>
                         </div>
                         <div className="flex items-center mt-1">
                           <span className="text-sm text-muted-foreground mr-2">Qty: {item.quantity}</span>
                           <span className="text-sm text-muted-foreground mr-2">•</span>
-                          <span className="text-sm text-muted-foreground mr-2">Color:</span>
-                          <span
-                            className={`w-4 h-4 rounded-full bg-${
-                              item.color === "black" ? "black" : item.color === "gray" ? "gray-400" : "blue-600"
-                            }`}
-                          ></span>
+                          <span className="text-sm text-muted-foreground mr-2">Variant:</span>
+                          <span className="text-sm text-muted-foreground">{item.variantName}</span>
+                        </div>
+                        <div>
+                          <span className="text-sm text-muted-foreground">
+                            Price: {formatPrice(item.price)}
+                          </span>
                         </div>
                         <div className="flex gap-2 mt-3">
                           <Button variant="outline" size="sm">
                             Buy Again
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
+                          {order.status === "ORDER_COMPLETED" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
                             onClick={() => {
                               setActiveTab("reviews")
                               setTimeout(() => {
@@ -353,6 +447,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                           >
                             Review Product
                           </Button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -369,22 +464,19 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>${order.payment.subtotal.toFixed(2)}</span>
+                    <span>{formatPrice(order.items.reduce((acc, item) => acc + item.price * item.quantity, 0))}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Shipping</span>
-                    <span>${order.shipping.cost.toFixed(2)}</span>
+                    <span>{formatPrice(order.shipping?.cost || 0)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tax</span>
-                    <span>${order.payment.tax.toFixed(2)}</span>
-                  </div>
+
 
                   <Separator />
 
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>${order.payment.total.toFixed(2)}</span>
+                    <span>{formatPrice(order.totalAmount)}</span>
                   </div>
                 </div>
 
@@ -394,7 +486,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                     <div>
                       <h3 className="font-medium mb-1">Payment Method</h3>
                       <p className="text-sm text-muted-foreground">
-                        {order.payment.method} ending in {order.payment.last4}
+                        {order.payment?.method}
                       </p>
                     </div>
                   </div>
@@ -412,9 +504,11 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                           If you're not satisfied with your purchase, you can return it within 30 days for a full
                           refund.
                         </p>
-                        <Button variant="link" className="px-0 h-auto text-sm mt-2">
-                          Start a Return
-                        </Button>
+                        {order.status === "ORDER_COMPLETED" && (
+                          <Button variant="link" className="px-0 h-auto text-sm mt-2">
+                            Start a Return
+                          </Button>
+                        )}
                       </AccordionContent>
                     </AccordionItem>
 
@@ -464,19 +558,16 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                         <Truck className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                       </div>
                       <div>
-                        <h3 className="font-medium">Current Status: {order.shipping.tracking.status}</h3>
+                        <h3 className="font-medium">Current Status: {mapOrderStatus(order.status)}</h3>
                         <p className="text-sm text-muted-foreground">
-                          Last updated:{" "}
-                          {order.shipping.tracking.history[order.shipping.tracking.history.length - 1].date} at{" "}
-                          {order.shipping.tracking.history[order.shipping.tracking.history.length - 1].time}
+                          Last updated: {formatDate(order.createdAt)}
                         </p>
                       </div>
                     </div>
                   </div>
                   <div className="flex flex-col">
                     <div className="text-sm text-muted-foreground">Tracking Number:</div>
-                    <div className="font-medium">{order.shipping.tracking.number}</div>
-                    <div className="text-sm text-muted-foreground">({order.shipping.tracking.carrier})</div>
+                    <div className="font-medium">{order.shipping?.tracking?.number || "Not available"}</div>
                   </div>
                 </div>
 
@@ -487,127 +578,75 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                         <MapPin className="h-4 w-4 text-green-600 dark:text-green-400" />
                       </div>
                       <div>
-                        <div className="text-sm text-muted-foreground">Origin</div>
-                        <div className="font-medium">Miami, FL</div>
-                      </div>
-                    </div>
-                    <div className="flex-1 mx-4 h-0.5 bg-gray-200 dark:bg-gray-800 relative">
-                      <div className="absolute left-0 top-0 bottom-0 bg-green-500" style={{ width: "50%" }}></div>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center mr-3">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                      <div>
-                        <div className="text-sm text-muted-foreground">Destination</div>
-                        <div className="font-medium">Sarasota, FL</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4 mt-6">
-                  <h3 className="font-medium">Tracking History</h3>
-                  <div className="space-y-4">
-                    {order.shipping.tracking.history.map((event, index) => (
-                      <div key={index} className="flex">
-                        <div className="mr-4 relative">
-                          <div className="w-4 h-4 rounded-full bg-blue-500 dark:bg-blue-400"></div>
-                          {index < order.shipping.tracking.history.length - 1 && (
-                            <div className="absolute top-4 bottom-0 left-1/2 w-0.5 -ml-px h-full bg-gray-200 dark:bg-gray-700"></div>
+                        <div className="text-sm text-muted-foreground">Shipping Address</div>
+                        <div className="font-medium">
+                          {order.shipping?.shippingAddress && (
+                            <>
+                              <p>{order.shipping.shippingAddress.street}</p>
+                              {order.shipping.shippingAddress.countryName === "Vietnam" ? (
+                                <p>
+                                  {order.shipping.shippingAddress.vnWardName}, {order.shipping.shippingAddress.vnDistrictName}, {order.shipping.shippingAddress.vnProvinceName}
+                                </p>
+                              ) : (
+                                <p>
+                                  {order.shipping.shippingAddress.city}, {order.shipping.shippingAddress.state} {order.shipping.shippingAddress.zip}
+                                </p>
+                              )}
+                              <p>{order.shipping.shippingAddress.countryName}</p>
+                            </>
                           )}
                         </div>
-                        <div className="flex-1 pb-4">
-                          <div className="flex justify-between">
-                            <h4 className="font-medium">{event.status}</h4>
-                            <span className="text-sm text-muted-foreground">
-                              {event.date}, {event.time}
-                            </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {order.shipping?.tracking?.history && order.shipping.tracking.history.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="font-medium">Tracking History</h3>
+                      <div className="space-y-4">
+                        {order.shipping.tracking.history.map((event: TrackingEvent, index: number) => (
+                          <div key={index} className="flex items-start gap-4">
+                            <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                              <Truck className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="font-medium">{event.status}</p>
+                              <p className="text-sm text-muted-foreground">{event.description}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatDate(`${event.date}T${event.time}`)}
+                              </p>
+                            </div>
                           </div>
-                          <p className="text-sm text-muted-foreground">{event.description}</p>
-                          <p className="text-sm font-medium mt-1">{event.location}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Shipping & Delivery */}
-              <div className="border dark:border-gray-800 rounded-lg p-6">
-                <h2 className="text-xl font-bold mb-6">Shipping & Delivery</h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <div className="flex items-start gap-3 mb-4">
-                      <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-                      <div>
-                        <h3 className="font-medium mb-1">Shipping Address</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {order.shipping.address.name}
-                          <br />
-                          {order.shipping.address.street}
-                          <br />
-                          {order.shipping.address.city}, {order.shipping.address.state} {order.shipping.address.zip}
-                          <br />
-                          {order.shipping.address.country}
-                        </p>
+                        ))}
                       </div>
                     </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-start gap-3">
-                      <Truck className="h-5 w-5 text-muted-foreground mt-0.5" />
-                      <div>
-                        <h3 className="font-medium mb-1">Shipping Method</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {order.shipping.method}
-                          <br />
-                          Estimated delivery: {order.shipping.estimatedDelivery}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
 
             <div className="lg:col-span-1">
               <div className="border dark:border-gray-800 rounded-lg p-6 space-y-6 sticky top-8">
-                <h2 className="text-xl font-bold mb-4">Order Summary</h2>
+                <h2 className="text-xl font-bold mb-4">Shipping Details</h2>
 
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>${order.payment.subtotal.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Shipping</span>
-                    <span>${order.shipping.cost.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tax</span>
-                    <span>${order.payment.tax.toFixed(2)}</span>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-medium mb-2">Shipping Method</h3>
+                    <p className="text-muted-foreground">{order.shipping?.method || "Standard Shipping"}</p>
                   </div>
 
-                  <Separator />
-
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Total</span>
-                    <span>${order.payment.total.toFixed(2)}</span>
+                  <div>
+                    <h3 className="font-medium mb-2">Estimated Delivery</h3>
+                    <p className="text-muted-foreground">
+                      {order.shipping?.estimatedDelivery 
+                        ? formatDate(order.shipping.estimatedDelivery)
+                        : "Not available"}
+                    </p>
                   </div>
-                </div>
 
-                <div className="pt-4">
-                  <div className="flex items-start gap-3 mb-4">
-                    <CreditCard className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <h3 className="font-medium mb-1">Payment Method</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {order.payment.method} ending in {order.payment.last4}
-                      </p>
-                    </div>
+                  <div>
+                    <h3 className="font-medium mb-2">Shipping Cost</h3>
+                    <p className="text-muted-foreground">{formatPrice(order.shipping?.cost || 0)}</p>
                   </div>
                 </div>
               </div>

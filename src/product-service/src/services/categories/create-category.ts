@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../db/prisma-client'
+import { PrismaClient } from '@nexura/product-service/src/db/prisma-client'
 import { handleError } from '@nexura/common/utils'
 import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js'
 import { CreateCategoryRequest, CreateCategoryResponse } from '@nexura/grpc_gateway/protos'
@@ -7,7 +7,6 @@ const prisma = new PrismaClient()
 
 export const createCategory = async (call: ServerUnaryCall<CreateCategoryRequest, CreateCategoryResponse>, callback: sendUnaryData<CreateCategoryResponse>) => {
     try {
-      console.log("Creating category", call.request)
       const categoryData = call.request.category
       if (categoryData == undefined) {
         throw new Error("Category data is required")

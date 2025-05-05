@@ -1,9 +1,9 @@
-import { PrismaClient } from '../../db/prisma-client'
-import { SpanStatusCode, logger, hashPassword, defaultTracer } from '@nexura/common/utils'
+import { PrismaClient } from '@nexura/user-service/src/db/prisma-client'
+import { SpanStatusCode, logger, hashPassword, api } from '@nexura/common/utils'
 import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js'
 import { UpdateUserRequest, UpdateUserResponse } from '@nexura/grpc_gateway/protos'
 
-const tracer = defaultTracer('updatePassword')
+const tracer = api.trace.getTracer('updatePassword')
 const prisma = new PrismaClient()
 
 export const updatePassword = async (

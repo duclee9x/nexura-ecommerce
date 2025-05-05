@@ -5,14 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
 import { Edit, MapPin, Plus, Trash2 } from "lucide-react";
-import { useState, useCallback, memo, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { ExtendedAddress, User, Country, Province, District, Ward, Address } from "@nexura/grpc_gateway/protos";
-
 import { z } from "zod"
-import { DefaultResponse } from "@/lib/types";
 import { AddressSkeleton } from "../skeleton";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, CustomInput, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Label, Switch, DialogFooter } from "@/components/ui/custom-dialog";
-import { useUserActions } from "@/hooks/use-user"
+import UserHooks from "@/hooks/user-hooks"
 
 type SelectedAddress = {
     country: Country | null;
@@ -55,36 +53,8 @@ const zipSchema = z.string()
     .max(10, "ZIP code must be less than 10 characters")
     .regex(/^[0-9\-]*$/, "Only numbers and hyphens are allowed")
 
-type AddressResponse = DefaultResponse & {
-    addresses: ExtendedAddress[];
-}
-
-type CountryResponse = DefaultResponse & {
-    countries: Country[];
-}
-
-type ProvinceResponse = DefaultResponse & {
-    provinces: Province[];
-}
-
-type DistrictResponse = DefaultResponse & {
-    districts: District[];
-}
-
-type GetWardsResponse = DefaultResponse & {
-    wards: Array<{
-        id: string;
-        name: string;
-        nameEn: string;
-        fullName: string;
-        fullNameEn: string;
-        districtId: string;
-        administrativeUnitId: string;
-    }>;
-}
-
 interface AddressTabProps {
-    user: User | null;
+    user: User;
     type: "profile" | "checkout";
     setAddress: (address: ExtendedAddress) => void;
     currentAddress?: ExtendedAddress | null;
@@ -97,11 +67,7 @@ export default function AddressTab({
     setAddress,
     currentAddress 
 }: AddressTabProps) {
-    if (!user) {
-        return <AddressSkeleton />;
-    }
-    const { getAddresses, getCountries, getProvinces, getDistricts, getWards, addAddress, updateAddress, deleteAddress  } = useUserActions()
-    const { data: addressResponse } = getAddresses(user.id);
+    // Initialize all state at the top level
     const [isAddressLoading, setIsAddressLoading] = useState(false);
     const [addressDialogOpen, setAddressDialogOpen] = useState<"add" | "edit" | null>(null);
     const [editingAddress, setEditingAddress] = useState<Address>({
@@ -127,23 +93,35 @@ export default function AddressTab({
         ward: null,
     });
 
-    const { data: countryResponse, isLoading: isCountryLoading } = getCountries();
-    const countries = countryResponse?.countries || [];
-
-    const { data: provinceResponse, isLoading: isProvinceLoading } = getProvinces(selectedAddress.country?.id || "");
-    const provinces = provinceResponse?.provinces || [];
-
-    const { data: districtResponse, isLoading: isDistrictLoading } = getDistricts(selectedAddress.province?.id || "");
-    const districts = districtResponse?.districts || [];
-
-    const { data: wardResponse, isLoading: isWardLoading } = getWards(selectedAddress.district?.id || "");
-    const wards = wardResponse?.wards || [];
-
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [addressToDelete, setAddressToDelete] = useState<ExtendedAddress | null>(null);
     const [formErrors, setFormErrors] = useState<FormErrors>({});
 
-  
+    // Initialize all hooks at the top level
+    const { 
+        useGetAddresses, 
+        useGetCountries, 
+        useGetProvinces, 
+        useGetDistricts, 
+        useGetWards, 
+        useAddAddress, 
+        useUpdateAddress, 
+        useDeleteAddress 
+    } = UserHooks()
+    
+    const { data: addressResponse } = useGetAddresses(user.id);
+    const { data: countryResponse } = useGetCountries();
+    const { data: provinceResponse } = useGetProvinces(selectedAddress.country?.id || "");
+    const { data: districtResponse } = useGetDistricts(selectedAddress.province?.id || "");
+    const { data: wardResponse } = useGetWards(selectedAddress.district?.id || "");
+
+    // Memoize derived values
+    const countries = useMemo(() => countryResponse?.countries || [], [countryResponse]);
+    const provinces = useMemo(() => provinceResponse?.provinces || [], [provinceResponse]);
+    const districts = useMemo(() => districtResponse?.districts || [], [districtResponse]);
+    const wards = useMemo(() => wardResponse?.wards || [], [wardResponse]);
+
+    // Callbacks
     const handleEditAddress = useCallback((address: ExtendedAddress) => {
         const country = countries.find((c: Country) => c.id.toString() === address.countryId);
         const province = provinces.find((p: Province) => p.id.toString() === address.vnProvinceId);
@@ -230,7 +208,7 @@ export default function AddressTab({
                 vnDistrictId: selectedAddress.district?.id.toString() || "",
                 vnWardId: selectedAddress.ward?.id.toString() || "",
             }
-            await addAddress.mutateAsync({ address: updatedAddress as ExtendedAddress, userId: user.id })
+            await useAddAddress.mutateAsync({ address: updatedAddress as ExtendedAddress, userId: user.id })
             setAddressDialogOpen(null)
             setFormErrors({})
             setSelectedAddress((prev) => ({
@@ -259,7 +237,7 @@ export default function AddressTab({
         } finally {
             setIsAddressLoading(false)
         }
-    }, [editingAddress, selectedAddress, user.id, addAddress, validateForm])
+    }, [editingAddress, selectedAddress, user.id, useAddAddress, validateForm])
 
     const handleUpdateAddress = useCallback(async () => {
         if (!validateForm()) return
@@ -272,7 +250,7 @@ export default function AddressTab({
                 vnDistrictId: selectedAddress.district?.id.toString() || "",
                 vnWardId: selectedAddress.ward?.id.toString() || "",
             }
-            await updateAddress.mutateAsync({ address: updatedAddress as ExtendedAddress, userId: user.id })
+            await useUpdateAddress.mutateAsync({ address: updatedAddress as ExtendedAddress, userId: user.id })
             setAddressDialogOpen(null)
             setFormErrors({})
             setEditingAddress({
@@ -301,14 +279,14 @@ export default function AddressTab({
         } finally {
             setIsAddressLoading(false)
         }
-    }, [editingAddress, selectedAddress, user.id, updateAddress, validateForm])
+    }, [editingAddress, selectedAddress, user.id, useUpdateAddress, validateForm])
 
     const handleDeleteConfirm = useCallback(async () => {
         if (!addressToDelete) return
         setIsDeleteDialogOpen(false)
         setIsAddressLoading(true)
         try {
-            await deleteAddress.mutateAsync({ 
+            await useDeleteAddress.mutateAsync({ 
                 addressId: addressToDelete.id, 
                 userId: user.id 
             })
@@ -318,7 +296,7 @@ export default function AddressTab({
         } finally {
             setIsAddressLoading(false)
         }
-    }, [addressToDelete, user.id, deleteAddress])
+    }, [addressToDelete, user.id, useDeleteAddress])
 
     const handleSetDefaultAddress = useCallback(async (id: string) => {
         if (!addressResponse) {
@@ -338,7 +316,7 @@ export default function AddressTab({
         }
 
         try {
-            await updateAddress.mutateAsync({ 
+            await useUpdateAddress.mutateAsync({ 
                 address: updatedAddress, 
                 userId: user.id 
             })
@@ -347,7 +325,7 @@ export default function AddressTab({
         } finally {
             setIsAddressLoading(false)
         }
-    }, [addressResponse, user.id, updateAddress])
+    }, [addressResponse, user.id, useUpdateAddress])
 
     const handleCancelDialog = useCallback(() => {
         if (addressDialogOpen === "edit") {
@@ -386,7 +364,12 @@ export default function AddressTab({
         if (addressResponse && addressResponse.addresses.length > 0) {
             setAddress(addressResponse.addresses.find((a) => a.isDefault) || addressResponse.addresses[0])
         }
-    }, [addressResponse])
+    }, [addressResponse, setAddress])
+
+    if (!user) {
+        return <AddressSkeleton />;
+    }
+
     return (
         <TabsContent value="addresses" className="space-y-6">
             {isAddressLoading ? <AddressSkeleton /> :

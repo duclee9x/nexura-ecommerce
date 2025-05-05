@@ -1,0 +1,10 @@
+.vscode
+.git
+.gitignore
+.dockerignore
+.next
+node_modules
+prisma-client
+**/*/node_modules
+**/*/dist
+**/*/prisma-client

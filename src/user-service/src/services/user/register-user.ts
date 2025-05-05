@@ -1,13 +1,13 @@
-import { PrismaClient } from '../../db/prisma-client'
+import { PrismaClient } from '@nexura/user-service/src/db/prisma-client'
 
-import { createToken, SpanStatusCode, hashPassword, withTracing, defaultTracer, logger } from '@nexura/common/utils';
+import { createToken, SpanStatusCode, hashPassword, withTracing, api, logger } from '@nexura/common/utils';
 import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
 import { status } from '@grpc/grpc-js';
 import { RegisterUserRequest, RegisterUserResponse } from "@nexura/grpc_gateway/protos";
 import { RegisterUserSchema } from "@nexura/common/validators";
 import { sendWelcomeEmailGateway } from '@nexura/grpc_gateway/gateway';
 
-const tracer = defaultTracer('UserRegister');
+const tracer = api.trace.getTracer('UserRegister');
 const prisma = new PrismaClient();
 
 const resultMessage = {

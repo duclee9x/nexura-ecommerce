@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, Minus, Plus, X, ShoppingBag, ArrowRight, Info, Loader2 } from "lucide-react"
 import { useCart } from "@/contexts/cart-context"
+import CartHooks from "@/hooks/cart-hooks"
 import { useCurrency } from "@/contexts/currency-context"
 import { toast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
@@ -26,20 +27,18 @@ import { useIsMutating, useIsFetching } from "@tanstack/react-query"
 import Stripe from "@/public/stripe.png"
 import Vnpay from "@/public/vnpay.webp"
 import CashOnDelivery from "@/public/cod.png"
-// Shipping options
-const shippingOptions = [
-  { id: "free", name: "Free Shipping", price: 0, description: "7-10 business days", minOrderValue: 50 },
-  { id: "standard", name: "Standard Shipping", price: 12, description: "3-5 business days" },
-  { id: "express", name: "Express Shipping", price: 20, description: "1-2 business days" },
-] as const
 
 
 export default function CartPage() {
   const router = useRouter()
-  const { items, removeItem, updateQuantity, clearCart, isLoading: isCartLoading, getVariants } = useCart()
+  const { useGetVariants } = CartHooks()
+  const { items, isLoading: isCartLoading, } = useCart()
   const { formatPrice } = useCurrency()
-  // const [promoCode, setPromoCode] = useState("")
-  const { data: variants } = getVariants(items.map((item) => item.variantId))
+  const { useUpdateItem, useRemoveItem, useClearCart } = CartHooks()
+  const { mutateAsync: updateQuantity } = useUpdateItem
+  const { mutateAsync: removeItem } = useRemoveItem
+  const { mutateAsync: clearCart } = useClearCart
+  const { data: variants } = useGetVariants(items.map((item) => item.variantId))
   const isUpdatingQuantity = useIsMutating({ mutationKey: ["updateQuantity"] })
   const isUpdatingVariants = useIsFetching({ queryKey: ["cartVariants"] })
   const { user } = useSession()
@@ -64,9 +63,6 @@ export default function CartPage() {
     )
   }
 
-  // Check if free shipping is available
-  const isFreeShippingAvailable = subtotal >= 50
-
   const handleQuantityChange = async (productId: string, variantId: string, newQuantity: number) => {
     if (newQuantity < 1) return
     if (!user || !user.id) return
@@ -87,46 +83,44 @@ export default function CartPage() {
     try {
       // Update the backend
       await updateQuantity({
+        userId: user.id,
         productId,
         variantId,
         quantity: newQuantity,
-        userId: user.id,
         image: ""
       })
     } catch (error) {
       toast({
         title: "Error updating quantity",
-        description: "Please try again",
+        description: error instanceof Error ? error.message : "Please try again",
         variant: "destructive",
       })
     }
   }
 
   const handleRemoveItem = async (productId: string, variantId: string) => {
-    // Optimistically update the UI
+    if (!user || !user.id) return
     try {
-      // Update the backend
-      await removeItem(productId, variantId)
+      await removeItem({ userId: user.id, productId, variantId })
     } catch (error) {
       // Revert optimistic update on error
       toast({
         title: "Error removing item",
-        description: "Please try again",
+        description: error instanceof Error ? error.message : "Please try again",
         variant: "destructive",
       })
     }
   }
 
   const handleClearCart = async () => {
-
+    if (!user || !user.id) return
     try {
-      // Update the backend
-      await clearCart()
+      await clearCart(user.id)
     } catch (error) {
       // Revert optimistic update on error
       toast({
         title: "Error clearing cart",
-        description: "Please try again",
+        description: error instanceof Error ? error.message : "Please try again",
         variant: "destructive",
       })
     }

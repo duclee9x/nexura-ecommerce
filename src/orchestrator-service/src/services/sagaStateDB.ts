@@ -1,4 +1,4 @@
-import { PrismaClient } from '../db/prisma-client';
+import { PrismaClient } from "@nexura/orchestrator-service/src/db/prisma-client";
 const prisma = new PrismaClient();
 
 export const createSaga = async () => {

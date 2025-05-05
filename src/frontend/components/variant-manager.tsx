@@ -42,7 +42,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProductVariant, ProductAttribute, VariantAttribute } from "@nexura/grpc_gateway/protos"
 import type { ProductImage } from "@/components/image-gallery"
-import { useProductActions } from "@/hooks/use-product"
+import ProductHooks from "@/hooks/product-hooks"
 interface VariantManagerProps {
   variants: ProductVariant[]
   onVariantUpdate: (variants: ProductVariant[], action: "delete" | "update") => void
@@ -67,13 +67,14 @@ export const VariantManager = memo(function VariantManager({
   attributes = [],
   productImages,
 }: VariantManagerProps) {
-  const { getWarehouses } = useProductActions()
+  const { useGetWarehouses } = ProductHooks()
   const [productVariants, setProductVariants] = useState<ProductVariant[]>(variants)
   const [isAddingVariant, setIsAddingVariant] = useState(false)
   const [newVariant, setNewVariant] = useState<ProductVariant>({
     id: "",
     sku: "",
     price: basePrice,
+    name: "",
     stock: {
       quantity: 0,
       reserved: 0,
@@ -98,7 +99,7 @@ export const VariantManager = memo(function VariantManager({
   const [activeTab, setActiveTab] = useState("manual")
   const [filterAttribute, setFilterAttribute] = useState<string | null>(null)
   const [filterValue, setFilterValue] = useState<string | null>(null)
-  const { data: warehouses } = getWarehouses()
+  const { data: warehouses } = useGetWarehouses()
   // Get variantable attributes
   const variantableAttributes = useMemo(() => {
     return attributes.filter((attr) => attr.variantable)
@@ -124,11 +125,12 @@ export const VariantManager = memo(function VariantManager({
   }, [variants])
 
   // Reset new variant form
-  const resetNewVariantForm = () => {
+  const resetNewVariantForm = useCallback(() => {
     setNewVariant({
       id: "",
       sku: `${baseSku}-${productVariants.length + 1}`,
       price: basePrice,
+      name: "",
       stock: {
         quantity: 0,
         reserved: 0,
@@ -144,17 +146,17 @@ export const VariantManager = memo(function VariantManager({
       warehouseId: "",
     })
     setErrors({})
-  }
+  }, [baseSku, basePrice, productVariants.length, attributes])
 
 
   // Validate variant
-  const validateVariant = (variant: ProductVariant): Record<string, string> => {
+  const validateVariant = useCallback((variant: ProductVariant): Record<string, string> => {
     const errors: Record<string, string> = {}
 
     // Basic validation
     if (!variant.sku) errors.sku = "SKU is required"
     if (variant.price <= 0) errors.price = "Price must be greater than 0"
-    if (variant.stock?.quantity && (variant.stock.quantity < 0 || isNaN(variant.stock.quantity))) errors.stock = "Stock must be a positive number"
+    if (variant.stock?.quantity && (variant.stock.quantity < 0 || Number.isNaN(variant.stock.quantity))) errors.stock = "Stock must be a positive number"
     if (variant.lowStockThreshold !== undefined && variant.lowStockThreshold < 0) {
       errors.lowStockThreshold = "Low stock threshold must be a positive number"
     }
@@ -183,7 +185,7 @@ export const VariantManager = memo(function VariantManager({
     }
 
     return errors
-  }
+  }, [attributes, selectedVariantAttributes])
 
   // Handle adding a new variant
   const handleAddVariant = useCallback(() => {
@@ -203,7 +205,7 @@ export const VariantManager = memo(function VariantManager({
       title: "Variant Added",
       description: "The variant has been added successfully.",
     })
-  }, [newVariant, productVariants, onVariantUpdate])
+  }, [newVariant, productVariants, onVariantUpdate, resetNewVariantForm, validateVariant])
 
   // Handle editing a variant
   const startEditingVariant = (variantId: string) => {
@@ -315,22 +317,6 @@ export const VariantManager = memo(function VariantManager({
     }
   }
 
-  // Handle select change for variant name
-  const handleVariantNameChange = (value: string) => {
-    setNewVariant((prev) => ({
-      ...prev,
-      name: value,
-    }))
-
-    // Clear error for name field if it exists
-    if (errors.name) {
-      setErrors((prev) => {
-        const updated = { ...prev }
-        delete updated.name
-        return updated
-      })
-    }
-  }
   // Handle attribute value change for a variant
   const handleAttributeValueChange = useCallback((attributeId: string, value: string, isColorName: boolean = false) => {
     
@@ -410,29 +396,6 @@ export const VariantManager = memo(function VariantManager({
       })
     }
   }, [attributes, newVariant, productVariants, onVariantUpdate, errors])
-
-  // Handle color change
-  const handleColorChange = (color: string) => {
-    setNewVariant((prev) => ({
-      ...prev,
-      attributes: prev.attributes?.map((attr) => {
-        const attribute = attributes.find((a) => a.id === attr.id)
-        if (attribute?.name.toLowerCase() === "color") {
-          return { ...attr, value: color, extraValue: color }
-        }
-        return attr
-      }) || [],
-    }))
-
-    // Clear error for value field if it exists
-    if (errors.value) {
-      setErrors((prev) => {
-        const updated = { ...prev }
-        delete updated.value
-        return updated
-      })
-    }
-  }
 
   // Handle image selection
   const handleImageSelect = (imageId: string) => {
@@ -740,7 +703,7 @@ export const VariantManager = memo(function VariantManager({
     if (variantableAttributes.length > 0 && selectedVariantAttributes.length === 0) {
       setSelectedVariantAttributes(variantableAttributes.map((attr) => attr.id))
     }
-  }, [variantableAttributes])
+  }, [variantableAttributes, selectedVariantAttributes])
 
   // Handle warehouse selection
   const handleWarehouseSelect = (warehouseId: string) => {

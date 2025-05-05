@@ -301,13 +301,14 @@ export interface SEO {
 // Notification Schema
 export interface Notification extends BaseEntity {
   userId: ID
-  type: "order" | "inventory" | "customer" | "system" | "chat" | "blog"
+  type: "order" | "inventory" | "customer" | "system" | "chat" | "blog" | "review" | "stock"
   title: string
   content: string
   link?: string
   read: boolean
   priority: "low" | "medium" | "high"
   expiresAt?: Timestamp
+  dateCreated: Timestamp
 }
 
 // Chat Message Schema

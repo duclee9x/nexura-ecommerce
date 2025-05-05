@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { AdminSidebar } from "@/components/admin-sidebar"
 import { Button } from "@/components/ui/button"
@@ -47,7 +46,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { Progress } from "@/components/ui/progress"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -151,7 +149,6 @@ const folders = ["All", "Products", "Banners", "Blog", "About"]
 const availableTags = ["hero", "featured", "backpack", "blue", "banner", "sale", "summer", "blog", "travel", "cover", "lifestyle", "outdoor", "team", "company", "detail", "closeup", "article"]
 
 export default function MediaLibraryPage() {
-  const router = useRouter()
   const [media, setMedia] = useState(sampleMedia)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedFolder, setSelectedFolder] = useState("All")
