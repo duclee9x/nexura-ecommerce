@@ -7,18 +7,17 @@ import { Label } from "@/components/ui/label";
 import { RadioGroupItem, RadioGroup } from "@/components/ui/radio-group";
 import { TabsContent } from "@/components/ui/tabs";
 import Image from "next/image";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { generateAvatar } from "@/lib/utils";
 import { toast } from "sonner";
-import { onPersonalSubmitAction, FormState } from "../personalSubmit";
 import { useState } from "react";
 import { AvatarCropperModal } from "@/components/ui/avatar-cropper-modal";
-import { User } from "@nexura/grpc_gateway/protos";
+import { UpdateUserRequest, User, UpdateUserResponse } from "@nexura/grpc_gateway/protos";
 import { PersonalSkeleton } from "../skeleton";
 import { uploadToImageKit } from "@/lib/imagekit";
-import { useUserActions } from "@/hooks/use-user";
+import { UseMutationResult } from "@tanstack/react-query";
 interface PersonalTabProps {
-    user: User | null
+    user: User
+    useUpdateUser: UseMutationResult<UpdateUserResponse, Error, UpdateUserRequest>
 }
 
 interface FormData {
@@ -37,10 +36,6 @@ interface ImageState {
     isCropperOpen: boolean
 }
 
-const initialFormState: FormState = {
-    message: "",
-    success: false
-}
 
 const initialImageState: ImageState = {
     selectedImage: null,
@@ -49,9 +44,9 @@ const initialImageState: ImageState = {
     isCropperOpen: false
 }
 
-export default function PersonalTab({ user }: PersonalTabProps) {
+export default function PersonalTab({ user, useUpdateUser }: PersonalTabProps) {
 
-    const { updateUser } = useUserActions()
+    const { mutateAsync: updateUser, isPending, error } = useUpdateUser
     const [imageState, setImageState] = useState<ImageState>(initialImageState);
     const [formData, setFormData] = useState<FormData>({
         firstName: user?.firstName || "",
@@ -62,7 +57,6 @@ export default function PersonalTab({ user }: PersonalTabProps) {
         dateOfBirth: user?.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : ""
     });
 
-    const { mutate: updateUserMutation, isPending, error } = updateUser
 
     const getFieldError = (fieldName: string): string | undefined => {
         if (!error?.message) return undefined;
@@ -120,7 +114,7 @@ export default function PersonalTab({ user }: PersonalTabProps) {
 
         if (formData.dateOfBirth && formData.dateOfBirth !== user?.dateOfBirth) {
             const date = new Date(formData.dateOfBirth);
-            if (isNaN(date.getTime())) {
+            if (Number.isNaN(date.getTime())) {
                 toast.error("Invalid date format");
                 return;
             }
@@ -142,7 +136,7 @@ export default function PersonalTab({ user }: PersonalTabProps) {
 
 
         if (Object.keys(updatedFields).length > 1) {
-            updateUserMutation({
+            updateUser({
                 user: {
                     id: user?.id || "",
                     firstName: updatedFields.firstName || "",

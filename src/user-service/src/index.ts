@@ -1,11 +1,11 @@
 import { AddressServiceService, UserServiceService } from '@nexura/grpc_gateway/protos';
-import { gracefulShutdown, startServer } from '@nexura/common/utils';
+import { gracefulShutdown, startServer, tracerInstrumentation } from '@nexura/common/utils';
 import { addressService } from "./services/address/address";
 import { userService } from './services/user/user';
 
 // Start the server
 const port = process.env.GRPC_PORT || '50051';
-
+tracerInstrumentation('User Service')
 const services = [
     {
         service: UserServiceService,

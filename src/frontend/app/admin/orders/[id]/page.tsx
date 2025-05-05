@@ -1,20 +1,37 @@
 "use client"
 
 import type React from "react"
+import { useState, useEffect } from "react"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import Image from "next/image"
+import Link from "next/link"
+
 import { AdminSidebar } from "@/components/admin-sidebar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/hooks/use-toast"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Skeleton } from "@/components/ui/skeleton"
+import { getStatusBadgeColor, mapStatus } from "@/lib/utils"
+
+
 import {
   ArrowLeft,
   Download,
@@ -32,163 +49,297 @@ import {
   Mail,
   Plus,
   AlertTriangle,
+  AlertCircle,
 } from "lucide-react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 
+import { toast } from "@/hooks/use-toast"
+import OrderHooks from "@/hooks/order-hooks"
+import { useCurrency } from "@/contexts/currency-context"
+import type { OrderStatus } from "@nexura/grpc_gateway/protos"
 // Sample order data
-const orderData = {
-  id: "ORD-2023-1001",
-  date: "2023-03-15T10:30:00",
-  customer: {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
-    address: {
-      street: "123 Main Street",
-      city: "New York",
-      state: "NY",
-      zip: "10001",
-      country: "United States",
-    },
+
+const orderStatuses = [
+  {
+    value: "ORDER_PENDING",
+    label: "Pending",
   },
-  items: [
-    {
-      id: 1,
-      name: "Urban Backpack",
-      sku: "BP-URB-001",
-      price: 120.0,
-      quantity: 1,
-      image: "/placeholder.svg?height=80&width=80&text=Urban+Backpack",
-    },
-    {
-      id: 8,
-      name: "Laptop Sleeve",
-      sku: "ACC-LTS-008",
-      price: 45.0,
-      quantity: 1,
-      image: "/placeholder.svg?height=80&width=80&text=Laptop+Sleeve",
-    },
-    {
-      id: 10,
-      name: "Water Bottle",
-      sku: "ACC-WBT-010",
-      price: 18.0,
-      quantity: 3,
-      image: "/placeholder.svg?height=80&width=80&text=Water+Bottle",
-    },
-  ],
-  status: "processing",
-  paymentStatus: "paid",
-  paymentMethod: "Credit Card (Visa ****4567)",
-  shippingMethod: "Standard Shipping",
-  trackingNumber: "TRK123456789US",
-  subtotal: 201.0,
-  shipping: 12.99,
-  tax: 32.0,
-  total: 245.99,
-  notes: "Customer requested gift wrapping for the backpack.",
-  history: [
-    {
-      date: "2023-03-15T10:30:00",
-      status: "created",
-      note: "Order placed by customer",
-    },
-    {
-      date: "2023-03-15T10:35:00",
-      status: "payment_received",
-      note: "Payment received via Credit Card",
-    },
-    {
-      date: "2023-03-15T14:20:00",
-      status: "processing",
-      note: "Order is being processed",
-    },
-  ],
-}
+  {
+    value: "ORDER_PAYMENT_PAID",
+    label: "Payment Paid",
+  },
+  {
+    value: "ORDER_PROCESSING",
+    label: "Processing",
+  },
+  {
+    value: "ORDER_SHIPPED",
+    label: "Shipped",
+  },
+  {
+    value: "ORDER_COMPLETED",
+    label: "Completed",
+  },
+  {
+    value: "ORDER_CANCELLED",
+    label: "Cancelled",
+  },
+]
 
-export default function OrderDetailPage({ params }: { params: { id: string } }) {
+
+export default function OrderDetailPage() {
   const router = useRouter()
-  const orderId = params.id
-  const [order, setOrder] = useState(orderData)
+  const { id } = useParams()
+  const { useGetOrder, useUpdateOrderStatus, useAddOrderNote, useUpdateTrackingNumber } = OrderHooks()
+  const { mutate: updateOrderStatus } = useUpdateOrderStatus
+  const { mutate: addOrderNote } = useAddOrderNote
+  const { mutate: updateTrackingNumber } = useUpdateTrackingNumber
+  const { data: order, isPending } = useGetOrder(id as string)
   const [activeTab, setActiveTab] = useState("details")
-  const [orderStatus, setOrderStatus] = useState(order.status)
-  const [trackingNumber, setTrackingNumber] = useState(order.trackingNumber || "")
+  const [orderStatus, setOrderStatus] = useState(order?.status || "")
+  const [trackingNumber, setTrackingNumber] = useState("")
   const [noteText, setNoteText] = useState("")
+  const { formatDate, formatPrice } = useCurrency()
 
-  // Format date
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date)
+  // Update local state when order data changes
+  useEffect(() => {
+    if (order) {
+      setOrderStatus(order.status)
+      setTrackingNumber(order.shipping?.tracking?.number || "")
+    }
+  }, [order])
+
+  if (isPending) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <div className="flex flex-1">
+          <AdminSidebar />
+          <main className="flex-1 p-6">
+            {/* Header Skeleton */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <Button variant="ghost" size="icon" onClick={() => router.push("/admin/orders")} className="mr-2">
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <div>
+                  <Skeleton className="h-8 w-48 mb-2" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Skeleton className="h-9 w-24" />
+                <Skeleton className="h-9 w-24" />
+                <Skeleton className="h-9 w-24" />
+              </div>
+            </div>
+
+            {/* Main Content Skeleton */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              {/* Order Status Card Skeleton */}
+              <Card className="lg:col-span-2">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <Skeleton className="h-6 w-32 mb-2" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                  <Skeleton className="h-9 w-[180px]" />
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex flex-col md:flex-row md:items-center gap-4">
+                      <div className="flex-1">
+                        <Skeleton className="h-4 w-24 mb-2" />
+                        <div className="flex">
+                          <Skeleton className="h-9 flex-1" />
+                          <Skeleton className="h-9 w-20 ml-2" />
+                        </div>
+                      </div>
+                      <div>
+                        <Skeleton className="h-4 w-24 mb-2" />
+                        <Skeleton className="h-6 w-32" />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between border rounded-md p-4 bg-muted/50">
+                      <div className="flex items-center">
+                        <Skeleton className="w-10 h-10 rounded-full mr-3" />
+                        <div>
+                          <Skeleton className="h-4 w-32 mb-1" />
+                          <Skeleton className="h-3 w-24" />
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <Skeleton className="w-10 h-10 rounded-full mr-3" />
+                        <div>
+                          <Skeleton className="h-4 w-32 mb-1" />
+                          <Skeleton className="h-3 w-24" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Customer Info Card Skeleton */}
+              <Card>
+                <CardHeader>
+                  <Skeleton className="h-6 w-32 mb-2" />
+                  <Skeleton className="h-4 w-24" />
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center">
+                      <Skeleton className="w-10 h-10 rounded-full mr-3" />
+                      <div>
+                        <Skeleton className="h-4 w-32 mb-1" />
+                        <Skeleton className="h-3 w-24" />
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div>
+                      <Skeleton className="h-4 w-32 mb-2" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div>
+                      <Skeleton className="h-4 w-32 mb-2" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                      </div>
+                    </div>
+
+                    <Skeleton className="h-9 w-full" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Tabs Skeleton */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+              <TabsList className="grid w-full grid-cols-3 md:w-[400px]">
+                <TabsTrigger value="details">Order Items</TabsTrigger>
+                <TabsTrigger value="history">History</TabsTrigger>
+                <TabsTrigger value="notes">Notes</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="details" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <Skeleton className="h-6 w-32 mb-2" />
+                    <Skeleton className="h-4 w-24" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="rounded-md border">
+                      <div className="p-4">
+                        <div className="grid grid-cols-5 gap-4">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-4 w-24" />
+                        </div>
+                      </div>
+                      <div className="space-y-4 p-4">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="grid grid-cols-5 gap-4">
+                            <div className="flex items-center gap-3">
+                              <Skeleton className="w-10 h-10 rounded-md" />
+                              <Skeleton className="h-4 w-32" />
+                            </div>
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-4 w-16" />
+                            <Skeleton className="h-4 w-16" />
+                            <Skeleton className="h-4 w-16" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-6 space-y-4">
+                      <div className="flex justify-between">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-16" />
+                      </div>
+                      <div className="flex justify-between">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-16" />
+                      </div>
+                      <div className="flex justify-between">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-16" />
+                      </div>
+                      <Separator />
+                      <div className="flex justify-between">
+                        <Skeleton className="h-4 w-20" />
+                        <Skeleton className="h-4 w-16" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </main>
+        </div>
+      </div>
+    )
   }
 
+  if (!order) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <div className="flex flex-1">
+          <AdminSidebar />
+          <main className="flex-1 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center">
+                <Button variant="ghost" size="icon" onClick={() => router.push("/admin/orders")} className="mr-2">
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <div>
+                  <h1 className="text-3xl font-bold dark:text-white">Order Not Found</h1>
+                </div>
+              </div>
+            </div>
+
+            <div className="max-w-3xl mx-auto text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-900 mb-4">
+                <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2 dark:text-white">Order Not Found</h2>
+              <p className="text-muted-foreground mb-8">
+                We couldn't find an order with the provided order number. Please check the order number and try again.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button asChild>
+                  <Link href="/admin/orders">View All Orders</Link>
+                </Button>
+                <Button variant="outline" onClick={() => router.back()}>
+                  Go Back
+                </Button>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    )
+  }
+    console.log('order', order)
   // Get status badge color
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-      case "processing":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-      case "shipped":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
-      case "cancelled":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-      case "created":
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-      case "payment_received":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-    }
-  }
-
-  // Get payment status badge color
-  const getPaymentStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case "paid":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-      case "refunded":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-    }
-  }
+  
 
   // Handle status change
-  const handleStatusChange = (status: string) => {
-    setOrderStatus(status)
+  const handleStatusChange = (status: OrderStatus) => {
 
     // In a real app, you would update the order status via API
-    setOrder((prev) => ({
-      ...prev,
-      status,
-      history: [
-        ...prev.history,
-        {
-          date: new Date().toISOString(),
-          status,
-          note: `Order status changed to ${status}`,
-        },
-      ],
-    }))
+    updateOrderStatus({ orderId: id as string, status })
 
     toast({
       title: "Status Updated",
@@ -197,22 +348,13 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
   }
 
   // Handle tracking number update
-  const handleTrackingUpdate = () => {
+  const handleTrackingUpdate = (trackingNumber: string) => {
     if (!trackingNumber.trim()) return
 
-    // In a real app, you would update the tracking number via API
-    setOrder((prev) => ({
-      ...prev,
-      trackingNumber,
-      history: [
-        ...prev.history,
-        {
-          date: new Date().toISOString(),
-          status: "tracking_updated",
-          note: `Tracking number updated to ${trackingNumber}`,
-        },
-      ],
-    }))
+    // // In a real app, you would update the tracking number via API
+    // updateOrderStatus(id as string, orderStatus as OrderStatus, trackingNumber)
+
+    updateTrackingNumber({ orderId: id as string, trackingNumber: trackingNumber.trim() })
 
     toast({
       title: "Tracking Updated",
@@ -224,19 +366,10 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
   const handleAddNote = () => {
     if (!noteText.trim()) return
 
-    // In a real app, you would add the note via API
-    setOrder((prev) => ({
-      ...prev,
-      history: [
-        ...prev.history,
-        {
-          date: new Date().toISOString(),
-          status: "note_added",
-          note: noteText,
-        },
-      ],
-    }))
-
+    addOrderNote({
+      orderId: id as string,
+      note: noteText,
+    })
     setNoteText("")
 
     toast({
@@ -246,27 +379,20 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
   }
 
   // Handle cancel order
-  const handleCancelOrder = () => {
-    // In a real app, you would cancel the order via API
-    setOrder((prev) => ({
-      ...prev,
-      status: "cancelled",
-      history: [
-        ...prev.history,
-        {
-          date: new Date().toISOString(),
-          status: "cancelled",
-          note: "Order cancelled by admin",
-        },
-      ],
-    }))
+  const handleCancelOrder = async () => {
+    if (!id || Array.isArray(id)) return
 
-    setOrderStatus("cancelled")
-
-    toast({
-      title: "Order Cancelled",
-      description: "Order has been cancelled.",
-    })
+    try {
+     updateOrderStatus({ orderId: id as string, status: "ORDER_CANCELLED" as OrderStatus })
+      
+    } catch (error) {
+      console.error("Error cancelling order:", error)
+      toast({
+        title: "Error",
+        description: "Failed to cancel the order. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
@@ -284,7 +410,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
               <div>
                 <h1 className="text-3xl font-bold dark:text-white">Order Details</h1>
                 <p className="text-muted-foreground">
-                  {order.id} • {formatDate(order.date)}
+                  {order.id} • {formatDate(order.createdAt)}
                 </p>
               </div>
             </div>
@@ -302,9 +428,13 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
 
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="outline" className="text-destructive hover:text-destructive">
+                  <Button 
+                    variant="outline" 
+                    className="text-destructive hover:text-destructive"
+                    disabled={orderStatus === "ORDER_CANCELLED"}
+                  >
                     <XCircle className="h-4 w-4 mr-2" />
-                    Cancel Order
+                    {orderStatus === "ORDER_CANCELLED" ? "Order Cancelled" : "Cancel Order"}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -335,21 +465,22 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                   <CardTitle>Order Status</CardTitle>
                   <CardDescription>
                     Current status:
-                    <Badge className={`ml-2 ${getStatusBadgeColor(orderStatus)}`}>
-                      {orderStatus.charAt(0).toUpperCase() + orderStatus.slice(1)}
+                    <Badge className={`ml-2 ${getStatusBadgeColor(order.status)}`}>
+                      {mapStatus(order.status)}
                     </Badge>
                   </CardDescription>
                 </div>
 
-                <Select value={orderStatus} onValueChange={handleStatusChange}>
+                <Select value={order.status} onValueChange={handleStatusChange}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Update Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="processing">Processing</SelectItem>
-                    <SelectItem value="shipped">Shipped</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                    {orderStatuses.map((status) => (
+                      <SelectItem key={status.value} value={status.value}>
+                        {status.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </CardHeader>
@@ -366,20 +497,20 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                           placeholder="Enter tracking number..."
                           className="rounded-r-none"
                         />
-                        <Button onClick={handleTrackingUpdate} className="rounded-l-none">
+                        <Button onClick={() => handleTrackingUpdate(trackingNumber)} className="rounded-l-none">
                           Update
                         </Button>
                       </div>
                     </div>
 
-                    <div>
+                    {/* <div>
                       <Label>Payment Status</Label>
                       <div className="mt-1">
-                        <Badge className={`${getPaymentStatusBadgeColor(order.paymentStatus)}`}>
-                          {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
+                        <Badge className={`${getPaymentStatusBadgeColor(order.payment?. || "")}`}>
+                          {order.payment?.status?.charAt(0).toUpperCase() + order.payment?.status?.slice(1)}
                         </Badge>
                       </div>
-                    </div>
+                    </div> */}
                   </div>
 
                   <div className="flex items-center justify-between border rounded-md p-4 bg-muted/50">
@@ -388,9 +519,9 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                         <Truck className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <p className="font-medium">{order.shippingMethod}</p>
-                        {order.trackingNumber && (
-                          <p className="text-sm text-muted-foreground">Tracking: {order.trackingNumber}</p>
+                        <p className="font-medium">{order.shipping?.method}</p>
+                        {order.shipping?.tracking?.number && (
+                          <p className="text-sm text-muted-foreground">Tracking: {order.shipping?.tracking?.number}</p>
                         )}
                       </div>
                     </div>
@@ -400,8 +531,8 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                         <CreditCard className="h-5 w-5 text-primary" />
                       </div>
                       <div>
-                        <p className="font-medium">{order.paymentMethod}</p>
-                        <p className="text-sm text-muted-foreground">{formatDate(order.date)}</p>
+                        <p className="font-medium">{order.payment?.method}</p>
+                        <p className="text-sm text-muted-foreground">{formatDate(order.createdAt)}</p>
                       </div>
                     </div>
                   </div>
@@ -421,7 +552,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                       <User className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <p className="font-medium">{order.customer.name}</p>
+                      <p className="font-medium">{order.user?.firstName} {order.user?.lastName}</p>
                       <p className="text-sm text-muted-foreground">Customer</p>
                     </div>
                   </div>
@@ -433,11 +564,11 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                     <div className="space-y-2">
                       <div className="flex items-center">
                         <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span>{order.customer.email}</span>
+                        <span>{order.user?.email}</span>
                       </div>
                       <div className="flex items-center">
                         <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span>{order.customer.phone}</span>
+                        <span>{order.user?.phone}</span>
                       </div>
                     </div>
                   </div>
@@ -449,11 +580,23 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                     <div className="flex items-start">
                       <MapPin className="h-4 w-4 mr-2 text-muted-foreground mt-0.5" />
                       <div>
-                        <p>{order.customer.address.street}</p>
-                        <p>
-                          {order.customer.address.city}, {order.customer.address.state} {order.customer.address.zip}
-                        </p>
-                        <p>{order.customer.address.country}</p>
+                        {order.shippingAddress ? (
+                          <>
+                            <p>{order.shippingAddress?.street}</p>
+                            {order.shippingAddress?.countryName === "Vietnam" ? (
+                              <p>
+                                {order.shippingAddress?.vnWardName}, {order.shippingAddress?.vnDistrictName}, {order.shippingAddress?.vnProvinceName}
+                              </p>
+                            ) : (
+                              <p>
+                                {order.shippingAddress?.city}, {order.shippingAddress?.state} {order.shippingAddress?.zip}
+                              </p>
+                            )}
+                            <p>{order.shippingAddress?.countryName}</p>
+                          </>
+                        ) : (
+                          <p className="text-muted-foreground">No shipping address available</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -461,7 +604,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => router.push(`/admin/customers/${order.customer.email}`)}
+                    onClick={() => router.push(`/admin/customers/${order.user?.id}`)}
                   >
                     View Customer Profile
                   </Button>
@@ -504,18 +647,21 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                                 <div className="relative w-10 h-10 rounded-md overflow-hidden">
                                   <Image
                                     src={item.image || "/placeholder.svg"}
-                                    alt={item.name}
+                                    alt={item.variantName}
                                     fill
                                     className="object-cover"
                                   />
                                 </div>
-                                <span className="font-medium">{item.name}</span>
+                                <div>
+                                  <p className="font-medium">{item.productName}</p>
+                                  <p className="font-medium">{item.variantName}</p>
+                                </div>
                               </div>
                             </TableCell>
                             <TableCell>{item.sku}</TableCell>
-                            <TableCell className="text-right">${item.price.toFixed(2)}</TableCell>
+                            <TableCell className="text-right">{formatPrice(item.price)}</TableCell>
                             <TableCell className="text-right">{item.quantity}</TableCell>
-                            <TableCell className="text-right">${(item.price * item.quantity).toFixed(2)}</TableCell>
+                            <TableCell className="text-right">{formatPrice(item.price * item.quantity)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -525,20 +671,16 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                   <div className="mt-6 space-y-4">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Subtotal</span>
-                      <span>${order.subtotal.toFixed(2)}</span>
+                      <span>{formatPrice(order.items.reduce((acc, item) => acc + item.price * item.quantity, 0))}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Shipping</span>
-                      <span>${order.shipping.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Tax</span>
-                      <span>${order.tax.toFixed(2)}</span>
+                      <span>{formatPrice(order.shipping?.cost || 0)}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between font-medium">
                       <span>Total</span>
-                      <span>${order.total.toFixed(2)}</span>
+                      <span>{formatPrice(order.totalAmount)}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -554,38 +696,34 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    {order.history.map((event, index) => (
+                    {order.statusHistory.map((event, index) => (
                       <div key={index} className="flex">
                         <div className="mr-4 flex flex-col items-center">
                           <div
-                            className={`rounded-full p-1 ${
-                              event.status === "cancelled"
+                            className={`rounded-full p-1 ${event.status === "ORDER_CANCELLED"
                                 ? "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-400"
                                 : "bg-primary/10 text-primary"
-                            }`}
+                              }`}
                           >
-                            {event.status === "created" && <Package className="h-5 w-5" />}
-                            {event.status === "payment_received" && <CreditCard className="h-5 w-5" />}
-                            {event.status === "processing" && <Clock className="h-5 w-5" />}
-                            {event.status === "shipped" && <Truck className="h-5 w-5" />}
-                            {event.status === "completed" && <CheckCircle className="h-5 w-5" />}
-                            {event.status === "cancelled" && <XCircle className="h-5 w-5" />}
-                            {event.status === "tracking_updated" && <Truck className="h-5 w-5" />}
-                            {event.status === "note_added" && <Send className="h-5 w-5" />}
+                            {event.status === "ORDER_PENDING" && <Package className="h-5 w-5" />}
+                            {event.status === "ORDER_PAYMENT_PAID" && <CreditCard className="h-5 w-5" />}
+                            {event.status === "ORDER_PROCESSING" && <Clock className="h-5 w-5" />}
+                            {event.status === "ORDER_SHIPPED" && <Truck className="h-5 w-5" />}
+                            {event.status === "ORDER_COMPLETED" && <CheckCircle className="h-5 w-5" />}
+                            {event.status === "ORDER_CANCELLED" && <XCircle className="h-5 w-5" />}
+                            {event.status === "ORDER_TRACKING_UPDATED" && <Truck className="h-5 w-5" />}
+                            {event.status === "ORDER_NOTE_ADDED" && <Send className="h-5 w-5" />}
                           </div>
-                          {index < order.history.length - 1 && <div className="h-full w-px bg-border mt-1"></div>}
+                          {index < order.statusHistory.length - 1 && <div className="h-full w-px bg-border mt-1"></div>}
                         </div>
                         <div className="pb-6">
                           <div className="flex items-center">
                             <Badge className={`${getStatusBadgeColor(event.status)}`}>
-                              {event.status
-                                .split("_")
-                                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                                .join(" ")}
+                              {mapStatus(event.status)}
                             </Badge>
-                            <span className="text-sm text-muted-foreground ml-2">{formatDate(event.date)}</span>
+                            <span className="text-sm text-muted-foreground ml-2">{formatDate(event.createdAt)}</span>
                           </div>
-                          <p className="mt-1">{event.note}</p>
+                          <p className="mt-1">{event.description}</p>
                         </div>
                       </div>
                     ))}
@@ -603,13 +741,15 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {order.notes && (
+                    {order.notes.length > 0 && (
                       <div className="p-4 border rounded-md bg-muted/50">
                         <div className="flex items-center mb-2">
                           <AlertTriangle className="h-4 w-4 mr-2 text-amber-500" />
                           <h3 className="font-medium">Customer Note</h3>
                         </div>
-                        <p>{order.notes}</p>
+                        {order.notes.map((note) => (
+                          <p key={note.id}>{note.note}</p>
+                        ))}
                       </div>
                     )}
 
@@ -631,19 +771,17 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                     <div className="mt-6">
                       <h3 className="font-medium mb-4">Previous Notes</h3>
                       <div className="space-y-4">
-                        {order.history
-                          .filter((event) => event.status === "note_added")
-                          .map((note, index) => (
-                            <div key={index} className="p-4 border rounded-md">
+                        {order.notes.map((note, index) => (
+                          <div key={index} className="p-4 border rounded-md">
                               <div className="flex justify-between mb-2">
                                 <span className="font-medium">Admin Note</span>
-                                <span className="text-sm text-muted-foreground">{formatDate(note.date)}</span>
+                                <span className="text-sm text-muted-foreground">{formatDate(note.createdAt)}</span>
                               </div>
                               <p>{note.note}</p>
                             </div>
                           ))}
 
-                        {order.history.filter((event) => event.status === "note_added").length === 0 && (
+                        {order.notes.length === 0 && (
                           <p className="text-muted-foreground">No notes have been added yet.</p>
                         )}
                       </div>

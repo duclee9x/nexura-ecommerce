@@ -8,8 +8,12 @@ import { forgotPassword } from './forgot-password-user.ts';
 import { validateOTP } from './validate-otp-user.ts';
 import { verifyAccount } from './verify-account-user.ts';
 import { resetPassword } from './reset-password-user.ts';
+import { GetAllUsers } from './get-all-user.ts';
+import { RegisterUserForAdmin } from './register-user-for-admin.ts';
+import { GetBatchUsers } from './get-batch-users.ts';
 export const userService: UntypedServiceImplementation = {
     getUser: GetUser,
+    getAllUsers: GetAllUsers,
     updateUser: UpdateUser,
     deleteUser: DeleteUser,
     registerUser: RegisterUser,
@@ -18,4 +22,6 @@ export const userService: UntypedServiceImplementation = {
     validateOtp: validateOTP,
     verifyAccount: verifyAccount,
     resetPassword: resetPassword,
+    registerUserForAdmin: RegisterUserForAdmin,
+    getBatchUsers: GetBatchUsers,
 }

@@ -12,18 +12,20 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
-import { emailSchema, verificationSchema } from "@/app/\(auth\)/forgot-password/forgotPasswordFormSchema"
+import { emailSchema, verificationSchema } from "@/app/(auth)/reset-password/resetPasswordFormSchema"
 
 import { useActionState } from "react"
-import { handleSubmitEmailAction, handleSubmitVerificationAction } from "@/app/(auth)/forgot-password/forgotPasswordSubmitAction"
-import { useUserHooks } from "@/hooks/use-user"
+import { handleSubmitEmailAction, handleSubmitVerificationAction } from "@/app/(auth)/reset-password/resetPasswordSubmitAction"
+import UserHooks from "@/hooks/user-hooks"
 
 
 type EmailFormValues = z.infer<typeof emailSchema>
 type VerificationFormValues = z.infer<typeof verificationSchema>
 
 export function ForgotPasswordForm() {
-  const { forgotPassword, validateOTP } = useUserHooks()
+  const { useForgotPassword, useValidateOTP } = UserHooks()
+  const { mutateAsync: forgotPassword } = useForgotPassword
+  const { mutateAsync: validateOTP } = useValidateOTP
   const router = useRouter()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
@@ -82,7 +84,7 @@ export function ForgotPasswordForm() {
     setIsLoading(true)
 
     try {
-      const { success, message } = await forgotPassword.mutateAsync(data.email)
+      const { success, message } = await forgotPassword(data.email)
       console.log(success, message)
       if (!success) {
         throw new Error(message)
@@ -112,7 +114,7 @@ export function ForgotPasswordForm() {
     setIsLoading(true)
 
     try {
-      const { success, message, resetToken } = await validateOTP.mutateAsync({ email: userEmail, otp: data.code })
+      const { success, message, resetToken } = await validateOTP({ email: userEmail, otp: data.code })
       if (!success) {
         throw new Error(message)
       }
@@ -140,7 +142,7 @@ export function ForgotPasswordForm() {
 
     setIsLoading(true)
     try {
-      const { success, message } = await forgotPassword.mutateAsync(userEmail)
+      const { success, message } = await forgotPassword(userEmail)
       if (!success) {
         throw new Error(message)
       }

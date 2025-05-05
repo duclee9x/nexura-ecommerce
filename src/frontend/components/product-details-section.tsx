@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { toast } from "@/hooks/use-toast"
 import useEmblaCarousel from 'embla-carousel-react'
 import {
   ChevronLeft,
@@ -26,7 +25,6 @@ import { ProductVariantSelector } from "@/components/product-variant-selector"
 import { Input } from "@/components/ui/input"
 import { Product, ProductVariant } from "@nexura/grpc_gateway/protos"
 import { useCurrency } from "@/contexts/currency-context"
-import { useSession } from "@/contexts/session-context"
 import { ImageViewer } from "@/components/image-viewer"
 
 interface ProductDetailsSectionProps {
@@ -40,7 +38,7 @@ interface ProductDetailsSectionProps {
   currentImageIndex?: number
   onImageIndexChange?: (index: number) => void
   onGoToCart?: () => void
-  stockStatus?: { status: string; color: string; stock: number }
+  stockStatus: { status: string; color: string; stock: number }
   maxQuantity?: number
   isAddingToCart?: boolean
   quantityDisabled?: boolean
@@ -67,9 +65,7 @@ export function ProductDetailsSection({
     dragFree: true,
   })
   const { formatPrice } = useCurrency()
-  const { user } = useSession()
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
-  const { currency } = useCurrency()
 
   // Update carousel when currentImageIndex changes
   useEffect(() => {

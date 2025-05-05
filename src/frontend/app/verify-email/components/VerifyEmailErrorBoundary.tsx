@@ -2,7 +2,6 @@
 
 import { Component, ErrorInfo, ReactNode } from "react"
 import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
 
 interface Props {
   children: ReactNode

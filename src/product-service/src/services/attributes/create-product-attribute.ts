@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../db/prisma-client'
+import { PrismaClient } from '@nexura/product-service/src/db/prisma-client'
 import { handleError } from '@nexura/common/utils'
 import type { handleUnaryCall, sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js'
 import { CreateProductAttributeRequest, CreateProductAttributeResponse } from '@nexura/grpc_gateway/protos'
@@ -7,7 +7,6 @@ const prisma = new PrismaClient()
 
 export const createProductAttribute: handleUnaryCall<CreateProductAttributeRequest, CreateProductAttributeResponse> = async (call: ServerUnaryCall<CreateProductAttributeRequest, CreateProductAttributeResponse>, callback: sendUnaryData<CreateProductAttributeResponse>) => {
     try {
-      console.log("Creating product attribute", call.request)
       const attributeData = call.request.attribute
       if (attributeData == undefined) {
         throw new Error("Attribute data is required")

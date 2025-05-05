@@ -1,16 +1,66 @@
 import { initials } from "@dicebear/collection"
 import { createAvatar } from "@dicebear/core"
+import type { OrderStatus, PaymentStatus, ProductVariant } from "@nexura/grpc_gateway/protos"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+export const mapStatus = (status: OrderStatus | PaymentStatus) => {
+  return status.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, (char: string) => char.toUpperCase());
+}
 
+export const getStatusBadgeColor = (status: OrderStatus) => {
+  switch (status) {
+    case "ORDER_COMPLETED":
+      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+    case "ORDER_PROCESSING":
+      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+    case "ORDER_SHIPPED":
+      return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
+    case "ORDER_CANCELLED":
+      return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+    case "ORDER_PENDING":
+      return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+    case "ORDER_PAYMENT_PAID":
+      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+    default:
+      return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+  }
+}
+export const getStockStatus = (selectedVariant: ProductVariant) => {
+  if (!selectedVariant || typeof selectedVariant.stock?.quantity !== 'number') {
+    return { status: "Out of Stock", color: "destructive", stock: 0 };
+  }
+  const currentStock = selectedVariant.stock.quantity;
+  const lowThreshold = typeof selectedVariant.lowStockThreshold === 'number' ? selectedVariant.lowStockThreshold : 5;
+  if (currentStock <= 0) {
+    return { status: "Out of Stock", color: "destructive", stock: 0 };
+  }
+  if (currentStock <= lowThreshold) {
+    return { status: `Low Stock (${currentStock} left)`, color: "warning", stock: currentStock };
+  }
+  return { status: `In Stock (${currentStock} left)`, color: "success", stock: currentStock };
+}
+// Get payment status badge color
+export const getPaymentStatusBadgeColor = (status: PaymentStatus) => {
+  switch (status) {
+    case "PAYMENT_PAID":
+      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+    case "PAYMENT_PENDING":
+      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+    case "PAYMENT_FAILED":
+      return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+    case "PAYMENT_CANCELLED":
+      return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+    case "PAYMENT_REFUNDED":
+      return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+    default:
+      return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+  }
+}
 export const convertIdToName = (list: any[], id: string, attribute: string) => {
-  // console.log(JSON.stringify(list, null, 2), 'list')
-  // console.log(id, 'id')
-  // console.log(attribute, 'attribute')
   const item = list.find((item) => item.id.toString() === id)
   return item?.[attribute]
 }

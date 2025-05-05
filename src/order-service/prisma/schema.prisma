@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/db/prisma-client"
@@ -12,16 +9,18 @@ datasource db {
 }
 
 model Order {
-  id                String      @id @default(uuid())
+  id                String               @id @default(uuid())
   userId            String
-  status            String      @default("pending")
+  status            OrderStatus          @default(ORDER_PENDING)
   totalAmount       Float
   shippingAddressId String
+  paymentId         String?
+  notes             OrderNote[]
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
   items             OrderItem[]
-  paymentId         String? // Reference to payment service
+  statusHistory     OrderStatusHistory[]
   shipping          Shipping?
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
 
   @@index([userId])
   @@index([status])
@@ -29,29 +28,121 @@ model Order {
   @@index([paymentId])
 }
 
-model OrderItem {
+model OrderNote {
   id        String   @id @default(uuid())
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId   String
-  variantId String
-  quantity  Int
-  productId String
-  price     Float
-  image     String
+  note      String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+}
+
+model OrderItem {
+  id          String   @id @default(uuid())
+  orderId     String
+  variantId   String
+  quantity    Int
+  productId   String
+  productName String
+  productSlug String
+  variantName String
+  sku         String
+  price       Float
+  image       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId])
   @@index([variantId])
 }
 
 model Shipping {
-  id             String   @id @default(uuid())
-  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId        String   @unique
-  method         String
-  trackingNumber String?
-  status         String   @default("pending")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                String    @id @default(uuid())
+  orderId           String    @unique
+  method            String
+  cost              Float
+  shippingAddressId String?
+  estimatedDelivery DateTime?
+  trackingId        String    @unique
+  status            String    @default("pending")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  order             Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tracking          Tracking  @relation(fields: [trackingId], references: [id], onDelete: Cascade)
+}
+
+model Tracking {
+  id              String          @id @default(uuid())
+  number          String
+  carrier         String
+  status          String
+  currentLocation String
+  coordinatesId   String?         @unique
+  shipping        Shipping?
+  coordinates     Coordinates?    @relation(fields: [coordinatesId], references: [id])
+  history         TrackingEvent[]
+}
+
+model TrackingEvent {
+  id          String   @id @default(uuid())
+  trackingId  String
+  date        DateTime
+  time        DateTime
+  location    String
+  status      String
+  description String
+  tracking    Tracking @relation(fields: [trackingId], references: [id], onDelete: Cascade)
+
+  @@index([trackingId], map: "TrackingEvent_trackingId_fkey")
+}
+
+model Coordinates {
+  id            String    @id @default(uuid())
+  originId      String    @unique
+  currentId     String    @unique
+  destinationId String    @unique
+  current       Point     @relation("CurrentPoint", fields: [currentId], references: [id])
+  destination   Point     @relation("DestinationPoint", fields: [destinationId], references: [id])
+  origin        Point     @relation("OriginPoint", fields: [originId], references: [id])
+  tracking      Tracking?
+}
+
+model Point {
+  id             String       @id @default(uuid())
+  lat            Float
+  lng            Float
+  currentFor     Coordinates? @relation("CurrentPoint")
+  destinationFor Coordinates? @relation("DestinationPoint")
+  originFor      Coordinates? @relation("OriginPoint")
+}
+
+model OrderStatusHistory {
+  id          String      @id @default(uuid())
+  orderId     String
+  status      OrderStatus
+  description String?
+  createdAt   DateTime    @default(now())
+  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([status])
+}
+
+enum OrderStatus {
+  ORDER_PENDING
+  ORDER_PROCESSING
+  ORDER_SHIPPED
+  ORDER_COMPENSATING
+  ORDER_DELIVERED
+  ORDER_CANCELLED
+  ORDER_COMPLETED
+  ORDER_FAILED
+  ORDER_REFUNDED
+  ORDER_EXPIRED
+  ORDER_ON_HOLD
+  ORDER_PAYMENT_PAID
+  ORDER_TRACKING_UPDATED
+  ORDER_NOTE_ADDED
 }

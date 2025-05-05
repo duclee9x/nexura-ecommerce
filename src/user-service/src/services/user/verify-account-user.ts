@@ -1,10 +1,10 @@
-import { PrismaClient } from '../../db/prisma-client'
-import { SpanStatusCode, logger, defaultTracer, withTracing, verifyToken } from "@nexura/common/utils";
+import { PrismaClient } from '@nexura/user-service/src/db/prisma-client'
+import { SpanStatusCode, logger, api, withTracing, verifyToken } from "@nexura/common/utils";
 import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
 import { status } from '@grpc/grpc-js';
 import { VerifyAccountRequest, VerifyAccountResponse } from "@nexura/grpc_gateway/protos";
 
-const tracer = defaultTracer('verifyAccount')
+const tracer = api.trace.getTracer('verifyAccount')
 const prisma = new PrismaClient()
 
 export const verifyAccount = async (

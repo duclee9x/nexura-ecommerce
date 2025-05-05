@@ -1,4 +1,3 @@
-import path from 'path';
 import { loadSync, ServiceDefinition } from '@grpc/proto-loader';
 
 const userProtoDefinition = loadSync("./lib/nexura.proto", {

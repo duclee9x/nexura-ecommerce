@@ -8,9 +8,9 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { z } from "zod";
 import { useState, useCallback } from "react";
-import { User } from "@nexura/grpc_gateway/protos";
+import { UpdateUserRequest, User, UpdateUserResponse } from "@nexura/grpc_gateway/protos";
 import { SecuritySkeleton } from "../skeleton";
-import { useUserActions } from "@/hooks/use-user";
+import { UseMutationResult } from "@tanstack/react-query";
 
 const passwordSchema = z.object({
     currentPassword: z.string().min(1, "Current password is required"),
@@ -27,9 +27,8 @@ const passwordSchema = z.object({
 type PasswordForm = z.infer<typeof passwordSchema>;
 
 // Main component
-export default function SecurityTab({ user }: { user: User | null }) {
-    const { updateUser } = useUserActions()
-    const { mutate: updateUserMutation } = updateUser
+export default function SecurityTab({ user, useUpdateUser }: { user: User, useUpdateUser: UseMutationResult<UpdateUserResponse, Error, UpdateUserRequest> }) {
+    const { mutateAsync: updateUser } = useUpdateUser
     const [formState, setFormState] = useState<PasswordForm>({
         currentPassword: "",
         newPassword: "",
@@ -66,7 +65,7 @@ export default function SecurityTab({ user }: { user: User | null }) {
         if (!validateForm() || !user) return;
         setIsLoading(true);
         try {
-            updateUserMutation({
+            updateUser({
                 user: user,
                 currentPassword: formState.currentPassword,
                 newPassword: formState.newPassword
@@ -87,7 +86,7 @@ export default function SecurityTab({ user }: { user: User | null }) {
         } finally {
             setIsLoading(false);
         }
-    }, [formState, user, validateForm, updateUserMutation]);
+    }, [formState, user, validateForm, updateUser]);
 
     if (!user) {
         return <SecuritySkeleton />;

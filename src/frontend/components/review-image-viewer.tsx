@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, X } from "lucide-react"
@@ -47,31 +47,31 @@ export function ReviewImageViewer({
 }: ReviewImageViewerProps) {
   const [isLoading, setIsLoading] = useState(true)
   const currentReview = reviews[currentReviewIndex]
-  const currentImages = currentReview?.images || []
+  const currentImages = useMemo(() => currentReview?.images || [], [currentReview])
 
-  const handlePrevImage = () => {
+  const handlePrevImage = useCallback(() => {
     if (currentImages.length > 0) {
       onImageChange((currentImageIndex - 1 + currentImages.length) % currentImages.length)
     }
-  }
+  }, [currentImages, currentImageIndex, onImageChange])
 
-  const handleNextImage = () => {
+  const handleNextImage = useCallback(() => {
     if (currentImages.length > 0) {
       onImageChange((currentImageIndex + 1) % currentImages.length)
     }
-  }
+  }, [currentImages, currentImageIndex, onImageChange])
 
-  const handlePrevReview = () => {
+  const handlePrevReview = useCallback(() => {
     const newIndex = (currentReviewIndex - 1 + reviews.length) % reviews.length
     onReviewChange(newIndex)
     onImageChange(0) // Reset image index when changing reviews
-  }
+  }, [currentReviewIndex, reviews, onReviewChange, onImageChange])
 
-  const handleNextReview = () => {
+  const handleNextReview = useCallback(() => {
     const newIndex = (currentReviewIndex + 1) % reviews.length
     onReviewChange(newIndex)
     onImageChange(0) // Reset image index when changing reviews
-  }
+  }, [currentReviewIndex, reviews, onReviewChange, onImageChange])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -105,7 +105,7 @@ export function ReviewImageViewer({
       document.removeEventListener("keydown", handleKeyDown)
       document.body.style.overflow = "unset"
     }
-  }, [isOpen, currentReviewIndex, currentImageIndex])
+  }, [isOpen, currentReviewIndex, currentImageIndex, onClose, handlePrevImage, handleNextImage, handlePrevReview, handleNextReview])
 
   if (!currentReview) return null
 

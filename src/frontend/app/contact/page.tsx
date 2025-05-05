@@ -21,16 +21,17 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  const handleChange = (e) => {
+  
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     const { name, value } = e.target
     setFormState((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleRadioChange = (value) => {
+  const handleRadioChange = (value: string) => {
     setFormState((prev) => ({ ...prev, subject: value }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
 
@@ -198,7 +199,7 @@ export default function ContactPage() {
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="order" id="order" />
                           <Label htmlFor="order">Order Status</Label>
-                          />
+                          
                           <Label htmlFor="order">Order Status</Label>
                         </div>
                         <div className="flex items-center space-x-2">

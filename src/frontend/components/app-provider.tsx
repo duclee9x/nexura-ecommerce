@@ -1,10 +1,10 @@
 "use client"
 
-import { type ReactNode, useEffect, useState, useMemo } from "react"
+import { type ReactNode, useEffect, useState } from "react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { CartProvider } from "@/contexts/cart-context"
 import { CurrencyProvider } from "@/contexts/currency-context"
-import { ErrorBoundary } from "@/components/error-boundary"
+import { WishlistProvider } from "@/contexts/wishlist-context"
 import { Toaster } from "@/components/ui/toaster"
 import { SessionProvider } from "@/contexts/session-context"
 import { scan } from "react-scan"
@@ -50,8 +50,10 @@ export function AppProvider({ children }: AppProviderProps) {
         >
           <CurrencyProvider>
             <CartProvider>
-              <ReactScan />
-              {children}
+              <WishlistProvider>
+                <ReactScan />
+                {children}
+              </WishlistProvider>
             </CartProvider>
           </CurrencyProvider>
         </ThemeProvider>

@@ -2,28 +2,27 @@
 
 import { createContext, useContext, ReactNode } from "react"
 import { User } from "@nexura/grpc_gateway/protos"
-import { useUserActions } from "@/hooks/use-user"
-import { UseMutationResult } from "@tanstack/react-query"
+import UserHooks from "@/hooks/user-hooks"
+
 interface SessionContextType {
   user: User | null
   isLoading: boolean
   isAuthenticated: boolean
-  login: UseMutationResult<void, Error, { email: string; password: string; }, unknown>
-  logout: UseMutationResult<void, Error, void, unknown>
+  error: Error | null
+  refetch: () => void
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined)
 
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const { getSession, login, logout } = useUserActions()
-  const { data: user, isLoading } = getSession()
-  
+  const { useGetSession } = UserHooks()
+  const { data: user, isLoading, error, refetch } = useGetSession()
   const value = {
     user: user || null,
     isLoading,
     isAuthenticated: !!user,
-    login,
-    logout,
+    error,
+    refetch,
   }
 
   return (

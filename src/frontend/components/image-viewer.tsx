@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight, X } from "lucide-react"
@@ -24,13 +24,13 @@ export function ImageViewer({
 }: ImageViewerProps) {
     const [isLoading, setIsLoading] = useState(true)
 
-    const handlePrev = () => {
+    const handlePrev = useCallback(() => {
         onIndexChange((currentIndex - 1 + images.length) % images.length)
-    }
+    }, [currentIndex, images, onIndexChange])
 
-    const handleNext = () => {
+    const handleNext = useCallback(() => {
         onIndexChange((currentIndex + 1) % images.length)
-    }
+    }, [currentIndex, images, onIndexChange])
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -52,7 +52,7 @@ export function ImageViewer({
             document.removeEventListener("keydown", handleKeyDown)
             document.body.style.overflow = "unset"
         }
-    }, [isOpen, currentIndex])
+    }, [isOpen, currentIndex, onClose, handlePrev, handleNext])
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>

@@ -89,7 +89,7 @@ export function Combobox({
     } catch (error) {
       toast({
         title: "Error",
-        description: `Failed to create new ${type}.`,
+        description: error instanceof Error ? error.message : `Failed to create new ${type}.`,
         variant: "destructive",
       })
     } finally {
@@ -112,7 +112,7 @@ export function Combobox({
     } catch (error) {
       toast({
         title: "Error",
-        description: `Failed to delete ${type}.`,
+        description: error instanceof Error ? error.message : `Failed to delete ${type}.`,
         variant: "destructive",
       })
     }

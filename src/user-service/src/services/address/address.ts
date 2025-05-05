@@ -1,13 +1,14 @@
 import type { UntypedServiceImplementation } from '@grpc/grpc-js';
-import { getCountries } from './address-get-countries';
-import { getProvincesByCountry } from './address-get-provinces';
-import { getDistrictsByProvince } from './address-get-districts';
-import { getWardsByDistrict } from './address-get-wards';
-import { addAddress } from './address-add';
-import { updateAddress } from './address-update';
-import { deleteAddress } from './address-delete';
-import { getAddresses } from './address-get-addresses';
-
+import { getCountries } from './get-countries';
+import { getProvincesByCountry } from './get-provinces';
+import { getDistrictsByProvince } from './get-districts';
+import { getWardsByDistrict } from './get-wards';
+import { addAddress } from './add-address';
+import { updateAddress } from './update-address';
+import { deleteAddress } from './delete-address';
+import { getAddresses } from './get-addresses';
+import { getAddress } from './get-address';
+import { getBatchAddresses } from './get-batch-addresses';
 export const addressService: UntypedServiceImplementation = {
   getCountries,
   getProvincesByCountry,
@@ -16,5 +17,7 @@ export const addressService: UntypedServiceImplementation = {
   addAddress,
   updateAddress,
   deleteAddress,
-  getAddresses
+  getAddresses,
+  getAddress,
+  getBatchAddresses
 } 

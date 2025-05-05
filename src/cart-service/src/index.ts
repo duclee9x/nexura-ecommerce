@@ -1,4 +1,4 @@
-import { startServer, gracefulShutdown } from '@nexura/common/utils';
+import { startServer,gracefulShutdown  } from "@nexura/grpc_gateway/server";
 import { CartService } from './services/cart';
 import { CartServiceService } from '@nexura/grpc_gateway/protos';
 

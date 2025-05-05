@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, use } from "react"
-import { useRouter, useParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -12,25 +12,25 @@ import useEmblaCarousel from 'embla-carousel-react'
 import {
   ChevronLeft,
   Heart,
-  Loader2,
   Star,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react"
 import NextImage from "next/image"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { useQuery } from "@tanstack/react-query"
-import { getProductBySlugGateway } from "@nexura/grpc_gateway/gateway"
-import { Product, ProductVariant, CartItem } from "@nexura/grpc_gateway/protos"
+import { ProductVariant } from "@nexura/grpc_gateway/protos"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { ImageViewer } from "@/components/image-viewer"
-import { useCurrency } from "@/contexts/currency-context"
 import { ReviewImageViewer } from "@/components/review-image-viewer"
-import { useCart, useCart as useCartContext } from "@/contexts/cart-context"
 import { useSession } from "@/contexts/session-context"
 import { ProductDetailsSection } from "@/components/product-details-section"
-import { useCartActions } from "@/hooks/use-cart"
-import { useQueryUtils } from "@/hooks/use-common"
-import { useProductActions } from "@/hooks/use-product"
+import CartHooks from "@/hooks/cart-hooks"
+import ProductHooks from "@/hooks/product-hooks"
+import { useCurrency } from "@/contexts/currency-context"
+import { ProductCard } from "@/components/product-card"
+import { useWishlist } from "@/contexts/wishlist-context"
+import { useQueryClient } from "@tanstack/react-query"
 // Add mock review data
 const mockReviews = [
   {
@@ -110,52 +110,134 @@ const ratingDistribution = {
   1: 2
 }
 
+// Loading Skeleton Components
+function ProductDetailSkeleton() {
+  return (
+    <div className="flex flex-col min-h-screen">
+      <main className="flex-1 container py-8">
+        <div className="mb-6">
+          <div className="h-8 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Image Gallery Skeleton */}
+          <div className="space-y-4">
+            <div className="aspect-square bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+            <div className="grid grid-cols-4 gap-2">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="aspect-square bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              ))}
+            </div>
+          </div>
+
+          {/* Product Info Skeleton */}
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <div className="h-8 w-3/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              <div className="h-4 w-1/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            </div>
+            <div className="h-6 w-1/3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="space-y-2">
+              <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              <div className="h-4 w-2/3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            </div>
+            <div className="h-10 w-1/2 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          </div>
+        </div>
+
+        {/* Tabs Skeleton */}
+        <div className="mt-12 space-y-4">
+          <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          <div className="h-32 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        </div>
+      </main>
+    </div>
+  )
+}
+
+// Error Component
+function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  const router = useRouter()
+  
+  return (
+    <div className="flex flex-col min-h-screen">
+      <main className="flex-1 container py-8">
+        <div className="mb-6">
+          <Button variant="ghost" size="sm" onClick={() => router.push("/products")}>
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Back to Products
+          </Button>
+        </div>
+
+        <div className="text-center py-16 space-y-6">
+          <div className="mx-auto w-24 h-24 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+            <AlertCircle className="h-12 w-12 text-red-600 dark:text-red-400" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold">Something went wrong</h2>
+            <p className="text-muted-foreground">{message}</p>
+          </div>
+          {onRetry && (
+            <Button onClick={onRetry} variant="outline">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Try Again
+            </Button>
+          )}
+        </div>
+      </main>
+    </div>
+  )
+}
+
 export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  // Basic hooks
   const { slug } = use(params)
   const router = useRouter()
-  const { addItem } = useCartContext()
-  const { getProductBySlug } = useProductActions()
+  const queryClient = useQueryClient()
+  const { currency } = useCurrency()
+  const { user, isLoading: isUserLoading } = useSession()
+  const { wishlistItems } = useWishlist()
+
+  // State hooks
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState("description")
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null)
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
-  // Embla carousel setup
+  const [isWishlistLoading, setIsWishlistLoading] = useState<{ [key: string]: boolean }>({})
+  const [currentReviewIndex, setCurrentReviewIndex] = useState(0)
+  const [currentReviewImageIndex, setCurrentReviewImageIndex] = useState(0)
+  const [isReviewImageViewerOpen, setIsReviewImageViewerOpen] = useState(false)
+
+  // Custom hooks
+  const { useAddItem, useGetCart } = CartHooks()
+  const { useGetProduct, useAddWishlist, useRemoveWishlist, useGetCategories } = ProductHooks()
+
+  // Data fetching hooks
+  const { data: categories } = useGetCategories()
+  const { data: product, isLoading, isError } = useGetProduct(slug, "slug")
+  const { data: cart } = useGetCart(user?.id || null)
+
+  // Mutation hooks
+  const { mutateAsync: addItem } = useAddItem
+  const { mutateAsync: addToWishlist } = useAddWishlist
+  const { mutateAsync: removeFromWishlist } = useRemoveWishlist
+
+  // Embla carousel hooks
   const [mainCarouselRef, mainEmbla] = useEmblaCarousel()
   const [thumbCarouselRef, thumbEmbla] = useEmblaCarousel({
     containScroll: 'keepSnaps',
     dragFree: true,
   })
-  const [currentReviewIndex, setCurrentReviewIndex] = useState(0)
-  const [currentReviewImageIndex, setCurrentReviewImageIndex] = useState(0)
-  const [isReviewImageViewerOpen, setIsReviewImageViewerOpen] = useState(false)
-  const { currency } = useCurrency()
-  const { data: product, isLoading, isError } = getProductBySlug(slug) 
-  const { user } = useSession()
-  const { invalidateQueries } = useQueryUtils()
-  const { getCart } = useCartActions()
-  const { data: cart } = getCart(user?.id || '')
-  // Initialize selectedVariant with the first variant when product loads
+
+  // Effect hooks
   useEffect(() => {
     if (product?.variants.length) {
       setSelectedVariant(product.variants[0])
     }
   }, [product])
-  // Get variant name for display
-  const getVariantName = (variant: ProductVariant) => {
-    return variant.attributes
-      .map((attr) => {
-        if (attr.name.toLowerCase() === "color") {
-          return attr.value
-        }
-        return attr.value
-      })
-      .filter(Boolean)
-      .join(" / ")
-  }
 
-  // Sync main and thumb carousels
   useEffect(() => {
     if (!mainEmbla || !thumbEmbla) return
 
@@ -176,27 +258,54 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     }
   }, [mainEmbla, thumbEmbla])
 
-  // Handle carousel navigation
-  const scrollPrev = () => mainEmbla?.scrollPrev()
-  const scrollNext = () => mainEmbla?.scrollNext()
-
-  // Handle quantity change
-  // Robust quantity change handler
-  const handleQuantityChange = (value: number) => {
-    const maxQuantity = selectedVariant?.stock?.quantity ?? 0;
-    if (value < 1) return;
-    if (value > maxQuantity) return;
-    setQuantity(value);
-  };
-
-  // Reset quantity when changing variants
   useEffect(() => {
-    setQuantity(1);
-  }, [selectedVariant]);
-  console.log(quantity, "quantity")
-  console.log(JSON.stringify(selectedVariant), "selectedVariant")
+    setQuantity(1)
+  }, [selectedVariant])
+
+  // Loading state
+  if (isUserLoading || isLoading) {
+    return <ProductDetailSkeleton />
+  }
+
+  if (!user) {
+    router.push("/login")
+    return null
+  }
+
+  // Error state
+  if (isError || !product) {
+    const errorMessage = (() => {
+      if (isError && typeof isError === 'object') {
+        const error = isError as { message?: string };
+        if (error.message) {
+          if (error.message.includes('NOT_FOUND')) {
+            return "Product not found. Please check the URL and try again.";
+          } else if (error.message.includes('INVALID_ARGUMENT')) {
+            return "Invalid product ID. Please try again.";
+          } else if (error.message.includes('INTERNAL')) {
+            return "Server error. Our team has been notified. Please try again later.";
+          } else if (error.message.includes('UNAVAILABLE')) {
+            return "Service temporarily unavailable. Please try again later.";
+          }
+          return error.message;
+        }
+      }
+      return "Failed to load product. Please try again later.";
+    })();
+
+    return (
+      <ErrorState 
+        message={errorMessage}
+        onRetry={() => {
+          queryClient.invalidateQueries({ queryKey: ['product', slug] });
+        }}
+      />
+    )
+  }
+
   // Handle add to cart with stock check and user feedback
   const handleAddToCart = async () => {
+    setIsAddingToCart(true)
     if (!product || !selectedVariant || !cart) return;
     const currentItemOnCart = cart.items.find(item => item.productId === product.id && item.variantId === selectedVariant.id);
     if (quantity + (currentItemOnCart?.quantity || 0) > (selectedVariant.stock?.quantity || 0)) {
@@ -209,31 +318,26 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     }
     try {
       await addItem({
+        userId: user?.id || '',
         productId: product.id,
         variantId: selectedVariant.id,
         image: product.images[0]?.url || "",
         quantity,
-      } as Omit<CartItem, 'id' | 'created_at' | 'updated_at' | 'variant'>, currency);
+        currencyCode: currency,
+      });
     } catch (error) {
       toast({
         title: "Failed to add to cart",
-        description: "Please try again later.",
+        description: error instanceof Error ? error.message : "Please try again later.",
         variant: "destructive"
       });
     } finally {
+      setIsAddingToCart(false)
     }
   };
 
-  const getCurrentPrice = (): string => {
-    if (selectedVariant) {
-      return selectedVariant.price.toFixed(2).toString()
-    }
-    return product?.basePrice?.toFixed(2) || "0.00"
-  }
-
   // Robust stock status calculation
   const getStockStatus = () => {
-    console.log(selectedVariant, 'selected variant')
     if (!selectedVariant || typeof selectedVariant.stock?.quantity !== 'number') {
       return { status: "Out of Stock", color: "destructive", stock: 0 };
     }
@@ -245,7 +349,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     if (currentStock <= lowThreshold) {
       return { status: `Low Stock (${currentStock} left)`, color: "warning", stock: currentStock };
     }
-    return { status: "In Stock", color: "success", stock: currentStock };
+    return { status: `In Stock (${currentStock} left)`, color: "success", stock: currentStock };
   }
 
   // Calculate average rating
@@ -259,7 +363,28 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       day: 'numeric'
     })
   }
-
+  const handleWishlistToggle = async (productId: string) => {
+    try {
+      setIsWishlistLoading(prev => ({ ...prev, [productId]: true }))
+      const isInWishlist = wishlistItems.find(item => item.productId === productId)
+      console.log('isInWishlist', isInWishlist)
+      if (isInWishlist) {
+        removeFromWishlist({
+          wishlistId: isInWishlist.id,
+          userId: user?.id || '',
+        })
+      } else {
+        addToWishlist({
+          userId: user?.id || '',
+          productId: productId,
+        })
+      }
+    } catch (error) {
+      console.error('Failed to update wishlist:', error)
+    } finally {
+      setIsWishlistLoading(prev => ({ ...prev, [productId]: false }))
+    }
+  }
   // Handle variant selection and update currentImageIndex
   const handleVariantSelect = (variant: ProductVariant | null) => {
     setSelectedVariant(variant)
@@ -278,40 +403,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       setCurrentImageIndex(0)
     }
   }
-
-  if (isLoading) {
-    return (
-      <div className="flex flex-col min-h-screen">
-        <main className="flex-1 container py-8">
-          <div className="flex items-center justify-center h-[50vh]">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
-        </main>
-      </div>
-    )
-  }
-
-  if (isError || !product) {
-    return (
-      <div className="flex flex-col min-h-screen">
-        <main className="flex-1 container py-8">
-          <div className="flex flex-col items-center justify-center h-[50vh] space-y-4">
-            <div className="text-destructive text-lg font-semibold">
-              {"Failed to load product, please try again later"}
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => invalidateQueries(['product', slug])}
-            >
-              Retry
-            </Button>
-          </div>
-        </main>
-      </div>
-    )
-  }
-
-  const stockStatus = getStockStatus()
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -337,7 +428,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
               }}
               onVariantSelect={handleVariantSelect}
               onAddToCart={handleAddToCart}
-              onQuantityChange={handleQuantityChange}
+              onQuantityChange={setQuantity}
               onImageIndexChange={setCurrentImageIndex}
               stockStatus={getStockStatus()}
               maxQuantity={selectedVariant?.stock?.quantity ?? 0}
@@ -605,33 +696,17 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-6">You Might Also Like</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {/* {mockProducts.slice(0, 4).map((relatedProduct, i) => (
-              <Card key={relatedProduct.id || i} className="overflow-hidden">
-                <div className="aspect-square bg-muted/50 relative">
-                  <img
-                    src={
-                      relatedProduct.images[0]?.url ||
-                      `/placeholder.svg?height=300&width=300&text=Related+Product+${i + 1}`
-                    }
-                    alt={relatedProduct.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <Button variant="outline" size="icon" className="absolute top-2 right-2 bg-background/80 h-8 w-8">
-                    <Heart className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-medium">{relatedProduct.name}</h3>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="font-bold">{formatPrice(relatedProduct.basePrice)}</span>
-                    <div className="flex items-center">
-                      <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                      <span className="text-sm ml-1">4.2</span>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            ))} */}
+            {product.relatedProducts.map(relatedProduct => (
+              <ProductCard 
+              key={relatedProduct.id} 
+              product={relatedProduct} 
+              viewMode="grid" 
+              categories={categories}
+              isInWishlist={wishlistItems.some(item => item.productId === relatedProduct.id)}
+              onWishlistToggle={() => handleWishlistToggle(relatedProduct.id)}
+              isWishlistLoading={isWishlistLoading[relatedProduct.id]}
+              />
+            ))}
           </div>
         </div>
 

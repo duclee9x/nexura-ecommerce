@@ -1,0 +1,7 @@
+node_modules
+dist
+bun.lockb
+.git
+.gitignore
+.dockerignore
+.next

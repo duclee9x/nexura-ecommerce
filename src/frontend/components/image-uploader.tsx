@@ -88,10 +88,10 @@ export function ImageUploader({ currentImage, onImageSelected }: ImageUploaderPr
         title: "Image Added",
         description: "Your image URL has been added successfully.",
       })
-    } catch (e) {
+    } catch (error) {
       toast({
         title: "Invalid URL",
-        description: "Please enter a valid image URL",
+        description: error instanceof Error ? error.message : "Please enter a valid image URL",
         variant: "destructive",
       })
     }

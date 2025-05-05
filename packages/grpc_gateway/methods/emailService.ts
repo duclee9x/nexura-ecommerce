@@ -1,4 +1,4 @@
-import { EmailServiceClient, SendOTPResetPasswordRequest, SendOTPResetPasswordResponse, SendWelcomeEmailRequest, SendWelcomeEmailResponse } from '@nexura/grpc_gateway/protos';
+import { EmailServiceClient, RegisterUserForAdminRequest, RegisterUserForAdminResponse, SendNewUserByAdminResponse, SendNewUserByAdminRequest, SendOTPResetPasswordRequest, SendOTPResetPasswordResponse, SendWelcomeEmailRequest, SendWelcomeEmailResponse } from '@nexura/grpc_gateway/protos';
 import { createServiceConfig, createClient, promisifyGrpcCall } from './baseAdapter';
 
 type EmailServiceMethods = {
@@ -24,4 +24,12 @@ export const emailService = {
             request
         );
     },
+
+    sendNewUserByAdmin: async (request: SendNewUserByAdminRequest): Promise<SendNewUserByAdminResponse> => {
+        return promisifyGrpcCall<SendNewUserByAdminResponse, EmailServiceClient & EmailServiceMethods>(
+            emailClient,
+            'sendNewUserByAdmin',
+            request
+        );
+    }
 }; 

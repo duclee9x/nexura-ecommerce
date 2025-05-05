@@ -13,15 +13,17 @@ import { createProductAttribute } from './attributes/create-product-attribute'
 import { createProduct } from './products/create-product'
 import { updateProduct } from './products/update-product'
 import { deleteProduct } from './products/delete-product'
-import { getProductBySlug } from './products/get-product-by-slug'
-import { getProductById } from './products/get-product-by-id'
+import { getProduct } from './products/get-product'
 import { listProducts } from './products/list-products'
 import { getWarehouses } from './warehouses/get-warehouses'
 import { getVariantsForCart } from './products/get-variants-for-cart'
 import { validateAndReserve } from "./products/validate-and-reserve"
 import { releaseReservation } from "./products/release-reservation"
 import { commitReservation } from "./products/commit-reservation"
-
+import { changeProductStatus } from './products/change-product-status'
+import { addWishlist } from './products/add-wishlist'
+import { getWishlist } from './products/get-wishlist'
+import { removeWishlist } from './products/remove-wishlist'
 export const productService: UntypedServiceImplementation = {
   newBrand,
   removeBrand,
@@ -35,11 +37,10 @@ export const productService: UntypedServiceImplementation = {
   createProduct,
   updateProduct,
   deleteProduct,
-  getProductById,
-  getProductBySlug,
+  getProduct,
   listProducts,
   getVariantsForCart,
-
+  changeProductStatus,
   getProductAttributes,
   updateProductAttribute,
   deleteProductAttribute,
@@ -50,5 +51,9 @@ export const productService: UntypedServiceImplementation = {
  
   validateAndReserve,
   releaseReservation,
-  commitReservation
+  commitReservation,
+
+  addWishlist,
+  getWishlist,
+  removeWishlist
 } 

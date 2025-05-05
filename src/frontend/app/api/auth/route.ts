@@ -20,7 +20,7 @@ export async function getSession(): Promise<SessionData | undefined> {
 
 
 // Example authentication API route
-export async function POST(request: Request) {
+export async function POST() {
   try {
     const session = await getSession()
     if (!session) {
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, message: "Authenticated" }, { status: 200 })
   } catch (error) {
-    return NextResponse.json({ success: false, message: "Authentication error" }, { status: 500 })
+    return NextResponse.json({ success: false, message: error instanceof Error ? error.message : "Authentication error" }, { status: 500 })
   }
 }
 

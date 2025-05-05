@@ -1,40 +1,106 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
-import { CheckCircle, Package, Truck, Clock } from "lucide-react"
-
+import { CheckCircle, Package, Truck, Clock, Loader2, AlertCircle } from "lucide-react"
+import OrderHooks from "@/hooks/order-hooks"
 import { Button } from "@/components/ui/button"
+import { useCurrency } from "@/contexts/currency-context"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function PaymentSuccessPage() {
   const searchParams = useSearchParams()
-  const orderNumber = searchParams.get("order") || "123456789"
-  const [currentDate, setCurrentDate] = useState("")
-  const [estimatedDelivery, setEstimatedDelivery] = useState("")
+  const orderNumber = searchParams.get("order")
+  const { formatDate } = useCurrency()
+  
+  const { useGetOrder } = OrderHooks()
+  const { data: order, isPending } = useGetOrder(orderNumber)
 
-  useEffect(() => {
-    // Format current date
-    const now = new Date()
-    setCurrentDate(
-      now.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
-    )
+  if (!orderNumber) {
+    return null
+  }
 
-    // Calculate estimated delivery date (5 business days from now)
-    const deliveryDate = new Date(now)
-    deliveryDate.setDate(deliveryDate.getDate() + 5)
-    setEstimatedDelivery(
-      deliveryDate.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
+  
+
+  if (isPending) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
+              <Loader2 className="h-8 w-8 text-gray-400 animate-spin" />
+            </div>
+            <h1 className="text-3xl font-bold mb-2 dark:text-white">Loading Order Details</h1>
+            <p className="text-muted-foreground">
+              Please wait while we fetch your order information...
+            </p>
+          </div>
+
+          <div className="border dark:border-gray-800 rounded-lg p-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h2 className="text-sm font-medium text-muted-foreground mb-1">Order Number</h2>
+                <Skeleton className="h-6 w-24" />
+              </div>
+              <div>
+                <h2 className="text-sm font-medium text-muted-foreground mb-1">Order Date</h2>
+                <Skeleton className="h-6 w-32" />
+              </div>
+              <div>
+                <h2 className="text-sm font-medium text-muted-foreground mb-1">Estimated Delivery</h2>
+                <Skeleton className="h-6 w-32" />
+              </div>
+              <div>
+                <h2 className="text-sm font-medium text-muted-foreground mb-1">Payment Method</h2>
+                <Skeleton className="h-6 w-24" />
+              </div>
+            </div>
+          </div>
+
+          <div className="border dark:border-gray-800 rounded-lg p-6 mb-8">
+            <h2 className="text-xl font-bold mb-4">Order Status</h2>
+            <div className="space-y-8">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex items-start gap-4">
+                  <Skeleton className="h-6 w-6 rounded-full" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-48" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     )
-  }, [])
+  }
+
+  if (!order) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-900 mb-4">
+            <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+          </div>
+          <h1 className="text-3xl font-bold mb-2 dark:text-white">Order Not Found</h1>
+          <p className="text-muted-foreground mb-8">
+            We couldn't find an order with the provided order number. Please check your order number and try again.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild>
+              <Link href="/orders">View All Orders</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/products">Continue Shopping</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const estimatedDelivery = order.shipping?.estimatedDelivery ? formatDate(order.shipping.estimatedDelivery) : ''
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -53,19 +119,19 @@ export default function PaymentSuccessPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <h2 className="text-sm font-medium text-muted-foreground mb-1">Order Number</h2>
-              <p className="font-medium">{orderNumber}</p>
+              <p className="font-medium">#{order.id.slice(0, 8)}</p>
             </div>
             <div>
               <h2 className="text-sm font-medium text-muted-foreground mb-1">Order Date</h2>
-              <p className="font-medium">{currentDate}</p>
+              <p className="font-medium">{formatDate(order.createdAt)}</p>
             </div>
-            <div>
-              <h2 className="text-sm font-medium text-muted-foreground mb-1">Estimated Delivery</h2>
-              <p className="font-medium">{estimatedDelivery}</p>
-            </div>
+              <div>
+                <h2 className="text-sm font-medium text-muted-foreground mb-1">Estimated Delivery</h2>
+                <p className="font-medium">{estimatedDelivery}</p>
+              </div>
             <div>
               <h2 className="text-sm font-medium text-muted-foreground mb-1">Payment Method</h2>
-              <p className="font-medium">Credit Card (•••• 4242)</p>
+              <p className="font-medium">{order.payment?.method}</p>
             </div>
           </div>
         </div>
@@ -83,7 +149,7 @@ export default function PaymentSuccessPage() {
               <div>
                 <h3 className="font-medium">Order Confirmed</h3>
                 <p className="text-sm text-muted-foreground">Your order has been received and is being processed.</p>
-                <p className="text-xs text-muted-foreground mt-1">{currentDate}</p>
+                <p className="text-xs text-muted-foreground mt-1">{formatDate(order.createdAt)}</p>
               </div>
             </div>
 
@@ -107,21 +173,23 @@ export default function PaymentSuccessPage() {
               </div>
             </div>
 
-            <div className="relative flex items-start pl-8">
-              <div className="absolute left-0 -translate-x-1/2 w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </div>
+            {estimatedDelivery && (
+              <div className="relative flex items-start pl-8">
+                <div className="absolute left-0 -translate-x-1/2 w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                </div>
               <div>
-                <h3 className="font-medium">Delivered</h3>
-                <p className="text-sm text-muted-foreground">Estimated delivery: {estimatedDelivery}</p>
+                  <h3 className="font-medium">Delivered</h3>
+                  <p className="text-sm text-muted-foreground">Estimated delivery: {estimatedDelivery}</p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button asChild>
-            <Link href="/orders">View Order Details</Link>
+            <Link href={`/orders/${orderNumber}`}>View Order Details</Link>
           </Button>
           <Button variant="outline" asChild>
             <Link href="/products">Continue Shopping</Link>

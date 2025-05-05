@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label"
 import { Star, StarOff, Plus, X, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "@/hooks/use-toast"
-import { useDebounce } from "@/hooks/use-debounce"
 
 // Default color palette
 
@@ -177,7 +176,7 @@ export const ColorPicker = memo(function ColorPicker({
       title: "Custom color added",
       description: `${customColorName} has been added to your favorites.`,
     })
-  }, [favoriteColors, customColor, customColorName, onChange, colorName])
+  }, [favoriteColors, customColor, customColorName])
 
   // Memoize color input component
   // Only update parent onChange when user finishes interacting
@@ -254,7 +253,7 @@ export const ColorPicker = memo(function ColorPicker({
         </div>
       </div>
     )
-  }, [favoriteColors, displayColors, isColorFavorite, handleColorSelect, showFavorites])
+  }, [displayColors, isColorFavorite, handleColorSelect, showFavorites, selectedColor, toggleFavorite])
 
   return (
     <div className="color-picker space-y-4">

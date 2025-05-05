@@ -15,11 +15,10 @@ import { Star, ImageIcon, ThumbsUp, ThumbsDown, MessageSquare, AlertCircle, X } 
 import type { Review } from "@/types/schema"
 
 export interface ProductReviewProps {
-  productId: number
   reviews: Review[]
 }
 
-export function ProductReview({ productId, reviews = [] }: ProductReviewProps) {
+export function ProductReview({ reviews = [] }: ProductReviewProps) {
   const [activeTab, setActiveTab] = useState("reviews")
   const [newReview, setNewReview] = useState({
     rating: 0,
@@ -98,21 +97,6 @@ export function ProductReview({ productId, reviews = [] }: ProductReviewProps) {
       return
     }
 
-    // In a real app, this would submit to the database
-    const newReviewData: Review = {
-      id: Date.now().toString(),
-      productId: productId.toString(),
-      customerId: "1", // Assuming logged in user
-      customerName: "John Doe", // Assuming logged in user
-      rating: newReview.rating,
-      title: newReview.title,
-      content: newReview.content,
-      images: newReview.images,
-      status: "pending",
-      createdAt: new Date().toISOString(),
-      helpful: 0,
-      notHelpful: 0,
-    }
 
     // Reset form
     setNewReview({
