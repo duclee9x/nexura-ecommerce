@@ -6,8 +6,9 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = "mysql://root:nexura-root-password@localhost:3306/user"
+  // url      = "mysql://root:nexura-root-password@localhost:3306/user"
   // url      = env("DATABASE_URL")
+  url      = "mysql://user@127.0.0.1:15306"
 }
 
 model User {
