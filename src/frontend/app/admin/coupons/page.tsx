@@ -83,161 +83,163 @@ const products = [
 ]
 
 type Coupon = {
-  id: number
-  code: string
-  type: string
-  value: number
-  minPurchase: number
-  maxUses: number | null
-  usedCount: number
-  startDate: string | null
-  endDate: string | null
-  status: string
-  productScope: string
-  customerScope: string
+  id:                 number
+  code:               string
+  type:               string
+  value:              number
+  minPurchase:        number
+  maxUses:            number | null
+  usedCount:          number
+  startDate:          string | null
+  endDate:            string | null
+  status:             string
+  productScope:       string
+  customerScope:      string
   selectedCategories: number[]
-  selectedProducts: number[]
+  selectedProducts:   number[]
 }
 
 // Sample coupon data
 const initialCoupons: Coupon[] = [
   {
-    id: 1,
-    code: "SUMMER23",
-    type: "percentage",
-    value: 20,
-    minPurchase: 50,
-    maxUses: 1000,
-    usedCount: 145,
-    startDate: "2023-06-01",
-    endDate: "2023-08-31",
-    status: "active",
-    productScope: "all",
-    customerScope: "all",
+    id:                 1,
+    code:               "SUMMER23",
+    type:               "percentage",
+    value:              20,
+    minPurchase:        50,
+    maxUses:            1000,
+    usedCount:          145,
+    startDate:          "2023-06-01",
+    endDate:            "2023-08-31",
+    status:             "active",
+    productScope:       "all",
+    customerScope:      "all",
     selectedCategories: [],
-    selectedProducts: [],
+    selectedProducts:   [],
   },
   {
-    id: 2,
-    code: "WELCOME10",
-    type: "percentage",
-    value: 10,
-    minPurchase: 0,
-    maxUses: null,
-    usedCount: 278,
-    startDate: "2023-01-01",
-    endDate: null,
-    status: "active",
-    productScope: "all",
-    customerScope: "new",
+    id:                 2,
+    code:               "WELCOME10",
+    type:               "percentage",
+    value:              10,
+    minPurchase:        0,
+    maxUses:            null,
+    usedCount:          278,
+    startDate:          "2023-01-01",
+    endDate:            null,
+    status:             "active",
+    productScope:       "all",
+    customerScope:      "new",
     selectedCategories: [],
-    selectedProducts: [],
+    selectedProducts:   [],
   },
   {
-    id: 3,
-    code: "FLASH50",
-    type: "percentage",
-    value: 50,
-    minPurchase: 100,
-    maxUses: 500,
-    usedCount: 0,
-    startDate: "2023-09-10",
-    endDate: "2023-09-15",
-    status: "scheduled",
-    productScope: "categories",
-    customerScope: "all",
-    selectedCategories: [1, 3],
-    selectedProducts: [],
+    id:                 3,
+    code:               "FLASH50",
+    type:               "percentage",
+    value:              50,
+    minPurchase:        100,
+    maxUses:            500,
+    usedCount:          0,
+    startDate:          "2023-09-10",
+    endDate:            "2023-09-15",
+    status:             "scheduled",
+    productScope:       "categories",
+    customerScope:      "all",
+    selectedCategories: [ 1, 3 ],
+    selectedProducts:   [],
   },
   {
-    id: 4,
-    code: "FREESHIP",
-    type: "shipping",
-    value: 15,
-    minPurchase: 75,
-    maxUses: 2000,
-    usedCount: 523,
-    startDate: "2023-05-15",
-    endDate: "2023-12-31",
-    status: "active",
-    productScope: "all",
-    customerScope: "all",
+    id:                 4,
+    code:               "FREESHIP",
+    type:               "shipping",
+    value:              15,
+    minPurchase:        75,
+    maxUses:            2000,
+    usedCount:          523,
+    startDate:          "2023-05-15",
+    endDate:            "2023-12-31",
+    status:             "active",
+    productScope:       "all",
+    customerScope:      "all",
     selectedCategories: [],
-    selectedProducts: [],
+    selectedProducts:   [],
   },
   {
-    id: 5,
-    code: "HOLIDAY25",
-    type: "percentage",
-    value: 25,
-    minPurchase: 150,
-    maxUses: 1000,
-    usedCount: 0,
-    startDate: "2023-12-01",
-    endDate: "2023-12-25",
-    status: "scheduled",
-    productScope: "products",
-    customerScope: "all",
+    id:                 5,
+    code:               "HOLIDAY25",
+    type:               "percentage",
+    value:              25,
+    minPurchase:        150,
+    maxUses:            1000,
+    usedCount:          0,
+    startDate:          "2023-12-01",
+    endDate:            "2023-12-25",
+    status:             "scheduled",
+    productScope:       "products",
+    customerScope:      "all",
     selectedCategories: [],
-    selectedProducts: [101, 103, 106],
+    selectedProducts:   [
+      101, 103, 106
+    ],
   },
   {
-    id: 6,
-    code: "EXPIRED20",
-    type: "percentage",
-    value: 20,
-    minPurchase: 50,
-    maxUses: 1000,
-    usedCount: 842,
-    startDate: "2022-11-20",
-    endDate: "2023-01-05",
-    status: "expired",
-    productScope: "all",
-    customerScope: "all",
+    id:                 6,
+    code:               "EXPIRED20",
+    type:               "percentage",
+    value:              20,
+    minPurchase:        50,
+    maxUses:            1000,
+    usedCount:          842,
+    startDate:          "2022-11-20",
+    endDate:            "2023-01-05",
+    status:             "expired",
+    productScope:       "all",
+    customerScope:      "all",
     selectedCategories: [],
-    selectedProducts: [],
+    selectedProducts:   [],
   },
   {
-    id: 7,
-    code: "DISABLED15",
-    type: "percentage",
-    value: 15,
-    minPurchase: 25,
-    maxUses: 500,
-    usedCount: 123,
-    startDate: "2023-02-01",
-    endDate: "2023-12-31",
-    status: "disabled",
-    productScope: "all",
-    customerScope: "all",
+    id:                 7,
+    code:               "DISABLED15",
+    type:               "percentage",
+    value:              15,
+    minPurchase:        25,
+    maxUses:            500,
+    usedCount:          123,
+    startDate:          "2023-02-01",
+    endDate:            "2023-12-31",
+    status:             "disabled",
+    productScope:       "all",
+    customerScope:      "all",
     selectedCategories: [],
-    selectedProducts: [],
+    selectedProducts:   [],
   },
 ]
 
 export default function CouponsPage() {
   const { formatPrice } = useCurrency()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [coupons, setCoupons] = useState(initialCoupons)
-  const [isAddCouponOpen, setIsAddCouponOpen] = useState(false)
-  const [isEditCouponOpen, setIsEditCouponOpen] = useState(false)
-  const [selectedCoupon, setSelectedCoupon] = useState<any>(null)
-  const [startDate, setStartDate] = useState<Date | undefined>(new Date())
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined)
-  const [selectedProductTab, setSelectedProductTab] = useState("categories")
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([])
-  const [selectedProductIds, setSelectedProductIds] = useState<number[]>([])
-  const [newCoupon, setNewCoupon] = useState({
-    code: "",
-    type: "percentage",
-    value: "",
-    minPurchase: "",
-    maxUses: "",
-    productScope: "all",
-    customerScope: "all",
+  const [ searchQuery, setSearchQuery ] = useState("")
+  const [ statusFilter, setStatusFilter ] = useState("all")
+  const [ coupons, setCoupons ] = useState(initialCoupons)
+  const [ isAddCouponOpen, setIsAddCouponOpen ] = useState(false)
+  const [ isEditCouponOpen, setIsEditCouponOpen ] = useState(false)
+  const [ selectedCoupon, setSelectedCoupon ] = useState<any>(null)
+  const [ startDate, setStartDate ] = useState<Date | undefined>(new Date())
+  const [ endDate, setEndDate ] = useState<Date | undefined>(undefined)
+  const [ selectedProductTab, setSelectedProductTab ] = useState("categories")
+  const [ selectedCategoryIds, setSelectedCategoryIds ] = useState<number[]>([])
+  const [ selectedProductIds, setSelectedProductIds ] = useState<number[]>([])
+  const [ newCoupon, setNewCoupon ] = useState({
+    code:               "",
+    type:               "percentage",
+    value:              "",
+    minPurchase:        "",
+    maxUses:            "",
+    productScope:       "all",
+    customerScope:      "all",
     selectedCategories: [] as number[],
-    selectedProducts: [] as number[],
+    selectedProducts:   [] as number[],
   })
 
   const { toast } = useToast()
@@ -261,7 +263,7 @@ export default function CouponsPage() {
   const handleCopyCoupon = (code: string) => {
     navigator.clipboard.writeText(code)
     toast({
-      title: "Coupon code copied",
+      title:       "Coupon code copied",
       description: `"${code}" has been copied to clipboard.`,
     })
   }
@@ -270,20 +272,20 @@ export default function CouponsPage() {
   const handleToggleCouponStatus = (id: number, currentStatus: string) => {
     const newStatus = currentStatus === "active" ? "disabled" : "active"
 
-    setCoupons(coupons.map((coupon) => (coupon.id === id ? { ...coupon, status: newStatus } : coupon)))
+    setCoupons(coupons.map(coupon => (coupon.id === id ? { ...coupon, status: newStatus } : coupon)))
 
     toast({
-      title: `Coupon ${newStatus === "active" ? "enabled" : "disabled"}`,
+      title:       `Coupon ${newStatus === "active" ? "enabled" : "disabled"}`,
       description: `The coupon has been ${newStatus === "active" ? "enabled" : "disabled"} successfully.`,
     })
   }
 
   // Handle delete coupon
   const handleDeleteCoupon = (id: number) => {
-    setCoupons(coupons.filter((coupon) => coupon.id !== id))
+    setCoupons(coupons.filter(coupon => coupon.id !== id))
 
     toast({
-      title: "Coupon deleted",
+      title:       "Coupon deleted",
       description: "The coupon has been successfully deleted.",
     })
   }
@@ -305,18 +307,18 @@ export default function CouponsPage() {
 
     const updatedCoupon = {
       ...selectedCoupon,
-      startDate: startDate ? format(startDate, "yyyy-MM-dd") : null,
-      endDate: endDate ? format(endDate, "yyyy-MM-dd") : null,
+      startDate:          startDate ? format(startDate, "yyyy-MM-dd") : null,
+      endDate:            endDate ? format(endDate, "yyyy-MM-dd") : null,
       selectedCategories: selectedCategoryIds,
-      selectedProducts: selectedProductIds,
+      selectedProducts:   selectedProductIds,
     }
 
-    setCoupons(coupons.map((coupon) => (coupon.id === selectedCoupon.id ? updatedCoupon : coupon)))
+    setCoupons(coupons.map(coupon => (coupon.id === selectedCoupon.id ? updatedCoupon : coupon)))
 
     setIsEditCouponOpen(false)
 
     toast({
-      title: "Coupon updated",
+      title:       "Coupon updated",
       description: "The coupon has been successfully updated.",
     })
   }
@@ -326,42 +328,42 @@ export default function CouponsPage() {
     // Validate required fields
     if (!newCoupon.code || !newCoupon.type || !newCoupon.value) {
       toast({
-        title: "Validation error",
+        title:       "Validation error",
         description: "Please fill in all required fields.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
 
     // Create new coupon object
     const couponToAdd = {
-      id: Math.max(...coupons.map((c) => c.id)) + 1,
+      id:                 Math.max(...coupons.map(c => c.id)) + 1,
       ...newCoupon,
-      value: Number.parseFloat(newCoupon.value),
-      minPurchase: newCoupon.minPurchase ? Number.parseFloat(newCoupon.minPurchase) : 0,
-      maxUses: newCoupon.maxUses ? Number.parseInt(newCoupon.maxUses) : null,
-      usedCount: 0,
-      startDate: startDate ? format(startDate, "yyyy-MM-dd") : null,
-      endDate: endDate ? format(endDate, "yyyy-MM-dd") : null,
-      status: "active",
+      value:              Number.parseFloat(newCoupon.value),
+      minPurchase:        newCoupon.minPurchase ? Number.parseFloat(newCoupon.minPurchase) : 0,
+      maxUses:            newCoupon.maxUses ? Number.parseInt(newCoupon.maxUses) : null,
+      usedCount:          0,
+      startDate:          startDate ? format(startDate, "yyyy-MM-dd") : null,
+      endDate:            endDate ? format(endDate, "yyyy-MM-dd") : null,
+      status:             "active",
       selectedCategories: newCoupon.productScope === "categories" ? selectedCategoryIds : [],
-      selectedProducts: newCoupon.productScope === "products" ? selectedProductIds : [],
+      selectedProducts:   newCoupon.productScope === "products" ? selectedProductIds : [],
     }
 
     // Add to coupons list
-    setCoupons([couponToAdd, ...coupons])
+    setCoupons([ couponToAdd, ...coupons ])
 
     // Reset form
     setNewCoupon({
-      code: "",
-      type: "percentage",
-      value: "",
-      minPurchase: "",
-      maxUses: "",
-      productScope: "all",
-      customerScope: "all",
+      code:               "",
+      type:               "percentage",
+      value:              "",
+      minPurchase:        "",
+      maxUses:            "",
+      productScope:       "all",
+      customerScope:      "all",
       selectedCategories: [],
-      selectedProducts: [],
+      selectedProducts:   [],
     })
     setStartDate(new Date())
     setEndDate(undefined)
@@ -370,22 +372,22 @@ export default function CouponsPage() {
     setIsAddCouponOpen(false)
 
     toast({
-      title: "Coupon created",
+      title:       "Coupon created",
       description: "The new coupon has been successfully created.",
     })
   }
 
   // Toggle category selection
   const toggleCategorySelection = (categoryId: number) => {
-    setSelectedCategoryIds((prev) =>
-      prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId],
+    setSelectedCategoryIds(prev =>
+      prev.includes(categoryId) ? prev.filter(id => id !== categoryId) : [ ...prev, categoryId ],
     )
   }
 
   // Toggle product selection
   const toggleProductSelection = (productId: number) => {
-    setSelectedProductIds((prev) =>
-      prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId],
+    setSelectedProductIds(prev =>
+      prev.includes(productId) ? prev.filter(id => id !== productId) : [ ...prev, productId ],
     )
   }
 
@@ -451,7 +453,7 @@ export default function CouponsPage() {
                       placeholder="e.g. SUMMER23"
                       className="col-span-3"
                       value={newCoupon.code}
-                      onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value.toUpperCase() })}
+                      onChange={e => setNewCoupon({ ...newCoupon, code: e.target.value.toUpperCase() })}
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -460,7 +462,7 @@ export default function CouponsPage() {
                     </Label>
                     <Select
                       value={newCoupon.type}
-                      onValueChange={(value) => setNewCoupon({ ...newCoupon, type: value })}
+                      onValueChange={value => setNewCoupon({ ...newCoupon, type: value })}
                     >
                       <SelectTrigger className="col-span-3">
                         <SelectValue placeholder="Select discount type" />
@@ -504,7 +506,7 @@ export default function CouponsPage() {
                         placeholder={newCoupon.type === "percentage" ? "e.g. 20" : "e.g. 10.00"}
                         className={newCoupon.type === "fixed" ? "pl-8" : undefined}
                         value={newCoupon.value}
-                        onChange={(e) => setNewCoupon({ ...newCoupon, value: e.target.value })}
+                        onChange={e => setNewCoupon({ ...newCoupon, value: e.target.value })}
                       />
                     </div>
                   </div>
@@ -520,7 +522,7 @@ export default function CouponsPage() {
                         placeholder="e.g. 50"
                         className="pl-8"
                         value={newCoupon.minPurchase}
-                        onChange={(e) => setNewCoupon({ ...newCoupon, minPurchase: e.target.value })}
+                        onChange={e => setNewCoupon({ ...newCoupon, minPurchase: e.target.value })}
                       />
                     </div>
                   </div>
@@ -534,7 +536,7 @@ export default function CouponsPage() {
                       placeholder="Leave empty for unlimited"
                       className="col-span-3"
                       value={newCoupon.maxUses}
-                      onChange={(e) => setNewCoupon({ ...newCoupon, maxUses: e.target.value })}
+                      onChange={e => setNewCoupon({ ...newCoupon, maxUses: e.target.value })}
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -605,7 +607,7 @@ export default function CouponsPage() {
                           <TabsContent value="categories" className="mt-2">
                             <ScrollArea className="h-[200px] border rounded-md p-4">
                               <div className="space-y-4">
-                                {productCategories.map((category) => (
+                                {productCategories.map(category => (
                                   <div key={category.id} className="flex items-center space-x-2">
                                     <Checkbox
                                       id={`category-${category.id}`}
@@ -632,7 +634,7 @@ export default function CouponsPage() {
                             </div>
                             <ScrollArea className="h-[200px] border rounded-md p-4">
                               <div className="space-y-4">
-                                {products.map((product) => (
+                                {products.map(product => (
                                   <div key={product.id} className="flex items-center space-x-2">
                                     <Checkbox
                                       id={`product-${product.id}`}
@@ -667,7 +669,7 @@ export default function CouponsPage() {
                     <Select
                       defaultValue="all"
                       value={newCoupon.customerScope}
-                      onValueChange={(value) => setNewCoupon({ ...newCoupon, customerScope: value })}
+                      onValueChange={value => setNewCoupon({ ...newCoupon, customerScope: value })}
                     >
                       <SelectTrigger className="col-span-3">
                         <SelectValue />
@@ -707,7 +709,7 @@ export default function CouponsPage() {
                       placeholder="Search coupons..."
                       className="pl-8"
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={e => setSearchQuery(e.target.value)}
                     />
                   </div>
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -746,7 +748,7 @@ export default function CouponsPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredCoupons.map((coupon) => (
+                    filteredCoupons.map(coupon => (
                       <TableRow key={coupon.id}>
                         <TableCell className="font-medium">{coupon.code}</TableCell>
                         <TableCell>
@@ -881,7 +883,7 @@ export default function CouponsPage() {
                 <Input
                   id="edit-code"
                   value={selectedCoupon.code}
-                  onChange={(e) => setSelectedCoupon({ ...selectedCoupon, code: e.target.value.toUpperCase() })}
+                  onChange={e => setSelectedCoupon({ ...selectedCoupon, code: e.target.value.toUpperCase() })}
                   className="col-span-3"
                 />
               </div>
@@ -891,7 +893,7 @@ export default function CouponsPage() {
                 </Label>
                 <Select
                   value={selectedCoupon.type}
-                  onValueChange={(value) => setSelectedCoupon({ ...selectedCoupon, type: value })}
+                  onValueChange={value => setSelectedCoupon({ ...selectedCoupon, type: value })}
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue />
@@ -933,7 +935,7 @@ export default function CouponsPage() {
                     id="edit-value"
                     type="number"
                     value={selectedCoupon.value}
-                    onChange={(e) => setSelectedCoupon({ ...selectedCoupon, value: Number.parseFloat(e.target.value) })}
+                    onChange={e => setSelectedCoupon({ ...selectedCoupon, value: Number.parseFloat(e.target.value) })}
                     className={selectedCoupon.type === "fixed" ? "pl-8" : undefined}
                   />
                 </div>
@@ -948,7 +950,7 @@ export default function CouponsPage() {
                     id="edit-min-purchase"
                     type="number"
                     value={selectedCoupon.minPurchase}
-                    onChange={(e) =>
+                    onChange={e =>
                       setSelectedCoupon({ ...selectedCoupon, minPurchase: Number.parseFloat(e.target.value) })
                     }
                     className="pl-8"
@@ -963,7 +965,7 @@ export default function CouponsPage() {
                   id="edit-max-uses"
                   type="number"
                   value={selectedCoupon.maxUses || ""}
-                  onChange={(e) =>
+                  onChange={e =>
                     setSelectedCoupon({
                       ...selectedCoupon,
                       maxUses: e.target.value ? Number.parseInt(e.target.value) : null,
@@ -1040,7 +1042,7 @@ export default function CouponsPage() {
                       <TabsContent value="categories" className="mt-2">
                         <ScrollArea className="h-[200px] border rounded-md p-4">
                           <div className="space-y-4">
-                            {productCategories.map((category) => (
+                            {productCategories.map(category => (
                               <div key={category.id} className="flex items-center space-x-2">
                                 <Checkbox
                                   id={`edit-category-${category.id}`}
@@ -1067,7 +1069,7 @@ export default function CouponsPage() {
                         </div>
                         <ScrollArea className="h-[200px] border rounded-md p-4">
                           <div className="space-y-4">
-                            {products.map((product) => (
+                            {products.map(product => (
                               <div key={product.id} className="flex items-center space-x-2">
                                 <Checkbox
                                   id={`edit-product-${product.id}`}
@@ -1101,7 +1103,7 @@ export default function CouponsPage() {
                 <Label className="text-right">Customers</Label>
                 <Select
                   value={selectedCoupon.customerScope}
-                  onValueChange={(value) => setSelectedCoupon({ ...selectedCoupon, customerScope: value })}
+                  onValueChange={value => setSelectedCoupon({ ...selectedCoupon, customerScope: value })}
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue />

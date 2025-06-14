@@ -17,13 +17,13 @@ const toggleVariants = cva(
       },
       size: {
         default: "h-10 px-3 min-w-10",
-        sm: "h-9 px-2.5 min-w-9",
-        lg: "h-11 px-5 min-w-11",
+        sm:      "h-9 px-2.5 min-w-9",
+        lg:      "h-11 px-5 min-w-11",
       },
     },
     defaultVariants: {
       variant: "default",
-      size: "default",
+      size:    "default",
     },
   }
 )
@@ -31,7 +31,7 @@ const toggleVariants = cva(
 const Toggle = React.forwardRef<
   React.ElementRef<typeof TogglePrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof TogglePrimitive.Root> &
-    VariantProps<typeof toggleVariants>
+  VariantProps<typeof toggleVariants>
 >(({ className, variant, size, ...props }, ref) => (
   <TogglePrimitive.Root
     ref={ref}

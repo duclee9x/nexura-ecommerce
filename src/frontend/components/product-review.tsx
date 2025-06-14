@@ -19,37 +19,39 @@ export interface ProductReviewProps {
 }
 
 export function ProductReview({ reviews = [] }: ProductReviewProps) {
-  const [activeTab, setActiveTab] = useState("reviews")
-  const [newReview, setNewReview] = useState({
-    rating: 0,
-    title: "",
+  const [ activeTab, setActiveTab ] = useState("reviews")
+  const [ newReview, setNewReview ] = useState({
+    rating:  0,
+    title:   "",
     content: "",
-    images: [] as string[],
+    images:  [] as string[],
   })
-  const [hoveredStar, setHoveredStar] = useState(0)
-  const [helpfulReviews, setHelpfulReviews] = useState<string[]>([])
-  const [unhelpfulReviews, setUnhelpfulReviews] = useState<string[]>([])
+  const [ hoveredStar, setHoveredStar ] = useState(0)
+  const [ helpfulReviews, setHelpfulReviews ] = useState<string[]>([])
+  const [ unhelpfulReviews, setUnhelpfulReviews ] = useState<string[]>([])
 
   // Calculate average rating
   const averageRating =
     reviews.length > 0 ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length : 0
 
   // Rating distribution
-  const ratingDistribution = [5, 4, 3, 2, 1].map((rating) => {
-    const count = reviews.filter((review) => review.rating === rating).length
+  const ratingDistribution = [
+    5, 4, 3, 2, 1
+  ].map((rating) => {
+    const count = reviews.filter(review => review.rating === rating).length
     const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0
     return { rating, count, percentage }
   })
 
   // Handle star rating
   const handleRatingChange = (rating: number) => {
-    setNewReview((prev) => ({ ...prev, rating }))
+    setNewReview(prev => ({ ...prev, rating }))
   }
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setNewReview((prev) => ({ ...prev, [name]: value }))
+    setNewReview(prev => ({ ...prev, [name]: value }))
   }
 
   // Handle image upload
@@ -57,20 +59,20 @@ export function ProductReview({ reviews = [] }: ProductReviewProps) {
     // In a real app, this would handle file upload
     const newImage = `/placeholder.svg?height=200&width=200&text=Review+Image+${newReview.images.length + 1}`
 
-    setNewReview((prev) => ({
+    setNewReview(prev => ({
       ...prev,
-      images: [...prev.images, newImage],
+      images: [ ...prev.images, newImage ],
     }))
 
     toast({
-      title: "Image Added",
+      title:       "Image Added",
       description: "Your image has been added to the review.",
     })
   }
 
   // Handle image removal
   const handleRemoveImage = (index: number) => {
-    setNewReview((prev) => ({
+    setNewReview(prev => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
     }))
@@ -81,18 +83,18 @@ export function ProductReview({ reviews = [] }: ProductReviewProps) {
     // Validate form
     if (newReview.rating === 0) {
       toast({
-        title: "Rating Required",
+        title:       "Rating Required",
         description: "Please select a star rating for your review.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
 
     if (!newReview.title || !newReview.content) {
       toast({
-        title: "Information Required",
+        title:       "Information Required",
         description: "Please provide both a title and content for your review.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
@@ -100,14 +102,14 @@ export function ProductReview({ reviews = [] }: ProductReviewProps) {
 
     // Reset form
     setNewReview({
-      rating: 0,
-      title: "",
+      rating:  0,
+      title:   "",
       content: "",
-      images: [],
+      images:  [],
     })
 
     toast({
-      title: "Review Submitted",
+      title:       "Review Submitted",
       description: "Your review has been submitted and is pending approval.",
     })
 
@@ -118,19 +120,19 @@ export function ProductReview({ reviews = [] }: ProductReviewProps) {
   // Handle helpful/unhelpful
   const handleHelpful = (reviewId: string) => {
     if (helpfulReviews.includes(reviewId)) {
-      setHelpfulReviews((prev) => prev.filter((id) => id !== reviewId))
+      setHelpfulReviews(prev => prev.filter(id => id !== reviewId))
     } else {
-      setHelpfulReviews((prev) => [...prev, reviewId])
-      setUnhelpfulReviews((prev) => prev.filter((id) => id !== reviewId))
+      setHelpfulReviews(prev => [ ...prev, reviewId ])
+      setUnhelpfulReviews(prev => prev.filter(id => id !== reviewId))
     }
   }
 
   const handleUnhelpful = (reviewId: string) => {
     if (unhelpfulReviews.includes(reviewId)) {
-      setUnhelpfulReviews((prev) => prev.filter((id) => id !== reviewId))
+      setUnhelpfulReviews(prev => prev.filter(id => id !== reviewId))
     } else {
-      setUnhelpfulReviews((prev) => [...prev, reviewId])
-      setHelpfulReviews((prev) => prev.filter((id) => id !== reviewId))
+      setUnhelpfulReviews(prev => [ ...prev, reviewId ])
+      setHelpfulReviews(prev => prev.filter(id => id !== reviewId))
     }
   }
 
@@ -162,7 +164,9 @@ export function ProductReview({ reviews = [] }: ProductReviewProps) {
                     <div className="flex items-center justify-center flex-col">
                       <div className="text-5xl font-bold mb-2 dark:text-white">{averageRating.toFixed(1)}</div>
                       <div className="flex items-center mb-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
+                        {[
+                          1, 2, 3, 4, 5
+                        ].map(star => (
                           <Star
                             key={star}
                             className={`h-6 w-6 ${
@@ -177,7 +181,7 @@ export function ProductReview({ reviews = [] }: ProductReviewProps) {
                     </div>
 
                     <div className="space-y-2">
-                      {ratingDistribution.map((item) => (
+                      {ratingDistribution.map(item => (
                         <div key={item.rating} className="flex items-center">
                           <div className="w-12 text-sm">{item.rating} stars</div>
                           <div className="flex-1 mx-2 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -191,7 +195,7 @@ export function ProductReview({ reviews = [] }: ProductReviewProps) {
 
                   <div className="md:col-span-2">
                     <div className="space-y-6">
-                      {reviews.map((review) => (
+                      {reviews.map(review => (
                         <div key={review.id} className="border-b pb-6 last:border-b-0 last:pb-0">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center">
@@ -206,7 +210,9 @@ export function ProductReview({ reviews = [] }: ProductReviewProps) {
                               </div>
                             </div>
                             <div className="flex items-center">
-                              {[1, 2, 3, 4, 5].map((star) => (
+                              {[
+                                1, 2, 3, 4, 5
+                              ].map(star => (
                                 <Star
                                   key={star}
                                   className={`h-4 w-4 ${
@@ -312,7 +318,9 @@ export function ProductReview({ reviews = [] }: ProductReviewProps) {
                   Rating <span className="text-destructive">*</span>
                 </Label>
                 <div className="flex items-center">
-                  {[1, 2, 3, 4, 5].map((star) => (
+                  {[
+                    1, 2, 3, 4, 5
+                  ].map(star => (
                     <Star
                       key={star}
                       className={`h-8 w-8 cursor-pointer transition-colors ${

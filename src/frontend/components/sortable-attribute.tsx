@@ -12,11 +12,11 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 
 interface SortableAttributeProps {
-  attribute: ProductAttribute
-  attributes: ProductAttribute[]
-  onChange: (attributes: ProductAttribute[]) => void
+  attribute:            ProductAttribute
+  attributes:           ProductAttribute[]
+  onChange:             (attributes: ProductAttribute[]) => void
   showAdvancedOptions?: boolean
-  onDelete: (id: string) => void
+  onDelete:             (id: string) => void
 }
 
 export function SortableAttribute({ 
@@ -27,7 +27,7 @@ export function SortableAttribute({
   onDelete
 }: SortableAttributeProps) {
   const { attributes: dndAttributes, listeners, setNodeRef, transform, transition } = useSortable({ id: attribute.id })
-  const [isEditing, setIsEditing] = useState(false)
+  const [ isEditing, setIsEditing ] = useState(false)
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -87,11 +87,11 @@ export function SortableAttribute({
                   <TooltipTrigger asChild>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={e => e.stopPropagation()}>
                           <Settings className="h-4 w-4" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-80" onClick={(e) => e.stopPropagation()}>
+                      <PopoverContent className="w-80" onClick={e => e.stopPropagation()}>
                         <div className="space-y-4">
                           <h4 className="font-medium">Attribute Settings</h4>
                           <div className="space-y-2">

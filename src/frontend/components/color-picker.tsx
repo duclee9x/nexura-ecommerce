@@ -13,17 +13,17 @@ import { toast } from "@/hooks/use-toast"
 // Default color palette
 
 export interface NamedColor {
-  value: string
-  name: string
+  value:       string
+  name:        string
   isFavorite?: boolean
 }
 
 interface ColorPickerProps {
-  value: string
-  onChange: (color: string) => void
-  colorName?: string
+  value:              string
+  onChange:           (color: string) => void
+  colorName?:         string
   onColorNameChange?: (name: string) => void
-  showFavorites: boolean
+  showFavorites:      boolean
 }
 
 export const ColorPicker = memo(function ColorPicker({ 
@@ -33,32 +33,61 @@ export const ColorPicker = memo(function ColorPicker({
   onColorNameChange, 
   showFavorites = true, 
 }: ColorPickerProps) {
-  const [selectedColor, setSelectedColor] = useState(value || "#000000")
-  const [customColor, setCustomColor] = useState(value || "#000000")
-  const [favoriteColors, setFavoriteColors] = useState<NamedColor[]>([])
-  const [displayColors, setDisplayColors] = useState<string[]>([])
-  const [isAddingCustomColor, setIsAddingCustomColor] = useState(false)
-  const [customColorName, setCustomColorName] = useState("")
-  const [isUpdating, setIsUpdating] = useState(false)
+  const [ selectedColor, setSelectedColor ] = useState(value || "#000000")
+  const [ customColor, setCustomColor ] = useState(value || "#000000")
+  const [ favoriteColors, setFavoriteColors ] = useState<NamedColor[]>([])
+  const [ displayColors, setDisplayColors ] = useState<string[]>([])
+  const [ isAddingCustomColor, setIsAddingCustomColor ] = useState(false)
+  const [ customColorName, setCustomColorName ] = useState("")
+  const [ isUpdating, setIsUpdating ] = useState(false)
 
   // Memoize default colors
   const defaultColors = useMemo(() => [
     // Reds
-    "#FF0000", "#FF5252", "#FF4081", "#F44336", "#E91E63",
+    "#FF0000",
+    "#FF5252",
+    "#FF4081",
+    "#F44336",
+    "#E91E63",
     // Purples
-    "#9C27B0", "#673AB7", "#7E57C2", "#BA68C8", "#CE93D8",
+    "#9C27B0",
+    "#673AB7",
+    "#7E57C2",
+    "#BA68C8",
+    "#CE93D8",
     // Blues
-    "#3F51B5", "#2196F3", "#03A9F4", "#00BCD4", "#4FC3F7",
+    "#3F51B5",
+    "#2196F3",
+    "#03A9F4",
+    "#00BCD4",
+    "#4FC3F7",
     // Greens
-    "#009688", "#4CAF50", "#8BC34A", "#CDDC39", "#76FF03",
+    "#009688",
+    "#4CAF50",
+    "#8BC34A",
+    "#CDDC39",
+    "#76FF03",
     // Yellows/Oranges
-    "#FFEB3B", "#FFC107", "#FF9800", "#FF5722", "#FFAB91",
+    "#FFEB3B",
+    "#FFC107",
+    "#FF9800",
+    "#FF5722",
+    "#FFAB91",
     // Browns
-    "#795548", "#A1887F", "#BCAAA4", "#D7CCC8", "#EFEBE9",
+    "#795548",
+    "#A1887F",
+    "#BCAAA4",
+    "#D7CCC8",
+    "#EFEBE9",
     // Grays
-    "#9E9E9E", "#757575", "#616161", "#424242", "#212121",
+    "#9E9E9E",
+    "#757575",
+    "#616161",
+    "#424242",
+    "#212121",
     // Black/White
-    "#000000", "#FFFFFF",
+    "#000000",
+    "#FFFFFF",
   ], [])
 
   // Debounced color update for color input
@@ -114,7 +143,7 @@ export const ColorPicker = memo(function ColorPicker({
   }, [onColorNameChange])
 
   const toggleFavorite = useCallback((color: string) => {
-    const existingIndex = favoriteColors.findIndex((c) => c.value === color)
+    const existingIndex = favoriteColors.findIndex(c => c.value === color)
 
     if (existingIndex >= 0) {
       // Remove from favorites
@@ -122,38 +151,38 @@ export const ColorPicker = memo(function ColorPicker({
       newFavorites.splice(existingIndex, 1)
       setFavoriteColors(newFavorites)
       toast({
-        title: "Removed from favorites",
+        title:       "Removed from favorites",
         description: "Color has been removed from your favorites.",
       })
     } else {
       // Add to favorites if under limit
       if (favoriteColors.length >= 10) {
         toast({
-          title: "Favorites limit reached",
+          title:       "Favorites limit reached",
           description: "You can only have 10 favorite colors. Remove some to add more.",
-          variant: "destructive",
+          variant:     "destructive",
         })
         return
       }
 
-      setFavoriteColors([...favoriteColors, { value: color, name: colorName }])
+      setFavoriteColors([ ...favoriteColors, { value: color, name: colorName } ])
       toast({
-        title: "Added to favorites",
+        title:       "Added to favorites",
         description: `${colorName} has been added to your favorites.`,
       })
     }
-  }, [favoriteColors, colorName])
+  }, [ favoriteColors, colorName ])
 
   const isColorFavorite = useCallback((color: string) => {
-    return favoriteColors.some((c) => c.value === color)
+    return favoriteColors.some(c => c.value === color)
   }, [favoriteColors])
 
   const handleAddCustomColor = useCallback(() => {
     if (!customColorName.trim()) {
       toast({
-        title: "Name required",
+        title:       "Name required",
         description: "Please provide a name for your custom color.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
@@ -161,22 +190,24 @@ export const ColorPicker = memo(function ColorPicker({
     // Add to favorites if under limit
     if (favoriteColors.length >= 10) {
       toast({
-        title: "Favorites limit reached",
+        title:       "Favorites limit reached",
         description: "You can only have 10 favorite colors. Remove some to add more.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
 
-    setFavoriteColors([...favoriteColors, { value: customColor, name: customColorName }])
+    setFavoriteColors([ ...favoriteColors, { value: customColor, name: customColorName } ])
     setIsAddingCustomColor(false)
     setCustomColorName("")
 
     toast({
-      title: "Custom color added",
+      title:       "Custom color added",
       description: `${customColorName} has been added to your favorites.`,
     })
-  }, [favoriteColors, customColor, customColorName])
+  }, [
+    favoriteColors, customColor, customColorName
+  ])
 
   // Memoize color input component
   // Only update parent onChange when user finishes interacting
@@ -203,7 +234,7 @@ export const ColorPicker = memo(function ColorPicker({
         className="h-10 p-1 cursor-pointer"
       />
     );
-  }, [customColor, onChange]);
+  }, [ customColor, onChange ]);
 
   // Memoize color name input component
   const colorNameInput = useMemo(() => (
@@ -214,7 +245,7 @@ export const ColorPicker = memo(function ColorPicker({
       onChange={handleColorNameChange}
       placeholder="e.g., Navy Blue, Forest Green"
     />
-  ), [colorName, handleColorNameChange])
+  ), [ colorName, handleColorNameChange ])
   const renderColorPallete = useMemo(() => {
     return (
       <div className="space-y-2">
@@ -253,7 +284,9 @@ export const ColorPicker = memo(function ColorPicker({
         </div>
       </div>
     )
-  }, [displayColors, isColorFavorite, handleColorSelect, showFavorites, selectedColor, toggleFavorite])
+  }, [
+    displayColors, isColorFavorite, handleColorSelect, showFavorites, selectedColor, toggleFavorite
+  ])
 
   return (
     <div className="color-picker space-y-4">
@@ -311,7 +344,7 @@ export const ColorPicker = memo(function ColorPicker({
                 <Input
                   id="custom-color-name"
                   value={customColorName}
-                  onChange={(e) => setCustomColorName(e.target.value)}
+                  onChange={e => setCustomColorName(e.target.value)}
                   placeholder="Enter color name"
                   className="h-8"
                 />

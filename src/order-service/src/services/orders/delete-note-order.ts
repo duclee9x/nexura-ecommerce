@@ -1,6 +1,6 @@
-import { PrismaClient, OrderStatus as PrismaOrderStatus } from '@nexura/order-service/src/db/prisma-client'
+import { PrismaClient } from '@nexura/order-service/src/db/prisma-client'
 import { logger } from '@nexura/common/utils'
-import { CreateOrderRequest, CreateOrderResponse, DeleteOrderNoteRequest, DeleteOrderNoteResponse, OrderStatus as ProtoOrderStatus } from '@nexura/grpc_gateway/protos'
+import { DeleteOrderNoteRequest, DeleteOrderNoteResponse } from '@nexura/grpc_gateway/protos'
 import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js'
 import { Status } from '@grpc/grpc-js/build/src/constants'
 
@@ -17,7 +17,7 @@ export const deleteOrderNote = async (call: ServerUnaryCall<DeleteOrderNoteReque
       // Create order with initial status
       await tx.order.update({
         where: { id: orderId },
-        data: {
+        data:  {
           notes: {
             delete: {
               id: noteId
@@ -33,7 +33,7 @@ export const deleteOrderNote = async (call: ServerUnaryCall<DeleteOrderNoteReque
   } catch (error) {
     logger.error('Error creating order:', error)
     callback({
-      code: Status.INTERNAL,
+      code:    Status.INTERNAL,
       message: 'Failed to delete order note'
     })
   }

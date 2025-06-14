@@ -15,7 +15,7 @@ export async function getAddress(
     const { addressId } = call.request;
     if (!addressId) {
       callback({
-        code: Status.INVALID_ARGUMENT,
+        code:    Status.INVALID_ARGUMENT,
         message: 'Address ID is required'
       });
       return;
@@ -27,62 +27,62 @@ export async function getAddress(
       },
       include: {
         country: {
-            select: {
-                id: true,
-                name: true
-            }
+          select: {
+            id:   true,
+            name: true
+          }
         },
         vnProvince: {
-            select: {
-                id: true,
-                fullName: true
-            }
+          select: {
+            id:       true,
+            fullName: true
+          }
         },
         vnDistrict: {
-            select: {
-                id: true,
-                fullName: true
-            }
+          select: {
+            id:       true,
+            fullName: true
+          }
         },
         vnWard: {
-            select: {
-                id: true,
-                fullName: true
-            }
+          select: {
+            id:       true,
+            fullName: true
+          }
         }
       }
     });
     GetAddressesSpan.setStatus({
-      code: SpanStatusCode.OK,
+      code:    SpanStatusCode.OK,
       message: 'Addresses fetched successfully'
     });
     GetAddressesSpan.end();
     if (!address) {
       callback({
-        code: Status.NOT_FOUND,
+        code:    Status.NOT_FOUND,
         message: 'Address not found'
       });
       return;
     }
     callback(null, {
       address: {
-        id: address.id,
-        name: address.name,
-        street: address.street,
-        city: address.city || '',
-        state: address.state || '',
-        countryId: address.countryId.toString(),
-        zip: address.zip || '',
-        vnProvinceId: address.vnProvinceId?.toString() || '',
-        vnDistrictId: address.vnDistrictId?.toString() || '',
-        vnWardId: address.vnWardId?.toString() || '',
-        isDefault: address.isDefault,
-        createdAt: address.createdAt.toISOString(),
-        updatedAt: address.updatedAt.toISOString(),
-        countryName: address.country?.name || '',
+        id:             address.id,
+        name:           address.name,
+        street:         address.street,
+        city:           address.city || '',
+        state:          address.state || '',
+        countryId:      address.countryId.toString(),
+        zip:            address.zip || '',
+        vnProvinceId:   address.vnProvinceId?.toString() || '',
+        vnDistrictId:   address.vnDistrictId?.toString() || '',
+        vnWardId:       address.vnWardId?.toString() || '',
+        isDefault:      address.isDefault,
+        createdAt:      address.createdAt.toISOString(),
+        updatedAt:      address.updatedAt.toISOString(),
+        countryName:    address.country?.name || '',
         vnProvinceName: address.vnProvince?.fullName || '',
         vnDistrictName: address.vnDistrict?.fullName || '',
-        vnWardName: address.vnWard?.fullName || ''
+        vnWardName:     address.vnWard?.fullName || ''
       }
     });
   } catch (error) {

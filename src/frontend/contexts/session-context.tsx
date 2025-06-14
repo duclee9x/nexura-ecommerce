@@ -5,11 +5,11 @@ import { User } from "@nexura/grpc_gateway/protos"
 import UserHooks from "@/hooks/user-hooks"
 
 interface SessionContextType {
-  user: User | null
-  isLoading: boolean
+  user:            User | null
+  isLoading:       boolean
   isAuthenticated: boolean
-  error: Error | null
-  refetch: () => void
+  error:           Error | null
+  refetch:         () => void
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined)
@@ -18,7 +18,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const { useGetSession } = UserHooks()
   const { data: user, isLoading, error, refetch } = useGetSession()
   const value = {
-    user: user || null,
+    user:            user || null,
     isLoading,
     isAuthenticated: !!user,
     error,

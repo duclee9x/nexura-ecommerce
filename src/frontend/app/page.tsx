@@ -9,69 +9,85 @@ import backpack_4 from "@/public/backpack-4.jpg"
 import TravelBackpack from "@/public/travel-backpack.webp"
 import { Icon } from "@iconify/react";
 interface Product {
-  id: string;
-  name: string;
-  image: StaticImageData;
-  url: string;
+  id:     string;
+  name:   string;
+  image:  StaticImageData;
+  url:    string;
   colors: string[];
 }
 
 const products: Product[] = [
   {
-    id: "1",
-    name: "Accessory 1",
-    image: backpack_1,
-    url: "/products/hyper-backpack",
-    colors: ["bg-black", "bg-gray-400", "bg-blue-800"]
+    id:     "1",
+    name:   "Accessory 1",
+    image:  backpack_1,
+    url:    "/products/hyper-backpack",
+    colors: [
+      "bg-black", "bg-gray-400", "bg-blue-800"
+    ]
   },
   {
-    id: "2",
-    name: "Accessory 2",
-    image: backpack_2,
-    url: "/products/urban-backpack",
-    colors: ["bg-black", "bg-gray-400", "bg-blue-800"]
+    id:     "2",
+    name:   "Accessory 2",
+    image:  backpack_2,
+    url:    "/products/urban-backpack",
+    colors: [
+      "bg-black", "bg-gray-400", "bg-blue-800"
+    ]
   },
   {
-    id: "3",
-    name: "Accessory 3",
-    image: backpack_3,
-    url: "/products/smart-carry-backpack",
-    colors: ["bg-black", "bg-gray-400", "bg-blue-800"]
+    id:     "3",
+    name:   "Accessory 3",
+    image:  backpack_3,
+    url:    "/products/smart-carry-backpack",
+    colors: [
+      "bg-black", "bg-gray-400", "bg-blue-800"
+    ]
   },
   {
-    id: "4",
-    name: "Accessory 4",
-    image: backpack_4,
-    url: "/products/aero-backpack",
-    colors: ["bg-black", "bg-gray-400", "bg-blue-800"]
+    id:     "4",
+    name:   "Accessory 4",
+    image:  backpack_4,
+    url:    "/products/aero-backpack",
+    colors: [
+      "bg-black", "bg-gray-400", "bg-blue-800"
+    ]
   },
   {
-    id: "5",
-    name: "Accessory 5",
-    image: backpack_1,
-    url: "/products/hyper-backpack",
-    colors: ["bg-black", "bg-gray-400", "bg-blue-800"]
+    id:     "5",
+    name:   "Accessory 5",
+    image:  backpack_1,
+    url:    "/products/hyper-backpack",
+    colors: [
+      "bg-black", "bg-gray-400", "bg-blue-800"
+    ]
   },
   {
-    id: "6",
-    name: "Accessory 6",
-    image: backpack_2,
-    url: "/products/urban-backpack",
-    colors: ["bg-black", "bg-gray-400", "bg-blue-800"]
+    id:     "6",
+    name:   "Accessory 6",
+    image:  backpack_2,
+    url:    "/products/urban-backpack",
+    colors: [
+      "bg-black", "bg-gray-400", "bg-blue-800"
+    ]
   },
   {
-    id: "7",
-    name: "Accessory 7",
-    image: backpack_3,
-    url: "/products/smart-carry-backpack",
-    colors: ["bg-black", "bg-gray-400", "bg-blue-800"]
+    id:     "7",
+    name:   "Accessory 7",
+    image:  backpack_3,
+    url:    "/products/smart-carry-backpack",
+    colors: [
+      "bg-black", "bg-gray-400", "bg-blue-800"
+    ]
   },
   {
-    id: "8",
-    name: "Accessory 8",
-    image: backpack_4,
-    url: "/products/aero-backpack",
-    colors: ["bg-black", "bg-gray-400", "bg-blue-800"]
+    id:     "8",
+    name:   "Accessory 8",
+    image:  backpack_4,
+    url:    "/products/aero-backpack",
+    colors: [
+      "bg-black", "bg-gray-400", "bg-blue-800"
+    ]
   }
 ]
 export default async function Home() {
@@ -170,7 +186,7 @@ export default async function Home() {
             <h3 className="font-medium uppercase dark:text-white">URBAN BACKPACK</h3>
             <p className="text-gray-900 dark:text-gray-100 font-semibold">$120</p>
             <div className="flex mt-2">
-              {colors.map((color) => (
+              {colors.map(color => (
                 <span key={color} className={`w-4 h-4 rounded-full ${color} mr-1`}></span>
               ))}
             </div>
@@ -211,7 +227,7 @@ export default async function Home() {
               </div>
             </div>
             <div className="grid md:grid-cols-2 col-span-2 gap-4">
-              {products.slice(0, 4).map((product) => (
+              {products.slice(0, 4).map(product => (
                 <ProductCard key={product.id} src={product.image} alt={product.name} href={product.url} colors={product.colors} />
               ))}
             </div>
@@ -246,7 +262,7 @@ export default async function Home() {
   function ProductCatalog({ products }: { products: Product[] }) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {products.map((product) => (
+        {products.map(product => (
           <ProductCard key={product.id} src={product.image} alt={product.name} href={product.url} colors={product.colors} />
         ))}
       </div>

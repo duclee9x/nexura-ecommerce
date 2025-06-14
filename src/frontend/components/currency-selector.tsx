@@ -10,7 +10,7 @@ import { currencies, type CurrencyCode, useCurrency } from "@/contexts/currency-
 
 export function CurrencySelector() {
   const { currency, setCurrency } = useCurrency()
-  const [open, setOpen] = useState(false)
+  const [ open, setOpen ] = useState(false)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -27,7 +27,7 @@ export function CurrencySelector() {
           <CommandList>
             <CommandEmpty>No currency found.</CommandEmpty>
             <CommandGroup>
-              {Object.entries(currencies).map(([code, details]) => (
+              {Object.entries(currencies).map(([ code, details ]) => (
                 <CommandItem
                   key={code}
                   value={code}

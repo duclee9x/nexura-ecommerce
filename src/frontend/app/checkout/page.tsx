@@ -8,7 +8,7 @@ import { ChevronLeft, X, CreditCard, Wallet, Banknote } from "lucide-react"
 import { useCart } from "@/contexts/cart-context"
 import { useSession } from "@/contexts/session-context"
 import { useCurrency } from "@/contexts/currency-context"
-import type { CreateSagaOrderRequest } from "@nexura/grpc_gateway/protos"
+import type { CreateOrderRequest, CreateSagaOrderRequest } from "@nexura/grpc_gateway/protos"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -25,8 +25,8 @@ import OrderHooks from "@/hooks/order-hooks"
 import CartHooks from "@/hooks/cart-hooks"
 
 export default function CheckoutPage() {
-  const { useCreateSagaOrder } = OrderHooks()
-  const { mutateAsync: createSagaOrder } = useCreateSagaOrder
+  const { useCreateOrderWorkflow } = OrderHooks()
+  const { mutateAsync: createOrderWorkflow } = useCreateOrderWorkflow
   const router = useRouter()
   const { items } = useCart()
   const { useGetVariants, useClearCart } = CartHooks()
@@ -34,39 +34,46 @@ export default function CheckoutPage() {
   const { user } = useSession()
   const { cartId } = useCart()
   const { formatPrice, currency } = useCurrency()
-  const [paymentMethod, setPaymentMethod] = useState<"STRIPE" | "VNPAY" | "COD">("STRIPE")
-  const [shippingMethod, setShippingMethod] = useState("standard")
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [address, setAddress] = useState<ExtendedAddressType | null>(null)
-  const [subtotal, setSubtotal] = useState(0)
-  const [shipping, setShipping] = useState(0)
-  const [orderTotal, setOrderTotal] = useState(0)
-  const { data: variants } = useGetVariants(items.map((item) => item.variantId))
-  const [coupons, setCoupons] = useState<{code: string, discount: number}[]>([])
-  const [newCoupon, setNewCoupon] = useState("")
+  const [ paymentMethod, setPaymentMethod ] = useState<"STRIPE" | "VNPAY" | "COD">("COD")
+  const [ shippingMethod, setShippingMethod ] = useState("standard")
+  const [ isProcessing, setIsProcessing ] = useState(false)
+  const [ address, setAddress ] = useState<ExtendedAddressType | null>(null)
+  const [ subtotal, setSubtotal ] = useState(0)
+  const [ shipping, setShipping ] = useState(0)
+  const [ orderTotal, setOrderTotal ] = useState(0)
+  const { data: variants } = useGetVariants(items.map(item => item.variantId))
+  const [ coupons, setCoupons ] = useState<{ code: string, discount: number }[]>([])
+  const [ newCoupon, setNewCoupon ] = useState("")
 
  
   const variantsPrice = useMemo(() => 
-    items.map((item) => ({
-      id: item.variantId, 
-      price: (variants?.find((v) => v.id === item.variantId)?.price || 0) * item.quantity,
-      variantName: variants?.find((v) => v.id === item.variantId)?.variantName,
-      productName: variants?.find((v) => v.id === item.variantId)?.productName,
-      productSlug: variants?.find((v) => v.id === item.variantId)?.productSlug,
-      image: variants?.find((v) => v.id === item.variantId)?.image,
-      sku: variants?.find((v) => v.id === item.variantId)?.sku,
-    }))
-  , [items, variants])
+    items.map((item) => {
+      const variant = variants?.find(v => v.id === item.variantId);
+      return {
+        id:          item.variantId,
+        price:       variant?.price || 0,
+        quantity:    item.quantity,
+        variantName: variant?.variantName || "",
+        productName: variant?.productName || "",
+        productSlug: variant?.productSlug || "",
+        image:       variant?.image || "",
+        sku:         variant?.sku || "",
+        variantId:   item.variantId,
+      };
+    }),
+  [ items, variants ])
 
   useEffect(() => {
     const shipping = shippingMethod === "express" ? 20 : 12
-    const total = items.reduce((acc, item) => acc + (variants?.find((v) => v.id === item.variantId)?.price || 0) * item.quantity, 0)
+    const total = items.reduce((acc, item) => acc + (variants?.find(v => v.id === item.variantId)?.price || 0) * item.quantity, 0)
     const orderTotal = total + shipping
 
     setShipping(shipping)
     setSubtotal(total)
     setOrderTotal(orderTotal)
-  }, [shippingMethod, items, variants])
+  }, [
+    shippingMethod, items, variants
+  ])
 
   const handlePlaceOrder = async () => {
     if (!user) {
@@ -76,7 +83,7 @@ export default function CheckoutPage() {
 
     if (!address) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: "Please select an address",
       })
       return
@@ -84,57 +91,62 @@ export default function CheckoutPage() {
 
     if (cartId === undefined) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: "Cart not found",
       })
       return
     }
 
     setIsProcessing(true)
-    const order: CreateSagaOrderRequest = {
+    const order: CreateOrderRequest = {
       userId: user.id,
       cartId: cartId,
-      shippingAddress: address,
-      items: variantsPrice.map((item) => ({
-        id: item.id,
-        productId: item.id,
-        variantId: item.id,
-        quantity: items.find((i) => i.variantId === item.id)?.quantity || 0,
-        price: item.price,
-        productName: item.productName || "",
-        productSlug: item.productSlug || "",
-        variantName: item.variantName || "",
-        image: item.image || "",
-        sku: item.sku || "",
-      })),
-      shippingMethod: shippingMethod,
-      shippingCost: shipping,
-      paymentMethod: paymentMethod,
-      paymentAmount: orderTotal,
-      paymentCurrency: currency,
-      subtotal: subtotal,
-      coupons: coupons.map((coupon) => ({
-        code: coupon.code,
+      items:  items.map((item) => {
+        const variant = variants?.find(v => v.id === item.variantId);
+        if (!variant) {
+          throw new Error(`Variant not found: ${item.variantId}`);
+        }
+        return {
+          id:          item.variantId,
+          productId:   item.variantId, // We'll use variantId as both since that's what the validation expects
+          variantId:   item.variantId,
+          quantity:    item.quantity,
+          price:       variant.price,
+          productName: variant.productName || "",
+          productSlug: variant.productSlug || "",
+          variantName: variant.variantName || "",
+          image:       variant.image || "",
+          sku:         variant.sku || "",
+        };
+      }),
+      coupons: coupons.map(coupon => ({
+        code:     coupon.code,
         discount: coupon.discount,
       })),
-      total: orderTotal,
-      currencyCode: currency,
+      currencyCode:    currency,
+      paymentMethod:   paymentMethod,
+      paymentSubtotal: subtotal,
+      paymentTotal:    orderTotal - coupons.reduce((acc, c) => acc + c.discount, 0),
+      shippingMethod:  shippingMethod,
+      shippingCost:    shipping,
+      shippingAddress: address,
     }
 
     try {
-      const result = await createSagaOrder(order)
-      if (result.orderId) {
+      const result = await createOrderWorkflow(order)
+      console.log("result", result)
+      if (result.instanceID) {
         await clearCart(user.id)
-        router.push(`/checkout/success?order=${result.orderId}`)
+        router.push(`/checkout/processing?instanceID=${result.instanceID}`)
       } else {
         toast({
-          title: "Error",
+          title:       "Error",
           description: "Failed to create order",
         })
       }
     } catch (error) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: "Failed to create order",
       })
       console.error(error)
@@ -148,10 +160,10 @@ export default function CheckoutPage() {
 
     // Example coupon logic - replace with actual API call
     const discount = newCoupon.toLowerCase() === "nexura10" ? 0.1 : 
-                    newCoupon.toLowerCase() === "freeship" ? shipping : 0
+      newCoupon.toLowerCase() === "freeship" ? shipping : 0
 
     if (discount > 0) {
-      setCoupons([...coupons, { code: newCoupon, discount }])
+      setCoupons([ ...coupons, { code: newCoupon, discount } ])
       setNewCoupon("")
     }
   }
@@ -179,14 +191,14 @@ export default function CheckoutPage() {
         {/* Checkout Form */}
         <div className="lg:col-span-2 space-y-8">
           {/* Address Component */}
-              <Tabs defaultValue="addresses">
-                <AddressTab 
-                    type="checkout" 
-                    user={user} 
-                    setAddress={setAddress} 
-                    currentAddress={address}
-                />
-              </Tabs>
+          <Tabs defaultValue="addresses">
+            <AddressTab 
+              type="checkout" 
+              user={user} 
+              setAddress={setAddress} 
+              currentAddress={address}
+            />
+          </Tabs>
 
           {/* Shipping Method */}
           <Card>
@@ -239,14 +251,14 @@ export default function CheckoutPage() {
                   <Input 
                     placeholder="Enter coupon code" 
                     value={newCoupon} 
-                    onChange={(e) => setNewCoupon(e.target.value)}
+                    onChange={e => setNewCoupon(e.target.value)}
                   />
                   <Button onClick={handleApplyCoupon}>Apply</Button>
                 </div>
 
                 {coupons.length > 0 && (
                   <div className="space-y-2">
-                    {coupons.map((coupon) => (
+                    {coupons.map(coupon => (
                       <div key={coupon.code} className="flex items-center justify-between bg-muted p-2 rounded-lg">
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{coupon.code}</span>
@@ -290,26 +302,26 @@ export default function CheckoutPage() {
                   </AccordionTrigger>
                   <AccordionContent>
                     <div className="space-y-4 pr-2">
-                      {items.map((item) => (
+                      {items.map(item => (
                         <div key={item.id} className="flex gap-3 justify-center items-center">
                           <div className="relative w-16 h-16 border flex-shrink-0">
                             <Image 
                               src={item.image || "/no-image-placeholder.webp"} 
-                              alt={variants?.find((v) => v.id === item.variantId)?.variantName || "Unknown"} 
+                              alt={variants?.find(v => v.id === item.variantId)?.variantName || "Unknown"} 
                               fill 
                               className="object-cover" 
                             />
                           </div>
                           <div className="flex-1">
                             <div className="flex justify-between">
-                              <p className="font-medium text-sm">{variants?.find((v) => v.id === item.variantId)?.productName}</p>
-                              <p className="font-bold text-sm">{formatPrice(variantsPrice.find((v) => v.id === item.variantId)?.price || 0)}</p>
+                              <p className="font-medium text-sm">{variants?.find(v => v.id === item.variantId)?.productName}</p>
+                              <p className="font-bold text-sm">{formatPrice(variantsPrice.find(v => v.id === item.variantId)?.price || 0)}</p>
                             </div>
                             <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
                             {variants && item.variantId && (
                               <p className="text-sm text-muted-foreground">Variant: {variants.find(v => v.id === item.variantId)?.variantName}</p>
                             )}
-                            <p className="text-sm py-1">Price: {formatPrice(variants?.find((v) => v.id === item.variantId)?.price || 0)}</p>
+                            <p className="text-sm py-1">Price: {formatPrice(variants?.find(v => v.id === item.variantId)?.price || 0)}</p>
                           </div>
                         </div>
                       ))}
@@ -351,18 +363,18 @@ export default function CheckoutPage() {
                 <h3 className="font-medium">Payment Method</h3>
                 <RadioGroup 
                   value={paymentMethod} 
-                  onValueChange={(value) => setPaymentMethod(value as "STRIPE" | "VNPAY" | "COD")}
+                  onValueChange={value => setPaymentMethod(value as "STRIPE" | "VNPAY" | "COD")}
                   className="space-y-3"
                 >
-                  <div className={`flex items-center space-x-3 rounded-lg border p-4 hover:border-primary cursor-pointer ${paymentMethod === "STRIPE" ? "bg-primary/5" : ""}`} onClick={() => setPaymentMethod("STRIPE")}>
-                    <RadioGroupItem value="STRIPE" id="STRIPE" />
+                  <div className={`flex items-center space-x-3 rounded-lg border p-4 hover:border-primary cursor-pointer ${paymentMethod === "STRIPE" ? "bg-primary/5" : ""}`} onClick={() => {}}>
+                    <RadioGroupItem disabled={true} value="STRIPE" id="STRIPE" />
                     <Label htmlFor="STRIPE" className="flex items-center gap-2 cursor-pointer">
                       <CreditCard className="h-5 w-5" />
                       <span>Global payment gateway (Stripe)</span>
                     </Label>
                   </div>
-                  <div className={`flex items-center space-x-3 rounded-lg border p-4 hover:border-primary cursor-pointer ${paymentMethod === "VNPAY" ? "bg-primary/5" : ""}`} onClick={() => setPaymentMethod("VNPAY")}>
-                    <RadioGroupItem value="VNPAY" id="VNPAY" />
+                  <div className={`flex items-center space-x-3 rounded-lg border p-4 hover:border-primary cursor-pointer ${paymentMethod === "VNPAY" ? "bg-primary/5" : ""}`} onClick={() => {}}>
+                    <RadioGroupItem disabled={true} value="VNPAY" id="VNPAY" />
                     <Label htmlFor="VNPAY" className="flex items-center gap-2 cursor-pointer">
                       <Wallet className="h-5 w-5" />
                       <span>Vietnam payment gateway (VNPay)</span>
@@ -394,12 +406,14 @@ export default function CheckoutPage() {
                         r="10"
                         stroke="currentColor"
                         strokeWidth="4"
-                      ></circle>
+                      >
+                      </circle>
                       <path
                         className="opacity-75"
                         fill="currentColor"
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
+                      >
+                      </path>
                     </svg>
                     Processing...
                   </>

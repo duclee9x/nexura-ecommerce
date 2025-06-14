@@ -8,8 +8,8 @@ import { GetBatchPayments } from './get-batch-payments'
 // import { GetPaymentStatus } from './payment/get-payment-status'
 
 export const paymentService: UntypedServiceImplementation = {
-  initiatePayment: InitiatePayment,
-  getPayment: GetPayment,
+  initiatePayment:  InitiatePayment,
+  getPayment:       GetPayment,
   getBatchPayments: GetBatchPayments
   // verifyPayment: VerifyPayment,
   // cancelPayment: CancelPayment,

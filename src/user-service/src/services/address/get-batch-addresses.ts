@@ -25,33 +25,33 @@ export async function getBatchAddresses(
       },
       include: {
         country: {
-            select: {
-                id: true,
-                codeName: true
-            }
+          select: {
+            id:       true,
+            codeName: true
+          }
         },
         vnProvince: {
-            select: {
-                id: true,
-                fullName: true
-            }
+          select: {
+            id:       true,
+            fullName: true
+          }
         },
         vnDistrict: {
-            select: {
-                id: true,
-                fullName: true
-            }
+          select: {
+            id:       true,
+            fullName: true
+          }
         },
         vnWard: {
-            select: {
-                id: true,
-                fullName: true
-            }
+          select: {
+            id:       true,
+            fullName: true
+          }
         }
       }
     });
     GetAddressesSpan.setStatus({
-      code: SpanStatusCode.OK,
+      code:    SpanStatusCode.OK,
       message: 'Addresses fetched successfully'
     });
     GetAddressesSpan.end();
@@ -62,24 +62,24 @@ export async function getBatchAddresses(
       return;
     }
     callback(null, {
-      addresses: addresses.map((address) => ({
-        id: address.id,
-        name: address.name,
-        street: address.street,
-        city: address.city || '',
-        state: address.state || '',
-        countryId: address.countryId.toString(),
-        zip: address.zip || '',
-        vnProvinceId: address.vnProvinceId?.toString() || '',
-        vnDistrictId: address.vnDistrictId?.toString() || '',
-        vnWardId: address.vnWardId?.toString() || '',
-        isDefault: address.isDefault,
-        createdAt: address.createdAt.toISOString(),
-        updatedAt: address.updatedAt.toISOString(),
-        countryName: address.country?.codeName || '',
+      addresses: addresses.map(address => ({
+        id:             address.id,
+        name:           address.name,
+        street:         address.street,
+        city:           address.city || '',
+        state:          address.state || '',
+        countryId:      address.countryId.toString(),
+        zip:            address.zip || '',
+        vnProvinceId:   address.vnProvinceId?.toString() || '',
+        vnDistrictId:   address.vnDistrictId?.toString() || '',
+        vnWardId:       address.vnWardId?.toString() || '',
+        isDefault:      address.isDefault,
+        createdAt:      address.createdAt.toISOString(),
+        updatedAt:      address.updatedAt.toISOString(),
+        countryName:    address.country?.codeName || '',
         vnProvinceName: address.vnProvince?.fullName || '',
         vnDistrictName: address.vnDistrict?.fullName || '',
-        vnWardName: address.vnWard?.fullName || ''
+        vnWardName:     address.vnWard?.fullName || ''
       }))
     });
   } catch (error) {

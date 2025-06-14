@@ -17,7 +17,8 @@
     "prisma:resolve": "prisma migrate resolve",
     "prisma:migrate:deploy": "prisma migrate deploy && prisma generate",
     "prisma:studio": "prisma studio",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint . --config ../../packages/eslint/eslint.config.js",
+    "lint:fix": "eslint . --fix --config ../../packages/eslint/eslint.config.js",
     "format": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {

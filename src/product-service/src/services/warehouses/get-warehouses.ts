@@ -14,15 +14,15 @@ export const getWarehouses = async (call: ServerUnaryCall<Empty, GetWarehousesRe
     }
 
     const response: GetWarehousesResponse = {
-      warehouses: warehouses.map((warehouse) => ({
-        id: warehouse.id,
-        name: warehouse.name,
-        code: warehouse.code,
-        location: warehouse.location,
-        address: warehouse.address,
-        manager: warehouse.manager,
-        contact: warehouse.contact,
-        status: warehouse.status,
+      warehouses: warehouses.map(warehouse => ({
+        id:        warehouse.id,
+        name:      warehouse.name,
+        code:      warehouse.code,
+        location:  warehouse.location,
+        address:   warehouse.address,
+        manager:   warehouse.manager,
+        contact:   warehouse.contact,
+        status:    warehouse.status,
         createdAt: warehouse.createdAt.toISOString(),
         updatedAt: warehouse.updatedAt.toISOString(),
       })),

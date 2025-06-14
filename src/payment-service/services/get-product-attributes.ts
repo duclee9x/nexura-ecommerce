@@ -20,16 +20,16 @@ export const getProductAttributes = async (call: ServerUnaryCall<GetProductAttri
     }
 
     const response: GetProductAttributesResponse = {
-      attributes: attributes.map((attribute) => ({
-        id: attribute.id,
-        name: attribute.name,
-        required: attribute.required,
-        visible: attribute.visible,
-        values: attribute.values,
-        productId: attribute.productId,
-        variantable: attribute.variantable,
-        filterable: attribute.filterable,
-        searchable: attribute.searchable,
+      attributes: attributes.map(attribute => ({
+        id:           attribute.id,
+        name:         attribute.name,
+        required:     attribute.required,
+        visible:      attribute.visible,
+        values:       attribute.values,
+        productId:    attribute.productId,
+        variantable:  attribute.variantable,
+        filterable:   attribute.filterable,
+        searchable:   attribute.searchable,
         displayOrder: attribute.displayOrder,
       })),
     }

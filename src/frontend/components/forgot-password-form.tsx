@@ -28,11 +28,11 @@ export function ForgotPasswordForm() {
   const { mutateAsync: validateOTP } = useValidateOTP
   const router = useRouter()
   const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
-  const [step, setStep] = useState<"email" | "verification">("email")
-  const [userEmail, setUserEmail] = useState("")
-  const [lastEmailSent, setLastEmailSent] = useState<Date | null>(null)
-  const [cooldownRemaining, setCooldownRemaining] = useState<number>(0)
+  const [ isLoading, setIsLoading ] = useState(false)
+  const [ step, setStep ] = useState<"email" | "verification">("email")
+  const [ userEmail, setUserEmail ] = useState("")
+  const [ lastEmailSent, setLastEmailSent ] = useState<Date | null>(null)
+  const [ cooldownRemaining, setCooldownRemaining ] = useState<number>(0)
     
   // Email form
   const {
@@ -40,7 +40,7 @@ export function ForgotPasswordForm() {
     handleSubmit: handleSubmitEmail,
     formState: { errors: emailErrors },
   } = useForm<EmailFormValues>({
-    resolver: zodResolver(emailSchema),
+    resolver:      zodResolver(emailSchema),
     defaultValues: {
       email: "",
     },
@@ -52,7 +52,7 @@ export function ForgotPasswordForm() {
     handleSubmit: handleSubmitVerification,
     formState: { errors: verificationErrors },
   } = useForm<VerificationFormValues>({
-    resolver: zodResolver(verificationSchema),
+    resolver:      zodResolver(verificationSchema),
     defaultValues: {
       code: "",
     },
@@ -77,8 +77,8 @@ export function ForgotPasswordForm() {
     return () => clearInterval(interval)
   }, [lastEmailSent])
 
-  const [stateSubmitEmail, formActionSubmitEmail] = useActionState(handleSubmitEmailAction, {message: "", success: false})
-  const [stateSubmitVerification, formActionSubmitVerification] = useActionState(handleSubmitVerificationAction, {message: "", success: false})
+  const [ stateSubmitEmail, formActionSubmitEmail ] = useActionState(handleSubmitEmailAction, {message: "", success: false})
+  const [ stateSubmitVerification, formActionSubmitVerification ] = useActionState(handleSubmitVerificationAction, {message: "", success: false})
 
   async function onSubmitEmail(data: EmailFormValues) {
     setIsLoading(true)
@@ -94,16 +94,16 @@ export function ForgotPasswordForm() {
       setStep("verification")
 
       toast({
-        title: "Verification code sent",
+        title:       "Verification code sent",
         description: `We've sent a verification code to ${data.email}. Please check your inbox.`,
-        variant: "default",
+        variant:     "default",
       })
     } catch (error) {
       console.error("Forgot password error:", error)
       toast({
-        title: "Error",
-        description: "We couldn't find an account with that email address. Please try again.",
-        variant: "destructive",
+        title:       "Error",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant:     "destructive",
       })
     } finally {
       setIsLoading(false)
@@ -119,18 +119,18 @@ export function ForgotPasswordForm() {
         throw new Error(message)
       }
       toast({
-        title: "Verification successful",
+        title:       "Verification successful",
         description: "Your identity has been verified. You can now reset your password.",
-        variant: "default",
+        variant:     "default",
       })
 
       router.push(`/reset-password?token=${resetToken}&email=${userEmail}`)
     } catch (error) {
       console.error("Verification error:", error)
       toast({
-        title: "Verification failed",
+        title:       "Verification failed",
         description: "The verification code is invalid or has expired. Please try again.",
-        variant: "destructive",
+        variant:     "destructive",
       })
     } finally {
       setIsLoading(false)
@@ -148,16 +148,16 @@ export function ForgotPasswordForm() {
       }
       setLastEmailSent(new Date())
       toast({
-        title: "Code resent",
+        title:       "Code resent",
         description: `We've sent a new verification code to ${userEmail}.`,
-        variant: "default",
+        variant:     "default",
       })
     } catch (error) {
       console.error("Resend code error:", error)
       toast({
-        title: "Error",
+        title:       "Error",
         description: "Failed to resend the verification code. Please try again.",
-        variant: "destructive",
+        variant:     "destructive",
       })
     } finally {
       setIsLoading(false)

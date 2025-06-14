@@ -29,57 +29,57 @@ import Link from "next/link"
 
 interface ProductFormProps {
   productSlug?: string
-  mode: "add" | "edit"
+  mode:         "add" | "edit"
 }
 
 export function ProductForm({
   productSlug,
   mode,
 }: ProductFormProps) {
-  const [product, setProduct] = useState<Product>(
+  const [ product, setProduct ] = useState<Product>(
     {
-      id: "",
-      name: "",
-      slug: "",
+      id:          "",
+      name:        "",
+      slug:        "",
       description: "",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      costPrice: 20,
-      sku: "",
-      basePrice: 32,
-      barcode: "",
-      categories: [],
+      createdAt:   new Date().toISOString(),
+      updatedAt:   new Date().toISOString(),
+      costPrice:   20,
+      sku:         "",
+      basePrice:   32,
+      barcode:     "",
+      categories:  [],
       productTags: [],
-      images: [],
-      attributes: [],
-      variants: [],
-      brandId: "",
-      featured: false,
-      status: "draft",
-      sizeCharts: [],
-      dimensions: {
+      images:      [],
+      attributes:  [],
+      variants:    [],
+      brandId:     "",
+      featured:    false,
+      status:      "draft",
+      sizeCharts:  [],
+      dimensions:  {
         length: 0,
-        width: 0,
+        width:  0,
         height: 0,
         weight: 0
       },
       seo: {
-        title: "",
+        title:       "",
         description: "",
-        keywords: "",
+        keywords:    "",
       },
-      taxable: false,
-      shippable: false,
+      taxable:         false,
+      shippable:       false,
       relatedProducts: []
     }
   )
-  const [relatedProductIds, setRelatedProductIds] = useState<string[]>([])
-  const [sizeCharts, setSizeCharts] = useState<SizeChart[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState("details")
-  const [isSaving, setIsSaving] = useState(false)
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [relatedProductSearch, setRelatedProductSearch] = useState("")
+  const [ relatedProductIds, setRelatedProductIds ] = useState<string[]>([])
+  const [ sizeCharts, setSizeCharts ] = useState<SizeChart[]>([])
+  const [ isLoading, setIsLoading ] = useState(false)
+  const [ activeTab, setActiveTab ] = useState("details")
+  const [ isSaving, setIsSaving ] = useState(false)
+  const [ errors, setErrors ] = useState<Record<string, string>>({})
+  const [ relatedProductSearch, setRelatedProductSearch ] = useState("")
   const { useGetProduct, useCreateCategory, useUpdateCategory, useCreateBrand, useListProducts, useGetCategories, useGetBrands, useUpdateProduct, useCreateProduct } = ProductHooks()
   const { mutateAsync: createCategory } = useCreateCategory
   const { mutateAsync: updateCategory } = useUpdateCategory
@@ -109,7 +109,7 @@ export function ProductForm({
     }
 
     return product.categories.map(getCategoryName).filter((name): name is string => name !== null)
-  }, [product.categories, categories])
+  }, [ product.categories, categories ])
 
   // Get full category path for display
   const getCategoryPath = useMemo(() => {
@@ -134,7 +134,7 @@ export function ProductForm({
 
     // Get the first category path for display
     return buildPath(product.categories[0])
-  }, [product.categories, categories])
+  }, [ product.categories, categories ])
 
   // Function to generate a slug from a name
   const generateSlug = () => {
@@ -154,13 +154,13 @@ export function ProductForm({
       .replace(/\-\-+/g, '-')
       .replace(/^-+/, '')
       .replace(/-+$/, '')
-    setProduct((prev) => ({ ...prev, slug: slug }))
+    setProduct(prev => ({ ...prev, slug: slug }))
   }
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setProduct((prev) => ({ ...prev, [name]: value }))
+    setProduct(prev => ({ ...prev, [name]: value }))
 
     // Clear error when field becomes valid
     if (errors[name]) {
@@ -176,7 +176,7 @@ export function ProductForm({
   const handleNumericInputChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
     const value = Number.parseFloat(e.target.value)
     if (!isNaN(value)) {
-      setProduct((prev) => ({ ...prev, [field]: value }))
+      setProduct(prev => ({ ...prev, [field]: value }))
 
       // Clear error when field becomes valid
       if (errors[field]) {
@@ -193,7 +193,7 @@ export function ProductForm({
   const handleDimensionChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
     const value = Number.parseFloat(e.target.value)
     if (!isNaN(value)) {
-      setProduct((prev) => ({
+      setProduct(prev => ({
         ...prev,
         dimensions: {
           ...prev.dimensions!,
@@ -214,12 +214,12 @@ export function ProductForm({
 
   // Handle SEO changes
   const handleSeoChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: string) => {
-    setProduct((prev) => ({
+    setProduct(prev => ({
       ...prev,
       seo: {
-        title: field === "title" ? e.target.value : prev.seo?.title || "",
+        title:       field === "title" ? e.target.value : prev.seo?.title || "",
         description: field === "description" ? e.target.value : prev.seo?.description || "",
-        keywords: field === "keywords" ? e.target.value : prev.seo?.keywords || "",
+        keywords:    field === "keywords" ? e.target.value : prev.seo?.keywords || "",
       },
     }))
   }
@@ -228,7 +228,7 @@ export function ProductForm({
 
   // Handle category selection
   const handleCategorySelect = (categoryIds: string[]) => {
-    setProduct((prev) => ({
+    setProduct(prev => ({
       ...prev,
       categories: categoryIds,
     }))
@@ -246,8 +246,8 @@ export function ProductForm({
   const handleCategoryCreate = async (category: Category, parentCategoryId: string) => {
     const newCategory: CreateCategoryRequest = {
       category: {
-        id: category.id,
-        name: category.name,
+        id:       category.id,
+        name:     category.name,
         parentId: parentCategoryId,
       }
     }
@@ -255,9 +255,9 @@ export function ProductForm({
       createCategory(newCategory)
     } catch (error) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: error instanceof Error ? error.message : "Failed to create category. Please try again.",
-        variant: "destructive",
+        variant:     "destructive",
       })
     }
   
@@ -267,16 +267,16 @@ export function ProductForm({
     try {
       updateCategory({
         category: {
-          id: updatedCategory.id,
-          name: updatedCategory.name,
+          id:       updatedCategory.id,
+          name:     updatedCategory.name,
           parentId: updatedCategory.parentId || "",
         }
       })
     } catch (error) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: error instanceof Error ? error.message : "Failed to update category. Please try again.",
-        variant: "destructive",
+        variant:     "destructive",
       })
     }
   }
@@ -284,7 +284,7 @@ export function ProductForm({
   const updateColorAttribute = (newVariants: ProductVariant[], productAttributes: ProductAttribute[]): ProductAttribute[] => {
     // Find the color attribute in product attributes
     const existingColorAttribute = productAttributes.find(
-      (attr) => attr.name.toLowerCase() === "color"
+      attr => attr.name.toLowerCase() === "color"
     )
 
     if (!existingColorAttribute) return productAttributes
@@ -293,7 +293,7 @@ export function ProductForm({
     const colorValues = new Set<string>()
     newVariants.forEach((variant) => {
       const colorAttr = variant.attributes.find(
-        (attr) => attr.name.toLowerCase() === "color"
+        attr => attr.name.toLowerCase() === "color"
       )
       if (colorAttr?.value) {
         colorValues.add(colorAttr.value)
@@ -305,7 +305,7 @@ export function ProductForm({
       if (attr.name.toLowerCase() === "color") {
         return {
           ...attr,
-          values: Array.from(new Set([...attr.values, ...colorValues]))
+          values: Array.from(new Set([ ...attr.values, ...colorValues ]))
         }
       }
       return attr
@@ -325,29 +325,29 @@ export function ProductForm({
       return {
         ...prev,
         attributes: updatedAttributes,
-        variants: updatedVariants.map((variant) => ({
+        variants:   updatedVariants.map(variant => ({
           ...variant,
-          id: variant.id || "",
-          sku: variant.sku || "",
+          id:    variant.id || "",
+          sku:   variant.sku || "",
           price: variant.price || 0,
           stock: variant.stock ? {
             ...variant.stock,
             quantity: variant.stock.quantity || 0,
           } : undefined,
           lowStockThreshold: variant.lowStockThreshold || 0,
-          warehouseId: variant.warehouseId || "",
-          images: variant.imageIds.map((imageId) => ({
-            ...product.images.find((image) => image.id === imageId),
-            id: imageId,
-            url: product.images.find((image) => image.id === imageId)?.url || "",
-            isMain: product.images.find((image) => image.id === imageId)?.isMain || false,
-            blurhash: product.images.find((image) => image.id === imageId)?.blurhash || ""
+          warehouseId:       variant.warehouseId || "",
+          images:            variant.imageIds.map(imageId => ({
+            ...product.images.find(image => image.id === imageId),
+            id:       imageId,
+            url:      product.images.find(image => image.id === imageId)?.url || "",
+            isMain:   product.images.find(image => image.id === imageId)?.isMain || false,
+            blurhash: product.images.find(image => image.id === imageId)?.blurhash || ""
           })),
-          attributes: variant.attributes?.map((attribute) => ({
+          attributes: variant.attributes?.map(attribute => ({
             ...attribute,
-            id: attribute.id || "",
-            name: attribute.name || "",
-            value: attribute.value || "",
+            id:         attribute.id || "",
+            name:       attribute.name || "",
+            value:      attribute.value || "",
             extraValue: attribute.extraValue || "",
           })),
         })),
@@ -357,7 +357,7 @@ export function ProductForm({
 
   // Handle brand selection
   const handleBrandSelect = (brandId: string) => {
-    setProduct((prev) => ({
+    setProduct(prev => ({
       ...prev,
       brandId: brandId,
     }))
@@ -374,18 +374,18 @@ export function ProductForm({
 
   // Handle attributes update
   const handleAttributesUpdate = (updatedAttributes: ProductAttribute[]) => {
-    setProduct((prev) => ({
+    setProduct(prev => ({
       ...prev,
-      attributes: updatedAttributes.map((attribute) => ({
+      attributes: updatedAttributes.map(attribute => ({
         ...attribute,
-        id: attribute.id || "",
-        name: attribute.name || "",
-        required: attribute.required || false,
-        visible: attribute.visible || false,
-        values: attribute.values || [],
-        variantable: attribute.variantable || false,
-        filterable: attribute.filterable || false,
-        searchable: attribute.searchable || false,
+        id:           attribute.id || "",
+        name:         attribute.name || "",
+        required:     attribute.required || false,
+        visible:      attribute.visible || false,
+        values:       attribute.values || [],
+        variantable:  attribute.variantable || false,
+        filterable:   attribute.filterable || false,
+        searchable:   attribute.searchable || false,
         displayOrder: attribute.displayOrder || 0,
       })),
     }))
@@ -402,7 +402,7 @@ export function ProductForm({
       return product.basePrice ? `${product.basePrice.toFixed(2)}` : `${product.costPrice.toFixed(2)}`
     }
 
-    const prices = product.variants.map((v) => v.price)
+    const prices = product.variants.map(v => v.price)
     const minPrice = Math.min(...prices)
     const maxPrice = Math.max(...prices)
 
@@ -414,7 +414,7 @@ export function ProductForm({
   }
 
   const handleImagesUpdate = (updatedImages: ProductImage[]) => {
-    setProduct((prev) => ({
+    setProduct(prev => ({
       ...prev,
       images: updatedImages,
     }))
@@ -424,7 +424,7 @@ export function ProductForm({
     try {
       const newBrand: CreateBrandRequest = {
         brand: {
-          id: brand.id,
+          id:   brand.id,
           name: brand.name,
           logo: brand.logo,
         }
@@ -432,9 +432,9 @@ export function ProductForm({
       createBrand(newBrand);
     } catch (error) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: error instanceof Error ? error.message : "Failed to create brand. Please try again.",
-        variant: "destructive",
+        variant:     "destructive",
       });
     }
   };
@@ -454,8 +454,10 @@ export function ProductForm({
     const errors: Record<string, string> = {}
     if (!dimensions) return errors
 
-    const fields = ['length', 'width', 'height', 'weight'] as const
-    fields.forEach(field => {
+    const fields = [
+      'length', 'width', 'height', 'weight'
+    ] as const
+    fields.forEach((field) => {
       const error = validateNumericField(dimensions[field], field)
       if (error) errors[`dimensions.${field}`] = error
     })
@@ -494,8 +496,10 @@ export function ProductForm({
     const errors: Record<string, string> = {}
 
     // Required fields validation
-    const requiredFields = ['name', 'slug', 'sku'] as const
-    requiredFields.forEach(field => {
+    const requiredFields = [
+      'name', 'slug', 'sku'
+    ] as const
+    requiredFields.forEach((field) => {
       const error = validateRequiredField(product[field], field)
       if (error) errors[field] = error
     })
@@ -534,13 +538,15 @@ export function ProductForm({
     if (!allProducts) return []
     const searchTerm = relatedProductSearch.toLowerCase()
     return allProducts
-      .filter((product) => product.slug !== productSlug) // Exclude current product
+      .filter(product => product.slug !== productSlug) // Exclude current product
       .filter(
-        (product) =>
+        product =>
           product.name.toLowerCase().includes(searchTerm) ||
           product.sku.toLowerCase().includes(searchTerm)
       )
-  }, [allProducts, relatedProductSearch, productSlug])
+  }, [
+    allProducts, relatedProductSearch, productSlug
+  ])
 
   // Update handleSave function
   const handleSave = async () => {
@@ -568,9 +574,9 @@ export function ProductForm({
       setIsSaving(false)
     } catch (error) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: error instanceof Error ? error.message : "Failed to save the product. Please try again.",
-        variant: "destructive",
+        variant:     "destructive",
       })
     } finally {
       setIsLoading(false)
@@ -594,7 +600,7 @@ export function ProductForm({
         return prev.filter(id => id !== productId);
       } else {
         // Add the product if it's not in the list
-        return [...prev, productId];
+        return [ ...prev, productId ];
       }
     });
   }
@@ -627,7 +633,7 @@ export function ProductForm({
                 <Select
                   value={product.status}
                   onValueChange={(value: "draft" | "published" | "archived") =>
-                    setProduct((prev) => ({ ...prev, status: value }))
+                    setProduct(prev => ({ ...prev, status: value }))
                   }
                 >
                   <SelectTrigger className="w-[180px]">
@@ -743,7 +749,7 @@ export function ProductForm({
                               name="costPrice"
                               type="number"
                               value={product.costPrice}
-                              onChange={(e) => handleNumericInputChange(e, "costPrice")}
+                              onChange={e => handleNumericInputChange(e, "costPrice")}
                               className={`pl-8 ${errors.costPrice ? "border-destructive" : ""}`}
                               step="0.01"
                               min="0"
@@ -760,7 +766,7 @@ export function ProductForm({
                               name="basePrice"
                               type="number"
                               value={product.basePrice || ""}
-                              onChange={(e) => handleNumericInputChange(e, "basePrice")}
+                              onChange={e => handleNumericInputChange(e, "basePrice")}
                               className={`pl-8 ${errors.basePrice ? "border-destructive" : ""}`}
                               step="0.01"
                               min="0"
@@ -854,7 +860,7 @@ export function ProductForm({
                                   id="length"
                                   type="number"
                                   value={product.dimensions?.length || ""}
-                                  onChange={(e) => handleDimensionChange(e, "length")}
+                                  onChange={e => handleDimensionChange(e, "length")}
                                   min="0"
                                   step="0.1"
                                   className={errors.dimensions ? "border-destructive" : ""}
@@ -869,7 +875,7 @@ export function ProductForm({
                                   id="width"
                                   type="number"
                                   value={product.dimensions?.width || ""}
-                                  onChange={(e) => handleDimensionChange(e, "width")}
+                                  onChange={e => handleDimensionChange(e, "width")}
                                   min="0"
                                   step="0.1"
                                   className={errors.dimensions ? "border-destructive" : ""}
@@ -884,7 +890,7 @@ export function ProductForm({
                                   id="height"
                                   type="number"
                                   value={product.dimensions?.height || ""}
-                                  onChange={(e) => handleDimensionChange(e, "height")}
+                                  onChange={e => handleDimensionChange(e, "height")}
                                   min="0"
                                   step="0.1"
                                   className={errors.dimensions ? "border-destructive" : ""}
@@ -899,7 +905,7 @@ export function ProductForm({
                                   id="weight"
                                   type="number"
                                   value={product.dimensions?.weight || ""}
-                                  onChange={(e) => handleDimensionChange(e, "weight")}
+                                  onChange={e => handleDimensionChange(e, "weight")}
                                   min="0"
                                   step="0.01"
                                   className={errors.dimensions ? "border-destructive" : ""}
@@ -985,7 +991,7 @@ export function ProductForm({
                         <Input
                           id="seoTitle"
                           value={product.seo?.title}
-                          onChange={(e) => handleSeoChange(e, "title")}
+                          onChange={e => handleSeoChange(e, "title")}
                           placeholder="SEO optimized title (for search engines)"
                         />
                         <p className="text-xs text-muted-foreground">Recommended length: 50-60 characters</p>
@@ -996,7 +1002,7 @@ export function ProductForm({
                         <Textarea
                           id="seoDescription"
                           value={product.seo?.description}
-                          onChange={(e) => handleSeoChange(e, "description")}
+                          onChange={e => handleSeoChange(e, "description")}
                           placeholder="Brief description for search engines"
                           rows={3}
                         />
@@ -1017,7 +1023,7 @@ export function ProductForm({
                           <Input
                             placeholder="Search products..."
                             value={relatedProductSearch}
-                            onChange={(e) => setRelatedProductSearch(e.target.value)}
+                            onChange={e => setRelatedProductSearch(e.target.value)}
                             className="pl-8"
                           />
                         </div>
@@ -1030,7 +1036,7 @@ export function ProductForm({
                             No products found matching your search
                           </p>
                         ) : (
-                          filteredRelatedProducts.map((relatedProduct) => (
+                          filteredRelatedProducts.map(relatedProduct => (
                             <div
                               key={relatedProduct.id}
                               className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0"
@@ -1127,7 +1133,7 @@ export function ProductForm({
                           <Label>Tags</Label>
                           <TagCombobox
                             selectedTags={product.productTags}
-                            onChange={(tags) => setProduct((prev) => ({
+                            onChange={tags => setProduct(prev => ({
                               ...prev,
                               productTags: tags
                             }))}
@@ -1160,7 +1166,7 @@ export function ProductForm({
                         <Switch
                           id="featured"
                           checked={product.featured}
-                          onCheckedChange={(checked) => setProduct((prev) => ({ ...prev, featured: checked }))}
+                          onCheckedChange={checked => setProduct(prev => ({ ...prev, featured: checked }))}
                         />
                         <Label htmlFor="featured">Featured Product</Label>
                       </div>
@@ -1169,7 +1175,7 @@ export function ProductForm({
                         <Switch
                           id="taxable"
                           checked={product.taxable}
-                          onCheckedChange={(checked) => setProduct((prev) => ({ ...prev, taxable: checked }))}
+                          onCheckedChange={checked => setProduct(prev => ({ ...prev, taxable: checked }))}
                         />
                         <Label htmlFor="taxable">Taxable Product</Label>
                       </div>
@@ -1178,7 +1184,7 @@ export function ProductForm({
                         <Switch
                           id="shippable"
                           checked={product.shippable !== false}
-                          onCheckedChange={(checked) => setProduct((prev) => ({ ...prev, shippable: checked }))}
+                          onCheckedChange={checked => setProduct(prev => ({ ...prev, shippable: checked }))}
                         />
                         <Label htmlFor="shippable">Requires Shipping</Label>
                       </div>

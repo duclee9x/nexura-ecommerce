@@ -1,14 +1,14 @@
 generator client {
   provider = "prisma-client-js"
-  output = "@nexura/user-service/src/db/prisma-client"
-  binaryTargets   = ["native", "linux-musl-openssl-3.0.x"]
+  output = "../src/db/prisma-client"
+  binaryTargets   = ["native","linux-musl-openssl-3.0.x","debian-openssl-3.0.x"]
 }
 
 datasource db {
   provider = "mysql"
   // url      = "mysql://root:nexura-root-password@localhost:3306/user"
-  // url      = env("DATABASE_URL")
-  url      = "mysql://user@127.0.0.1:15306"
+  url      = env("DATABASE_URL")
+  // url      = "mysql://user@127.0.0.1:15306"
 }
 
 model User {

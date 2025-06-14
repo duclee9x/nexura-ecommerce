@@ -45,7 +45,9 @@ import UserHooks from "@/hooks/user-hooks"
 function TableSkeleton() {
   return (
     <div className="space-y-4">
-      {[1, 2, 3, 4, 5].map((i) => (
+      {[
+        1, 2, 3, 4, 5
+      ].map(i => (
         <div key={i} className="flex items-center justify-between p-4 border rounded-lg animate-pulse">
           <div className="space-y-2">
             <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
@@ -107,17 +109,17 @@ export default function CustomersManagementPage() {
   const { mutateAsync: registerUserForAdmin } = useRegisterUserForAdmin
   const { formatPrice, formatDate } = useCurrency()
   const { data: users, error, isLoading, refetch } = useGetAllUsers()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState("all")
-  const [sortField, setSortField] = useState("lastOrder")
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
-  const [currentPage, setCurrentPage] = useState(1)
+  const [ searchQuery, setSearchQuery ] = useState("")
+  const [ selectedStatus, setSelectedStatus ] = useState("all")
+  const [ sortField, setSortField ] = useState("lastOrder")
+  const [ sortDirection, setSortDirection ] = useState<"asc" | "desc">("desc")
+  const [ currentPage, setCurrentPage ] = useState(1)
   const [itemsPerPage] = useState(5)
-  const [newCustomer, setNewCustomer] = useState({
+  const [ newCustomer, setNewCustomer ] = useState({
     firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
+    lastName:  "",
+    email:     "",
+    phone:     "",
   })
 
   // Handle sort
@@ -242,7 +244,7 @@ export default function CustomersManagementPage() {
   // Handle new customer form change
   const handleNewCustomerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setNewCustomer((prev) => ({ ...prev, [name]: value }))
+    setNewCustomer(prev => ({ ...prev, [name]: value }))
   }
 
   // Handle add new customer
@@ -255,9 +257,9 @@ export default function CustomersManagementPage() {
     // Create new customer
     registerUserForAdmin({
       firstName: newCustomer.firstName,
-      lastName: newCustomer.lastName,
-      email: newCustomer.email,
-      phone: newCustomer.phone,
+      lastName:  newCustomer.lastName,
+      email:     newCustomer.email,
+      phone:     newCustomer.phone,
     })
 
     // Add to customers
@@ -364,7 +366,7 @@ export default function CustomersManagementPage() {
                     placeholder="Search by name, email, or phone..."
                     className="pl-9"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                   />
                 </div>
 
@@ -435,7 +437,7 @@ export default function CustomersManagementPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      currentItems.map((customer) => (
+                      currentItems.map(customer => (
                         <TableRow key={customer.id}>
                           <TableCell className="font-medium">
                             {customer.firstName} {customer.lastName}
@@ -459,7 +461,7 @@ export default function CustomersManagementPage() {
                               className={`${customer.isActive === "active"
                                 ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
                                 : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-                                }`}
+                              }`}
                             >
                               {customer.isActive === "active" ? "Active" : "Inactive"}
                             </Badge>
@@ -498,7 +500,7 @@ export default function CustomersManagementPage() {
                         />
                       </PaginationItem>
 
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                         <PaginationItem key={page}>
                           <PaginationLink isActive={currentPage === page} onClick={() => handlePageChange(page)}>
                             {page}

@@ -12,8 +12,8 @@ import { toast } from "@/hooks/use-toast"
 import { ChevronLeft, Link, Save } from "lucide-react"
 
 export default function AttributesPage() {
-  const [attributes, setAttributes] = useState<ProductAttribute[]>(mockAttributes)
-  const [isLoading, setIsLoading] = useState(false)
+  const [ attributes, setAttributes ] = useState<ProductAttribute[]>(mockAttributes)
+  const [ isLoading, setIsLoading ] = useState(false)
 
   const handleAttributesChange = (updatedAttributes: ProductAttribute[]) => {
     setAttributes(updatedAttributes)
@@ -26,7 +26,7 @@ export default function AttributesPage() {
     setTimeout(() => {
       setIsLoading(false)
       toast({
-        title: "Attributes Saved",
+        title:       "Attributes Saved",
         description: "Your product attributes have been saved successfully.",
       })
     }, 1000)

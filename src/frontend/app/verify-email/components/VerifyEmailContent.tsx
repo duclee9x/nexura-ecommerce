@@ -9,9 +9,9 @@ export function VerifyEmailContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get("token")
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
-  const [message, setMessage] = useState("")
-  const [isPending, setIsPending] = useState(false)
+  const [ status, setStatus ] = useState<"loading" | "success" | "error">("loading")
+  const [ message, setMessage ] = useState("")
+  const [ isPending, setIsPending ] = useState(false)
 
   useEffect(() => {
     const verify = async () => {

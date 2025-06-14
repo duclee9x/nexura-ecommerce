@@ -6,10 +6,10 @@ import { paymentService } from '../services/payment.service';
 const port = process.env.PAYMENT_SERVICE_PORT || '50057';
 
 const services = [
-    {
-        service: PaymentServiceService,
-        serviceHandler: paymentService
-    }
+  {
+    service:        PaymentServiceService,
+    serviceHandler: paymentService
+  }
 ]
 
 const server = startServer(services, port, 'PAYMENT_SERVICE');

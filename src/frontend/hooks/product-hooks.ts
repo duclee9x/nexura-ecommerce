@@ -35,19 +35,19 @@ export default function ProductHooks() {
     useListProducts: () =>
       useQuery({
         queryKey: ["inventory"],
-        queryFn: async () =>
-          await listProductsGateway().then((response) => response.products),
+        queryFn:  async () =>
+          await listProductsGateway().then(response => response.products),
         staleTime: 1000 * 5,
-        gcTime: 1000 * 60,
+        gcTime:    1000 * 60,
       }),
     useGetFilteredProducts: (
       products: Product[] | undefined,
       filters: {
         searchQuery: string;
-        categories: string[];
-        colors: string[];
-        features: string[];
-        priceRange: [number, number];
+        categories:  string[];
+        colors:      string[];
+        features:    string[];
+        priceRange:  [number, number];
       },
     ) => {
       return products?.filter((product) => {
@@ -57,14 +57,14 @@ export default function ProductHooks() {
           product.name
             .toLowerCase()
             .includes(filters.searchQuery.toLowerCase()) &&
-          product.sku.toLowerCase().includes(filters.searchQuery.toLowerCase())
+            product.sku.toLowerCase().includes(filters.searchQuery.toLowerCase())
         ) {
           return false;
         }
 
         // Category filter
         if (filters.categories.length > 0) {
-          const hasMatchingCategory = product.categories.some((category) =>
+          const hasMatchingCategory = product.categories.some(category =>
             filters.categories.includes(category),
           );
           if (!hasMatchingCategory) return false;
@@ -74,7 +74,7 @@ export default function ProductHooks() {
         if (filters.colors.length > 0) {
           const hasMatchingColor = product.variants.some((variant) => {
             const colorAttribute = variant.attributes.find(
-              (attr) => attr.name.toLowerCase() === "color",
+              attr => attr.name.toLowerCase() === "color",
             );
             return (
               colorAttribute?.extraValue &&
@@ -111,10 +111,10 @@ export default function ProductHooks() {
 
     useGetProduct: (data: string, type: string) =>
       useQuery({
-        queryKey: ["product", data],
-        queryFn: async () =>
+        queryKey: [ "product", data ],
+        queryFn:  async () =>
           await getProductGateway({ data, type }).then(
-            (response) => response.product,
+            response => response.product,
           ).catch((error) => {
             throw error;
           }),
@@ -124,8 +124,8 @@ export default function ProductHooks() {
     useGetCategories: () =>
       useQuery({
         queryKey: ["categories"],
-        queryFn: async () =>
-          await getAllCategoryGateway().then((response) => response.categories).catch((error) => {
+        queryFn:  async () =>
+          await getAllCategoryGateway().then(response => response.categories).catch((error) => {
             throw error;
           }),
       }),
@@ -133,8 +133,8 @@ export default function ProductHooks() {
     useGetBrands: () =>
       useQuery({
         queryKey: ["brands"],
-        queryFn: async () =>
-          await getAllBrandGateway().then((response) => response.brands).catch((error) => {
+        queryFn:  async () =>
+          await getAllBrandGateway().then(response => response.brands).catch((error) => {
             throw error;
           }),
       }),
@@ -142,35 +142,35 @@ export default function ProductHooks() {
     useGetWarehouses: () =>
       useQuery({
         queryKey: ["warehouses"],
-        queryFn: async () =>
-          await getWarehousesGateway().then((response) => response.warehouses).catch((error) => {
+        queryFn:  async () =>
+          await getWarehousesGateway().then(response => response.warehouses).catch((error) => {
             throw error;
           }),
       }),
 
     useGetWishlist: (userId: string) =>
       useQuery({
-        queryKey: ["wishlist", userId],
-        queryFn: async () =>
+        queryKey: [ "wishlist", userId ],
+        queryFn:  async () =>
           await getWishlistGateway({ userId }).then(
-            (response) => response.wishlistItems,
+            response => response.wishlistItems,
           ).catch((error) => {
             throw error;
           }),
         refetchOnWindowFocus: false,
-        staleTime: 1000 * 60 * 5,
+        staleTime:            1000 * 60 * 5,
       }),
 
     useCreateProduct: useMutation({
       mutationFn: async (request: CreateProductRequest) =>
         await createProductGateway(request).then(
-          (response) => response.product,
+          response => response.product,
         ),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["inventory"] });
         queryClient.invalidateQueries({ queryKey: ["product"] });
         toast({
-          title: "Success",
+          title:       "Success",
           description: "Product created successfully",
         });
       },
@@ -183,14 +183,14 @@ export default function ProductHooks() {
     useCreateCategory: useMutation({
       mutationFn: async (category: CreateCategoryRequest) =>
         await createCategoryGateway(category).then(
-          (response) => response.category,
+          response => response.category,
         ).catch((error) => {
           throw error;
         }),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["categories"] });
         toast({
-          title: "Success",
+          title:       "Success",
           description: "Category created successfully",
         });
       },
@@ -202,13 +202,13 @@ export default function ProductHooks() {
 
     useCreateBrand: useMutation({
       mutationFn: async (brand: CreateBrandRequest) =>
-        await createBrandGateway(brand).then((response) => response.brand).catch((error) => {
+        await createBrandGateway(brand).then(response => response.brand).catch((error) => {
           throw error;
         }),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["brands"] });
         toast({
-          title: "Success",
+          title:       "Success",
           description: "Brand created successfully",
         });
       },
@@ -226,7 +226,7 @@ export default function ProductHooks() {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["wishlist"] });
         toast({
-          title: "Success",
+          title:       "Success",
           description: "Product added to wishlist successfully",
         });
       },
@@ -245,7 +245,7 @@ export default function ProductHooks() {
         queryClient.invalidateQueries({ queryKey: ["inventory"] });
         queryClient.invalidateQueries({ queryKey: ["product"] });
         toast({
-          title: "Success",
+          title:       "Success",
           description: "Product status updated successfully",
         });
       },
@@ -264,7 +264,7 @@ export default function ProductHooks() {
         queryClient.invalidateQueries({ queryKey: ["inventory"] });
         queryClient.invalidateQueries({ queryKey: ["product"] });
         toast({
-          title: "Success",
+          title:       "Success",
           description: "Product updated successfully",
         });
       },
@@ -276,13 +276,13 @@ export default function ProductHooks() {
 
     useUpdateCategory: useMutation({
       mutationFn: async (category: UpdateCategoryRequest) =>
-        await updateCategoryGateway(category).then((response) => response.category).catch((error) => {
+        await updateCategoryGateway(category).then(response => response.category).catch((error) => {
           throw error;
         }),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["categories"] });
         toast({
-          title: "Success",
+          title:       "Success",
           description: "Category updated successfully",
         });
       },
@@ -301,7 +301,7 @@ export default function ProductHooks() {
         queryClient.invalidateQueries({ queryKey: ["inventory"] });
         queryClient.invalidateQueries({ queryKey: ["product"] });
         toast({
-          title: "Success",
+          title:       "Success",
           description: "Product deleted successfully",
         });
       },
@@ -319,7 +319,7 @@ export default function ProductHooks() {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["wishlist"] });
         toast({
-          title: "Success",
+          title:       "Success",
           description: "Product removed from wishlist successfully",
         });
       },

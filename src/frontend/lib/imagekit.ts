@@ -3,8 +3,8 @@ import type { UploadResponse } from "imagekit/dist/libs/interfaces"
 
 // Initialize ImageKit
 export const imagekit = new ImageKit({
-  publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || "",
-  privateKey: process.env.NEXT_PUBLIC_IMAGEKIT_PRIVATE_KEY || "",
+  publicKey:   process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || "",
+  privateKey:  process.env.NEXT_PUBLIC_IMAGEKIT_PRIVATE_KEY || "",
   urlEndpoint: process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || "",
 })
 
@@ -38,14 +38,14 @@ export const uploadToImageKit = async (file: File, folder: string = "products"):
     })
 
     const response = await imagekit.upload({
-      file: base64String,
-      fileName: `${Date.now()}-${file.name}`,
-      folder: folder,
+      file:              base64String,
+      fileName:          `${Date.now()}-${file.name}`,
+      folder:            folder,
       useUniqueFileName: true,
     }) as UploadResponse
 
     return {
-      url: response.url,
+      url:    response.url,
       fileId: response.fileId,
     }
   } catch (error) {

@@ -12,91 +12,91 @@ import type { Notification } from "@/types/schema"
 // Sample notifications
 const initialNotifications: Notification[] = [
   {
-    id: "1",
-    type: "order",
-    title: "New Order Received",
-    content: "Order #ORD-2023-1234 has been placed for $156.99",
-    link: "/admin/orders/ORD-2023-1234",
-    read: false,
+    id:          "1",
+    type:        "order",
+    title:       "New Order Received",
+    content:     "Order #ORD-2023-1234 has been placed for $156.99",
+    link:        "/admin/orders/ORD-2023-1234",
+    read:        false,
     dateCreated: new Date(Date.now() - 1000 * 60 * 15).toISOString(), // 15 minutes ago
-    userId: "1",
-    priority: "low",
-    createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+    userId:      "1",
+    priority:    "low",
+    createdAt:   new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+    updatedAt:   new Date(Date.now() - 1000 * 60 * 15).toISOString(),
   },
   {
-    id: "2",
-    type: "stock",
-    title: "Low Stock Alert",
-    content: "Pro Traveler Backpack (BP-PRO-001) is running low with only 3 items left",
-    link: "/admin/inventory/edit/101",
-    read: false,
+    id:          "2",
+    type:        "stock",
+    title:       "Low Stock Alert",
+    content:     "Pro Traveler Backpack (BP-PRO-001) is running low with only 3 items left",
+    link:        "/admin/inventory/edit/101",
+    read:        false,
     dateCreated: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
-    userId: "1",
-    priority: "low",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+    userId:      "1",
+    priority:    "low",
+    createdAt:   new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+    updatedAt:   new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
   },
   {
-    id: "3",
-    type: "review",
-    title: "New Product Review",
-    content: "A new 5-star review has been submitted for Weekend Duffle Bag",
-    link: "/admin/products/reviews",
-    read: false,
+    id:          "3",
+    type:        "review",
+    title:       "New Product Review",
+    content:     "A new 5-star review has been submitted for Weekend Duffle Bag",
+    link:        "/admin/products/reviews",
+    read:        false,
     dateCreated: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
-    userId: "1",
-    priority: "low",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+    userId:      "1",
+    priority:    "low",
+    createdAt:   new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+    updatedAt:   new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
   },
   {
-    id: "4",
-    type: "customer",
-    title: "New Customer Registration",
-    content: "Emily Davis has created a new account",
-    link: "/admin/customers/4",
-    read: true,
+    id:          "4",
+    type:        "customer",
+    title:       "New Customer Registration",
+    content:     "Emily Davis has created a new account",
+    link:        "/admin/customers/4",
+    read:        true,
     dateCreated: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-    userId: "1",
-    priority: "low",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+    userId:      "1",
+    priority:    "low",
+    createdAt:   new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+    updatedAt:   new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
   },
   {
-    id: "5",
-    type: "system",
-    title: "System Update",
-    content: "The system will undergo maintenance on Sunday at 2:00 AM",
-    read: true,
+    id:          "5",
+    type:        "system",
+    title:       "System Update",
+    content:     "The system will undergo maintenance on Sunday at 2:00 AM",
+    read:        true,
     dateCreated: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), // 2 days ago
-    userId: "1",
-    priority: "low",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+    userId:      "1",
+    priority:    "low",
+    createdAt:   new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+    updatedAt:   new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
   },
   {
-    id: "6",
-    type: "order",
-    title: "Order Shipped",
-    content: "Order #ORD-2023-1198 has been shipped",
-    link: "/admin/orders/ORD-2023-1198",
-    read: true,
+    id:          "6",
+    type:        "order",
+    title:       "Order Shipped",
+    content:     "Order #ORD-2023-1198 has been shipped",
+    link:        "/admin/orders/ORD-2023-1198",
+    read:        true,
     dateCreated: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(), // 3 days ago
-    userId: "1",
-    priority: "low",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
+    userId:      "1",
+    priority:    "low",
+    createdAt:   new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
+    updatedAt:   new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
   },
 ]
 
 export function NotificationCenter() {
-  const [notifications, setNotifications] = useState(initialNotifications)
-  const [activeTab, setActiveTab] = useState("all")
-  const [isOpen, setIsOpen] = useState(false)
+  const [ notifications, setNotifications ] = useState(initialNotifications)
+  const [ activeTab, setActiveTab ] = useState("all")
+  const [ isOpen, setIsOpen ] = useState(false)
 
   // Count unread notifications
-  const unreadCount = notifications.filter((notification) => !notification.read).length
+  const unreadCount = notifications.filter(notification => !notification.read).length
 
   // Filter notifications based on active tab
   const filteredNotifications = notifications.filter((notification) => {
@@ -127,14 +127,14 @@ export function NotificationCenter() {
 
   // Mark notification as read
   const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((notification) => (notification.id === id ? { ...notification, read: true } : notification)),
+    setNotifications(prev =>
+      prev.map(notification => (notification.id === id ? { ...notification, read: true } : notification)),
     )
   }
 
   // Mark all as read
   const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((notification) => ({ ...notification, read: true })))
+    setNotifications(prev => prev.map(notification => ({ ...notification, read: true })))
   }
 
   // Get notification icon based on type
@@ -160,7 +160,9 @@ export function NotificationCenter() {
     const interval = setInterval(() => {
       // 10% chance of receiving a new notification every 30 seconds
       if (Math.random() < 0.1) {
-        const types = ["order", "stock", "review", "customer", "system"]
+        const types = [
+          "order", "stock", "review", "customer", "system"
+        ]
         const type = types[Math.floor(Math.random() * types.length)]
 
         let title = ""
@@ -189,7 +191,9 @@ export function NotificationCenter() {
             link = `/admin/products/reviews`
             break
           case "customer":
-            const names = ["Alex Johnson", "Maria Garcia", "Sam Taylor", "Lisa Wong"]
+            const names = [
+              "Alex Johnson", "Maria Garcia", "Sam Taylor", "Lisa Wong"
+            ]
             const name = names[Math.floor(Math.random() * names.length)]
             title = "New Customer Registration"
             content = `${name} has created a new account`
@@ -203,20 +207,20 @@ export function NotificationCenter() {
         }
 
         const newNotification: Notification = {
-          id: Date.now().toString(),
-          type: type as "order" | "inventory" | "customer" | "system" | "chat" | "blog" | "review",
+          id:          Date.now().toString(),
+          type:        type as "order" | "inventory" | "customer" | "system" | "chat" | "blog" | "review",
           title,
           content,
           link,
-          read: false,
+          read:        false,
           dateCreated: new Date().toISOString(),
-          userId: "1",
-          priority: "low",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          userId:      "1",
+          priority:    "low",
+          createdAt:   new Date().toISOString(),
+          updatedAt:   new Date().toISOString(),
         }
 
-        setNotifications((prev) => [newNotification, ...prev])
+        setNotifications(prev => [ newNotification, ...prev ])
       }
     }, 30000) // Check every 30 seconds
 
@@ -277,7 +281,7 @@ export function NotificationCenter() {
                 </div>
               ) : (
                 <div className="divide-y">
-                  {filteredNotifications.map((notification) => (
+                  {filteredNotifications.map(notification => (
                     <div
                       key={notification.id}
                       className={`p-4 hover:bg-muted/50 transition-colors ${!notification.read ? "bg-muted/20" : ""}`}

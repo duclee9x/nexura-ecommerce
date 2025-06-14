@@ -11,17 +11,17 @@ export const getVariantsForCart = async (call: ServerUnaryCall<GetVariantsForCar
     
     // Fetch variants with their associated product information
     const variants = await prisma.productVariant.findMany({
-      where: { id: { in: variantIds } },
+      where:  { id: { in: variantIds } },
       select: {
-        id: true,
-        price: true,
-        imageIds: true,
-        sku: true,
-        stock: true,
+        id:         true,
+        price:      true,
+        imageIds:   true,
+        sku:        true,
+        stock:      true,
         attributes: true,
-        product: {
+        product:    {
           select: {
-            id: true,
+            id:   true,
             name: true,
             slug: true
           }
@@ -36,32 +36,33 @@ export const getVariantsForCart = async (call: ServerUnaryCall<GetVariantsForCar
 
     // Fetch corresponding ProductImages
     const images = await prisma.productImage.findMany({
-      where: { id: { in: firstImageIds as string[] } },
+      where:  { id: { in: firstImageIds as string[] } },
       select: { id: true, url: true },
     });
 
     // Map imageId to URL
-    const imageMap = new Map(images.map(img => [img.id, img.url]));
+    const imageMap = new Map(images.map(img => [ img.id, img.url ]));
 
     // Combine results
-    const response: VariantCart[] = variants.map(variant => {
+    const response: VariantCart[] = variants.map((variant) => {
       const firstImageId = variant.imageIds[0];
       return {
-        id: variant.id,
+        id:    variant.id,
         price: variant.price, 
         image: imageMap.get(firstImageId as string) ?? "",
         stock: variant.stock ? {
           quantity: variant.stock.quantity,
           reserved: variant.stock.reserved,
         } : undefined,
-        sku: variant.sku,
+        sku:         variant.sku,
         variantName: variant.attributes.map(attribute => attribute.name + ": " + attribute.value).join(", "),
-        productName: variant.product.name,
-        productSlug: variant.product.slug,
-        attributes: variant.attributes.map(attribute => ({
-          id: attribute.id,
-          name: attribute.name,
-          value: attribute.value,
+        productName: variant.product.name ?? "",
+        productId:   variant.product.id,
+        productSlug: variant.product.slug ?? "",
+        attributes:  variant.attributes.map(attribute => ({
+          id:         attribute.id,
+          name:       attribute.name,
+          value:      attribute.value,
           extraValue: attribute.extraValue ?? ""
         })),
       };

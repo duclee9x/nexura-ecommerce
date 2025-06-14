@@ -28,7 +28,7 @@ interface AdminSidebarProps {
 
 export const AdminSidebar = memo(({ className }: AdminSidebarProps) => {
   const pathname = usePathname()
-  const [isOpen, setIsOpen] = useState(false)
+  const [ isOpen, setIsOpen ] = useState(false)
 
   const isActive = (path: string) => {
     return pathname?.startsWith(path)
@@ -36,81 +36,81 @@ export const AdminSidebar = memo(({ className }: AdminSidebarProps) => {
 
   const navItems = [
     {
-      title: "Dashboard",
-      href: "/admin",
-      icon: LayoutDashboard,
+      title:             "Dashboard",
+      href:              "/admin",
+      icon:              LayoutDashboard,
       hasImplementation: false,
-      active: pathname === "/admin",
+      active:            pathname === "/admin",
     },
     {
-      title: "Inventory",
-      href: "/admin/inventory",
-      icon: Package,
+      title:             "Inventory",
+      href:              "/admin/inventory",
+      icon:              Package,
       hasImplementation: true,
-      active: isActive("/admin/inventory"),
+      active:            isActive("/admin/inventory"),
     },
     {
-      title: "Orders",
-      href: "/admin/orders",
-      icon: ShoppingCart,
+      title:             "Orders",
+      href:              "/admin/orders",
+      icon:              ShoppingCart,
       hasImplementation: true,
-      active: isActive("/admin/orders"),
+      active:            isActive("/admin/orders"),
     },
     {
-      title: "Customers",
-      href: "/admin/customers",
-      icon: Users,
+      title:             "Customers",
+      href:              "/admin/customers",
+      icon:              Users,
       hasImplementation: true,
-      active: isActive("/admin/customers"),
+      active:            isActive("/admin/customers"),
     },
     {
-      title: "Analytics",
-      href: "/admin/analytics",
-      icon: BarChart3,
+      title:             "Analytics",
+      href:              "/admin/analytics",
+      icon:              BarChart3,
       hasImplementation: false,
-      active: isActive("/admin/analytics"),
+      active:            isActive("/admin/analytics"),
     },
     {
-      title: "Warehouses",
-      href: "/admin/warehouses",
-      icon: Warehouse,
+      title:             "Warehouses",
+      href:              "/admin/warehouses",
+      icon:              Warehouse,
       hasImplementation: false,
-      active: isActive("/admin/warehouses"),
+      active:            isActive("/admin/warehouses"),
     },
     {
-      title: "Coupons",
-      href: "/admin/coupons",
-      icon: Tag,
+      title:             "Coupons",
+      href:              "/admin/coupons",
+      icon:              Tag,
       hasImplementation: false,
-      active: isActive("/admin/coupons"),
+      active:            isActive("/admin/coupons"),
     },
     {
-      title: "Blog",
-      href: "/admin/blog",
-      icon: FileText,
+      title:             "Blog",
+      href:              "/admin/blog",
+      icon:              FileText,
       hasImplementation: false,
-      active: isActive("/admin/blog"),
+      active:            isActive("/admin/blog"),
     },
     {
-      title: "Media",
-      href: "/admin/media",
-      icon: Image,
+      title:             "Media",
+      href:              "/admin/media",
+      icon:              Image,
       hasImplementation: false,
-      active: isActive("/admin/media"),
+      active:            isActive("/admin/media"),
     },
     {
-      title: "Newsletter",
-      href: "/admin/newsletter",
-      icon: Mail,
+      title:             "Newsletter",
+      href:              "/admin/newsletter",
+      icon:              Mail,
       hasImplementation: false,
-      active: isActive("/admin/newsletter"),
+      active:            isActive("/admin/newsletter"),
     },
     {
-      title: "Settings",
-      href: "/admin/settings",
-      icon: Settings,
+      title:             "Settings",
+      href:              "/admin/settings",
+      icon:              Settings,
       hasImplementation: false,
-      active: isActive("/admin/settings"),
+      active:            isActive("/admin/settings"),
     },
   ]
 
@@ -119,7 +119,7 @@ export const AdminSidebar = memo(({ className }: AdminSidebarProps) => {
       <div className="px-4 py-2">
         <h2 className="mb-2 px-2 text-xl font-semibold tracking-tight text-text-base">Admin Dashboard</h2>
         <div className="space-y-1">
-          {navItems.map((item) => (
+          {navItems.map(item => (
             <Button
               key={item.href}
               variant={item.active ? "secondary" : "ghost"}

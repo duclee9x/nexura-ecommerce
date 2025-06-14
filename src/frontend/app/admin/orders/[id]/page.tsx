@@ -94,10 +94,10 @@ export default function OrderDetailPage() {
   const { mutate: addOrderNote } = useAddOrderNote
   const { mutate: updateTrackingNumber } = useUpdateTrackingNumber
   const { data: order, isPending } = useGetOrder(id as string)
-  const [activeTab, setActiveTab] = useState("details")
-  const [orderStatus, setOrderStatus] = useState(order?.status || "")
-  const [trackingNumber, setTrackingNumber] = useState("")
-  const [noteText, setNoteText] = useState("")
+  const [ activeTab, setActiveTab ] = useState("details")
+  const [ orderStatus, setOrderStatus ] = useState(order?.status || "")
+  const [ trackingNumber, setTrackingNumber ] = useState("")
+  const [ noteText, setNoteText ] = useState("")
   const { formatDate, formatPrice } = useCurrency()
 
   // Update local state when order data changes
@@ -248,7 +248,9 @@ export default function OrderDetailPage() {
                         </div>
                       </div>
                       <div className="space-y-4 p-4">
-                        {[1, 2, 3].map((i) => (
+                        {[
+                          1, 2, 3
+                        ].map(i => (
                           <div key={i} className="grid grid-cols-5 gap-4">
                             <div className="flex items-center gap-3">
                               <Skeleton className="w-10 h-10 rounded-md" />
@@ -331,7 +333,7 @@ export default function OrderDetailPage() {
       </div>
     )
   }
-    console.log('order', order)
+  console.log('order', order)
   // Get status badge color
   
 
@@ -342,7 +344,7 @@ export default function OrderDetailPage() {
     updateOrderStatus({ orderId: id as string, status })
 
     toast({
-      title: "Status Updated",
+      title:       "Status Updated",
       description: `Order status has been updated to ${status}.`,
     })
   }
@@ -357,7 +359,7 @@ export default function OrderDetailPage() {
     updateTrackingNumber({ orderId: id as string, trackingNumber: trackingNumber.trim() })
 
     toast({
-      title: "Tracking Updated",
+      title:       "Tracking Updated",
       description: "Tracking number has been updated.",
     })
   }
@@ -368,12 +370,12 @@ export default function OrderDetailPage() {
 
     addOrderNote({
       orderId: id as string,
-      note: noteText,
+      note:    noteText,
     })
     setNoteText("")
 
     toast({
-      title: "Note Added",
+      title:       "Note Added",
       description: "Note has been added to the order.",
     })
   }
@@ -383,14 +385,14 @@ export default function OrderDetailPage() {
     if (!id || Array.isArray(id)) return
 
     try {
-     updateOrderStatus({ orderId: id as string, status: "ORDER_CANCELLED" as OrderStatus })
+      updateOrderStatus({ orderId: id as string, status: "ORDER_CANCELLED" as OrderStatus })
       
     } catch (error) {
       console.error("Error cancelling order:", error)
       toast({
-        title: "Error",
+        title:       "Error",
         description: "Failed to cancel the order. Please try again.",
-        variant: "destructive",
+        variant:     "destructive",
       })
     }
   }
@@ -476,7 +478,7 @@ export default function OrderDetailPage() {
                     <SelectValue placeholder="Update Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    {orderStatuses.map((status) => (
+                    {orderStatuses.map(status => (
                       <SelectItem key={status.value} value={status.value}>
                         {status.label}
                       </SelectItem>
@@ -493,7 +495,7 @@ export default function OrderDetailPage() {
                         <Input
                           id="tracking"
                           value={trackingNumber}
-                          onChange={(e) => setTrackingNumber(e.target.value)}
+                          onChange={e => setTrackingNumber(e.target.value)}
                           placeholder="Enter tracking number..."
                           className="rounded-r-none"
                         />
@@ -640,7 +642,7 @@ export default function OrderDetailPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {order.items.map((item) => (
+                        {order.items.map(item => (
                           <TableRow key={item.id}>
                             <TableCell>
                               <div className="flex items-center gap-3">
@@ -701,9 +703,9 @@ export default function OrderDetailPage() {
                         <div className="mr-4 flex flex-col items-center">
                           <div
                             className={`rounded-full p-1 ${event.status === "ORDER_CANCELLED"
-                                ? "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-400"
-                                : "bg-primary/10 text-primary"
-                              }`}
+                              ? "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-400"
+                              : "bg-primary/10 text-primary"
+                            }`}
                           >
                             {event.status === "ORDER_PENDING" && <Package className="h-5 w-5" />}
                             {event.status === "ORDER_PAYMENT_PAID" && <CreditCard className="h-5 w-5" />}
@@ -747,7 +749,7 @@ export default function OrderDetailPage() {
                           <AlertTriangle className="h-4 w-4 mr-2 text-amber-500" />
                           <h3 className="font-medium">Customer Note</h3>
                         </div>
-                        {order.notes.map((note) => (
+                        {order.notes.map(note => (
                           <p key={note.id}>{note.note}</p>
                         ))}
                       </div>
@@ -760,7 +762,7 @@ export default function OrderDetailPage() {
                         placeholder="Add a note about this order..."
                         rows={3}
                         value={noteText}
-                        onChange={(e) => setNoteText(e.target.value)}
+                        onChange={e => setNoteText(e.target.value)}
                       />
                       <Button onClick={handleAddNote} className="mt-2">
                         <Plus className="h-4 w-4 mr-2" />
@@ -773,13 +775,13 @@ export default function OrderDetailPage() {
                       <div className="space-y-4">
                         {order.notes.map((note, index) => (
                           <div key={index} className="p-4 border rounded-md">
-                              <div className="flex justify-between mb-2">
-                                <span className="font-medium">Admin Note</span>
-                                <span className="text-sm text-muted-foreground">{formatDate(note.createdAt)}</span>
-                              </div>
-                              <p>{note.note}</p>
+                            <div className="flex justify-between mb-2">
+                              <span className="font-medium">Admin Note</span>
+                              <span className="text-sm text-muted-foreground">{formatDate(note.createdAt)}</span>
                             </div>
-                          ))}
+                            <p>{note.note}</p>
+                          </div>
+                        ))}
 
                         {order.notes.length === 0 && (
                           <p className="text-muted-foreground">No notes have been added yet.</p>

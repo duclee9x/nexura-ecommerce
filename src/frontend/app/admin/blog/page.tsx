@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { toast } from "@/hooks/use-toast"
 import { Search, ChevronDown, Eye, Edit, Trash2, Plus, Calendar, FileText, ArrowUpDown, X } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import Image from "next/image"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,26 +44,26 @@ import type { BlogPost } from "@/types/schema"
 // Sample blog posts
 const initialBlogPosts: BlogPost[] = [
   {
-    id: "1",
+    id:    "1",
     title: "The Ultimate Guide to Choosing the Perfect Backpack",
-    slug: "ultimate-guide-choosing-perfect-backpack",
+    slug:  "ultimate-guide-choosing-perfect-backpack",
     content:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...",
     excerpt:
       "Find the perfect backpack for your needs with our comprehensive guide covering materials, sizes, and features.",
     author: {
-      id: "1",
-      name: "Sarah Johnson",
+      id:     "1",
+      name:   "Sarah Johnson",
       avatar: "/placeholder.svg?height=40&width=40",
     },
     featuredImage: {
-      id: "1",
-      url: "/placeholder.svg?height=600&width=1200&text=Backpack+Guide",
-      alt: "Backpack Guide",
-      filename: "backpack-guide.jpg",
-      type: "image",
-      fileSize: 123456,
-      mimeType: "image/jpeg",
+      id:        "1",
+      url:       "/placeholder.svg?height=600&width=1200&text=Backpack+Guide",
+      alt:       "Backpack Guide",
+      filename:  "backpack-guide.jpg",
+      type:      "image",
+      fileSize:  123456,
+      mimeType:  "image/jpeg",
       createdAt: "2023-03-10T09:30:00",
       updatedAt: "2023-03-10T09:30:00",
     },
@@ -72,47 +73,51 @@ const initialBlogPosts: BlogPost[] = [
         "Find the perfect backpack for your needs with our comprehensive guide covering materials, sizes, and features.",
     },
     commentStatus: "open",
-    categories: ["guides", "products"],
-    tags: ["backpacks", "travel", "gear"],
-    status: "published",
-    createdAt: "2023-03-10T09:30:00",
-    publishedAt: "2023-03-15T10:00:00",
-    updatedAt: "2023-03-15T10:00:00",
-    seoTitle: "The Ultimate Guide to Choosing the Perfect Backpack | NEXURA",
+    categories:    [ "guides", "products" ],
+    tags:          [
+      "backpacks", "travel", "gear"
+    ],
+    status:        "published",
+    createdAt:     "2023-03-10T09:30:00",
+    publishedAt:   "2023-03-15T10:00:00",
+    updatedAt:     "2023-03-15T10:00:00",
+    seoTitle:      "The Ultimate Guide to Choosing the Perfect Backpack | NEXURA",
     seoDescription:
       "Find the perfect backpack for your needs with our comprehensive guide covering materials, sizes, and features.",
   },
   {
-    id: "2",
+    id:    "2",
     title: "5 Essential Travel Accessories for Your Next Adventure",
-    slug: "5-essential-travel-accessories-next-adventure",
+    slug:  "5-essential-travel-accessories-next-adventure",
     content:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...",
     excerpt:
       "Prepare for your next journey with these must-have travel accessories that combine style, functionality, and convenience.",
     author: {
-      id: "1",
-      name: "Sarah Johnson",
+      id:     "1",
+      name:   "Sarah Johnson",
       avatar: "/placeholder.svg?height=40&width=40",
     },
     featuredImage: {
-      id: "1",
-      url: "/placeholder.svg?height=600&width=1200&text=Travel+Accessories",
-      alt: "Travel Accessories",
-      filename: "travel-accessories.jpg",
-      type: "image",
-      fileSize: 123456,
-      mimeType: "image/jpeg",
+      id:        "1",
+      url:       "/placeholder.svg?height=600&width=1200&text=Travel+Accessories",
+      alt:       "Travel Accessories",
+      filename:  "travel-accessories.jpg",
+      type:      "image",
+      fileSize:  123456,
+      mimeType:  "image/jpeg",
       createdAt: "2023-02-20T14:45:00",
       updatedAt: "2023-02-20T14:45:00",
     },
-    categories: ["travel", "products"],
-    tags: ["accessories", "travel", "essentials"],
-    status: "published",
-    createdAt: "2023-02-20T14:45:00",
+    categories:  [ "travel", "products" ],
+    tags:        [
+      "accessories", "travel", "essentials"
+    ],
+    status:      "published",
+    createdAt:   "2023-02-20T14:45:00",
     publishedAt: "2023-02-25T09:00:00",
-    updatedAt: "2023-02-25T09:00:00",
-    seo: {
+    updatedAt:   "2023-02-25T09:00:00",
+    seo:         {
       title: "5 Essential Travel Accessories for Your Next Adventure | NEXURA",
       description:
         "Prepare for your next journey with these must-have travel accessories that combine style, functionality, and convenience.",
@@ -120,71 +125,75 @@ const initialBlogPosts: BlogPost[] = [
     commentStatus: "open",
   },
   {
-    id: "3",
+    id:    "3",
     title: "How to Pack Efficiently for a Weekend Getaway",
-    slug: "how-to-pack-efficiently-weekend-getaway",
+    slug:  "how-to-pack-efficiently-weekend-getaway",
     content:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...",
     excerpt: "Master the art of packing light with our expert tips for organizing your weekend bag efficiently.",
-    author: {
-      id: "2",
-      name: "Michael Chen",
+    author:  {
+      id:     "2",
+      name:   "Michael Chen",
       avatar: "/placeholder.svg?height=40&width=40",
     },
     featuredImage: {
-      id: "1",
-      url: "/placeholder.svg?height=600&width=1200&text=Packing+Tips",
-      alt: "Packing Tips",
-      filename: "packing-tips.jpg",
-      type: "image",
-      fileSize: 123456,
-      mimeType: "image/jpeg",
+      id:        "1",
+      url:       "/placeholder.svg?height=600&width=1200&text=Packing+Tips",
+      alt:       "Packing Tips",
+      filename:  "packing-tips.jpg",
+      type:      "image",
+      fileSize:  123456,
+      mimeType:  "image/jpeg",
       createdAt: "2023-01-15T11:20:00",
       updatedAt: "2023-01-15T11:20:00",
     },
-    categories: ["guides", "travel"],
-    tags: ["packing", "travel", "organization"],
-    status: "published",
-    createdAt: "2023-01-15T11:20:00",
+    categories:  [ "guides", "travel" ],
+    tags:        [
+      "packing", "travel", "organization"
+    ],
+    status:      "published",
+    createdAt:   "2023-01-15T11:20:00",
     publishedAt: "2023-01-20T10:30:00",
-    updatedAt: "2023-01-20T10:30:00",
-    seo: {
-      title: "How to Pack Efficiently for a Weekend Getaway | NEXURA",
+    updatedAt:   "2023-01-20T10:30:00",
+    seo:         {
+      title:       "How to Pack Efficiently for a Weekend Getaway | NEXURA",
       description: "Master the art of packing light with our expert tips for organizing your weekend bag efficiently.",
     },
     commentStatus: "open",
   },
   {
-    id: "4",
+    id:    "4",
     title: "The History of Backpacks: From Practical to Fashionable",
-    slug: "history-backpacks-practical-fashionable",
+    slug:  "history-backpacks-practical-fashionable",
     content:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...",
     excerpt:
       "Explore the fascinating evolution of backpacks from simple utility items to fashion statements and everyday essentials.",
     author: {
-      id: "1",
-      name: "Sarah Johnson",
+      id:     "1",
+      name:   "Sarah Johnson",
       avatar: "/placeholder.svg?height=40&width=40",
     },
     featuredImage: {
-      id: "1",
-      url: "/placeholder.svg?height=600&width=1200&text=Backpack+History",
-      alt: "Backpack History",
-      filename: "backpack-history.jpg",
-      type: "image",
-      fileSize: 123456,
-      mimeType: "image/jpeg",
+      id:        "1",
+      url:       "/placeholder.svg?height=600&width=1200&text=Backpack+History",
+      alt:       "Backpack History",
+      filename:  "backpack-history.jpg",
+      type:      "image",
+      fileSize:  123456,
+      mimeType:  "image/jpeg",
       createdAt: "2023-03-18T15:10:00",
       updatedAt: "2023-03-18T15:10:00",
     },
-    categories: ["history", "fashion"],
-    tags: ["backpacks", "fashion", "history"],
-    status: "draft",
-    createdAt: "2023-03-18T15:10:00",
+    categories:  [ "history", "fashion" ],
+    tags:        [
+      "backpacks", "fashion", "history"
+    ],
+    status:      "draft",
+    createdAt:   "2023-03-18T15:10:00",
     publishedAt: "",
-    updatedAt: "2023-03-18T15:10:00",
-    seo: {
+    updatedAt:   "2023-03-18T15:10:00",
+    seo:         {
       title: "The History of Backpacks: From Practical to Fashionable | NEXURA",
       description:
         "Explore the fascinating evolution of backpacks from simple utility items to fashion statements and everyday essentials.",
@@ -192,36 +201,38 @@ const initialBlogPosts: BlogPost[] = [
     commentStatus: "open",
   },
   {
-    id: "5",
+    id:    "5",
     title: "Sustainable Materials in Modern Bag Manufacturing",
-    slug: "sustainable-materials-modern-bag-manufacturing",
+    slug:  "sustainable-materials-modern-bag-manufacturing",
     content:
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...",
     excerpt:
       "Discover how eco-friendly materials are revolutionizing the bag industry and creating a more sustainable future.",
     author: {
-      id: "2",
-      name: "Michael Chen",
+      id:     "2",
+      name:   "Michael Chen",
       avatar: "/placeholder.svg?height=40&width=40",
     },
     featuredImage: {
-      id: "1",
-      url: "/placeholder.svg?height=600&width=1200&text=Sustainable+Materials",
-      alt: "Sustainable Materials",
-      filename: "sustainable-materials.jpg",
-      type: "image",
-      fileSize: 123456,
-      mimeType: "image/jpeg",
+      id:        "1",
+      url:       "/placeholder.svg?height=600&width=1200&text=Sustainable+Materials",
+      alt:       "Sustainable Materials",
+      filename:  "sustainable-materials.jpg",
+      type:      "image",
+      fileSize:  123456,
+      mimeType:  "image/jpeg",
       createdAt: "2023-03-05T09:45:00",
       updatedAt: "2023-03-05T09:45:00",
     },
-    categories: ["sustainability", "manufacturing"],
-    tags: ["eco-friendly", "materials", "sustainability"],
-    status: "draft",
-    createdAt: "2023-03-05T09:45:00",
+    categories:  [ "sustainability", "manufacturing" ],
+    tags:        [
+      "eco-friendly", "materials", "sustainability"
+    ],
+    status:      "draft",
+    createdAt:   "2023-03-05T09:45:00",
     publishedAt: "",
-    updatedAt: "2023-03-05T09:45:00",
-    seo: {
+    updatedAt:   "2023-03-05T09:45:00",
+    seo:         {
       title: "Sustainable Materials in Modern Bag Manufacturing | NEXURA",
       description:
         "Discover how eco-friendly materials are revolutionizing the bag industry and creating a more sustainable future.",
@@ -232,26 +243,26 @@ const initialBlogPosts: BlogPost[] = [
 
 export default function BlogManagementPage() {
   const router = useRouter()
-  const [blogPosts, setBlogPosts] = useState(initialBlogPosts)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState("all")
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [sortField, setSortField] = useState("dateCreated")
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
-  const [currentPage, setCurrentPage] = useState(1)
+  const [ blogPosts, setBlogPosts ] = useState(initialBlogPosts)
+  const [ searchQuery, setSearchQuery ] = useState("")
+  const [ selectedStatus, setSelectedStatus ] = useState("all")
+  const [ selectedCategory, setSelectedCategory ] = useState("all")
+  const [ sortField, setSortField ] = useState("dateCreated")
+  const [ sortDirection, setSortDirection ] = useState<"asc" | "desc">("desc")
+  const [ currentPage, setCurrentPage ] = useState(1)
   const [itemsPerPage] = useState(5)
 
   // Get unique categories
-  const categories = Array.from(new Set(blogPosts.flatMap((post) => post.categories))).sort()
+  const categories = Array.from(new Set(blogPosts.flatMap(post => post.categories))).sort()
 
   // Format date
   const formatDate = (dateString: string) => {
     if (!dateString) return "—"
     const date = new Date(dateString)
     return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
+      year:  "numeric",
       month: "short",
-      day: "numeric",
+      day:   "numeric",
     }).format(date)
   }
 
@@ -327,17 +338,17 @@ export default function BlogManagementPage() {
 
   // Handle delete post
   const handleDeletePost = (id: string) => {
-    setBlogPosts((prev) => prev.filter((post) => post.id !== id))
+    setBlogPosts(prev => prev.filter(post => post.id !== id))
 
     toast({
-      title: "Post Deleted",
+      title:       "Post Deleted",
       description: "Blog post has been permanently deleted.",
     })
   }
 
   // Handle publish/unpublish post
   const handlePublishPost = (id: string) => {
-    setBlogPosts((prev) =>
+    setBlogPosts(prev =>
       prev.map((post) => {
         if (post.id === id) {
           const newStatus = post.status === "published" ? "draft" : "published"
@@ -345,7 +356,7 @@ export default function BlogManagementPage() {
 
           return {
             ...post,
-            status: newStatus,
+            status:       newStatus,
             datePublished,
             dateModified: new Date().toISOString(),
           }
@@ -354,11 +365,11 @@ export default function BlogManagementPage() {
       }),
     )
 
-    const post = blogPosts.find((post) => post.id === id)
+    const post = blogPosts.find(post => post.id === id)
     const action = post?.status === "published" ? "unpublished" : "published"
 
     toast({
-      title: `Post ${action}`,
+      title:       `Post ${action}`,
       description: `Blog post has been ${action}.`,
     })
   }
@@ -395,7 +406,7 @@ export default function BlogManagementPage() {
                     placeholder="Search posts..."
                     className="pl-9"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                   />
                 </div>
 
@@ -418,7 +429,7 @@ export default function BlogManagementPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>
-                      {categories.map((category) => (
+                      {categories.map(category => (
                         <SelectItem key={category} value={category}>
                           {category.charAt(0).toUpperCase() + category.slice(1)}
                         </SelectItem>
@@ -481,14 +492,15 @@ export default function BlogManagementPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      currentItems.map((post) => (
+                      currentItems.map(post => (
                         <TableRow key={post.id}>
                           <TableCell className="font-medium">
                             <div className="flex items-center">
                               <div
                                 className="w-10 h-10 rounded-md overflow-hidden mr-3 bg-muted flex-shrink-0"
                                 style={{ backgroundImage: `url(${post.featuredImage})`, backgroundSize: "cover" }}
-                              ></div>
+                              >
+                              </div>
                               <div className="truncate max-w-[250px]">
                                 {post.title}
                                 <div className="text-xs text-muted-foreground mt-1 truncate">{post.slug}</div>
@@ -498,7 +510,7 @@ export default function BlogManagementPage() {
                           <TableCell>
                             <div className="flex items-center">
                               <div className="w-6 h-6 rounded-full overflow-hidden mr-2 bg-muted">
-                                <img
+                                <Image
                                   src={post.author.avatar || "/placeholder.svg"}
                                   alt={post.author.name}
                                   className="w-full h-full object-cover"
@@ -509,7 +521,7 @@ export default function BlogManagementPage() {
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-wrap gap-1">
-                              {post.categories.map((category) => (
+                              {post.categories.map(category => (
                                 <Badge key={category} variant="outline" className="capitalize">
                                   {category}
                                 </Badge>
@@ -569,7 +581,7 @@ export default function BlogManagementPage() {
                                 <DropdownMenuSeparator />
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
-                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                    <DropdownMenuItem onSelect={e => e.preventDefault()}>
                                       <Trash2 className="h-4 w-4 mr-2" />
                                       Delete
                                     </DropdownMenuItem>
@@ -613,7 +625,7 @@ export default function BlogManagementPage() {
                         />
                       </PaginationItem>
 
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                         <PaginationItem key={page}>
                           <PaginationLink isActive={currentPage === page} onClick={() => handlePageChange(page)}>
                             {page}

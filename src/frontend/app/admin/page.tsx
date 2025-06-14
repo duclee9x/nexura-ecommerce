@@ -47,7 +47,9 @@ const categoryData = [
   { name: "Accessories", value: 30 },
 ]
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28"]
+const COLORS = [
+  "#0088FE", "#00C49F", "#FFBB28"
+]
 
 const recentOrders = [
   { id: "ORD-001", customer: "John Doe", date: "2023-03-15", total: 245.99, status: "completed" },
@@ -184,7 +186,7 @@ export default function AdminDashboardPage() {
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {warehouseData.map((warehouse) => (
+              {warehouseData.map(warehouse => (
                 <Card key={warehouse.id}>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg">{warehouse.name}</CardTitle>
@@ -233,7 +235,7 @@ export default function AdminDashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {adminUsers.map((user) => (
+                  {adminUsers.map(user => (
                     <div
                       key={user.id}
                       className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
@@ -279,7 +281,7 @@ export default function AdminDashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {couponCampaigns.map((coupon) => (
+                  {couponCampaigns.map(coupon => (
                     <div
                       key={coupon.id}
                       className="grid grid-cols-3 items-center justify-between w-auto border-b pb-4 last:border-0 last:pb-0"
@@ -331,9 +333,9 @@ export default function AdminDashboardPage() {
                     <BarChart
                       data={salesData}
                       margin={{
-                        top: 5,
-                        right: 30,
-                        left: 20,
+                        top:    5,
+                        right:  30,
+                        left:   20,
                         bottom: 5,
                       }}
                     >
@@ -393,7 +395,7 @@ export default function AdminDashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {recentOrders.map((order) => (
+                  {recentOrders.map(order => (
                     <div
                       key={order.id}
                       className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
@@ -436,7 +438,7 @@ export default function AdminDashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {topProducts.map((product) => (
+                  {topProducts.map(product => (
                     <div
                       key={product.id}
                       className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"

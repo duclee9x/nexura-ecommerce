@@ -1,6 +1,6 @@
 import { PrismaClient } from '@nexura/order-service/src/db/prisma-client';
 import { GetOrderStatusRequest, GetOrderStatusResponse, OrderStatus } from '@nexura/grpc_gateway/protos';
-import type { ServerUnaryCall, sendUnaryData, ServiceError } from '@grpc/grpc-js';
+import type { ServerUnaryCall, sendUnaryData } from '@grpc/grpc-js';
 import { Status } from '@grpc/grpc-js/build/src/constants';
 
 const prisma = new PrismaClient();
@@ -8,13 +8,13 @@ const prisma = new PrismaClient();
 export async function getOrderStatus(call: ServerUnaryCall<GetOrderStatusRequest, GetOrderStatusResponse>, callback: sendUnaryData<GetOrderStatusResponse>) {
   try {
     const order = await prisma.order.findUnique({
-      where: { id: call.request.orderId },
+      where:  { id: call.request.orderId },
       select: { status: true }
     });
 
     if (!order) {
       callback({
-        code: Status.NOT_FOUND,
+        code:    Status.NOT_FOUND,
         message: 'Order not found'
       });
       return;
@@ -26,7 +26,7 @@ export async function getOrderStatus(call: ServerUnaryCall<GetOrderStatusRequest
   } catch (error) {
     console.error('Error getting order status:', error);
     callback({
-      code: Status.INTERNAL,
+      code:    Status.INTERNAL,
       message: 'Failed to get order status'
     });
   }

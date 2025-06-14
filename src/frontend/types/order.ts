@@ -9,22 +9,22 @@ export enum OrderStatus {
 }
 
 export interface OrderItem {
-  variantId: string
-  productId: string
+  variantId:   string
+  productId:   string
   productName: string
   productSlug: string
   variantName: string
-  quantity: number
-  price: number
-  image?: string
+  quantity:    number
+  price:       number
+  image?:      string
 }
 
 export interface Order {
-  id: string
-  userId: string
-  status: OrderStatus
+  id:          string
+  userId:      string
+  status:      OrderStatus
   totalAmount: number
-  items: OrderItem[]
-  createdAt: string
-  updatedAt: string
+  items:       OrderItem[]
+  createdAt:   string
+  updatedAt:   string
 } 

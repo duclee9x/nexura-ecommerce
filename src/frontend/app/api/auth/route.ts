@@ -3,9 +3,9 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server"
 
 export interface SessionData {
-  email: string;
-  userId: string;
-  accessToken: string;
+  email:        string;
+  userId:       string;
+  accessToken:  string;
   refreshToken: string;
 } 
 
@@ -13,7 +13,7 @@ export async function getSession(): Promise<SessionData | undefined> {
   const sessionStore = await cookies()
   const session = await getIronSession<SessionData>(sessionStore, {
     cookieName: 'nexura-auth-cookie',
-    password: process.env.SESSION_SECRET || "complex_password_at_least_32_characters_long",
+    password:   process.env.SESSION_SECRET || "complex_password_at_least_32_characters_long",
   })
   return session
 }

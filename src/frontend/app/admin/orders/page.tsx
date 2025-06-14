@@ -38,7 +38,9 @@ import { getPaymentStatusBadgeColor, getStatusBadgeColor, mapStatus } from "@/li
 function TableSkeleton() {
   return (
     <div className="space-y-4">
-      {[1, 2, 3, 4, 5].map((i) => (
+      {[
+        1, 2, 3, 4, 5
+      ].map(i => (
         <div key={i} className="flex items-center justify-between p-4 border rounded-lg animate-pulse">
           <div className="space-y-2">
             <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
@@ -99,13 +101,13 @@ export default function OrdersManagementPage() {
   const { formatDate, formatPrice } = useCurrency()
   const { useListAllOrders } = OrderHooks()
   const { data: orders, error, isLoading, refetch } = useListAllOrders()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState<OrderStatus | "all">("all")
-  const [selectedPaymentStatus, setSelectedPaymentStatus] = useState<PaymentStatus | "all">("all")
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
-  const [sortField, setSortField] = useState("date")
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
-  const [currentPage, setCurrentPage] = useState(1)
+  const [ searchQuery, setSearchQuery ] = useState("")
+  const [ selectedStatus, setSelectedStatus ] = useState<OrderStatus | "all">("all")
+  const [ selectedPaymentStatus, setSelectedPaymentStatus ] = useState<PaymentStatus | "all">("all")
+  const [ dateRange, setDateRange ] = useState<DateRange | undefined>(undefined)
+  const [ sortField, setSortField ] = useState("date")
+  const [ sortDirection, setSortDirection ] = useState<"asc" | "desc">("desc")
+  const [ currentPage, setCurrentPage ] = useState(1)
   const [itemsPerPage] = useState(5)
 
   // Handle sort
@@ -278,12 +280,12 @@ export default function OrdersManagementPage() {
                     placeholder="Search by order ID, customer name, or email..."
                     className="pl-9"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                   />
                 </div>
 
                 <div className="flex flex-wrap gap-4">
-                  <Select value={selectedStatus} onValueChange={(value) => setSelectedStatus(value as OrderStatus)}>
+                  <Select value={selectedStatus} onValueChange={value => setSelectedStatus(value as OrderStatus)}>
                     <SelectTrigger className="w-[150px]">
                       <SelectValue placeholder="Order Status" />
                     </SelectTrigger>
@@ -296,7 +298,7 @@ export default function OrdersManagementPage() {
                     </SelectContent>
                   </Select>
 
-                  <Select value={selectedPaymentStatus} onValueChange={(value) => setSelectedPaymentStatus(value as PaymentStatus)}>
+                  <Select value={selectedPaymentStatus} onValueChange={value => setSelectedPaymentStatus(value as PaymentStatus)}>
                     <SelectTrigger className="w-[150px]">
                       <SelectValue placeholder="Payment Status" />
                     </SelectTrigger>
@@ -333,7 +335,7 @@ export default function OrdersManagementPage() {
                         mode="range"
                         defaultMonth={dateRange?.from}
                         selected={dateRange}
-                        onSelect={(range) => setDateRange(range)}
+                        onSelect={range => setDateRange(range)}
                         numberOfMonths={2}
                       />
                     </PopoverContent>
@@ -382,7 +384,7 @@ export default function OrdersManagementPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      currentItems.map((order) => (
+                      currentItems.map(order => (
                         <TableRow key={order.id}>
                           <TableCell className="font-medium">
                             #{order.id.slice(0, 8)}
@@ -402,8 +404,8 @@ export default function OrdersManagementPage() {
                           </TableCell>
                           <TableCell>
                             <Badge
-                             className={`${getPaymentStatusBadgeColor(order.payment?.status as PaymentStatus)}`}
-                             >
+                              className={`${getPaymentStatusBadgeColor(order.payment?.status as PaymentStatus)}`}
+                            >
                               {mapStatus(order.payment?.status as PaymentStatus)}
                             </Badge>
                           </TableCell>
@@ -450,7 +452,7 @@ export default function OrdersManagementPage() {
                         />
                       </PaginationItem>
 
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                         <PaginationItem key={page}>
                           <PaginationLink isActive={currentPage === page} onClick={() => handlePageChange(page)}>
                             {page}

@@ -10,19 +10,19 @@ import { getCroppedImg } from "@/lib/utils"
 import { Loader2 } from "lucide-react"
 
 interface AvatarCropperModalProps {
-  image: string | null
-  isOpen: boolean
+  image:   string | null
+  isOpen:  boolean
   onClose: () => void
-  onSave: (croppedImage: File) => void
+  onSave:  (croppedImage: File) => void
 }
 
 export function AvatarCropperModal({ image, isOpen, onClose, onSave }: AvatarCropperModalProps) {
-  const [crop, setCrop] = useState({ x: 0, y: 0 })
-  const [zoom, setZoom] = useState(1)
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
-  const [croppedImage, setCroppedImage] = useState<string | null>(null)
-  const [croppedFile, setCroppedFile] = useState<File | null>(null)
-  const [isGenerating, setIsGenerating] = useState(false)
+  const [ crop, setCrop ] = useState({ x: 0, y: 0 })
+  const [ zoom, setZoom ] = useState(1)
+  const [ croppedAreaPixels, setCroppedAreaPixels ] = useState(null)
+  const [ croppedImage, setCroppedImage ] = useState<string | null>(null)
+  const [ croppedFile, setCroppedFile ] = useState<File | null>(null)
+  const [ isGenerating, setIsGenerating ] = useState(false)
   const isGeneratingRef = useRef(false)
 
   const onCropComplete = useCallback((croppedArea: any, croppedAreaPixels: any) => {
@@ -46,13 +46,13 @@ export function AvatarCropperModal({ image, isOpen, onClose, onSave }: AvatarCro
       isGeneratingRef.current = false
       setIsGenerating(false)
     }
-  }, [image, croppedAreaPixels])
+  }, [ image, croppedAreaPixels ])
 
   useEffect(() => {
     if (croppedAreaPixels && !isGeneratingRef.current) {
       generateCroppedImage()
     }
-  }, [croppedAreaPixels, generateCroppedImage])
+  }, [ croppedAreaPixels, generateCroppedImage ])
 
   const handleSave = () => {
     if (croppedFile) {
@@ -93,7 +93,7 @@ export function AvatarCropperModal({ image, isOpen, onClose, onSave }: AvatarCro
                     onCropComplete={onCropComplete}
                     style={{
                       containerStyle: {
-                        width: "100%",
+                        width:  "100%",
                         height: "250px",
                       },
                     }}
@@ -126,7 +126,7 @@ export function AvatarCropperModal({ image, isOpen, onClose, onSave }: AvatarCro
             max={3}
             step={0.1}
             value={[zoom]}
-            onValueChange={(value) => setZoom(value[0])}
+            onValueChange={value => setZoom(value[0])}
             className="w-full"
           />
         </div>

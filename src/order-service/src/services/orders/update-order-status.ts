@@ -71,13 +71,13 @@ export async function updateOrderStatus(call: ServerUnaryCall<UpdateOrderStatusR
 
     // Get current order status
     const currentOrder = await prisma.order.findUnique({
-      where: { id: orderId },
+      where:  { id: orderId },
       select: { status: true }
     });
 
     if (!currentOrder) {
       callback({
-        code: Status.NOT_FOUND,
+        code:    Status.NOT_FOUND,
         message: 'Order not found'
       });
       return;
@@ -88,11 +88,11 @@ export async function updateOrderStatus(call: ServerUnaryCall<UpdateOrderStatusR
       // Update order status
       const order = await tx.order.update({
         where: { id: orderId },
-        data: {
-          status: mapOrderStatus(status),
+        data:  {
+          status:        mapOrderStatus(status),
           statusHistory: {
             create: {
-              status: mapOrderStatus(status),
+              status:      mapOrderStatus(status),
               description: `Status changed from ${mapStatusToReadableStatus(currentOrder.status)} to ${mapStatusToReadableStatus(mapOrderStatus(status))}`
             }
           }
@@ -107,7 +107,7 @@ export async function updateOrderStatus(call: ServerUnaryCall<UpdateOrderStatusR
       });
 
       logger.info("Order status updated", { 
-        orderId: order.id, 
+        orderId:   order.id, 
         oldStatus: currentOrder.status, 
         newStatus: order.status 
       });
@@ -117,11 +117,11 @@ export async function updateOrderStatus(call: ServerUnaryCall<UpdateOrderStatusR
 
     callback(null, {
       orderId: updatedOrder.id,
-      status: status,
-      steps: updatedOrder.statusHistory.map(history => ({
-        service: 'order',
-        status: mapOrderStatusToStepStatus(history.status),
-        error: '',
+      status:  status,
+      steps:   updatedOrder.statusHistory.map(history => ({
+        service:   'order',
+        status:    mapOrderStatusToStepStatus(history.status),
+        error:     '',
         timestamp: history.createdAt.toISOString()
       })),
       message: 'Order status updated successfully'
@@ -129,7 +129,7 @@ export async function updateOrderStatus(call: ServerUnaryCall<UpdateOrderStatusR
   } catch (error) {
     logger.error('Error updating order status:', error);
     callback({
-      code: Status.INTERNAL,
+      code:    Status.INTERNAL,
       message: 'Failed to update order status'
     });
   }

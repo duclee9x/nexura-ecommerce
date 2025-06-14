@@ -18,66 +18,66 @@ import { Save, Building, CreditCard, Globe } from "lucide-react"
 import { useCurrency } from "@/contexts/currency-context"
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState("general")
-  const [isSaving, setIsSaving] = useState(false)
+  const [ activeTab, setActiveTab ] = useState("general")
+  const [ isSaving, setIsSaving ] = useState(false)
   const { formatPrice } = useCurrency()
   // General settings state
-  const [generalSettings, setGeneralSettings] = useState({
-    storeName: "NEXURA",
-    storeEmail: "admin@nexura.com",
-    storePhone: "+84 33 475 4517",
-    storeAddress: "123 Commerce St, New York, NY 10001, USA",
+  const [ generalSettings, setGeneralSettings ] = useState({
+    storeName:     "NEXURA",
+    storeEmail:    "admin@nexura.com",
+    storePhone:    "+84 33 475 4517",
+    storeAddress:  "123 Commerce St, New York, NY 10001, USA",
     storeCurrency: "USD",
     storeTimeZone: "Asia/Jakarta"
   })
   
   // Payment settings state
-  const [paymentSettings, setPaymentSettings] = useState({
-    enableStripe: true,
-    enablePayPal: true,
+  const [ paymentSettings, setPaymentSettings ] = useState({
+    enableStripe:         true,
+    enablePayPal:         true,
     enableCashOnDelivery: false,
-    enableBankTransfer: false,
-    testMode: true
+    enableBankTransfer:   false,
+    testMode:             true
   })
   
   // Shipping settings state
-  const [shippingSettings, setShippingSettings] = useState({
-    enableFreeShipping: true,
+  const [ shippingSettings, setShippingSettings ] = useState({
+    enableFreeShipping:    true,
     freeShippingThreshold: "100",
-    enableFlatRate: true,
-    flatRateAmount: "10",
-    enableLocalPickup: false
+    enableFlatRate:        true,
+    flatRateAmount:        "10",
+    enableLocalPickup:     false
   })
   
   // Email settings state
-  const [emailSettings, setEmailSettings] = useState({
-    emailProvider: "smtp",
-    smtpHost: "smtp.example.com",
-    smtpPort: "587",
-    smtpUsername: "user@example.com",
-    smtpPassword: "••••••••",
-    senderName: "NEXURA Store",
-    senderEmail: "noreply@nexura.com",
-    enableOrderConfirmation: true,
+  const [ emailSettings, setEmailSettings ] = useState({
+    emailProvider:              "smtp",
+    smtpHost:                   "smtp.example.com",
+    smtpPort:                   "587",
+    smtpUsername:               "user@example.com",
+    smtpPassword:               "••••••••",
+    senderName:                 "NEXURA Store",
+    senderEmail:                "noreply@nexura.com",
+    enableOrderConfirmation:    true,
     enableShippingConfirmation: true,
     enableCustomerRegistration: true
   })
   
   // User settings state
-  const [userSettings, setUserSettings] = useState({
-    enableUserRegistration: true,
+  const [ userSettings, setUserSettings ] = useState({
+    enableUserRegistration:   true,
     requireEmailVerification: true,
-    enableGuestCheckout: true,
-    passwordMinLength: "8"
+    enableGuestCheckout:      true,
+    passwordMinLength:        "8"
   })
   
   // Appearance settings state
-  const [appearanceSettings, setAppearanceSettings] = useState({
-    primaryColor: "#3b82f6",
+  const [ appearanceSettings, setAppearanceSettings ] = useState({
+    primaryColor:   "#3b82f6",
     secondaryColor: "#10b981",
-    accentColor: "#f59e0b",
+    accentColor:    "#f59e0b",
     enableDarkMode: true,
-    defaultTheme: "system"
+    defaultTheme:   "system"
   })
   
   // Handle input change for general settings
@@ -159,7 +159,7 @@ export default function SettingsPage() {
       setIsSaving(false)
       
       toast({
-        title: "Settings Saved",
+        title:       "Settings Saved",
         description: "Your settings have been saved successfully."
       })
     }, 1000)
@@ -275,7 +275,7 @@ export default function SettingsPage() {
                       <Select 
                         disabled={true}
                         value={generalSettings.storeCurrency} 
-                        onValueChange={(value) => handleGeneralSelectChange("storeCurrency", value)}
+                        onValueChange={value => handleGeneralSelectChange("storeCurrency", value)}
                       >
                         <SelectTrigger id="storeCurrency">
                           <SelectValue placeholder="Select currency" />
@@ -294,7 +294,7 @@ export default function SettingsPage() {
                       <Label htmlFor="storeTimeZone">Time Zone</Label>
                       <Select 
                         value={generalSettings.storeTimeZone} 
-                        onValueChange={(value) => handleGeneralSelectChange("storeTimeZone", value)}
+                        onValueChange={value => handleGeneralSelectChange("storeTimeZone", value)}
                       >
                         <SelectTrigger id="storeTimeZone">
                           <SelectValue placeholder="Select time zone" />

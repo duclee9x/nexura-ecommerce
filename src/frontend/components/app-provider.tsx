@@ -31,8 +31,8 @@ export function AppProvider({ children }: AppProviderProps) {
       queries: {
         staleTime: 60 * 1000,
       }, mutations: {
-        retry: 1,
-        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+        retry:      1,
+        retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
       },
     },
   }))

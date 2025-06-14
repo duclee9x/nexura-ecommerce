@@ -1,8 +1,7 @@
-import { PrismaClient } from '@nexura/product-service/src/db/prisma-client'
+import { PrismaClient, type JsonValue } from '@nexura/product-service/src/db/prisma-client'
 import { handleError } from '@nexura/common/utils'
 import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js'
 import { CreateProductRequest, CreateProductResponse } from '@nexura/grpc_gateway/protos'
-
 const prisma = new PrismaClient()
 
 export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, CreateProductResponse>, callback: sendUnaryData<CreateProductResponse>) => {
@@ -17,7 +16,7 @@ export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, 
     if (!productData.slug) throw new Error("Product slug is required")
     if (!productData.sku) throw new Error("Product SKU is required")
     if (!productData.variants?.length) throw new Error("At least one variant is required")
-
+    if (!productData.variants.every(variant => variant.name)) throw new Error("Variant name is required")
     // Check for existing SKUs first
     const variantSkus = productData.variants?.map(variant => variant.sku) || []
     const existingVariants = await prisma.productVariant.findMany({
@@ -35,33 +34,33 @@ export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, 
       throw new Error(`The following SKUs already exist: ${existingVariants.map(v => v.sku).join(', ')}`)
     }
 
-    const images = productData.images?.map((image) => ({
-      url: image.url,
-      isMain: image.isMain,
+    const images = productData.images?.map(image => ({
+      url:      image.url,
+      isMain:   image.isMain,
       blurhash: image.blurhash,
     })) || []
 
-    const attributes = productData.attributes?.map((attribute) => ({
-      name: attribute.name,
-      required: attribute.required,
-      visible: attribute.visible,
-      values: attribute.values,
-      variantable: attribute.variantable,
-      filterable: attribute.filterable,
-      searchable: attribute.searchable,
+    const attributes = productData.attributes?.map(attribute => ({
+      name:         attribute.name,
+      required:     attribute.required,
+      visible:      attribute.visible,
+      values:       attribute.values,
+      variantable:  attribute.variantable,
+      filterable:   attribute.filterable,
+      searchable:   attribute.searchable,
       displayOrder: attribute.displayOrder,
     })) || []
 
-    const variants = productData.variants?.map((variant) => ({
-      name: variant.name,
-      sku: variant.sku,
-      price: variant.price,
+    const variants = productData.variants?.map(variant => ({
+      name:              variant.name,
+      sku:               variant.sku,
+      price:             variant.price,
       lowStockThreshold: variant.lowStockThreshold,
-      imageIds: variant.imageIds || [],
-      attributes: {
-        create: variant.attributes?.map((attr) => ({
-          name: attr.name,
-          value: attr.value,
+      imageIds:          variant.imageIds || [],
+      attributes:        {
+        create: variant.attributes?.map(attr => ({
+          name:       attr.name,
+          value:      attr.value,
           extraValue: attr.extraValue || "",
         })) || [],
       },
@@ -99,15 +98,15 @@ export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, 
       // Create the product
       const product = await tx.product.create({
         data: {
-          name: productData.name,
-          slug: productData.slug,
+          name:        productData.name,
+          slug:        productData.slug,
           description: productData.description,
-          costPrice: productData.costPrice,
-          basePrice: productData.basePrice,
-          sku: productData.sku,
-          barcode: productData.barcode,
-          categories: productData.categories,
-          images: {
+          costPrice:   productData.costPrice,
+          basePrice:   productData.basePrice,
+          sku:         productData.sku,
+          barcode:     productData.barcode,
+          categories:  productData.categories,
+          images:      {
             create: images,
           },
           attributes: {
@@ -117,60 +116,60 @@ export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, 
             create: variants,
           },
           productTags: {
-            create: productData.productTags?.map(productTag => {
+            create: productData.productTags?.map((productTag) => {
               if (!productTag?.tag?.name) {
                 throw new Error("Tag name is required");
               }
               return {
                 tag: {
                   connectOrCreate: {
-                    where: { name: productTag.tag.name },
+                    where:  { name: productTag.tag.name },
                     create: { name: productTag.tag.name }
                   }
                 }
               };
             }) || []
           },
-          brandId: productData.brandId,
-          featured: productData.featured,
-          status: productData.status,
+          brandId:    productData.brandId,
+          featured:   productData.featured,
+          status:     productData.status,
           dimensions: productData.dimensions ? {
             create: {
               length: productData.dimensions.length,
-              width: productData.dimensions.width,
+              width:  productData.dimensions.width,
               height: productData.dimensions.height,
               weight: productData.dimensions.weight,
             }
           } : undefined,
           seo: productData.seo ? {
             create: {
-              title: productData.seo.title,
+              title:       productData.seo.title,
               description: productData.seo.description,
-              keywords: productData.seo.keywords,
+              keywords:    productData.seo.keywords,
             }
           } : undefined,
-          taxable: productData.taxable,
+          taxable:   productData.taxable,
           shippable: productData.shippable,
         },
         include: {
-          images: true,
+          images:     true,
           attributes: true,
-          variants: {
+          variants:   {
             include: {
               attributes: true,
-              warehouse: true,
-              stock: true
+              warehouse:  true,
+              stock:      true
             }
           },
           sizeCharts: {
             include: {
-              images: true,
+              images:  true,
               columns: true,
-              rows: true
+              rows:    true
             }
           },
-          dimensions: true,
-          seo: true,
+          dimensions:  true,
+          seo:         true,
           productTags: {
             include: {
               tag: true
@@ -184,33 +183,33 @@ export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, 
         await tx.relatedProduct.createMany({
           data: productData.relatedProducts.map(relatedProduct => ({
             fromProductId: product.id,
-            toProductId: relatedProduct.id
+            toProductId:   relatedProduct.id
           }))
         })
       }
 
       // Fetch the created product with all relations
       const productWithRelations = await tx.product.findUnique({
-        where: { id: product.id },
+        where:   { id: product.id },
         include: {
-          images: true,
+          images:     true,
           attributes: true,
-          variants: {
+          variants:   {
             include: {
               attributes: true,
-              warehouse: true,
-              stock: true
+              warehouse:  true,
+              stock:      true
             }
           },
           sizeCharts: {
             include: {
-              images: true,
+              images:  true,
               columns: true,
-              rows: true
+              rows:    true
             }
           },
-          dimensions: true,
-          seo: true,
+          dimensions:  true,
+          seo:         true,
           productTags: {
             include: {
               tag: true
@@ -220,24 +219,24 @@ export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, 
             include: {
               toProduct: {
                 include: {
-                  images: true,
+                  images:     true,
                   attributes: true,
-                  variants: {
+                  variants:   {
                     include: {
                       attributes: true,
-                      warehouse: true,
-                      stock: true
+                      warehouse:  true,
+                      stock:      true
                     }
                   },
                   sizeCharts: {
                     include: {
-                      images: true,
+                      images:  true,
                       columns: true,
-                      rows: true
+                      rows:    true
                     }
                   },
-                  dimensions: true,
-                  seo: true,
+                  dimensions:  true,
+                  seo:         true,
                   productTags: {
                     include: {
                       tag: true
@@ -259,73 +258,73 @@ export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, 
 
     const response: CreateProductResponse = {
       product: {
-        id: result.id,
-        name: result.name,
-        slug: result.slug,
+        id:          result.id,
+        name:        result.name || "",
+        slug:        result.slug,
         description: result.description,
-        costPrice: result.costPrice,
-        basePrice: result.basePrice,
-        sku: result.sku,
-        barcode: result.barcode || "",
-        categories: result.categories,
-        productTags: result.productTags.map((pt) => ({
-          id: pt.id,
+        costPrice:   result.costPrice,
+        basePrice:   result.basePrice,
+        sku:         result.sku,
+        barcode:     result.barcode || "",
+        categories:  result.categories,
+        productTags: result.productTags.map(pt => ({
+          id:  pt.id,
           tag: {
-            id: pt.tag.id,
-            name: pt.tag.name,
+            id:        pt.tag.id,
+            name:      pt.tag.name,
             createdAt: pt.tag.createdAt.toISOString(),
             updatedAt: pt.tag.updatedAt.toISOString()
           },
           productId: result.id
         })),
-        images: result.images.map((img) => ({
-          id: img.id,
-          url: img.url,
-          isMain: img.isMain,
+        images: result.images.map(img => ({
+          id:       img.id,
+          url:      img.url,
+          isMain:   img.isMain,
           blurhash: img.blurhash,
         })),
         relatedProducts: result.relatedTo.map(rp => ({
-          id: rp.toProduct.id,
-          name: rp.toProduct.name,
-          slug: rp.toProduct.slug,
+          id:          rp.toProduct.id,
+          name:        rp.toProduct.name || "",
+          slug:        rp.toProduct.slug,
           description: rp.toProduct.description,
-          costPrice: rp.toProduct.costPrice,
-          basePrice: rp.toProduct.basePrice,
-          sku: rp.toProduct.sku,
-          barcode: rp.toProduct.barcode || "",
-          categories: rp.toProduct.categories,
-          images: rp.toProduct.images.map(img => ({
-            id: img.id,
-            url: img.url,
-            isMain: img.isMain,
+          costPrice:   rp.toProduct.costPrice,
+          basePrice:   rp.toProduct.basePrice,
+          sku:         rp.toProduct.sku,
+          barcode:     rp.toProduct.barcode || "",
+          categories:  rp.toProduct.categories,
+          images:      rp.toProduct.images.map(img => ({
+            id:       img.id,
+            url:      img.url,
+            isMain:   img.isMain,
             blurhash: img.blurhash,
           })),
           attributes: rp.toProduct.attributes.map(attr => ({
-            id: attr.id,
-            name: attr.name,
-            required: attr.required,
-            visible: attr.visible,
-            values: attr.values,
-            variantable: attr.variantable,
-            filterable: attr.filterable,
-            searchable: attr.searchable,
+            id:           attr.id,
+            name:         attr.name,
+            required:     attr.required,
+            visible:      attr.visible,
+            values:       attr.values,
+            variantable:  attr.variantable,
+            filterable:   attr.filterable,
+            searchable:   attr.searchable,
             displayOrder: attr.displayOrder,
-            productId: rp.toProduct.id,
+            productId:    rp.toProduct.id,
           })),
           variants: rp.toProduct.variants.map(variant => ({
-            id: variant.id,
-            sku: variant.sku,
-            name: variant.name,
-            price: variant.price,
+            id:                variant.id,
+            sku:               variant.sku,
+            name:              variant.name || "",
+            price:             variant.price,
             lowStockThreshold: variant.lowStockThreshold,
-            warehouseId: variant.warehouseId,
-            imageIds: variant.imageIds,
-            attributes: variant.attributes.map(attr => ({
-              id: attr.id,
-              name: attr.name,
-              value: attr.value,
+            warehouseId:       variant.warehouseId,
+            imageIds:          variant.imageIds,
+            attributes:        variant.attributes.map(attr => ({
+              id:         attr.id,
+              name:       attr.name,
+              value:      attr.value,
               extraValue: attr.extraValue || "",
-              variantId: variant.id,
+              variantId:  variant.id,
             })),
             stock: variant.stock ? {
               quantity: variant.stock.quantity,
@@ -336,123 +335,123 @@ export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, 
             }
           })),
           productTags: rp.toProduct.productTags.map(pt => ({
-            id: pt.id,
+            id:  pt.id,
             tag: {
-              id: pt.tag.id,
-              name: pt.tag.name,
+              id:        pt.tag.id,
+              name:      pt.tag.name,
               createdAt: pt.tag.createdAt.toISOString(),
               updatedAt: pt.tag.updatedAt.toISOString()
             },
             productId: rp.toProduct.id
           })),
           sizeCharts: rp.toProduct.sizeCharts.map(sizeChart => ({
-            id: sizeChart.id,
-            name: sizeChart.name,
+            id:          sizeChart.id,
+            name:        sizeChart.name,
             description: sizeChart.description || "",
-            category: sizeChart.category,
-            productId: sizeChart.productId,
-            images: sizeChart.images.map(img => ({
-              id: img.id,
-              url: img.url,
-              name: img.name,
+            category:    sizeChart.category,
+            productId:   sizeChart.productId,
+            images:      sizeChart.images.map(img => ({
+              id:          img.id,
+              url:         img.url,
+              name:        img.name,
               sizeChartId: img.sizeChartId,
-              createdAt: img.createdAt.toISOString(),
+              createdAt:   img.createdAt.toISOString(),
             })),
             createdAt: sizeChart.createdAt.toISOString(),
             updatedAt: sizeChart.updatedAt.toISOString(),
-            columns: sizeChart.columns.map(column => ({
-              id: column.id,
-              name: column.name,
-              type: column.type,
-              unit: column.unit || "",
+            columns:   sizeChart.columns.map(column => ({
+              id:          column.id,
+              name:        column.name,
+              type:        column.type,
+              unit:        column.unit || "",
               sizeChartId: column.sizeChartId,
-              createdAt: column.createdAt.toISOString(),
+              createdAt:   column.createdAt.toISOString(),
             })),
             rows: sizeChart.rows.map(row => ({
-              id: row.id,
-              name: row.name,
-              cells: row.values as any,
+              id:          row.id,
+              name:        row.name,
+              cells:       row.values,
               sizeChartId: row.sizeChartId,
-              createdAt: row.createdAt.toISOString(),
+              createdAt:   row.createdAt.toISOString(),
             })),
           })),
           relatedProducts: [], // Related products of related products are not included
-          brandId: rp.toProduct.brandId || "",
-          featured: rp.toProduct.featured,
-          status: rp.toProduct.status,
-          dimensions: rp.toProduct.dimensions ? {
+          brandId:         rp.toProduct.brandId || "",
+          featured:        rp.toProduct.featured,
+          status:          rp.toProduct.status,
+          dimensions:      rp.toProduct.dimensions ? {
             length: rp.toProduct.dimensions.length,
-            width: rp.toProduct.dimensions.width,
+            width:  rp.toProduct.dimensions.width,
             height: rp.toProduct.dimensions.height,
             weight: rp.toProduct.dimensions.weight,
           } : undefined,
           seo: rp.toProduct.seo ? {
-            title: rp.toProduct.seo.title,
+            title:       rp.toProduct.seo.title,
             description: rp.toProduct.seo.description,
-            keywords: rp.toProduct.seo.keywords,
+            keywords:    rp.toProduct.seo.keywords,
           } : undefined,
-          taxable: rp.toProduct.taxable,
+          taxable:   rp.toProduct.taxable,
           shippable: rp.toProduct.shippable,
           createdAt: rp.toProduct.createdAt.toISOString(),
           updatedAt: rp.toProduct.updatedAt.toISOString(),
         })),
-        sizeCharts: result.sizeCharts.map((sizeChart) => ({
-          id: sizeChart.id,
-          name: sizeChart.name,
+        sizeCharts: result.sizeCharts.map(sizeChart => ({
+          id:          sizeChart.id,
+          name:        sizeChart.name,
           description: sizeChart.description || "",
-          category: sizeChart.category,
-          productId: sizeChart.productId,
-          images: sizeChart.images.map((img) => ({
-            id: img.id,
-            url: img.url,
-            name: img.name,
+          category:    sizeChart.category,
+          productId:   sizeChart.productId,
+          images:      sizeChart.images.map(img => ({
+            id:          img.id,
+            url:         img.url,
+            name:        img.name,
             sizeChartId: img.sizeChartId,
-            createdAt: img.createdAt.toISOString(),
+            createdAt:   img.createdAt.toISOString(),
           })),
           createdAt: sizeChart.createdAt.toISOString(),
           updatedAt: sizeChart.updatedAt.toISOString(),
-          columns: sizeChart.columns.map((column) => ({
-            id: column.id,
-            name: column.name,
-            type: column.type,
-            unit: column.unit || "",
+          columns:   sizeChart.columns.map(column => ({
+            id:          column.id,
+            name:        column.name,
+            type:        column.type,
+            unit:        column.unit || "",
             sizeChartId: column.sizeChartId,
-            createdAt: column.createdAt.toISOString(),
+            createdAt:   column.createdAt.toISOString(),
           })),
-          rows: sizeChart.rows.map((row) => ({
-            id: row.id,
-            name: row.name,
-            cells: row.values as any,
+          rows: sizeChart.rows.map(row => ({
+            id:          row.id,
+            name:        row.name,
+            cells:       row.values as JsonValue[],
             sizeChartId: row.sizeChartId,
-            createdAt: row.createdAt.toISOString(),
+            createdAt:   row.createdAt.toISOString(),
           })),
         })),
-        attributes: result.attributes.map((attr) => ({
-          id: attr.id,
-          name: attr.name,
-          required: attr.required,
-          visible: attr.visible,
-          values: attr.values,
-          variantable: attr.variantable,
-          filterable: attr.filterable,
-          searchable: attr.searchable,
+        attributes: result.attributes.map(attr => ({
+          id:           attr.id,
+          name:         attr.name,
+          required:     attr.required,
+          visible:      attr.visible,
+          values:       attr.values,
+          variantable:  attr.variantable,
+          filterable:   attr.filterable,
+          searchable:   attr.searchable,
           displayOrder: attr.displayOrder,
-          productId: result.id,
+          productId:    result.id,
         })),
-        variants: result.variants.map((variant) => ({
-          id: variant.id,
-          sku: variant.sku,
-          name: variant.name,
-          price: variant.price,
+        variants: result.variants.map(variant => ({
+          id:                variant.id,
+          sku:               variant.sku,
+          name:              variant.name,
+          price:             variant.price,
           lowStockThreshold: variant.lowStockThreshold,
-          warehouseId: variant.warehouseId,
-          imageIds: variant.imageIds,
-          attributes: variant.attributes.map((attr) => ({
-            id: attr.id,
-            name: attr.name,
-            value: attr.value,
+          warehouseId:       variant.warehouseId,
+          imageIds:          variant.imageIds,
+          attributes:        variant.attributes.map(attr => ({
+            id:         attr.id,
+            name:       attr.name,
+            value:      attr.value,
             extraValue: attr.extraValue || "",
-            variantId: variant.id,
+            variantId:  variant.id,
           })),
           stock: variant.stock ? {
             quantity: variant.stock.quantity,
@@ -462,21 +461,21 @@ export const createProduct = async (call: ServerUnaryCall<CreateProductRequest, 
             reserved: 0
           }
         })),
-        brandId: result.brandId || "",
-        featured: result.featured,
-        status: result.status,
+        brandId:    result.brandId || "",
+        featured:   result.featured,
+        status:     result.status,
         dimensions: result.dimensions ? {
           length: result.dimensions.length,
-          width: result.dimensions.width,
+          width:  result.dimensions.width,
           height: result.dimensions.height,
           weight: result.dimensions.weight,
         } : undefined,
         seo: result.seo ? {
-          title: result.seo.title,
+          title:       result.seo.title,
           description: result.seo.description,
-          keywords: result.seo.keywords,
+          keywords:    result.seo.keywords,
         } : undefined,
-        taxable: result.taxable,
+        taxable:   result.taxable,
         shippable: result.shippable,
         createdAt: result.createdAt.toISOString(),
         updatedAt: result.updatedAt.toISOString(),

@@ -15,103 +15,103 @@ import { Plus, Trash, ImageIcon, Table2, Save, X, FileUp, Edit } from "lucide-re
 import { toast } from "@/hooks/use-toast"
 
 export interface SizeTableColumn {
-  id: string
-  name: string
-  type: "text" | "number" | "measurement"
+  id:    string
+  name:  string
+  type:  "text" | "number" | "measurement"
   unit?: string
 }
 
 export interface SizeTableRow {
-  id: string
-  name: string
+  id:     string
+  name:   string
   values: { [columnId: string]: string }
 }
 
 export interface SizeChart {
-  id: string
-  name: string
-  category: string
+  id:           string
+  name:         string
+  category:     string
   description?: string
-  columns: SizeTableColumn[]
-  rows: SizeTableRow[]
+  columns:      SizeTableColumn[]
+  rows:         SizeTableRow[]
   images: {
-    id: string
-    url: string
+    id:   string
+    url:  string
     name: string
   }[]
 }
 
 interface SizeInstructionEditorProps {
-  sizeCharts: SizeChart[]
-  onChange: (sizeCharts: SizeChart[]) => void
+  sizeCharts:        SizeChart[]
+  onChange:          (sizeCharts: SizeChart[]) => void
   productCategories: string[]
 }
 
 export function SizeInstructionEditor({ sizeCharts, onChange, productCategories }: SizeInstructionEditorProps) {
-  const [activeTab, setActiveTab] = useState("table")
-  const [editingChartId, setEditingChartId] = useState<string | null>(null)
-  const [isAddingChart, setIsAddingChart] = useState(false)
-  const [newColumn, setNewColumn] = useState<Omit<SizeTableColumn, "id">>({
+  const [ activeTab, setActiveTab ] = useState("table")
+  const [ editingChartId, setEditingChartId ] = useState<string | null>(null)
+  const [ isAddingChart, setIsAddingChart ] = useState(false)
+  const [ newColumn, setNewColumn ] = useState<Omit<SizeTableColumn, "id">>({
     name: "",
     type: "text",
   })
-  const [newRow, setNewRow] = useState<{ name: string }>({ name: "" })
+  const [ newRow, setNewRow ] = useState<{ name: string }>({ name: "" })
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Get the current chart being edited
   const currentChart = editingChartId
-    ? sizeCharts.find((chart) => chart.id === editingChartId) || createEmptyChart()
+    ? sizeCharts.find(chart => chart.id === editingChartId) || createEmptyChart()
     : createEmptyChart()
 
   function createEmptyChart(): SizeChart {
     return {
-      id: `size-chart-${Date.now()}`,
-      name: "",
-      category: "",
+      id:          `size-chart-${Date.now()}`,
+      name:        "",
+      category:    "",
       description: "",
-      columns: [],
-      rows: [],
-      images: [],
+      columns:     [],
+      rows:        [],
+      images:      [],
     }
   }
 
   const handleAddChart = () => {
     if (!currentChart.name) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: "Please provide a name for the size chart",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
 
     if (!currentChart.category) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: "Please select a category for the size chart",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
 
     const updatedCharts = editingChartId
-      ? sizeCharts.map((chart) => (chart.id === editingChartId ? currentChart : chart))
-      : [...sizeCharts, currentChart]
+      ? sizeCharts.map(chart => (chart.id === editingChartId ? currentChart : chart))
+      : [ ...sizeCharts, currentChart ]
 
     onChange(updatedCharts)
     setEditingChartId(null)
     setIsAddingChart(false)
     toast({
-      title: editingChartId ? "Size Chart Updated" : "Size Chart Added",
+      title:       editingChartId ? "Size Chart Updated" : "Size Chart Added",
       description: `${currentChart.name} has been ${editingChartId ? "updated" : "added"} successfully.`,
     })
   }
 
   const handleDeleteChart = (chartId: string) => {
-    const updatedCharts = sizeCharts.filter((chart) => chart.id !== chartId)
+    const updatedCharts = sizeCharts.filter(chart => chart.id !== chartId)
     onChange(updatedCharts)
     toast({
-      title: "Size Chart Deleted",
+      title:       "Size Chart Deleted",
       description: "The size chart has been removed.",
     })
   }
@@ -125,9 +125,9 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
   const handleAddColumn = () => {
     if (!newColumn.name) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: "Column name is required",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
@@ -138,13 +138,13 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
       columns: [
         ...currentChart.columns,
         {
-          id: columnId,
+          id:   columnId,
           name: newColumn.name,
           type: newColumn.type,
           unit: newColumn.type === "measurement" ? newColumn.unit || "cm" : undefined,
         },
       ],
-      rows: currentChart.rows.map((row) => ({
+      rows: currentChart.rows.map(row => ({
         ...row,
         values: {
           ...row.values,
@@ -155,7 +155,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
 
     setEditingChartId(updatedChart.id)
     setNewColumn({ name: "", type: "text" })
-    const updatedCharts = sizeCharts.map((chart) => 
+    const updatedCharts = sizeCharts.map(chart => 
       chart.id === updatedChart.id ? updatedChart : chart
     )
     onChange(updatedCharts)
@@ -164,8 +164,8 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
   const handleDeleteColumn = (columnId: string) => {
     const updatedChart = {
       ...currentChart,
-      columns: currentChart.columns.filter((col) => col.id !== columnId),
-      rows: currentChart.rows.map((row) => {
+      columns: currentChart.columns.filter(col => col.id !== columnId),
+      rows:    currentChart.rows.map((row) => {
         const { [columnId]: _, ...restValues } = row.values
         return {
           ...row,
@@ -175,7 +175,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
     }
 
     setEditingChartId(updatedChart.id)
-    const updatedCharts = sizeCharts.map((chart) => 
+    const updatedCharts = sizeCharts.map(chart => 
       chart.id === updatedChart.id ? updatedChart : chart
     )
     onChange(updatedCharts)
@@ -184,9 +184,9 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
   const handleAddRow = () => {
     if (!newRow.name) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: "Row name is required",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
@@ -201,8 +201,8 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
       rows: [
         ...currentChart.rows,
         {
-          id: `row-${Date.now()}`,
-          name: newRow.name,
+          id:     `row-${Date.now()}`,
+          name:   newRow.name,
           values: rowValues,
         },
       ],
@@ -210,7 +210,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
 
     setEditingChartId(updatedChart.id)
     setNewRow({ name: "" })
-    const updatedCharts = sizeCharts.map((chart) => 
+    const updatedCharts = sizeCharts.map(chart => 
       chart.id === updatedChart.id ? updatedChart : chart
     )
     onChange(updatedCharts)
@@ -219,11 +219,11 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
   const handleDeleteRow = (rowId: string) => {
     const updatedChart = {
       ...currentChart,
-      rows: currentChart.rows.filter((row) => row.id !== rowId),
+      rows: currentChart.rows.filter(row => row.id !== rowId),
     }
 
     setEditingChartId(updatedChart.id)
-    const updatedCharts = sizeCharts.map((chart) => 
+    const updatedCharts = sizeCharts.map(chart => 
       chart.id === updatedChart.id ? updatedChart : chart
     )
     onChange(updatedCharts)
@@ -247,7 +247,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
     }
 
     setEditingChartId(updatedChart.id)
-    const updatedCharts = sizeCharts.map((chart) => 
+    const updatedCharts = sizeCharts.map(chart => 
       chart.id === updatedChart.id ? updatedChart : chart
     )
     onChange(updatedCharts)
@@ -259,7 +259,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
       name,
     }
     setEditingChartId(updatedChart.id)
-    const updatedCharts = sizeCharts.map((chart) => 
+    const updatedCharts = sizeCharts.map(chart => 
       chart.id === updatedChart.id ? updatedChart : chart
     )
     onChange(updatedCharts)
@@ -271,7 +271,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
       category,
     }
     setEditingChartId(updatedChart.id)
-    const updatedCharts = sizeCharts.map((chart) => 
+    const updatedCharts = sizeCharts.map(chart => 
       chart.id === updatedChart.id ? updatedChart : chart
     )
     onChange(updatedCharts)
@@ -283,7 +283,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
       description,
     }
     setEditingChartId(updatedChart.id)
-    const updatedCharts = sizeCharts.map((chart) => 
+    const updatedCharts = sizeCharts.map(chart => 
       chart.id === updatedChart.id ? updatedChart : chart
     )
     onChange(updatedCharts)
@@ -299,19 +299,19 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
       const file = files[i]
       const imageUrl = URL.createObjectURL(file)
       newImages.push({
-        id: `img-${Date.now()}-${i}`,
-        url: imageUrl,
+        id:   `img-${Date.now()}-${i}`,
+        url:  imageUrl,
         name: file.name,
       })
     }
 
     const updatedChart = {
       ...currentChart,
-      images: [...currentChart.images, ...newImages],
+      images: [ ...currentChart.images, ...newImages ],
     }
 
     setEditingChartId(updatedChart.id)
-    const updatedCharts = sizeCharts.map((chart) => 
+    const updatedCharts = sizeCharts.map(chart => 
       chart.id === updatedChart.id ? updatedChart : chart
     )
     onChange(updatedCharts)
@@ -321,7 +321,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
     }
 
     toast({
-      title: "Images Added",
+      title:       "Images Added",
       description: `${newImages.length} image(s) have been added to the size chart.`,
     })
   }
@@ -329,11 +329,11 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
   const handleRemoveImage = (imageId: string) => {
     const updatedChart = {
       ...currentChart,
-      images: currentChart.images.filter((img) => img.id !== imageId),
+      images: currentChart.images.filter(img => img.id !== imageId),
     }
 
     setEditingChartId(updatedChart.id)
-    const updatedCharts = sizeCharts.map((chart) => 
+    const updatedCharts = sizeCharts.map(chart => 
       chart.id === updatedChart.id ? updatedChart : chart
     )
     onChange(updatedCharts)
@@ -350,7 +350,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {sizeCharts.map((chart) => (
+        {sizeCharts.map(chart => (
           <Card key={chart.id} className="overflow-hidden">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-center">
@@ -401,7 +401,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
           <Input
             id="chart-name"
             value={currentChart.name}
-            onChange={(e) => handleChartNameChange(e.target.value)}
+            onChange={e => handleChartNameChange(e.target.value)}
             placeholder="e.g., Men's Shoe Sizes"
           />
         </div>
@@ -415,7 +415,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
               <SelectValue placeholder="Select category" />
             </SelectTrigger>
             <SelectContent>
-              {productCategories.map((category) => (
+              {productCategories.map(category => (
                 <SelectItem key={category} value={category}>
                   {category}
                 </SelectItem>
@@ -429,7 +429,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
           <Input
             id="chart-description"
             value={currentChart.description || ""}
-            onChange={(e) => handleChartDescriptionChange(e.target.value)}
+            onChange={e => handleChartDescriptionChange(e.target.value)}
             placeholder="Optional description"
           />
         </div>
@@ -444,7 +444,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
             <Select
               value={newColumn.type}
               onValueChange={(value: "text" | "number" | "measurement") =>
-                setNewColumn((prev) => ({ ...prev, type: value }))
+                setNewColumn(prev => ({ ...prev, type: value }))
               }
             >
               <SelectTrigger className="w-[140px]">
@@ -460,7 +460,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
             {newColumn.type === "measurement" && (
               <Select
                 value={newColumn.unit || "cm"}
-                onValueChange={(value) => setNewColumn((prev) => ({ ...prev, unit: value }))}
+                onValueChange={value => setNewColumn(prev => ({ ...prev, unit: value }))}
               >
                 <SelectTrigger className="w-[80px]">
                   <SelectValue placeholder="Unit" />
@@ -476,7 +476,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
             <div className="flex items-center gap-2">
               <Input
                 value={newColumn.name}
-                onChange={(e) => setNewColumn((prev) => ({ ...prev, name: e.target.value }))}
+                onChange={e => setNewColumn(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="Column name"
                 className="w-[180px]"
               />
@@ -494,7 +494,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[200px]">Size</TableHead>
-                  {currentChart.columns.map((column) => (
+                  {currentChart.columns.map(column => (
                     <TableHead key={column.id}>
                       <div className="flex justify-between items-center">
                         <span>
@@ -518,14 +518,14 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {currentChart.rows.map((row) => (
+                {currentChart.rows.map(row => (
                   <TableRow key={row.id}>
                     <TableCell className="font-medium">{row.name}</TableCell>
-                    {currentChart.columns.map((column) => (
+                    {currentChart.columns.map(column => (
                       <TableCell key={column.id}>
                         <Input
                           value={row.values[column.id] || ""}
-                          onChange={(e) => handleCellChange(row.id, column.id, e.target.value)}
+                          onChange={e => handleCellChange(row.id, column.id, e.target.value)}
                           type={column.type === "number" || column.type === "measurement" ? "number" : "text"}
                           step={column.type === "measurement" ? "0.1" : undefined}
                           className="h-8"
@@ -549,7 +549,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
                     <div className="flex items-center gap-2 py-1">
                       <Input
                         value={newRow.name}
-                        onChange={(e) => setNewRow({ name: e.target.value })}
+                        onChange={e => setNewRow({ name: e.target.value })}
                         placeholder="New size name (e.g., Small, 42, XL)"
                         className="w-[200px]"
                       />
@@ -592,7 +592,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
 
       {currentChart.images.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {currentChart.images.map((image) => (
+          {currentChart.images.map(image => (
             <div key={image.id} className="border rounded-md overflow-hidden">
               <div className="relative aspect-video">
                 <img src={image.url || "/placeholder.svg"} alt={image.name} className="object-contain w-full h-full" />
@@ -641,7 +641,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
                 <thead>
                   <tr className="bg-muted">
                     <th className="border px-4 py-2 text-left">Size</th>
-                    {currentChart.columns.map((column) => (
+                    {currentChart.columns.map(column => (
                       <th key={column.id} className="border px-4 py-2 text-left">
                         {column.name}
                         {column.type === "measurement" && column.unit && (
@@ -652,10 +652,10 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
                   </tr>
                 </thead>
                 <tbody>
-                  {currentChart.rows.map((row) => (
+                  {currentChart.rows.map(row => (
                     <tr key={row.id}>
                       <td className="border px-4 py-2 font-medium">{row.name}</td>
-                      {currentChart.columns.map((column) => (
+                      {currentChart.columns.map(column => (
                         <td key={column.id} className="border px-4 py-2">
                           {row.values[column.id] || "-"}
                           {column.type === "measurement" && row.values[column.id] && column.unit && (
@@ -672,7 +672,7 @@ export function SizeInstructionEditor({ sizeCharts, onChange, productCategories 
 
           {currentChart.images.length > 0 && (
             <div className="space-y-4">
-              {currentChart.images.map((image) => (
+              {currentChart.images.map(image => (
                 <div key={image.id} className="border rounded-md overflow-hidden">
                   <img src={image.url || "/placeholder.svg"} alt={image.name} className="max-w-full h-auto" />
                 </div>

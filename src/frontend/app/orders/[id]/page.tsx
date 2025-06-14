@@ -30,8 +30,8 @@ const mapOrderStatus = (status: OrderStatus) => {
 }
 // Define types for the review state
 type ReviewState = {
-  ratings: Record<string, number>;
-  comments: Record<string, string>;
+  ratings:        Record<string, number>;
+  comments:       Record<string, string>;
   hoveredRatings: Record<string, number>;
 }
 
@@ -42,13 +42,13 @@ export default function OrderDetailsPage() {
   const { useGetOrder } = OrderHooks()
   const { formatPrice, formatDate } = useCurrency()
   const { data: order, isPending } = useGetOrder(id as string)
-  const [activeTab, setActiveTab] = useState("details")
-  const [reviewState, setReviewState] = useState<ReviewState>({
-    ratings: {},
-    comments: {},
+  const [ activeTab, setActiveTab ] = useState("details")
+  const [ reviewState, setReviewState ] = useState<ReviewState>({
+    ratings:        {},
+    comments:       {},
     hoveredRatings: {}
   })
-  const [submittingReview, setSubmittingReview] = useState(false)
+  const [ submittingReview, setSubmittingReview ] = useState(false)
 
   // Handle rating hover
   const handleRatingHover = (itemId: string, rating: number) => {
@@ -78,9 +78,9 @@ export default function OrderDetailsPage() {
   const handleSubmitReview = (itemId: string) => {
     if (!reviewState.ratings[itemId]) {
       toast({
-        title: "Rating Required",
+        title:       "Rating Required",
         description: "Please select a star rating for your review.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
@@ -90,7 +90,7 @@ export default function OrderDetailsPage() {
     // Simulate API call
     setTimeout(() => {
       toast({
-        title: "Review Submitted",
+        title:       "Review Submitted",
         description: "Thank you for your feedback!",
       })
       setSubmittingReview(false)
@@ -139,7 +139,9 @@ export default function OrderDetailsPage() {
                   </div>
 
                   <div className="space-y-8">
-                    {[1, 2, 3].map((i) => (
+                    {[
+                      1, 2, 3
+                    ].map(i => (
                       <div key={i} className="flex items-start gap-4">
                         <Skeleton className="w-12 h-12 rounded-full" />
                         <div className="space-y-2">
@@ -155,7 +157,7 @@ export default function OrderDetailsPage() {
                 <div className="border dark:border-gray-800 rounded-lg p-6">
                   <Skeleton className="h-8 w-32 mb-6" />
                   <div className="space-y-6">
-                    {[1, 2].map((i) => (
+                    {[ 1, 2 ].map(i => (
                       <div key={i} className="flex gap-4 pb-6 border-b dark:border-gray-800 last:border-0 last:pb-0">
                         <Skeleton className="w-20 h-20" />
                         <div className="flex-1">
@@ -179,7 +181,9 @@ export default function OrderDetailsPage() {
                 <div className="border dark:border-gray-800 rounded-lg p-6 space-y-6 sticky top-8">
                   <Skeleton className="h-8 w-32 mb-4" />
                   <div className="space-y-3">
-                    {[1, 2, 3].map((i) => (
+                    {[
+                      1, 2, 3
+                    ].map(i => (
                       <div key={i} className="flex justify-between">
                         <Skeleton className="h-4 w-20" />
                         <Skeleton className="h-4 w-16" />
@@ -252,13 +256,15 @@ export default function OrderDetailsPage() {
             <div>
               <label className="block text-sm font-medium mb-2">Your Rating</label>
               <div className="flex items-center">
-                {[1, 2, 3, 4, 5].map((star) => (
+                {[
+                  1, 2, 3, 4, 5
+                ].map(star => (
                   <Star
                     key={star}
                     className={`h-6 w-6 cursor-pointer transition-colors ${star <= (reviewState.hoveredRatings[item.id] || reviewState.ratings[item.id] || 0)
                       ? "text-yellow-400 fill-yellow-400"
                       : "text-gray-300 dark:text-gray-600"
-                      }`}
+                    }`}
                     onMouseEnter={() => handleRatingHover(item.id, star)}
                     onMouseLeave={() => handleRatingHover(item.id, 0)}
                     onClick={() => handleRatingClick(item.id, star)}
@@ -286,7 +292,7 @@ export default function OrderDetailsPage() {
                 placeholder="What did you like or dislike about this product? How was the quality? Would you recommend it to others?"
                 rows={4}
                 value={reviewState.comments[item.id] || ""}
-                onChange={(e) => handleCommentChange(item.id, e.target.value)}
+                onChange={e => handleCommentChange(item.id, e.target.value)}
               />
             </div>
 
@@ -360,9 +366,10 @@ export default function OrderDetailsPage() {
                         index === 0 
                           ? 'bg-primary' 
                           : index === order.statusHistory.length - 1 && order.status === history.status
-                          ? 'bg-primary'
-                          : 'bg-gray-200 dark:bg-gray-800'
-                      }`}>
+                            ? 'bg-primary'
+                            : 'bg-gray-200 dark:bg-gray-800'
+                      }`}
+                      >
                         {index === 0 ? (
                           <CheckCircle className="h-4 w-4 text-primary-foreground" />
                         ) : history.status === 'ORDER_SHIPPED' ? (
@@ -402,7 +409,7 @@ export default function OrderDetailsPage() {
                 <h2 className="text-xl font-bold mb-6">Order Items</h2>
 
                 <div className="space-y-6">
-                  {order.items.map((item) => (
+                  {order.items.map(item => (
                     <div
                       key={item.id}
                       className="flex gap-4 pb-6 border-b dark:border-gray-800 last:border-0 last:pb-0"
@@ -436,17 +443,17 @@ export default function OrderDetailsPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                            onClick={() => {
-                              setActiveTab("reviews")
-                              setTimeout(() => {
-                                document
-                                  .getElementById(`review-item-${item.id}`)
-                                  ?.scrollIntoView({ behavior: "smooth" })
-                              }, 100)
-                            }}
-                          >
-                            Review Product
-                          </Button>
+                              onClick={() => {
+                                setActiveTab("reviews")
+                                setTimeout(() => {
+                                  document
+                                    .getElementById(`review-item-${item.id}`)
+                                    ?.scrollIntoView({ behavior: "smooth" })
+                                }, 100)
+                              }}
+                            >
+                              Review Product
+                            </Button>
                           )}
                         </div>
                       </div>
@@ -548,7 +555,8 @@ export default function OrderDetailsPage() {
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
                     className="absolute inset-0"
-                  ></iframe>
+                  >
+                  </iframe>
                 </div>
 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
@@ -663,7 +671,7 @@ export default function OrderDetailsPage() {
                 decisions.
               </p>
 
-              <div className="space-y-8">{order.items.map((item) => renderReviewForm(item))}</div>
+              <div className="space-y-8">{order.items.map(item => renderReviewForm(item))}</div>
             </div>
           </div>
         </TabsContent>

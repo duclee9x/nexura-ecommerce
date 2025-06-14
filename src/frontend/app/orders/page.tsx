@@ -32,7 +32,7 @@ function OrderItemSkeleton() {
         </div>
       </div>
       <div className="flex flex-wrap gap-4">
-        {[1, 2].map((i) => (
+        {[ 1, 2 ].map(i => (
           <div key={i} className="flex items-center gap-3">
             <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
             <div className="space-y-2">
@@ -145,7 +145,7 @@ function OrderItem({ order }: { order: Order }) {
       </div>
 
       <div className="flex flex-wrap gap-4">
-        {order.items.map((item) => (
+        {order.items.map(item => (
           <div key={item.variantId} className="flex items-center gap-3">
             <div className="relative w-16 h-16 border dark:border-gray-800">
               <Image src={item.image || "/placeholder.svg"} alt={item.productName} fill className="object-cover" />
@@ -172,9 +172,9 @@ function OrderItem({ order }: { order: Order }) {
 
 export default function OrdersPage() {
   const router = useRouter()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState<OrderStatus | "all">("all")
-  const [timeFilter, setTimeFilter] = useState("all")
+  const [ searchQuery, setSearchQuery ] = useState("")
+  const [ statusFilter, setStatusFilter ] = useState<OrderStatus | "all">("all")
+  const [ timeFilter, setTimeFilter ] = useState("all")
   const { user } = useSession()
   const { useListOrders } = OrderHooks()
   const { data: orders, isLoading, error, refetch } = useListOrders(user?.id || "")
@@ -230,7 +230,9 @@ export default function OrdersPage() {
 
         {/* Loading Orders */}
         <div className="space-y-6">
-          {[1, 2, 3].map((i) => (
+          {[
+            1, 2, 3
+          ].map(i => (
             <OrderItemSkeleton key={i} />
           ))}
         </div>
@@ -276,12 +278,12 @@ export default function OrdersPage() {
             placeholder="Search by order number"
             className="pl-9"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
           />
         </div>
 
         <div className="flex gap-4">
-          <Select value={statusFilter.toString()} onValueChange={(value) => setStatusFilter(value === "all" ? "all" : value as OrderStatus)}>
+          <Select value={statusFilter.toString()} onValueChange={value => setStatusFilter(value === "all" ? "all" : value as OrderStatus)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>

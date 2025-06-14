@@ -146,22 +146,22 @@ export default function AboutPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {[
                 {
-                  name: "Alex Morgan",
+                  name:  "Alex Morgan",
                   title: "Founder & CEO",
                   image: "/placeholder.svg?height=300&width=300&text=Alex",
                 },
                 {
-                  name: "Jamie Chen",
+                  name:  "Jamie Chen",
                   title: "Head of Design",
                   image: "/placeholder.svg?height=300&width=300&text=Jamie",
                 },
                 {
-                  name: "Taylor Kim",
+                  name:  "Taylor Kim",
                   title: "Product Development",
                   image: "/placeholder.svg?height=300&width=300&text=Taylor",
                 },
                 {
-                  name: "Jordan Smith",
+                  name:  "Jordan Smith",
                   title: "Marketing Director",
                   image: "/placeholder.svg?height=300&width=300&text=Jordan",
                 },

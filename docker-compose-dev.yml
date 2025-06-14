@@ -203,14 +203,14 @@ services:
 
   protoc:
     build:
-      context: ./packages/grpc_gateway/protos
+      context: ./packages/grpc_gateway/utils
       dockerfile: Dockerfile
     container_name: protoc
     working_dir: /app
     volumes:
-      - ./packages/grpc_gateway/protos/nexura.proto:/app/nexura.proto
-      - ./packages/grpc_gateway/protos/generated:/app/generated
-    entrypoint: ["sh", "-c", "protoc --proto_path=. --python_out=./generated --plugin=node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=esModuleInterop=true,stringEnums=true,outputServices=grpc-js --descriptor_set_out=reflection_descriptor.pb --include_imports --ts_proto_out=./generated --grpc-python_out=./generated ./nexura.proto"]
+      - ./packages/grpc_gateway/utils/nexura.proto:/app/nexura.proto
+      - ./packages/grpc_gateway/utils/generated:/app/generated
+    entrypoint: ["sh", "-c", "protoc --proto_path=. --plugin=node_modules/.bin/protoc-gen-ts_proto --ts_proto_opt=esModuleInterop=true,stringEnums=true,outputServices=grpc-js,context=true,addGrpcMetadata=true --descriptor_set_out=reflection_descriptor.pb --include_imports --ts_proto_out=./generated ./nexura.proto"]
     # entrypoint: ["sh", "-c", "protoc --proto_path=. --plugin=protoc-gen-ts_proto=./node_modules/.bin/protoc-gen-ts_proto --python_out=./generated --ts_proto_out=./generated --ts_proto_opt=esModuleInterop=true,outputServices=grpc-js --descriptor_set_out=./generated/nexura_reflection_descriptor.pb --include_imports --include_source_info --grpc-python_out=./generated  ./nexura.proto"]
 
   # image-proxy:

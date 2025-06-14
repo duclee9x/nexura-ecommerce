@@ -1,9 +1,10 @@
 import { PrismaClient } from '@nexura/product-service/src/db/prisma-client'
 import { handleError } from '@nexura/common/utils'
-
+import { GetAllBrandResponse } from '@nexura/grpc_gateway/protos'
+import type { sendUnaryData, ServiceError } from '@grpc/grpc-js'
 const prisma = new PrismaClient()
 
-export const getAllBrand = async (call: any, callback: any) => {
+export const getAllBrand = async (callback: sendUnaryData<GetAllBrandResponse>) => {
   try {
     const brands = await prisma.brand.findMany()
 
@@ -14,15 +15,15 @@ export const getAllBrand = async (call: any, callback: any) => {
     const response = {
       success: true,
       message: "Brand retrieved successfully",
-      brands: brands.map((brand) => ({
-        id: brand.id,
-        name: brand.name,
-        picture: brand.logo || "",
+      brands:  brands.map(brand => ({
+        id:      brand.id,
+        name:    brand.name,
+        logo:    brand.logo || "",
       })),
     }
 
     callback(null, response)
   } catch (error) {
-    handleError(error, callback)
+    handleError(error as ServiceError, callback)
   }
 }

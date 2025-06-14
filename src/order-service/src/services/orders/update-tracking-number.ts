@@ -12,7 +12,7 @@ export const updateTrackingNumber = async (call: ServerUnaryCall<UpdateTrackingN
     const { orderId, trackingNumber } = call.request
     if (!orderId || !trackingNumber) {
       callback({
-        code: Status.INVALID_ARGUMENT,
+        code:    Status.INVALID_ARGUMENT,
         message: 'Invalid request'
       })
       return
@@ -20,9 +20,9 @@ export const updateTrackingNumber = async (call: ServerUnaryCall<UpdateTrackingN
     // Create order with transaction
     await prisma.$transaction(async (tx) => {
       // Create order with initial status
-      const order = await tx.order.update({
+      await tx.order.update({
         where: { id: orderId },
-        data: {
+        data:  {
           shipping: {
             update: {
               tracking: {
@@ -43,7 +43,7 @@ export const updateTrackingNumber = async (call: ServerUnaryCall<UpdateTrackingN
   } catch (error) {
     logger.error('Error creating order:', error)
     callback({
-      code: Status.INTERNAL,
+      code:    Status.INTERNAL,
       message: 'Failed to create order'
     })
   }

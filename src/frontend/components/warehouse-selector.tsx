@@ -9,20 +9,20 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { toast } from "@/hooks/use-toast"
 
 export interface Warehouse {
-  id: string
-  name: string
-  code: string
+  id:       string
+  name:     string
+  code:     string
   address?: string
-  city?: string
+  city?:    string
   country?: string
 }
 
 interface WarehouseSelectorProps {
-  warehouses: Warehouse[]
+  warehouses:          Warehouse[]
   selectedWarehouseId: string | null
-  onWarehouseSelect: (warehouseId: string) => void
-  onWarehouseReload?: () => void
-  showAddNew?: boolean
+  onWarehouseSelect:   (warehouseId: string) => void
+  onWarehouseReload?:  () => void
+  showAddNew?:         boolean
 }
 
 export function WarehouseSelector({
@@ -32,18 +32,18 @@ export function WarehouseSelector({
   onWarehouseReload,
   showAddNew = false,
 }: WarehouseSelectorProps) {
-  const [open, setOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const [ open, setOpen ] = useState(false)
+  const [ searchQuery, setSearchQuery ] = useState("")
+  const [ isLoading, setIsLoading ] = useState(false)
 
-  const selectedWarehouse = warehouses.find((warehouse) => warehouse.id === selectedWarehouseId)
+  const selectedWarehouse = warehouses.find(warehouse => warehouse.id === selectedWarehouseId)
 
   const filteredWarehouses = searchQuery
     ? warehouses.filter(
-        (warehouse) =>
-          warehouse.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          warehouse.code.toLowerCase().includes(searchQuery.toLowerCase()),
-      )
+      warehouse =>
+        warehouse.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        warehouse.code.toLowerCase().includes(searchQuery.toLowerCase()),
+    )
     : warehouses
 
   const handleReloadWarehouses = () => {
@@ -58,7 +58,7 @@ export function WarehouseSelector({
     setTimeout(() => {
       setIsLoading(false)
       toast({
-        title: "Warehouses Reloaded",
+        title:       "Warehouses Reloaded",
         description: "The warehouse list has been updated with the latest data.",
       })
     }, 1000)
@@ -69,7 +69,7 @@ export function WarehouseSelector({
     window.open("/admin/warehouses", "_blank")
 
     toast({
-      title: "Opening Warehouse Dashboard",
+      title:       "Opening Warehouse Dashboard",
       description: "The warehouse management dashboard has been opened in a new tab.",
     })
   }
@@ -123,7 +123,7 @@ export function WarehouseSelector({
                 </div>
               </CommandEmpty>
               <CommandGroup>
-                {filteredWarehouses.map((warehouse) => (
+                {filteredWarehouses.map(warehouse => (
                   <CommandItem
                     key={warehouse.id}
                     value={warehouse.name}

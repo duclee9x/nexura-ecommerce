@@ -38,7 +38,7 @@ export default function CartPage() {
   const { mutateAsync: updateQuantity } = useUpdateItem
   const { mutateAsync: removeItem } = useRemoveItem
   const { mutateAsync: clearCart } = useClearCart
-  const { data: variants } = useGetVariants(items.map((item) => item.variantId))
+  const { data: variants } = useGetVariants(items.map(item => item.variantId))
   const isUpdatingQuantity = useIsMutating({ mutationKey: ["updateQuantity"] })
   const isUpdatingVariants = useIsFetching({ queryKey: ["cartVariants"] })
   const { user } = useSession()
@@ -49,7 +49,7 @@ export default function CartPage() {
       const variant = variants?.find(v => v.id === item.variantId)
       return total + ((variant?.price || 0) * item.quantity)
     }, 0)
-  }, [items, variants])
+  }, [ items, variants ])
 
   // Show loader while initial data is being fetched
   if (isCartLoading) {
@@ -72,9 +72,9 @@ export default function CartPage() {
     // Check if new quantity exceeds available stock
     if (variant.stock && newQuantity > variant.stock.quantity) {
       toast({
-        title: "Maximum stock reached",
+        title:       "Maximum stock reached",
         description: `Only ${variant.stock.quantity} items available`,
-        variant: "destructive"
+        variant:     "destructive"
       })
       // Set quantity to maximum available if trying to add more
       newQuantity = variant.stock.quantity
@@ -83,17 +83,17 @@ export default function CartPage() {
     try {
       // Update the backend
       await updateQuantity({
-        userId: user.id,
+        userId:   user.id,
         productId,
         variantId,
         quantity: newQuantity,
-        image: ""
+        image:    ""
       })
     } catch (error) {
       toast({
-        title: "Error updating quantity",
+        title:       "Error updating quantity",
         description: error instanceof Error ? error.message : "Please try again",
-        variant: "destructive",
+        variant:     "destructive",
       })
     }
   }
@@ -105,9 +105,9 @@ export default function CartPage() {
     } catch (error) {
       // Revert optimistic update on error
       toast({
-        title: "Error removing item",
+        title:       "Error removing item",
         description: error instanceof Error ? error.message : "Please try again",
-        variant: "destructive",
+        variant:     "destructive",
       })
     }
   }
@@ -119,9 +119,9 @@ export default function CartPage() {
     } catch (error) {
       // Revert optimistic update on error
       toast({
-        title: "Error clearing cart",
+        title:       "Error clearing cart",
         description: error instanceof Error ? error.message : "Please try again",
-        variant: "destructive",
+        variant:     "destructive",
       })
     }
   }

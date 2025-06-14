@@ -12,124 +12,136 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 // Sample product data for search
 const products = [
   {
-    id: 1,
-    name: "Urban Backpack",
-    price: 120,
+    id:       1,
+    name:     "Urban Backpack",
+    price:    120,
     category: "backpack",
-    type: "everyday",
-    colors: ["black", "gray", "blue"],
-    rating: 4.5,
-    image: "/placeholder.svg?height=300&width=300",
+    type:     "everyday",
+    colors:   [
+      "black", "gray", "blue"
+    ],
+    rating:   4.5,
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: 2,
-    name: "Hyper Backpack",
-    price: 140,
+    id:       2,
+    name:     "Hyper Backpack",
+    price:    140,
     category: "backpack",
-    type: "travel",
-    colors: ["black", "gray", "blue"],
-    rating: 4.2,
-    image: "/placeholder.svg?height=300&width=300",
+    type:     "travel",
+    colors:   [
+      "black", "gray", "blue"
+    ],
+    rating:   4.2,
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: 3,
-    name: "Smart Carry Backpack",
-    price: 95,
+    id:       3,
+    name:     "Smart Carry Backpack",
+    price:    95,
     category: "backpack",
-    type: "everyday",
-    colors: ["black", "gray", "blue"],
-    rating: 4.0,
-    image: "/placeholder.svg?height=300&width=300",
+    type:     "everyday",
+    colors:   [
+      "black", "gray", "blue"
+    ],
+    rating:   4.0,
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: 4,
-    name: "Aero Backpack",
-    price: 127,
+    id:       4,
+    name:     "Aero Backpack",
+    price:    127,
     category: "backpack",
-    type: "travel",
-    colors: ["black", "gray", "blue"],
-    rating: 4.8,
-    image: "/placeholder.svg?height=300&width=300",
+    type:     "travel",
+    colors:   [
+      "black", "gray", "blue"
+    ],
+    rating:   4.8,
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: 5,
-    name: "Commuter Backpack",
-    price: 110,
+    id:       5,
+    name:     "Commuter Backpack",
+    price:    110,
     category: "backpack",
-    type: "everyday",
-    colors: ["black", "gray"],
-    rating: 4.3,
-    image: "/placeholder.svg?height=300&width=300",
+    type:     "everyday",
+    colors:   [ "black", "gray" ],
+    rating:   4.3,
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: 6,
-    name: "Weekender Duffel",
-    price: 150,
+    id:       6,
+    name:     "Weekender Duffel",
+    price:    150,
     category: "bag",
-    type: "travel",
-    colors: ["black", "blue"],
-    rating: 4.6,
-    image: "/placeholder.svg?height=300&width=300",
+    type:     "travel",
+    colors:   [ "black", "blue" ],
+    rating:   4.6,
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: 7,
-    name: "Messenger Bag",
-    price: 85,
+    id:       7,
+    name:     "Messenger Bag",
+    price:    85,
     category: "bag",
-    type: "everyday",
-    colors: ["black", "gray"],
-    rating: 4.1,
-    image: "/placeholder.svg?height=300&width=300",
+    type:     "everyday",
+    colors:   [ "black", "gray" ],
+    rating:   4.1,
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: 8,
-    name: "Laptop Sleeve",
-    price: 45,
+    id:       8,
+    name:     "Laptop Sleeve",
+    price:    45,
     category: "accessory",
-    type: "everyday",
-    colors: ["black", "gray", "blue"],
-    rating: 4.4,
-    image: "/placeholder.svg?height=300&width=300",
+    type:     "everyday",
+    colors:   [
+      "black", "gray", "blue"
+    ],
+    rating:   4.4,
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: 9,
-    name: "Travel Organizer",
-    price: 35,
+    id:       9,
+    name:     "Travel Organizer",
+    price:    35,
     category: "accessory",
-    type: "travel",
-    colors: ["black", "gray"],
-    rating: 4.7,
-    image: "/placeholder.svg?height=300&width=300",
+    type:     "travel",
+    colors:   [ "black", "gray" ],
+    rating:   4.7,
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: 10,
-    name: "Water Bottle",
-    price: 18,
+    id:       10,
+    name:     "Water Bottle",
+    price:    18,
     category: "accessory",
-    type: "everyday",
-    colors: ["black", "gray", "blue"],
-    rating: 4.9,
-    image: "/placeholder.svg?height=300&width=300",
+    type:     "everyday",
+    colors:   [
+      "black", "gray", "blue"
+    ],
+    rating:   4.9,
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: 11,
-    name: "Extension Strap",
-    price: 12,
+    id:       11,
+    name:     "Extension Strap",
+    price:    12,
     category: "accessory",
-    type: "travel",
-    colors: ["black", "gray"],
-    rating: 4.2,
-    image: "/placeholder.svg?height=300&width=300",
+    type:     "travel",
+    colors:   [ "black", "gray" ],
+    rating:   4.2,
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: 12,
-    name: "TSA-Approved Lock",
-    price: 16,
+    id:       12,
+    name:     "TSA-Approved Lock",
+    price:    16,
     category: "accessory",
-    type: "travel",
-    colors: ["black"],
-    rating: 4.5,
-    image: "/placeholder.svg?height=300&width=300",
+    type:     "travel",
+    colors:   ["black"],
+    rating:   4.5,
+    image:    "/placeholder.svg?height=300&width=300",
   },
 ]
 
@@ -138,11 +150,11 @@ export default function SearchPage() {
   const searchParams = useSearchParams()
   const query = searchParams.get("q") || ""
 
-  const [searchQuery, setSearchQuery] = useState(query)
-  const [viewMode, setViewMode] = useState("grid")
-  const [sortBy, setSortBy] = useState("relevance")
-  const [searchResults, setSearchResults] = useState([])
-  const [isSearching, setIsSearching] = useState(false)
+  const [ searchQuery, setSearchQuery ] = useState(query)
+  const [ viewMode, setViewMode ] = useState("grid")
+  const [ sortBy, setSortBy ] = useState("relevance")
+  const [ searchResults, setSearchResults ] = useState([])
+  const [ isSearching, setIsSearching ] = useState(false)
 
   // Perform search when query changes
   useEffect(() => {
@@ -156,7 +168,7 @@ export default function SearchPage() {
     // Simulate API call delay
     setTimeout(() => {
       const results = products.filter(
-        (product) =>
+        product =>
           product.name.toLowerCase().includes(query.toLowerCase()) ||
           product.category.toLowerCase().includes(query.toLowerCase()) ||
           product.type.toLowerCase().includes(query.toLowerCase()),
@@ -191,7 +203,7 @@ export default function SearchPage() {
       setSearchResults(sortedResults)
       setIsSearching(false)
     }, 500)
-  }, [query, sortBy])
+  }, [ query, sortBy ])
 
   // Handle search form submission
   const handleSearchSubmit = (e) => {
@@ -227,7 +239,7 @@ export default function SearchPage() {
               placeholder="Search for products..."
               className="pl-9"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
             />
           </div>
           <Button type="submit">Search</Button>
@@ -283,13 +295,13 @@ export default function SearchPage() {
             {/* Product Grid */}
             {viewMode === "grid" ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {searchResults.map((product) => (
+                {searchResults.map(product => (
                   <ProductCard key={product.id} product={product} viewMode="grid" />
                 ))}
               </div>
             ) : (
               <div className="space-y-6">
-                {searchResults.map((product) => (
+                {searchResults.map(product => (
                   <ProductCard key={product.id} product={product} viewMode="list" />
                 ))}
               </div>

@@ -1,4 +1,4 @@
-import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js';
+import type { sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js';
 import type { DeleteAddressRequest, DeleteAddressResponse } from '@nexura/grpc_gateway/protos';
 import { PrismaClient } from '@nexura/user-service/src/db/prisma-client'
 import { api, withTracing } from '@nexura/common/utils';
@@ -21,7 +21,7 @@ export async function deleteAddress(
     }
 
     const tracer = api.trace.getTracer('deleteAddress');
-    const validatedData = await withTracing(tracer, 'Validate Request', async (span) => {
+    const validatedData = await withTracing(tracer, 'Validate Request', async () => {
       const result = DeleteAddressSchema.safeParse({
         addressId: addressId
       });

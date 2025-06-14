@@ -27,8 +27,8 @@ export default function CartHooks() {
   return {
     useGetCart: (userId: string | null) => {
       return useQuery({
-        queryKey: ["cart", userId],
-        queryFn: async () => {
+        queryKey: [ "cart", userId ],
+        queryFn:  async () => {
           if (!userId) {
             throw new Error("User ID is required");
           }
@@ -42,8 +42,8 @@ export default function CartHooks() {
 
     useGetVariants: (variantIds: string[]) => {
       return useQuery({
-        queryKey: ["cartVariants", variantIds],
-        queryFn: async () => {
+        queryKey: [ "cartVariants", variantIds ],
+        queryFn:  async () => {
           const response = await getVariantsForCartGateway({ variantIds });
           return response.variants;
         },
@@ -57,7 +57,7 @@ export default function CartHooks() {
       },
       onSuccess: () => {
         toast({
-          title: "SUCCESS",
+          title:       "SUCCESS",
           description: `Item added to cart`,
         });
         queryClient.invalidateQueries({ queryKey: ["cart"] });
@@ -65,9 +65,9 @@ export default function CartHooks() {
       },
       onError: (error: Error) => {
         toast({
-          title: "ERROR",
+          title:       "ERROR",
           description: error.message,
-          variant: "destructive",
+          variant:     "destructive",
         });
       },
     }),
@@ -88,15 +88,15 @@ export default function CartHooks() {
         queryClient.invalidateQueries({ queryKey: ["cart"] });
         queryClient.invalidateQueries({ queryKey: ["cartVariants"] });
         toast({
-          title: "SUCCESS",
+          title:       "SUCCESS",
           description: "Update item successfully",
         });
       },
       onError: (error: Error) => {
         toast({
-          title: "ERROR",
+          title:       "ERROR",
           description: error.message,
-          variant: "destructive",
+          variant:     "destructive",
         });
       },
     }),
@@ -115,15 +115,15 @@ export default function CartHooks() {
       },
       onSuccess: () => {
         toast({
-          title: "SUCCESS",
+          title:       "SUCCESS",
           description: "Remove item successfully",
         });
       },
       onError: (error: Error) => {
         toast({
-          title: "ERROR",
+          title:       "ERROR",
           description: error.message,
-          variant: "destructive",
+          variant:     "destructive",
         });
       },
     }),
@@ -141,15 +141,15 @@ export default function CartHooks() {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["cart"] });
         toast({
-          title: "SUCCESS",
+          title:       "SUCCESS",
           description: "Cart cleared successfully",
         });
       },
       onError: (error: Error) => {
         toast({
-          title: "ERROR",
+          title:       "ERROR",
           description: error.message,
-          variant: "destructive",
+          variant:     "destructive",
         });
       },
     }),

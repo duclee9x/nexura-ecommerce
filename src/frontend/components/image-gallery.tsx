@@ -30,17 +30,17 @@ import ObjectID from "bson-objectid"
 import { uploadToImageKit, deleteFromImageKit } from "@/lib/imagekit"
 
 export interface ProductImage {
-  id: string
-  url: string
-  isMain: boolean
-  blurhash: string
-  isUploading?: boolean
+  id:              string
+  url:             string
+  isMain:          boolean
+  blurhash:        string
+  isUploading?:    boolean
   uploadProgress?: number
-  fileId?: string
+  fileId?:         string
 }
 
 interface ImageGalleryProps {
-  images: ProductImage[]
+  images:   ProductImage[]
   onChange: (images: ProductImage[]) => void
 }
 
@@ -49,8 +49,8 @@ const SortableImage = ({
   onRemove,
   onSetMain,
 }: {
-  image: ProductImage
-  onRemove: (id: string) => void
+  image:     ProductImage
+  onRemove:  (id: string) => void
   onSetMain: (id: string) => void
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: image.id })
@@ -146,9 +146,9 @@ const generateBlurhash = async (imageUrl: string): Promise<string> => {
 }
 
 export function ImageGallery({ images, onChange }: ImageGalleryProps) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [ currentImageIndex, setCurrentImageIndex ] = useState(0)
   const { toast } = useToast()
-  const [uploadingFiles, setUploadingFiles] = useState<{ id: string; progress: number }[]>([])
+  const [ uploadingFiles, setUploadingFiles ] = useState<{ id: string; progress: number }[]>([])
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -161,8 +161,8 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
     const { active, over } = event
 
     if (over && active.id !== over.id) {
-      const oldIndex = images.findIndex((img) => img.id === active.id)
-      const newIndex = images.findIndex((img) => img.id === over.id)
+      const oldIndex = images.findIndex(img => img.id === active.id)
+      const newIndex = images.findIndex(img => img.id === over.id)
 
       const newImages = arrayMove(images, oldIndex, newIndex)
       onChange(newImages)
@@ -181,7 +181,7 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
     if (!files || files.length === 0) return
 
     // Create temporary images with loading states
-    const newUploads = Array.from(files).map(file => {
+    const newUploads = Array.from(files).map((file) => {
       const tempId = new ObjectID().toString()
       const tempUrl = URL.createObjectURL(file)
       return { file, tempUrl, id: tempId }
@@ -190,17 +190,17 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
     // Add temporary images to the gallery immediately
     const tempImages: ProductImage[] = newUploads.map(({ tempUrl, id }) => ({
       id,
-      url: tempUrl,
-      isMain: images.length === 0,
-      blurhash: '',
-      isUploading: true,
+      url:            tempUrl,
+      isMain:         images.length === 0,
+      blurhash:       '',
+      isUploading:    true,
       uploadProgress: 0
     }))
 
     // Keep track of the current state of images
-    let currentImages = [...images, ...tempImages]
+    let currentImages = [ ...images, ...tempImages ]
     onChange(currentImages)
-    setUploadingFiles(prev => [...prev, ...newUploads.map(upload => ({ id: upload.id, progress: 0 }))])
+    setUploadingFiles(prev => [ ...prev, ...newUploads.map(upload => ({ id: upload.id, progress: 0 })) ])
 
     // Upload each file to ImageKit
     for (const upload of newUploads) {
@@ -212,13 +212,13 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
         currentImages = currentImages.map(img => 
           img.id === upload.id 
             ? { 
-                ...img, 
-                url,
-                fileId, // Store ImageKit fileId for future deletion
-                blurhash,
-                isUploading: false,
-                uploadProgress: undefined
-              }
+              ...img, 
+              url,
+              fileId, // Store ImageKit fileId for future deletion
+              blurhash,
+              isUploading:    false,
+              uploadProgress: undefined
+            }
             : img
         )
         
@@ -235,9 +235,9 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
         onChange(currentImages)
         setUploadingFiles(prev => prev.filter(f => f.id !== upload.id))
         toast({
-          title: "Upload Failed",
+          title:       "Upload Failed",
           description: error instanceof Error ? error.message : "Failed to upload image. Please try again.",
-          variant: "destructive",
+          variant:     "destructive",
         })
       }
     }
@@ -250,9 +250,9 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
     const imageToRemove = images.find(img => img.id === id)
     if (!imageToRemove) return
 
-    const index = images.findIndex((img) => img.id === id)
+    const index = images.findIndex(img => img.id === id)
     const isMain = images[index].isMain
-    const newImages = images.filter((img) => img.id !== id)
+    const newImages = images.filter(img => img.id !== id)
     
     // If we removed the main image, set the first image as main
     if (isMain && newImages.length > 0) {
@@ -266,9 +266,9 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
       } catch (error) {
         console.error('Error deleting image from ImageKit:', error)
         toast({
-          title: "Delete Failed",
+          title:       "Delete Failed",
           description: "Failed to delete image from storage. Please try again.",
-          variant: "destructive",
+          variant:     "destructive",
         })
       }
     }
@@ -281,7 +281,7 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
   }
 
   const handleSetMainImage = (id: string) => {
-    const updatedImages = images.map((img) => ({
+    const updatedImages = images.map(img => ({
       ...img,
       isMain: img.id === id,
     }))
@@ -289,11 +289,11 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
     onChange(updatedImages)
 
     // Set current image to the main one
-    const mainIndex = updatedImages.findIndex((img) => img.id === id)
+    const mainIndex = updatedImages.findIndex(img => img.id === id)
     setCurrentImageIndex(mainIndex)
 
     toast({
-      title: "Main Image Updated",
+      title:       "Main Image Updated",
       description: "The main product image has been updated.",
     })
   }
@@ -345,9 +345,9 @@ export function ImageGallery({ images, onChange }: ImageGalleryProps) {
         </div>
 
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={images.map((img) => img.id)} strategy={rectSortingStrategy}>
+          <SortableContext items={images.map(img => img.id)} strategy={rectSortingStrategy}>
             <div className="grid grid-cols-3 gap-2">
-              {images.map((image) => (
+              {images.map(image => (
                 <SortableImage
                   key={image.id}
                   image={image}

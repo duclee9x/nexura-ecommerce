@@ -49,152 +49,152 @@ import type { BlogPost } from "@/types/schema"
 // Sample subscribers data
 const initialSubscribers = [
   {
-    id: 1,
-    email: "john.doe@example.com",
-    name: "John Doe",
-    status: "active",
+    id:             1,
+    email:          "john.doe@example.com",
+    name:           "John Doe",
+    status:         "active",
     dateSubscribed: "2023-01-15T10:30:00",
-    source: "website",
-    tags: ["customer"],
+    source:         "website",
+    tags:           ["customer"],
   },
   {
-    id: 2,
-    email: "jane.smith@example.com",
-    name: "Jane Smith",
-    status: "active",
+    id:             2,
+    email:          "jane.smith@example.com",
+    name:           "Jane Smith",
+    status:         "active",
     dateSubscribed: "2023-02-20T14:45:00",
-    source: "checkout",
-    tags: ["customer", "vip"],
+    source:         "checkout",
+    tags:           [ "customer", "vip" ],
   },
   {
-    id: 3,
-    email: "michael.brown@example.com",
-    name: "Michael Brown",
-    status: "active",
+    id:             3,
+    email:          "michael.brown@example.com",
+    name:           "Michael Brown",
+    status:         "active",
     dateSubscribed: "2023-03-05T09:15:00",
-    source: "website",
-    tags: ["prospect"],
+    source:         "website",
+    tags:           ["prospect"],
   },
   {
-    id: 4,
-    email: "sarah.wilson@example.com",
-    name: "Sarah Wilson",
-    status: "unsubscribed",
-    dateSubscribed: "2023-01-10T11:20:00",
+    id:               4,
+    email:            "sarah.wilson@example.com",
+    name:             "Sarah Wilson",
+    status:           "unsubscribed",
+    dateSubscribed:   "2023-01-10T11:20:00",
     dateUnsubscribed: "2023-04-15T16:30:00",
-    source: "website",
-    tags: ["customer"],
+    source:           "website",
+    tags:             ["customer"],
   },
   {
-    id: 5,
-    email: "david.johnson@example.com",
-    name: "David Johnson",
-    status: "active",
+    id:             5,
+    email:          "david.johnson@example.com",
+    name:           "David Johnson",
+    status:         "active",
     dateSubscribed: "2023-03-18T15:10:00",
-    source: "checkout",
-    tags: ["customer", "vip"],
+    source:         "checkout",
+    tags:           [ "customer", "vip" ],
   },
   {
-    id: 6,
-    email: "emily.davis@example.com",
-    name: "Emily Davis",
-    status: "bounced",
+    id:             6,
+    email:          "emily.davis@example.com",
+    name:           "Emily Davis",
+    status:         "bounced",
     dateSubscribed: "2023-02-05T13:45:00",
-    source: "website",
-    tags: ["prospect"],
+    source:         "website",
+    tags:           ["prospect"],
   },
   {
-    id: 7,
-    email: "robert.miller@example.com",
-    name: "Robert Miller",
-    status: "active",
+    id:             7,
+    email:          "robert.miller@example.com",
+    name:           "Robert Miller",
+    status:         "active",
     dateSubscribed: "2023-04-02T10:20:00",
-    source: "checkout",
-    tags: ["customer"],
+    source:         "checkout",
+    tags:           ["customer"],
   },
   {
-    id: 8,
-    email: "jennifer.taylor@example.com",
-    name: "Jennifer Taylor",
-    status: "active",
+    id:             8,
+    email:          "jennifer.taylor@example.com",
+    name:           "Jennifer Taylor",
+    status:         "active",
     dateSubscribed: "2023-03-25T09:30:00",
-    source: "website",
-    tags: ["prospect"],
+    source:         "website",
+    tags:           ["prospect"],
   },
   {
-    id: 9,
-    email: "william.anderson@example.com",
-    name: "William Anderson",
-    status: "unsubscribed",
-    dateSubscribed: "2023-01-20T14:15:00",
+    id:               9,
+    email:            "william.anderson@example.com",
+    name:             "William Anderson",
+    status:           "unsubscribed",
+    dateSubscribed:   "2023-01-20T14:15:00",
     dateUnsubscribed: "2023-04-10T11:45:00",
-    source: "checkout",
-    tags: ["customer"],
+    source:           "checkout",
+    tags:             ["customer"],
   },
   {
-    id: 10,
-    email: "olivia.thomas@example.com",
-    name: "Olivia Thomas",
-    status: "active",
+    id:             10,
+    email:          "olivia.thomas@example.com",
+    name:           "Olivia Thomas",
+    status:         "active",
     dateSubscribed: "2023-04-05T16:30:00",
-    source: "website",
-    tags: ["customer", "vip"],
+    source:         "website",
+    tags:           [ "customer", "vip" ],
   },
 ]
 
 // Sample campaigns data
 const initialCampaigns = [
   {
-    id: 1,
-    name: "Spring Collection Launch",
-    subject: "Introducing Our Spring Collection - 20% Off for Early Birds!",
-    status: "sent",
-    dateSent: "2023-03-15T10:00:00",
-    recipients: 1250,
-    opens: 680,
-    clicks: 320,
+    id:           1,
+    name:         "Spring Collection Launch",
+    subject:      "Introducing Our Spring Collection - 20% Off for Early Birds!",
+    status:       "sent",
+    dateSent:     "2023-03-15T10:00:00",
+    recipients:   1250,
+    opens:        680,
+    clicks:       320,
     unsubscribes: 5,
   },
   {
-    id: 2,
-    name: "Summer Travel Essentials",
-    subject: "Pack Smart: Must-Have Travel Accessories for Your Summer Adventures",
-    status: "sent",
-    dateSent: "2023-04-10T09:30:00",
-    recipients: 1300,
-    opens: 720,
-    clicks: 350,
+    id:           2,
+    name:         "Summer Travel Essentials",
+    subject:      "Pack Smart: Must-Have Travel Accessories for Your Summer Adventures",
+    status:       "sent",
+    dateSent:     "2023-04-10T09:30:00",
+    recipients:   1300,
+    opens:        720,
+    clicks:       350,
     unsubscribes: 3,
   },
   {
-    id: 3,
-    name: "Back to School Sale",
-    subject: "Get Ready for School: Special Discounts on Backpacks and Accessories",
-    status: "draft",
-    recipients: 0,
-    opens: 0,
-    clicks: 0,
+    id:           3,
+    name:         "Back to School Sale",
+    subject:      "Get Ready for School: Special Discounts on Backpacks and Accessories",
+    status:       "draft",
+    recipients:   0,
+    opens:        0,
+    clicks:       0,
     unsubscribes: 0,
   },
   {
-    id: 4,
-    name: "New Blog: Sustainable Materials",
-    subject: "Discover How Eco-Friendly Materials Are Changing the Bag Industry",
-    status: "scheduled",
+    id:            4,
+    name:          "New Blog: Sustainable Materials",
+    subject:       "Discover How Eco-Friendly Materials Are Changing the Bag Industry",
+    status:        "scheduled",
     scheduledDate: "2023-05-20T09:00:00",
-    recipients: 1350,
-    opens: 0,
-    clicks: 0,
-    unsubscribes: 0,
+    recipients:    1350,
+    opens:         0,
+    clicks:        0,
+    unsubscribes:  0,
   },
   {
-    id: 5,
-    name: "Holiday Gift Guide",
-    subject: "Find the Perfect Gift: Our Holiday Selection for Every Budget",
-    status: "draft",
-    recipients: 0,
-    opens: 0,
-    clicks: 0,
+    id:           5,
+    name:         "Holiday Gift Guide",
+    subject:      "Find the Perfect Gift: Our Holiday Selection for Every Budget",
+    status:       "draft",
+    recipients:   0,
+    opens:        0,
+    clicks:       0,
     unsubscribes: 0,
   },
 ]
@@ -202,142 +202,142 @@ const initialCampaigns = [
 // Sample blog posts for newsletter
 const blogPosts: BlogPost[] = [
   {
-    id: "1",
+    id:    "1",
     title: "The Ultimate Guide to Choosing the Perfect Backpack",
-    slug: "ultimate-guide-choosing-perfect-backpack",
+    slug:  "ultimate-guide-choosing-perfect-backpack",
     excerpt:
       "Find the perfect backpack for your needs with our comprehensive guide covering materials, sizes, and features.",
     featuredImage: {
-      id: "1",
-      url: "/placeholder.svg?height=600&width=1200&text=Backpack+Guide",
-      type: "image",
-      fileSize: 1.2,
-      filename: "backpack-guide.jpg",
-      mimeType: "image/jpeg",
+      id:        "1",
+      url:       "/placeholder.svg?height=600&width=1200&text=Backpack+Guide",
+      type:      "image",
+      fileSize:  1.2,
+      filename:  "backpack-guide.jpg",
+      mimeType:  "image/jpeg",
       createdAt: "2023-02-25T09:00:00",
       updatedAt: "2023-02-25T09:00:00",
     },
     publishedAt: "2023-03-15T10:00:00",
-    author: {
-      id: "1",
-      name: "John Doe",
+    author:      {
+      id:     "1",
+      name:   "John Doe",
       avatar: "/placeholder.svg?height=600&width=1200&text=Backpack+Guide",
-      bio: "John Doe is a backpack expert and founder of NEXURA.",
-      email: "john.doe@example.com",
-      role: "admin",
+      bio:    "John Doe is a backpack expert and founder of NEXURA.",
+      email:  "john.doe@example.com",
+      role:   "admin",
     },
-    content: "<p>The Ultimate Guide to Choosing the Perfect Backpack</p>",
-    categories: ["Travel", "Backpacks"],
-    tags: ["Backpacks", "Travel"],
-    status: "published",
-    seo: {
-      title: "The Ultimate Guide to Choosing the Perfect Backpack",
+    content:    "<p>The Ultimate Guide to Choosing the Perfect Backpack</p>",
+    categories: [ "Travel", "Backpacks" ],
+    tags:       [ "Backpacks", "Travel" ],
+    status:     "published",
+    seo:        {
+      title:       "The Ultimate Guide to Choosing the Perfect Backpack",
       description: "Find the perfect backpack for your needs with our comprehensive guide covering materials, sizes, and features.",
     },
     commentStatus: "open",
-    comments: [],
-    createdAt: "2023-02-25T09:00:00",
-    updatedAt: "2023-02-25T09:00:00",
+    comments:      [],
+    createdAt:     "2023-02-25T09:00:00",
+    updatedAt:     "2023-02-25T09:00:00",
   },
   {
-    id: "2",
+    id:    "2",
     title: "5 Essential Travel Accessories for Your Next Adventure",
-    slug: "5-essential-travel-accessories-next-adventure",
+    slug:  "5-essential-travel-accessories-next-adventure",
     excerpt:
       "Prepare for your next journey with these must-have travel accessories that combine style, functionality, and convenience.",
     featuredImage: {
-      id: "2",
-      url: "/placeholder.svg?height=600&width=1200&text=Travel+Accessories",
-      type: "image",
-      fileSize: 1.2,
-      filename: "travel-accessories.jpg",
-      mimeType: "image/jpeg",
+      id:        "2",
+      url:       "/placeholder.svg?height=600&width=1200&text=Travel+Accessories",
+      type:      "image",
+      fileSize:  1.2,
+      filename:  "travel-accessories.jpg",
+      mimeType:  "image/jpeg",
       createdAt: "2023-02-25T09:00:00",
       updatedAt: "2023-02-25T09:00:00",
     },
     publishedAt: "2023-02-25T09:00:00",
-    author: {
-      id: "1",
-      name: "John Doe",
+    author:      {
+      id:     "1",
+      name:   "John Doe",
       avatar: "/placeholder.svg?height=600&width=1200&text=Backpack+Guide",
-      bio: "John Doe is a backpack expert and founder of NEXURA.",
-      email: "john.doe@example.com",
-      role: "admin",
+      bio:    "John Doe is a backpack expert and founder of NEXURA.",
+      email:  "john.doe@example.com",
+      role:   "admin",
     },
-    content: "<p>5 Essential Travel Accessories for Your Next Adventure</p>",
-    categories: ["Travel", "Accessories"],
-    tags: ["Travel", "Accessories"],
-    status: "published",
-    seo: {
-      title: "5 Essential Travel Accessories for Your Next Adventure",
+    content:    "<p>5 Essential Travel Accessories for Your Next Adventure</p>",
+    categories: [ "Travel", "Accessories" ],
+    tags:       [ "Travel", "Accessories" ],
+    status:     "published",
+    seo:        {
+      title:       "5 Essential Travel Accessories for Your Next Adventure",
       description: "Prepare for your next journey with these must-have travel accessories that combine style, functionality, and convenience.",
     },
     commentStatus: "open",
-    comments: [],
-    createdAt: "2023-02-25T09:00:00",
-    updatedAt: "2023-02-25T09:00:00",
+    comments:      [],
+    createdAt:     "2023-02-25T09:00:00",
+    updatedAt:     "2023-02-25T09:00:00",
   },
   {
-    id: "3",
-    title: "How to Pack Efficiently for a Weekend Getaway",
-    slug: "how-to-pack-efficiently-weekend-getaway",
-    excerpt: "Master the art of packing light with our expert tips for organizing your weekend bag efficiently.",
+    id:            "3",
+    title:         "How to Pack Efficiently for a Weekend Getaway",
+    slug:          "how-to-pack-efficiently-weekend-getaway",
+    excerpt:       "Master the art of packing light with our expert tips for organizing your weekend bag efficiently.",
     featuredImage: {
-      id: "3",
-      url: "/placeholder.svg?height=600&width=1200&text=Packing+Tips",
-      type: "image",
-      fileSize: 1.2,
-      filename: "packing-tips.jpg",
-      mimeType: "image/jpeg",
+      id:        "3",
+      url:       "/placeholder.svg?height=600&width=1200&text=Packing+Tips",
+      type:      "image",
+      fileSize:  1.2,
+      filename:  "packing-tips.jpg",
+      mimeType:  "image/jpeg",
       createdAt: "2023-02-25T09:00:00",
       updatedAt: "2023-02-25T09:00:00",
     },
     publishedAt: "2023-01-20T10:30:00",
-    content: "<p>How to Pack Efficiently for a Weekend Getaway</p>",
-    categories: ["Travel", "Packing"],
-    tags: ["Travel", "Packing"],
-    status: "published",
-    seo: {
-      title: "How to Pack Efficiently for a Weekend Getaway",
+    content:     "<p>How to Pack Efficiently for a Weekend Getaway</p>",
+    categories:  [ "Travel", "Packing" ],
+    tags:        [ "Travel", "Packing" ],
+    status:      "published",
+    seo:         {
+      title:       "How to Pack Efficiently for a Weekend Getaway",
       description: "Master the art of packing light with our expert tips for organizing your weekend bag efficiently.",
     },
     commentStatus: "open",
-    comments: [],
-    createdAt: "2023-02-25T09:00:00",
-    updatedAt: "2023-02-25T09:00:00",
-    author: {
-      id: "1",
-      name: "John Doe",
+    comments:      [],
+    createdAt:     "2023-02-25T09:00:00",
+    updatedAt:     "2023-02-25T09:00:00",
+    author:        {
+      id:     "1",
+      name:   "John Doe",
       avatar: "/placeholder.svg?height=600&width=1200&text=Backpack+Guide",
-      bio: "John Doe is a backpack expert and founder of NEXURA.",
-      email: "john.doe@example.com",
-      role: "admin",
+      bio:    "John Doe is a backpack expert and founder of NEXURA.",
+      email:  "john.doe@example.com",
+      role:   "admin",
     },
   },
 ]
 
 export default function NewsletterPage() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState("subscribers")
-  const [subscribers, setSubscribers] = useState(initialSubscribers)
-  const [campaigns, setCampaigns] = useState(initialCampaigns)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState("all")
-  const [selectedTag, setSelectedTag] = useState("all")
-  const [currentPage, setCurrentPage] = useState(1)
+  const [ activeTab, setActiveTab ] = useState("subscribers")
+  const [ subscribers, setSubscribers ] = useState(initialSubscribers)
+  const [ campaigns, setCampaigns ] = useState(initialCampaigns)
+  const [ searchQuery, setSearchQuery ] = useState("")
+  const [ selectedStatus, setSelectedStatus ] = useState("all")
+  const [ selectedTag, setSelectedTag ] = useState("all")
+  const [ currentPage, setCurrentPage ] = useState(1)
   const [itemsPerPage] = useState(5)
-  const [showNewCampaign, setShowNewCampaign] = useState(false)
-  const [newCampaign, setNewCampaign] = useState({
-    name: "",
-    subject: "",
-    content: "<p>Write your newsletter content here...</p>",
+  const [ showNewCampaign, setShowNewCampaign ] = useState(false)
+  const [ newCampaign, setNewCampaign ] = useState({
+    name:             "",
+    subject:          "",
+    content:          "<p>Write your newsletter content here...</p>",
     selectedBlogPost: "",
-    includeBlogPost: false,
-    sendToAll: true,
-    selectedSegment: "all",
-    scheduleLater: false,
-    scheduleDate: "",
-    scheduleTime: "",
+    includeBlogPost:  false,
+    sendToAll:        true,
+    selectedSegment:  "all",
+    scheduleLater:    false,
+    scheduleDate:     "",
+    scheduleTime:     "",
   })
 
   // Format date
@@ -345,9 +345,9 @@ export default function NewsletterPage() {
     if (!dateString) return "—"
     const date = new Date(dateString)
     return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
+      year:  "numeric",
       month: "short",
-      day: "numeric",
+      day:   "numeric",
     }).format(date)
   }
 
@@ -389,25 +389,25 @@ export default function NewsletterPage() {
   // Handle newsletter edit
   const handleNewsletterEdit = () => {
     toast({
-      title: "Not implemented yet",
+      title:       "Not implemented yet",
       description: "This feature is not yet implemented.",
-      variant: "destructive",
+      variant:     "destructive",
     })
   }
 
   // Handle delete subscriber
   const handleDeleteSubscriber = (id: number) => {
-    setSubscribers((prevSubscribers) => prevSubscribers.filter((subscriber) => subscriber.id !== id))
+    setSubscribers(prevSubscribers => prevSubscribers.filter(subscriber => subscriber.id !== id))
 
     toast({
-      title: "Subscriber Deleted",
+      title:       "Subscriber Deleted",
       description: "Subscriber has been permanently removed from your list.",
     })
   }
 
   // Handle status change
   const handleStatusChange = (id: number, newStatus: string) => {
-    setSubscribers((prevSubscribers) =>
+    setSubscribers(prevSubscribers =>
       prevSubscribers.map((subscriber) => {
         if (subscriber.id === id) {
           return {
@@ -421,28 +421,28 @@ export default function NewsletterPage() {
     )
 
     toast({
-      title: "Status Updated",
+      title:       "Status Updated",
       description: `Subscriber status has been updated to ${newStatus}.`,
     })
   }
 
   // Handle campaign content change
   const handleCampaignContentChange = (content: string) => {
-    setNewCampaign((prev) => ({ ...prev, content }))
+    setNewCampaign(prev => ({ ...prev, content }))
   }
 
   // Handle campaign input change
   const handleCampaignInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setNewCampaign((prev) => ({ ...prev, [name]: value }))
+    setNewCampaign(prev => ({ ...prev, [name]: value }))
   }
 
   // Handle blog post selection
   const handleBlogPostSelection = (postId: string) => {
-    setNewCampaign((prev) => ({ ...prev, selectedBlogPost: postId }))
+    setNewCampaign(prev => ({ ...prev, selectedBlogPost: postId }))
 
     if (postId && newCampaign.includeBlogPost) {
-      const selectedPost = blogPosts.find((post) => post.id.toString() === postId)
+      const selectedPost = blogPosts.find(post => post.id.toString() === postId)
       if (selectedPost) {
         // Add blog post content to the newsletter
         const blogContent = `
@@ -452,7 +452,7 @@ export default function NewsletterPage() {
             <p><a href="https://nexura.com/blog/${selectedPost.slug}">Read more</a></p>
           </div>
         `
-        setNewCampaign((prev) => ({
+        setNewCampaign(prev => ({
           ...prev,
           content: prev.content + blogContent,
         }))
@@ -465,51 +465,51 @@ export default function NewsletterPage() {
     // Validate campaign
     if (!newCampaign.name || !newCampaign.subject || !newCampaign.content) {
       toast({
-        title: "Incomplete Campaign",
+        title:       "Incomplete Campaign",
         description: "Please fill in all required fields.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
 
     const newCampaignData = {
-      id: campaigns.length + 1,
-      name: newCampaign.name,
+      id:      campaigns.length + 1,
+      name:    newCampaign.name,
       subject: newCampaign.subject,
-      status: newCampaign.scheduleLater ? "scheduled" : "sent",
+      status:  newCampaign.scheduleLater ? "scheduled" : "sent",
       ...(newCampaign.scheduleLater
         ? {
-            scheduledDate: `${newCampaign.scheduleDate}T${newCampaign.scheduleTime || "09:00:00"}`,
-          }
+          scheduledDate: `${newCampaign.scheduleDate}T${newCampaign.scheduleTime || "09:00:00"}`,
+        }
         : {
-            dateSent: new Date().toISOString(),
-          }),
-      recipients: 1350, // Sample data
-      opens: 0,
-      clicks: 0,
+          dateSent: new Date().toISOString(),
+        }),
+      recipients:   1350, // Sample data
+      opens:        0,
+      clicks:       0,
       unsubscribes: 0,
     }
 
-    setCampaigns((prevCampaigns) => [newCampaignData, ...prevCampaigns])
+    setCampaigns(prevCampaigns => [ newCampaignData, ...prevCampaigns ])
 
     // Reset form
     setNewCampaign({
-      name: "",
-      subject: "",
-      content: "<p>Write your newsletter content here...</p>",
+      name:             "",
+      subject:          "",
+      content:          "<p>Write your newsletter content here...</p>",
       selectedBlogPost: "",
-      includeBlogPost: false,
-      sendToAll: true,
-      selectedSegment: "all",
-      scheduleLater: false,
-      scheduleDate: "",
-      scheduleTime: "",
+      includeBlogPost:  false,
+      sendToAll:        true,
+      selectedSegment:  "all",
+      scheduleLater:    false,
+      scheduleDate:     "",
+      scheduleTime:     "",
     })
 
     setShowNewCampaign(false)
 
     toast({
-      title: newCampaign.scheduleLater ? "Campaign Scheduled" : "Campaign Sent",
+      title:       newCampaign.scheduleLater ? "Campaign Scheduled" : "Campaign Sent",
       description: newCampaign.scheduleLater
         ? "Your newsletter has been scheduled for delivery."
         : "Your newsletter has been sent to subscribers.",
@@ -517,7 +517,7 @@ export default function NewsletterPage() {
   }
 
   // Get unique tags
-  const uniqueTags = Array.from(new Set(subscribers.flatMap((subscriber) => subscriber.tags))).sort()
+  const uniqueTags = Array.from(new Set(subscribers.flatMap(subscriber => subscriber.tags))).sort()
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -554,14 +554,14 @@ export default function NewsletterPage() {
 
                   <div className="flex gap-2 flex-col md:flex-row">
                     <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => router.push("/admin/newsletter/import")}>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Import
-                    </Button>
-                    <Button variant="outline">
-                      <Download className="h-4 w-4 mr-2" />
-                      Export
-                    </Button>
+                      <Button variant="outline" onClick={() => router.push("/admin/newsletter/import")}>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Import
+                      </Button>
+                      <Button variant="outline">
+                        <Download className="h-4 w-4 mr-2" />
+                        Export
+                      </Button>
                     </div>
                     <Button onClick={() => router.push("/admin/newsletter/add-subscriber")}>
                       <Plus className="h-4 w-4 mr-2" />
@@ -577,7 +577,7 @@ export default function NewsletterPage() {
                         placeholder="Search subscribers..."
                         className="pl-9"
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={e => setSearchQuery(e.target.value)}
                       />
                     </div>
 
@@ -600,7 +600,7 @@ export default function NewsletterPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">All Tags</SelectItem>
-                          {uniqueTags.map((tag) => (
+                          {uniqueTags.map(tag => (
                             <SelectItem key={tag} value={tag}>
                               {tag.charAt(0).toUpperCase() + tag.slice(1)}
                             </SelectItem>
@@ -642,7 +642,7 @@ export default function NewsletterPage() {
                             </TableCell>
                           </TableRow>
                         ) : (
-                          currentSubscribers.map((subscriber) => (
+                          currentSubscribers.map(subscriber => (
                             <TableRow key={subscriber.id}>
                               <TableCell className="font-medium">{subscriber.email}</TableCell>
                               <TableCell>{subscriber.name || "—"}</TableCell>
@@ -667,7 +667,7 @@ export default function NewsletterPage() {
                               </TableCell>
                               <TableCell>
                                 <div className="flex flex-wrap gap-1">
-                                  {subscriber.tags.map((tag) => (
+                                  {subscriber.tags.map(tag => (
                                     <Badge key={tag} variant="outline" className="capitalize">
                                       {tag}
                                     </Badge>
@@ -701,7 +701,7 @@ export default function NewsletterPage() {
                                     <DropdownMenuSeparator />
                                     <AlertDialog>
                                       <AlertDialogTrigger asChild>
-                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                        <DropdownMenuItem onSelect={e => e.preventDefault()}>
                                           <Trash2 className="h-4 w-4 mr-2" />
                                           Delete
                                         </DropdownMenuItem>
@@ -745,7 +745,7 @@ export default function NewsletterPage() {
                             />
                           </PaginationItem>
 
-                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                          {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                             <PaginationItem key={page}>
                               <PaginationLink isActive={currentPage === page} onClick={() => handlePageChange(page)}>
                                 {page}
@@ -820,8 +820,8 @@ export default function NewsletterPage() {
                         <Switch
                           id="includeBlogPost"
                           checked={newCampaign.includeBlogPost}
-                          onCheckedChange={(checked) =>
-                            setNewCampaign((prev) => ({ ...prev, includeBlogPost: checked }))
+                          onCheckedChange={checked =>
+                            setNewCampaign(prev => ({ ...prev, includeBlogPost: checked }))
                           }
                         />
                         <Label htmlFor="includeBlogPost">Include blog post</Label>
@@ -834,7 +834,7 @@ export default function NewsletterPage() {
                               <SelectValue placeholder="Select a blog post" />
                             </SelectTrigger>
                             <SelectContent>
-                              {blogPosts.map((post) => (
+                              {blogPosts.map(post => (
                                 <SelectItem key={post.id} value={post.id.toString()}>
                                   {post.title}
                                 </SelectItem>
@@ -851,7 +851,7 @@ export default function NewsletterPage() {
                         <Switch
                           id="sendToAll"
                           checked={newCampaign.sendToAll}
-                          onCheckedChange={(checked) => setNewCampaign((prev) => ({ ...prev, sendToAll: checked }))}
+                          onCheckedChange={checked => setNewCampaign(prev => ({ ...prev, sendToAll: checked }))}
                         />
                         <Label htmlFor="sendToAll">Send to all subscribers</Label>
                       </div>
@@ -860,7 +860,7 @@ export default function NewsletterPage() {
                         <div className="mt-2">
                           <Select
                             value={newCampaign.selectedSegment}
-                            onValueChange={(value) => setNewCampaign((prev) => ({ ...prev, selectedSegment: value }))}
+                            onValueChange={value => setNewCampaign(prev => ({ ...prev, selectedSegment: value }))}
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Select segment" />
@@ -881,7 +881,7 @@ export default function NewsletterPage() {
                         <Switch
                           id="scheduleLater"
                           checked={newCampaign.scheduleLater}
-                          onCheckedChange={(checked) => setNewCampaign((prev) => ({ ...prev, scheduleLater: checked }))}
+                          onCheckedChange={checked => setNewCampaign(prev => ({ ...prev, scheduleLater: checked }))}
                         />
                         <Label htmlFor="scheduleLater">Schedule for later</Label>
                       </div>
@@ -956,7 +956,7 @@ export default function NewsletterPage() {
                               </TableCell>
                             </TableRow>
                           ) : (
-                            campaigns.map((campaign) => (
+                            campaigns.map(campaign => (
                               <TableRow key={campaign.id}>
                                 <TableCell className="font-medium">
                                   <div>

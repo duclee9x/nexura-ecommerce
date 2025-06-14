@@ -29,7 +29,9 @@ import ProductHooks from "@/hooks/product-hooks"
 function TableSkeleton() {
   return (
     <div className="space-y-4">
-      {[1, 2, 3, 4, 5].map((i) => (
+      {[
+        1, 2, 3, 4, 5
+      ].map(i => (
         <div key={i} className="flex items-center justify-between p-4 border rounded-lg animate-pulse">
           <div className="space-y-2">
             <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
@@ -90,11 +92,11 @@ function ErrorState({ message, onRetry }: { message: string; onRetry?: () => voi
 
 export default function InventoryManagementPage() {
   // All hooks must be called at the top level
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState("all")
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [isPublishing, setIsPublishing] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [ searchQuery, setSearchQuery ] = useState("")
+  const [ selectedStatus, setSelectedStatus ] = useState("all")
+  const [ selectedCategory, setSelectedCategory ] = useState("all")
+  const [ isPublishing, setIsPublishing ] = useState(false)
+  const [ isDeleting, setIsDeleting ] = useState(false)
   const { formatPrice } = useCurrency()
   
   const { useListProducts, useGetCategories, useUpdateProductStatus, useDeleteProduct } = ProductHooks()
@@ -165,7 +167,7 @@ export default function InventoryManagementPage() {
     }
 
     // Filter by category
-    if (selectedCategory !== "all" && product.categories.filter((category) => category.includes(selectedCategory)).length === 0) {
+    if (selectedCategory !== "all" && product.categories.filter(category => category.includes(selectedCategory)).length === 0) {
       return false
     }
 
@@ -175,10 +177,10 @@ export default function InventoryManagementPage() {
   // Handle publish product
   const handlePublishProduct = (slug: string) => {
     setIsPublishing(true)
-    const publishedProduct = inventory?.find((product) => product.slug === slug)
+    const publishedProduct = inventory?.find(product => product.slug === slug)
     if (publishedProduct === undefined) {
       toast({
-        title: "Product Not Found",
+        title:       "Product Not Found",
         description: "Product not found in inventory.",
       })
       return
@@ -186,7 +188,7 @@ export default function InventoryManagementPage() {
     changeProductStatus({productId: publishedProduct.id, status: "published"})
 
     toast({
-      title: "Product Published",
+      title:       "Product Published",
       description: "Product has been published to the catalog.",
     })
     setIsPublishing(false)
@@ -195,17 +197,17 @@ export default function InventoryManagementPage() {
   // Handle delete product
   const handleDeleteProduct = (id: string) => {
     setIsDeleting(true)
-    const deletedProduct = inventory?.find((product) => product.id === id)
+    const deletedProduct = inventory?.find(product => product.id === id)
     if (deletedProduct === undefined) {
       toast({
-        title: "Product Not Found",
+        title:       "Product Not Found",
         description: "Product not found in inventory.",
       })
       return
     }
     deleteProduct(deletedProduct.id)
     toast({
-      title: "Product Deleted",
+      title:       "Product Deleted",
       description: "Product has been removed from inventory.",
     })
     setIsDeleting(false)
@@ -244,7 +246,6 @@ export default function InventoryManagementPage() {
 
   // Render error state
   if (isInventoryError || isCategoriesError) {
-    const error = inventoryError || categoriesError
     return (
       <div className="flex flex-col min-h-screen">
         <div className="flex flex-1">
@@ -298,7 +299,7 @@ export default function InventoryManagementPage() {
                     placeholder="Search by name or SKU..."
                     className="pl-9"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                   />
                 </div>
                 
@@ -321,7 +322,7 @@ export default function InventoryManagementPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>
-                      {categories?.map((category) => (
+                      {categories?.map(category => (
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}
                         </SelectItem>
@@ -353,12 +354,12 @@ export default function InventoryManagementPage() {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredInventory.map((product) => (
+                      filteredInventory.map(product => (
                         <TableRow key={product.id}>
                           <TableCell className="font-medium">{product.sku}</TableCell>
                           <TableCell>{product.name}</TableCell>
                           <TableCell>
-                            {product.categories.map((category) => categories?.find((c) => c.id === category)?.name).join(", ")}
+                            {product.categories.map(category => categories?.find(c => c.id === category)?.name).join(", ")}
                           </TableCell>
                           <TableCell className="text-right">{formatPrice(product.variants.reduce((prev, curr) => prev < curr.price ? prev : curr.price, 0))}</TableCell>
                           <TableCell className="text-right">{formatPrice(product.variants.reduce((prev, curr) => prev > curr.price ? prev : curr.price, 0))}</TableCell>
@@ -368,7 +369,7 @@ export default function InventoryManagementPage() {
                               className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.status === "published"
                                 ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
                                 : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                                }`}
+                              }`}
                             >
                               {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
                             </span>
@@ -381,13 +382,13 @@ export default function InventoryManagementPage() {
 
                               {product.status === "draft" && (
                                 isPublishing ? <Loader2 className="w-4 h-4 animate-spin" /> :
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handlePublishProduct(product.slug)}
-                                >
-                                  Publish
-                                </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handlePublishProduct(product.slug)}
+                                  >
+                                    Publish
+                                  </Button>
                               )}
 
                               <AlertDialog>

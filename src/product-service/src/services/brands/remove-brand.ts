@@ -1,9 +1,11 @@
 import { PrismaClient } from '@nexura/product-service/src/db/prisma-client'
 import { handleError } from '@nexura/common/utils'
+import type { ServerUnaryCall, sendUnaryData, ServiceError } from '@grpc/grpc-js'
+import { RemoveBrandResponse, RemoveBrandRequest } from '@nexura/grpc_gateway/protos'
 
 const prisma = new PrismaClient()
 
-export const removeBrand = async (call: any, callback: any) => {
+export const removeBrand = async (call: ServerUnaryCall<RemoveBrandRequest, RemoveBrandResponse>, callback: sendUnaryData<RemoveBrandResponse>) => {
   try {
     const request = call.request
     const brandId = request.id
@@ -25,6 +27,6 @@ export const removeBrand = async (call: any, callback: any) => {
 
     callback(null, response)
   } catch (error) {
-    handleError(error, callback)
+    handleError(error as ServiceError, callback)
   }
 }

@@ -12,8 +12,8 @@ interface ErrorBoundaryProps {
 }
 
 export function ErrorBoundary({ children }: ErrorBoundaryProps) {
-  const [error, setError] = useState<AppError | null>(null)
-  const [errorType, setErrorType] = useState<string | null>(null)
+  const [ error, setError ] = useState<AppError | null>(null)
+  const [ errorType, setErrorType ] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -76,7 +76,7 @@ export function ErrorBoundary({ children }: ErrorBoundaryProps) {
       window.removeEventListener("error", handleError)
       window.removeEventListener("unhandledrejection", handleRejection)
     }
-  }, [router, errorType])
+  }, [ router, errorType ])
 
   if (errorType === "forbidden") {
     return <ForbiddenPage />

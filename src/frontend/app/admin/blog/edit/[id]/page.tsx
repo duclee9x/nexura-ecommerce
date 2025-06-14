@@ -27,49 +27,51 @@ import type { BlogPost, MediaItem } from "@/types/schema"
 
 // Sample blog post data
 const sampleBlogPost: BlogPost = {
-  id: "1",
+  id:    "1",
   title: "The Ultimate Guide to Choosing the Perfect Backpack",
-  slug: "ultimate-guide-choosing-perfect-backpack",
+  slug:  "ultimate-guide-choosing-perfect-backpack",
   content:
     "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p><h2>Consider Your Needs</h2><p>Before purchasing a backpack, think about how you'll use it. Are you commuting to work, hiking in the wilderness, or traveling abroad?</p><h2>Size Matters</h2><p>Backpacks come in various sizes, measured in liters. A 20-30L backpack is suitable for daily use, while 40-50L works well for weekend trips.</p><h2>Material and Durability</h2><p>Look for materials like ripstop nylon or Cordura for durability. Water-resistant coatings are a plus for protecting your belongings.</p>",
   excerpt:
     "Find the perfect backpack for your needs with our comprehensive guide covering materials, sizes, and features.",
   author: {
-    id: "1",
-    name: "Sarah Johnson",
+    id:     "1",
+    name:   "Sarah Johnson",
     avatar: "/placeholder.svg?height=40&width=40",
   },
   seo: {
-    title: "The Ultimate Guide to Choosing the Perfect Backpack | NEXURA",
+    title:       "The Ultimate Guide to Choosing the Perfect Backpack | NEXURA",
     description: "Find the perfect backpack for your needs with our comprehensive guide covering materials, sizes, and features",
   },
   featuredImage: {
-    id: "1",
-    filename: "backpack-guide.jpg",
-    url: "/placeholder.svg?height=600&width=1200&text=Backpack+Guide",
-    type: "image",
-    createdAt: "2024-03-15T10:30:00",
-    updatedAt: "2024-03-15T10:30:00",
-    mimeType: "image/jpeg",
-    fileSize: 1.2,
+    id:         "1",
+    filename:   "backpack-guide.jpg",
+    url:        "/placeholder.svg?height=600&width=1200&text=Backpack+Guide",
+    type:       "image",
+    createdAt:  "2024-03-15T10:30:00",
+    updatedAt:  "2024-03-15T10:30:00",
+    mimeType:   "image/jpeg",
+    fileSize:   1.2,
     dimensions: {
-      width: 1920,
+      width:  1920,
       height: 1080,
     },
     folder: "products",
-    tags: ["hero", "featured"],
+    tags:   [ "hero", "featured" ],
   },
-  categories: ["guides", "products"],
-  tags: ["backpacks", "travel", "gear"],
-  status: "published",
-  commentStatus: "open",
-  allowComments: true,
+  categories:     [ "guides", "products" ],
+  tags:           [
+    "backpacks", "travel", "gear"
+  ],
+  status:         "published",
+  commentStatus:  "open",
+  allowComments:  true,
   sendNewsletter: false,
-  isFeatured: true,
-  seoTitle: "The Ultimate Guide to Choosing the Perfect Backpack | NEXURA",
+  isFeatured:     true,
+  seoTitle:       "The Ultimate Guide to Choosing the Perfect Backpack | NEXURA",
   seoDescription: "Find the perfect backpack for your needs with our comprehensive guide covering materials, sizes, and features",
-  createdAt: "2023-03-10T09:30:00",
-  updatedAt: "2023-03-15T10:00:00",
+  createdAt:      "2023-03-10T09:30:00",
+  updatedAt:      "2023-03-15T10:00:00",
 }
 
 // Available categories and tags
@@ -105,43 +107,43 @@ export default function BlogEditPage({ params }: { params: { id: string } }) {
   const postId = Number.parseInt(params.id)
 
   // In a real app, you would fetch the blog post data based on the ID
-  const [post, setPost] = useState<BlogPost>(sampleBlogPost)
-  const [isLoading, setIsLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState("content")
-  const [selectedCategory, setSelectedCategory] = useState("")
-  const [selectedTag, setSelectedTag] = useState("")
-  const [publishDate, setPublishDate] = useState<Date | undefined>(
+  const [ post, setPost ] = useState<BlogPost>(sampleBlogPost)
+  const [ isLoading, setIsLoading ] = useState(false)
+  const [ activeTab, setActiveTab ] = useState("content")
+  const [ selectedCategory, setSelectedCategory ] = useState("")
+  const [ selectedTag, setSelectedTag ] = useState("")
+  const [ publishDate, setPublishDate ] = useState<Date | undefined>(
     post.publishedAt ? new Date(post.publishedAt) : undefined,
   )
-  const [publishTime, setPublishTime] = useState(
+  const [ publishTime, setPublishTime ] = useState(
     post.publishedAt
       ? new Date(post.publishedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       : "",
   )
-  const [isScheduled, setIsScheduled] = useState(false)
+  const [ isScheduled, setIsScheduled ] = useState(false)
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setPost((prev) => ({ ...prev, [name]: value }))
+    setPost(prev => ({ ...prev, [name]: value }))
   }
 
   // Handle content change from rich text editor
   const handleContentChange = (content: string) => {
-    setPost((prev) => ({ ...prev, content }))
+    setPost(prev => ({ ...prev, content }))
   }
 
   // Handle featured image change
   const handleFeaturedImageChange = (imageUrl: string) => {
-    setPost((prev) => ({ ...prev, featuredImage: { ...prev.featuredImage, url: imageUrl } as MediaItem }))
+    setPost(prev => ({ ...prev, featuredImage: { ...prev.featuredImage, url: imageUrl } as MediaItem }))
   }
 
   // Handle category selection
   const handleAddCategory = () => {
     if (selectedCategory && !post.categories.includes(selectedCategory)) {
-      setPost((prev) => ({
+      setPost(prev => ({
         ...prev,
-        categories: [...prev.categories, selectedCategory],
+        categories: [ ...prev.categories, selectedCategory ],
       }))
       setSelectedCategory("")
     }
@@ -150,9 +152,9 @@ export default function BlogEditPage({ params }: { params: { id: string } }) {
   // Handle tag selection
   const handleAddTag = () => {
     if (selectedTag && !post.tags.includes(selectedTag)) {
-      setPost((prev) => ({
+      setPost(prev => ({
         ...prev,
-        tags: [...prev.tags, selectedTag],
+        tags: [ ...prev.tags, selectedTag ],
       }))
       setSelectedTag("")
     }
@@ -160,17 +162,17 @@ export default function BlogEditPage({ params }: { params: { id: string } }) {
 
   // Handle removing a category
   const handleRemoveCategory = (category: string) => {
-    setPost((prev) => ({
+    setPost(prev => ({
       ...prev,
-      categories: prev.categories.filter((c) => c !== category),
+      categories: prev.categories.filter(c => c !== category),
     }))
   }
 
   // Handle removing a tag
   const handleRemoveTag = (tag: string) => {
-    setPost((prev) => ({
+    setPost(prev => ({
       ...prev,
-      tags: prev.tags.filter((t) => t !== tag),
+      tags: prev.tags.filter(t => t !== tag),
     }))
   }
 
@@ -180,7 +182,7 @@ export default function BlogEditPage({ params }: { params: { id: string } }) {
       .toLowerCase()
       .replace(/[^\w\s]/gi, "")
       .replace(/\s+/g, "-")
-    setPost((prev) => ({ ...prev, slug }))
+    setPost(prev => ({ ...prev, slug }))
   }
 
   // Handle save
@@ -190,7 +192,7 @@ export default function BlogEditPage({ params }: { params: { id: string } }) {
     // Update status if provided
     const updatedPost = {
       ...post,
-      status: status || post.status,
+      status:       status || post.status,
       dateModified: new Date().toISOString(),
     }
 
@@ -202,7 +204,7 @@ export default function BlogEditPage({ params }: { params: { id: string } }) {
         // Create date from selected date and time
         publishDateTime = new Date(publishDate)
         if (publishTime) {
-          const [hours, minutes] = publishTime.split(":").map(Number)
+          const [ hours, minutes ] = publishTime.split(":").map(Number)
           publishDateTime.setHours(hours, minutes)
         }
         updatedPost.status = "scheduled"
@@ -220,7 +222,7 @@ export default function BlogEditPage({ params }: { params: { id: string } }) {
     setTimeout(() => {
       setIsLoading(false)
       toast({
-        title: "Post Saved",
+        title:       "Post Saved",
         description: `Your post has been ${status || "saved"}.`,
       })
 
@@ -306,7 +308,7 @@ export default function BlogEditPage({ params }: { params: { id: string } }) {
                             id="publishTime"
                             type="time"
                             value={publishTime}
-                            onChange={(e) => setPublishTime(e.target.value)}
+                            onChange={e => setPublishTime(e.target.value)}
                           />
                         </div>
                       </div>
@@ -455,7 +457,7 @@ export default function BlogEditPage({ params }: { params: { id: string } }) {
                     <Label>Status</Label>
                     <Select
                       value={post.status}
-                      onValueChange={(value) => setPost((prev) => ({ ...prev, status: value as "draft" | "published" | "archived" | "scheduled" }))}
+                      onValueChange={value => setPost(prev => ({ ...prev, status: value as "draft" | "published" | "archived" | "scheduled" }))}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select status" />
@@ -473,12 +475,12 @@ export default function BlogEditPage({ params }: { params: { id: string } }) {
                     <Label>Author</Label>
                     <Select
                       value={post.author.id.toString()}
-                      onValueChange={(value) =>
-                        setPost((prev) => ({
+                      onValueChange={value =>
+                        setPost(prev => ({
                           ...prev,
                           author: {
-                            id: value,
-                            name: value === "1" ? "Sarah Johnson" : "Michael Chen",
+                            id:     value,
+                            name:   value === "1" ? "Sarah Johnson" : "Michael Chen",
                             avatar: `/placeholder.svg?height=40&width=40&text=${value === "1" ? "SJ" : "MC"}`,
                           },
                         }))
@@ -499,7 +501,7 @@ export default function BlogEditPage({ params }: { params: { id: string } }) {
                   <div className="space-y-2">
                     <Label>Categories</Label>
                     <div className="flex flex-wrap gap-2 mb-2">
-                      {post.categories.map((category) => (
+                      {post.categories.map(category => (
                         <Badge key={category} variant="secondary" className="capitalize">
                           {category}
                           <button
@@ -518,8 +520,8 @@ export default function BlogEditPage({ params }: { params: { id: string } }) {
                         </SelectTrigger>
                         <SelectContent>
                           {availableCategories
-                            .filter((category) => !post.categories.includes(category))
-                            .map((category) => (
+                            .filter(category => !post.categories.includes(category))
+                            .map(category => (
                               <SelectItem key={category} value={category} className="capitalize">
                                 {category}
                               </SelectItem>
@@ -535,7 +537,7 @@ export default function BlogEditPage({ params }: { params: { id: string } }) {
                   <div className="space-y-2">
                     <Label>Tags</Label>
                     <div className="flex flex-wrap gap-2 mb-2">
-                      {post.tags.map((tag) => (
+                      {post.tags.map(tag => (
                         <Badge key={tag} variant="outline" className="capitalize">
                           {tag}
                           <button className="ml-1 hover:text-destructive" onClick={() => handleRemoveTag(tag)}>
@@ -551,8 +553,8 @@ export default function BlogEditPage({ params }: { params: { id: string } }) {
                         </SelectTrigger>
                         <SelectContent>
                           {availableTags
-                            .filter((tag) => !post.tags.includes(tag))
-                            .map((tag) => (
+                            .filter(tag => !post.tags.includes(tag))
+                            .map(tag => (
                               <SelectItem key={tag} value={tag} className="capitalize">
                                 {tag}
                               </SelectItem>
@@ -609,7 +611,7 @@ export default function BlogEditPage({ params }: { params: { id: string } }) {
                     <Switch
                       id="newsletter"
                       checked={post.sendNewsletter}
-                      onCheckedChange={(checked) => setPost((prev) => ({ ...prev, sendNewsletter: checked }))}
+                      onCheckedChange={checked => setPost(prev => ({ ...prev, sendNewsletter: checked }))}
                     />
                     <Label htmlFor="newsletter">Send to newsletter subscribers</Label>
                   </div>
@@ -618,7 +620,7 @@ export default function BlogEditPage({ params }: { params: { id: string } }) {
                     <Switch
                       id="comments"
                       checked={post.allowComments !== false}
-                      onCheckedChange={(checked) => setPost((prev) => ({ ...prev, allowComments: checked }))}
+                      onCheckedChange={checked => setPost(prev => ({ ...prev, allowComments: checked }))}
                     />
                     <Label htmlFor="comments">Allow comments</Label>
                   </div>
@@ -627,7 +629,7 @@ export default function BlogEditPage({ params }: { params: { id: string } }) {
                     <Switch
                       id="featured"
                       checked={post.isFeatured}
-                      onCheckedChange={(checked) => setPost((prev) => ({ ...prev, isFeatured: checked }))}
+                      onCheckedChange={checked => setPost(prev => ({ ...prev, isFeatured: checked }))}
                     />
                     <Label htmlFor="featured">Feature on homepage</Label>
                   </div>

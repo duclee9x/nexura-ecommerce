@@ -61,204 +61,204 @@ import { useToast } from "@/hooks/use-toast"
 // Sample warehouse data
 const initialWarehouses = [
   {
-    id: 1,
-    name: "Main Warehouse",
-    code: "WH-MAIN",
-    location: "New York, NY",
-    address: "123 Warehouse St, New York, NY 10001",
-    manager: "John Smith",
-    contact: "+1 (212) 555-1234",
+    id:            1,
+    name:          "Main Warehouse",
+    code:          "WH-MAIN",
+    location:      "New York, NY",
+    address:       "123 Warehouse St, New York, NY 10001",
+    manager:       "John Smith",
+    contact:       "+1 (212) 555-1234",
     totalProducts: 532,
-    lowStock: 12,
-    outOfStock: 3,
-    status: "active",
+    lowStock:      12,
+    outOfStock:    3,
+    status:        "active",
   },
   {
-    id: 2,
-    name: "West Coast Facility",
-    code: "WH-WEST",
-    location: "Los Angeles, CA",
-    address: "456 Storage Blvd, Los Angeles, CA 90001",
-    manager: "Maria Rodriguez",
-    contact: "+1 (310) 555-6789",
+    id:            2,
+    name:          "West Coast Facility",
+    code:          "WH-WEST",
+    location:      "Los Angeles, CA",
+    address:       "456 Storage Blvd, Los Angeles, CA 90001",
+    manager:       "Maria Rodriguez",
+    contact:       "+1 (310) 555-6789",
     totalProducts: 328,
-    lowStock: 8,
-    outOfStock: 1,
-    status: "active",
+    lowStock:      8,
+    outOfStock:    1,
+    status:        "active",
   },
   {
-    id: 3,
-    name: "European Hub",
-    code: "WH-EUR",
-    location: "London, UK",
-    address: "78 Warehouse Lane, London, UK E1 6AA",
-    manager: "James Wilson",
-    contact: "+44 20 7123 4567",
+    id:            3,
+    name:          "European Hub",
+    code:          "WH-EUR",
+    location:      "London, UK",
+    address:       "78 Warehouse Lane, London, UK E1 6AA",
+    manager:       "James Wilson",
+    contact:       "+44 20 7123 4567",
     totalProducts: 245,
-    lowStock: 5,
-    outOfStock: 0,
-    status: "active",
+    lowStock:      5,
+    outOfStock:    0,
+    status:        "active",
   },
   {
-    id: 4,
-    name: "Asian Distribution Center",
-    code: "WH-APAC",
-    location: "Singapore",
-    address: "42 Storage Road, Singapore 123456",
-    manager: "Li Wei",
-    contact: "+65 6123 4567",
+    id:            4,
+    name:          "Asian Distribution Center",
+    code:          "WH-APAC",
+    location:      "Singapore",
+    address:       "42 Storage Road, Singapore 123456",
+    manager:       "Li Wei",
+    contact:       "+65 6123 4567",
     totalProducts: 187,
-    lowStock: 3,
-    outOfStock: 1,
-    status: "active",
+    lowStock:      3,
+    outOfStock:    1,
+    status:        "active",
   },
   {
-    id: 5,
-    name: "Seasonal Storage",
-    code: "WH-SEAS",
-    location: "Chicago, IL",
-    address: "789 Temporary Ave, Chicago, IL 60007",
-    manager: "Robert Johnson",
-    contact: "+1 (312) 555-9876",
+    id:            5,
+    name:          "Seasonal Storage",
+    code:          "WH-SEAS",
+    location:      "Chicago, IL",
+    address:       "789 Temporary Ave, Chicago, IL 60007",
+    manager:       "Robert Johnson",
+    contact:       "+1 (312) 555-9876",
     totalProducts: 98,
-    lowStock: 0,
-    outOfStock: 0,
-    status: "inactive",
+    lowStock:      0,
+    outOfStock:    0,
+    status:        "inactive",
   },
 ]
 
 // Sample inventory data
 const initialInventory = [
   {
-    id: 1,
-    sku: "BP-001",
-    name: "Urban Backpack",
-    warehouseId: 1,
-    warehouseName: "Main Warehouse",
-    quantity: 45,
+    id:                1,
+    sku:               "BP-001",
+    name:              "Urban Backpack",
+    warehouseId:       1,
+    warehouseName:     "Main Warehouse",
+    quantity:          45,
     lowStockThreshold: 10,
-    status: "In Stock",
-    category: "Backpacks",
-    lastUpdated: "2023-07-10T14:30:00",
+    status:            "In Stock",
+    category:          "Backpacks",
+    lastUpdated:       "2023-07-10T14:30:00",
   },
   {
-    id: 2,
-    sku: "BP-002",
-    name: "Hiking Backpack",
-    warehouseId: 1,
-    warehouseName: "Main Warehouse",
-    quantity: 8,
+    id:                2,
+    sku:               "BP-002",
+    name:              "Hiking Backpack",
+    warehouseId:       1,
+    warehouseName:     "Main Warehouse",
+    quantity:          8,
     lowStockThreshold: 10,
-    status: "Low Stock",
-    category: "Backpacks",
-    lastUpdated: "2023-07-12T09:15:00",
+    status:            "Low Stock",
+    category:          "Backpacks",
+    lastUpdated:       "2023-07-12T09:15:00",
   },
   {
-    id: 3,
-    sku: "BG-001",
-    name: "Messenger Bag",
-    warehouseId: 2,
-    warehouseName: "West Coast Facility",
-    quantity: 23,
+    id:                3,
+    sku:               "BG-001",
+    name:              "Messenger Bag",
+    warehouseId:       2,
+    warehouseName:     "West Coast Facility",
+    quantity:          23,
     lowStockThreshold: 15,
-    status: "In Stock",
-    category: "Bags",
-    lastUpdated: "2023-07-08T16:45:00",
+    status:            "In Stock",
+    category:          "Bags",
+    lastUpdated:       "2023-07-08T16:45:00",
   },
   {
-    id: 4,
-    sku: "ACC-001",
-    name: "Water Bottle",
-    warehouseId: 1,
-    warehouseName: "Main Warehouse",
-    quantity: 0,
+    id:                4,
+    sku:               "ACC-001",
+    name:              "Water Bottle",
+    warehouseId:       1,
+    warehouseName:     "Main Warehouse",
+    quantity:          0,
     lowStockThreshold: 5,
-    status: "Out of Stock",
-    category: "Accessories",
-    lastUpdated: "2023-07-05T11:20:00",
+    status:            "Out of Stock",
+    category:          "Accessories",
+    lastUpdated:       "2023-07-05T11:20:00",
   },
   {
-    id: 5,
-    sku: "BP-003",
-    name: "Travel Backpack",
-    warehouseId: 3,
-    warehouseName: "European Hub",
-    quantity: 12,
+    id:                5,
+    sku:               "BP-003",
+    name:              "Travel Backpack",
+    warehouseId:       3,
+    warehouseName:     "European Hub",
+    quantity:          12,
     lowStockThreshold: 8,
-    status: "In Stock",
-    category: "Backpacks",
-    lastUpdated: "2023-07-14T10:30:00",
+    status:            "In Stock",
+    category:          "Backpacks",
+    lastUpdated:       "2023-07-14T10:30:00",
   },
   {
-    id: 6,
-    sku: "ACC-002",
-    name: "Travel Adapter",
-    warehouseId: 3,
-    warehouseName: "European Hub",
-    quantity: 35,
+    id:                6,
+    sku:               "ACC-002",
+    name:              "Travel Adapter",
+    warehouseId:       3,
+    warehouseName:     "European Hub",
+    quantity:          35,
     lowStockThreshold: 10,
-    status: "In Stock",
-    category: "Accessories",
-    lastUpdated: "2023-07-11T13:45:00",
+    status:            "In Stock",
+    category:          "Accessories",
+    lastUpdated:       "2023-07-11T13:45:00",
   },
   {
-    id: 7,
-    sku: "BG-002",
-    name: "Duffel Bag",
-    warehouseId: 2,
-    warehouseName: "West Coast Facility",
-    quantity: 5,
+    id:                7,
+    sku:               "BG-002",
+    name:              "Duffel Bag",
+    warehouseId:       2,
+    warehouseName:     "West Coast Facility",
+    quantity:          5,
     lowStockThreshold: 8,
-    status: "Low Stock",
-    category: "Bags",
-    lastUpdated: "2023-07-09T15:20:00",
+    status:            "Low Stock",
+    category:          "Bags",
+    lastUpdated:       "2023-07-09T15:20:00",
   },
   {
-    id: 8,
-    sku: "ACC-003",
-    name: "Packing Cubes",
-    warehouseId: 4,
-    warehouseName: "Asian Distribution Center",
-    quantity: 42,
+    id:                8,
+    sku:               "ACC-003",
+    name:              "Packing Cubes",
+    warehouseId:       4,
+    warehouseName:     "Asian Distribution Center",
+    quantity:          42,
     lowStockThreshold: 15,
-    status: "In Stock",
-    category: "Accessories",
-    lastUpdated: "2023-07-13T09:10:00",
+    status:            "In Stock",
+    category:          "Accessories",
+    lastUpdated:       "2023-07-13T09:10:00",
   },
 ]
 
 export default function WarehousesPage() {
   const { toast } = useToast()
 
-  const [activeTab, setActiveTab] = useState("warehouses")
-  const [warehouses, setWarehouses] = useState(initialWarehouses)
-  const [inventory, setInventory] = useState(initialInventory)
-  const [warehouseSearchQuery, setWarehouseSearchQuery] = useState("")
-  const [inventorySearchQuery, setInventorySearchQuery] = useState("")
-  const [warehouseStatusFilter, setWarehouseStatusFilter] = useState("all")
-  const [inventoryStatusFilter, setInventoryStatusFilter] = useState("all")
-  const [inventoryWarehouseFilter, setInventoryWarehouseFilter] = useState("all")
-  const [inventoryCategoryFilter, setInventoryCategoryFilter] = useState("all")
-  const [sortField, setSortField] = useState("name")
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
-  const [isAddWarehouseOpen, setIsAddWarehouseOpen] = useState(false)
-  const [isEditWarehouseOpen, setIsEditWarehouseOpen] = useState(false)
-  const [isAdjustStockOpen, setIsAdjustStockOpen] = useState(false)
-  const [selectedWarehouse, setSelectedWarehouse] = useState<any>(null)
-  const [selectedInventoryItem, setSelectedInventoryItem] = useState<any>(null)
-  const [newWarehouse, setNewWarehouse] = useState({
-    name: "",
-    code: "",
+  const [ activeTab, setActiveTab ] = useState("warehouses")
+  const [ warehouses, setWarehouses ] = useState(initialWarehouses)
+  const [ inventory, setInventory ] = useState(initialInventory)
+  const [ warehouseSearchQuery, setWarehouseSearchQuery ] = useState("")
+  const [ inventorySearchQuery, setInventorySearchQuery ] = useState("")
+  const [ warehouseStatusFilter, setWarehouseStatusFilter ] = useState("all")
+  const [ inventoryStatusFilter, setInventoryStatusFilter ] = useState("all")
+  const [ inventoryWarehouseFilter, setInventoryWarehouseFilter ] = useState("all")
+  const [ inventoryCategoryFilter, setInventoryCategoryFilter ] = useState("all")
+  const [ sortField, setSortField ] = useState("name")
+  const [ sortDirection, setSortDirection ] = useState<"asc" | "desc">("asc")
+  const [ isAddWarehouseOpen, setIsAddWarehouseOpen ] = useState(false)
+  const [ isEditWarehouseOpen, setIsEditWarehouseOpen ] = useState(false)
+  const [ isAdjustStockOpen, setIsAdjustStockOpen ] = useState(false)
+  const [ selectedWarehouse, setSelectedWarehouse ] = useState<any>(null)
+  const [ selectedInventoryItem, setSelectedInventoryItem ] = useState<any>(null)
+  const [ newWarehouse, setNewWarehouse ] = useState({
+    name:     "",
+    code:     "",
     location: "",
-    address: "",
-    manager: "",
-    contact: "",
-    status: "active",
+    address:  "",
+    manager:  "",
+    contact:  "",
+    status:   "active",
   })
-  const [stockAdjustment, setStockAdjustment] = useState({
+  const [ stockAdjustment, setStockAdjustment ] = useState({
     quantity: 0,
-    reason: "restock",
-    notes: "",
+    reason:   "restock",
+    notes:    "",
   })
 
   // Filter warehouses based on search and status
@@ -311,7 +311,7 @@ export default function WarehousesPage() {
   })
 
   // Get unique categories from inventory
-  const categories = Array.from(new Set(inventory.map((item) => item.category)))
+  const categories = Array.from(new Set(inventory.map(item => item.category)))
 
   // Handle sort
   const handleSort = (field: string) => {
@@ -347,39 +347,39 @@ export default function WarehousesPage() {
     // Validate form
     if (!newWarehouse.name || !newWarehouse.code || !newWarehouse.location) {
       toast({
-        title: "Validation error",
+        title:       "Validation error",
         description: "Please fill in all required fields.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
 
     // Create new warehouse
     const warehouseToAdd = {
-      id: Math.max(...warehouses.map((w) => w.id)) + 1,
+      id:            Math.max(...warehouses.map(w => w.id)) + 1,
       ...newWarehouse,
       totalProducts: 0,
-      lowStock: 0,
-      outOfStock: 0,
+      lowStock:      0,
+      outOfStock:    0,
     }
 
-    setWarehouses([...warehouses, warehouseToAdd])
+    setWarehouses([ ...warehouses, warehouseToAdd ])
 
     // Reset form
     setNewWarehouse({
-      name: "",
-      code: "",
+      name:     "",
+      code:     "",
       location: "",
-      address: "",
-      manager: "",
-      contact: "",
-      status: "active",
+      address:  "",
+      manager:  "",
+      contact:  "",
+      status:   "active",
     })
 
     setIsAddWarehouseOpen(false)
 
     toast({
-      title: "Warehouse added",
+      title:       "Warehouse added",
       description: `${warehouseToAdd.name} has been successfully added.`,
     })
   }
@@ -395,13 +395,13 @@ export default function WarehousesPage() {
     if (!selectedWarehouse) return
 
     setWarehouses(
-      warehouses.map((warehouse) => (warehouse.id === selectedWarehouse.id ? selectedWarehouse : warehouse)),
+      warehouses.map(warehouse => (warehouse.id === selectedWarehouse.id ? selectedWarehouse : warehouse)),
     )
 
     setIsEditWarehouseOpen(false)
 
     toast({
-      title: "Warehouse updated",
+      title:       "Warehouse updated",
       description: `${selectedWarehouse.name} has been successfully updated.`,
     })
   }
@@ -409,21 +409,21 @@ export default function WarehousesPage() {
   // Handle delete warehouse
   const handleDeleteWarehouse = (id: number) => {
     // Check if warehouse has inventory
-    const warehouseInventory = inventory.filter((item) => item.warehouseId === id)
+    const warehouseInventory = inventory.filter(item => item.warehouseId === id)
 
     if (warehouseInventory.length > 0) {
       toast({
-        title: "Cannot delete warehouse",
+        title:       "Cannot delete warehouse",
         description: "This warehouse contains inventory items. Please transfer or remove all items first.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
 
-    setWarehouses(warehouses.filter((warehouse) => warehouse.id !== id))
+    setWarehouses(warehouses.filter(warehouse => warehouse.id !== id))
 
     toast({
-      title: "Warehouse deleted",
+      title:       "Warehouse deleted",
       description: "The warehouse has been successfully deleted.",
     })
   }
@@ -433,8 +433,8 @@ export default function WarehousesPage() {
     setSelectedInventoryItem(item)
     setStockAdjustment({
       quantity: 0,
-      reason: "restock",
-      notes: "",
+      reason:   "restock",
+      notes:    "",
     })
     setIsAdjustStockOpen(true)
   }
@@ -448,9 +448,9 @@ export default function WarehousesPage() {
     // Prevent negative stock
     if (newQuantity < 0) {
       toast({
-        title: "Invalid adjustment",
+        title:       "Invalid adjustment",
         description: "Stock quantity cannot be negative.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
@@ -468,7 +468,7 @@ export default function WarehousesPage() {
       lastUpdated: new Date().toISOString(),
     }
 
-    setInventory(inventory.map((item) => (item.id === selectedInventoryItem.id ? updatedItem : item)))
+    setInventory(inventory.map(item => (item.id === selectedInventoryItem.id ? updatedItem : item)))
 
     // Update warehouse stats
     updateWarehouseStats(updatedItem.warehouseId)
@@ -476,21 +476,21 @@ export default function WarehousesPage() {
     setIsAdjustStockOpen(false)
 
     toast({
-      title: "Stock adjusted",
+      title:       "Stock adjusted",
       description: `${updatedItem.name} stock has been updated to ${newQuantity}.`,
     })
   }
 
   // Update warehouse stats
   const updateWarehouseStats = (warehouseId: number) => {
-    const warehouseInventory = inventory.filter((item) => item.warehouseId === warehouseId)
+    const warehouseInventory = inventory.filter(item => item.warehouseId === warehouseId)
 
     const totalProducts = warehouseInventory.length
-    const lowStock = warehouseInventory.filter((item) => item.status === "Low Stock").length
-    const outOfStock = warehouseInventory.filter((item) => item.status === "Out of Stock").length
+    const lowStock = warehouseInventory.filter(item => item.status === "Low Stock").length
+    const outOfStock = warehouseInventory.filter(item => item.status === "Out of Stock").length
 
     setWarehouses(
-      warehouses.map((warehouse) =>
+      warehouses.map(warehouse =>
         warehouse.id === warehouseId ? { ...warehouse, totalProducts, lowStock, outOfStock } : warehouse,
       ),
     )
@@ -500,10 +500,10 @@ export default function WarehousesPage() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
+      month:  "short",
+      day:    "numeric",
+      year:   "numeric",
+      hour:   "2-digit",
       minute: "2-digit",
     }).format(date)
   }
@@ -547,7 +547,7 @@ export default function WarehousesPage() {
                         placeholder="e.g. Main Warehouse"
                         className="col-span-3"
                         value={newWarehouse.name}
-                        onChange={(e) => setNewWarehouse({ ...newWarehouse, name: e.target.value })}
+                        onChange={e => setNewWarehouse({ ...newWarehouse, name: e.target.value })}
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -559,7 +559,7 @@ export default function WarehousesPage() {
                         placeholder="e.g. WH-MAIN"
                         className="col-span-3"
                         value={newWarehouse.code}
-                        onChange={(e) => setNewWarehouse({ ...newWarehouse, code: e.target.value.toUpperCase() })}
+                        onChange={e => setNewWarehouse({ ...newWarehouse, code: e.target.value.toUpperCase() })}
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -571,7 +571,7 @@ export default function WarehousesPage() {
                         placeholder="e.g. New York, NY"
                         className="col-span-3"
                         value={newWarehouse.location}
-                        onChange={(e) => setNewWarehouse({ ...newWarehouse, location: e.target.value })}
+                        onChange={e => setNewWarehouse({ ...newWarehouse, location: e.target.value })}
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -583,7 +583,7 @@ export default function WarehousesPage() {
                         placeholder="Full address"
                         className="col-span-3"
                         value={newWarehouse.address}
-                        onChange={(e) => setNewWarehouse({ ...newWarehouse, address: e.target.value })}
+                        onChange={e => setNewWarehouse({ ...newWarehouse, address: e.target.value })}
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -595,7 +595,7 @@ export default function WarehousesPage() {
                         placeholder="Warehouse manager name"
                         className="col-span-3"
                         value={newWarehouse.manager}
-                        onChange={(e) => setNewWarehouse({ ...newWarehouse, manager: e.target.value })}
+                        onChange={e => setNewWarehouse({ ...newWarehouse, manager: e.target.value })}
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -607,7 +607,7 @@ export default function WarehousesPage() {
                         placeholder="Phone number or email"
                         className="col-span-3"
                         value={newWarehouse.contact}
-                        onChange={(e) => setNewWarehouse({ ...newWarehouse, contact: e.target.value })}
+                        onChange={e => setNewWarehouse({ ...newWarehouse, contact: e.target.value })}
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -616,7 +616,7 @@ export default function WarehousesPage() {
                       </Label>
                       <Select
                         value={newWarehouse.status}
-                        onValueChange={(value) => setNewWarehouse({ ...newWarehouse, status: value })}
+                        onValueChange={value => setNewWarehouse({ ...newWarehouse, status: value })}
                       >
                         <SelectTrigger id="status" className="col-span-3">
                           <SelectValue placeholder="Select status" />
@@ -658,10 +658,10 @@ export default function WarehousesPage() {
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Total Warehouses</p>
                     <h3 className="text-2xl font-bold mt-1">
-                      {warehouses.filter((w) => w.status === "active").length}
+                      {warehouses.filter(w => w.status === "active").length}
                     </h3>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {warehouses.filter((w) => w.status === "inactive").length} inactive
+                      {warehouses.filter(w => w.status === "inactive").length} inactive
                     </p>
                   </div>
                   <div className="bg-primary/10 p-3 rounded-full">
@@ -692,10 +692,10 @@ export default function WarehousesPage() {
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Low Stock Items</p>
                     <h3 className="text-2xl font-bold mt-1">
-                      {inventory.filter((item) => item.status === "Low Stock").length}
+                      {inventory.filter(item => item.status === "Low Stock").length}
                     </h3>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {inventory.filter((item) => item.status === "Out of Stock").length} out of stock
+                      {inventory.filter(item => item.status === "Out of Stock").length} out of stock
                     </p>
                   </div>
                   <div className="bg-primary/10 p-3 rounded-full">
@@ -720,7 +720,7 @@ export default function WarehousesPage() {
                     placeholder="Search warehouses..."
                     className="pl-9"
                     value={warehouseSearchQuery}
-                    onChange={(e) => setWarehouseSearchQuery(e.target.value)}
+                    onChange={e => setWarehouseSearchQuery(e.target.value)}
                   />
                 </div>
                 <Select value={warehouseStatusFilter} onValueChange={setWarehouseStatusFilter}>
@@ -757,7 +757,7 @@ export default function WarehousesPage() {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        filteredWarehouses.map((warehouse) => (
+                        filteredWarehouses.map(warehouse => (
                           <TableRow key={warehouse.id}>
                             <TableCell className="font-medium">{warehouse.name}</TableCell>
                             <TableCell>{warehouse.code}</TableCell>
@@ -868,7 +868,7 @@ export default function WarehousesPage() {
                     placeholder="Search inventory..."
                     className="pl-9"
                     value={inventorySearchQuery}
-                    onChange={(e) => setInventorySearchQuery(e.target.value)}
+                    onChange={e => setInventorySearchQuery(e.target.value)}
                   />
                 </div>
                 <div className="flex flex-wrap gap-4">
@@ -889,7 +889,7 @@ export default function WarehousesPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Warehouses</SelectItem>
-                      {warehouses.map((warehouse) => (
+                      {warehouses.map(warehouse => (
                         <SelectItem key={warehouse.id} value={warehouse.id.toString()}>
                           {warehouse.name}
                         </SelectItem>
@@ -902,7 +902,7 @@ export default function WarehousesPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>
-                      {categories.map((category) => (
+                      {categories.map(category => (
                         <SelectItem key={category} value={category}>
                           {category}
                         </SelectItem>
@@ -975,7 +975,7 @@ export default function WarehousesPage() {
                           </TableCell>
                         </TableRow>
                       ) : (
-                        sortedInventory.map((item) => (
+                        sortedInventory.map(item => (
                           <TableRow key={item.id}>
                             <TableCell className="font-medium">{item.sku}</TableCell>
                             <TableCell>{item.name}</TableCell>
@@ -1050,7 +1050,7 @@ export default function WarehousesPage() {
                 <Input
                   id="edit-name"
                   value={selectedWarehouse.name}
-                  onChange={(e) => setSelectedWarehouse({ ...selectedWarehouse, name: e.target.value })}
+                  onChange={e => setSelectedWarehouse({ ...selectedWarehouse, name: e.target.value })}
                   className="col-span-3"
                 />
               </div>
@@ -1061,7 +1061,7 @@ export default function WarehousesPage() {
                 <Input
                   id="edit-code"
                   value={selectedWarehouse.code}
-                  onChange={(e) => setSelectedWarehouse({ ...selectedWarehouse, code: e.target.value.toUpperCase() })}
+                  onChange={e => setSelectedWarehouse({ ...selectedWarehouse, code: e.target.value.toUpperCase() })}
                   className="col-span-3"
                 />
               </div>
@@ -1072,7 +1072,7 @@ export default function WarehousesPage() {
                 <Input
                   id="edit-location"
                   value={selectedWarehouse.location}
-                  onChange={(e) => setSelectedWarehouse({ ...selectedWarehouse, location: e.target.value })}
+                  onChange={e => setSelectedWarehouse({ ...selectedWarehouse, location: e.target.value })}
                   className="col-span-3"
                 />
               </div>
@@ -1083,7 +1083,7 @@ export default function WarehousesPage() {
                 <Textarea
                   id="edit-address"
                   value={selectedWarehouse.address}
-                  onChange={(e) => setSelectedWarehouse({ ...selectedWarehouse, address: e.target.value })}
+                  onChange={e => setSelectedWarehouse({ ...selectedWarehouse, address: e.target.value })}
                   className="col-span-3"
                 />
               </div>
@@ -1094,7 +1094,7 @@ export default function WarehousesPage() {
                 <Input
                   id="edit-manager"
                   value={selectedWarehouse.manager}
-                  onChange={(e) => setSelectedWarehouse({ ...selectedWarehouse, manager: e.target.value })}
+                  onChange={e => setSelectedWarehouse({ ...selectedWarehouse, manager: e.target.value })}
                   className="col-span-3"
                 />
               </div>
@@ -1105,7 +1105,7 @@ export default function WarehousesPage() {
                 <Input
                   id="edit-contact"
                   value={selectedWarehouse.contact}
-                  onChange={(e) => setSelectedWarehouse({ ...selectedWarehouse, contact: e.target.value })}
+                  onChange={e => setSelectedWarehouse({ ...selectedWarehouse, contact: e.target.value })}
                   className="col-span-3"
                 />
               </div>
@@ -1115,7 +1115,7 @@ export default function WarehousesPage() {
                 </Label>
                 <Select
                   value={selectedWarehouse.status}
-                  onValueChange={(value) => setSelectedWarehouse({ ...selectedWarehouse, status: value })}
+                  onValueChange={value => setSelectedWarehouse({ ...selectedWarehouse, status: value })}
                 >
                   <SelectTrigger id="edit-status" className="col-span-3">
                     <SelectValue placeholder="Select status" />
@@ -1186,7 +1186,7 @@ export default function WarehousesPage() {
                     id="adjustment"
                     type="number"
                     value={stockAdjustment.quantity}
-                    onChange={(e) =>
+                    onChange={e =>
                       setStockAdjustment({ ...stockAdjustment, quantity: Number.parseInt(e.target.value) || 0 })
                     }
                   />
@@ -1201,7 +1201,7 @@ export default function WarehousesPage() {
                 </Label>
                 <Select
                   value={stockAdjustment.reason}
-                  onValueChange={(value) => setStockAdjustment({ ...stockAdjustment, reason: value })}
+                  onValueChange={value => setStockAdjustment({ ...stockAdjustment, reason: value })}
                 >
                   <SelectTrigger id="reason" className="col-span-3">
                     <SelectValue placeholder="Select reason" />
@@ -1222,7 +1222,7 @@ export default function WarehousesPage() {
                 <Textarea
                   id="notes"
                   value={stockAdjustment.notes}
-                  onChange={(e) => setStockAdjustment({ ...stockAdjustment, notes: e.target.value })}
+                  onChange={e => setStockAdjustment({ ...stockAdjustment, notes: e.target.value })}
                   placeholder="Add any additional notes here"
                   className="col-span-3"
                 />

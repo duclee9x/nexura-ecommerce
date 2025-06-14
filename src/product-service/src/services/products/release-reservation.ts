@@ -14,7 +14,7 @@ export async function releaseReservation(
 
     // Get the reservation with its variant and stock
     const reservation = await prisma.reservation.findUnique({
-      where: { id: reservationId },
+      where:   { id: reservationId },
       include: {
         variant: {
           include: {
@@ -53,7 +53,7 @@ export async function releaseReservation(
       // Update stock - reverse the reservation operation
       await tx.stock.update({
         where: { variantId: reservation.variantId },
-        data: {
+        data:  {
           quantity: quantity + reservation.quantity,
           reserved: reserved - reservation.quantity
         }

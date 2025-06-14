@@ -44,7 +44,7 @@ import { NodeSDK } from "@opentelemetry/sdk-node";
 
 export const tracerInstrumentation = (serviceName: string) => {
   const exporter = new OTLPTraceExporter({
-    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
+    url:     process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -55,7 +55,7 @@ export const tracerInstrumentation = (serviceName: string) => {
     resource: new Resource({
       [ATTR_SERVICE_NAME]: serviceName,
     }),
-    traceExporter: exporter,
+    traceExporter:    exporter,
     instrumentations: [
       getNodeAutoInstrumentations(),
       new GrpcInstrumentation(),
@@ -80,7 +80,7 @@ export const withTracing = async <T>(
     return result;
   } catch (error) {
     span.setStatus({
-      code: SpanStatusCode.ERROR,
+      code:    SpanStatusCode.ERROR,
       message: error instanceof Error ? error.message : "Unknown error",
     });
     throw error;

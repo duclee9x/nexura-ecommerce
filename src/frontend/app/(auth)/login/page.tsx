@@ -17,34 +17,51 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState } from "react"
 
-import { useSession } from "@/contexts/session-context"
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email:    z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 })
 
 type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
-  const { login } = useSession()
   const router = useRouter()
+  const [ isLoading, setIsLoading ] = useState(false)
 
   const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+    resolver:      zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      email:    "",
       password: "",
     },
   })
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      await login.mutateAsync(data)
+      setIsLoading(true)
+      const response = await fetch('/api/auth/login', {
+        method:  'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to login')
+      }
+
       toast.success("Logged in successfully")
       router.push("/")
+      router.refresh() // Refresh the page to update the auth state
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to login")
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -68,7 +85,6 @@ export default function LoginPage() {
                     <FormLabel className="text-foreground">Email</FormLabel>
                     <FormControl>
                       <Input
-
                         type="email"
                         placeholder="Enter your email"
                         {...field}
@@ -95,13 +111,17 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <p className="text-sm text-foreground hover:underline  cursor-pointer text-right">
+              <p className="text-sm text-foreground hover:underline cursor-pointer text-right">
                 <Link href="/forgot-password" className="text-primary hover:underline">
                   Forgot password?
                 </Link>
               </p>
-              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Logging in..." : "Login"}
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={isLoading}
+              >
+                {isLoading ? "Logging in..." : "Login"}
               </Button>
             </form>
           </Form>
@@ -113,7 +133,6 @@ export default function LoginPage() {
               Register
             </Link>
           </p>
-
         </CardFooter>
       </Card>
     </div>

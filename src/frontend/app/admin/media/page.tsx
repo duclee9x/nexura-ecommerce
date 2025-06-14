@@ -53,113 +53,121 @@ import { Checkbox } from "@/components/ui/checkbox"
 // Sample media items
 const sampleMedia = [
   {
-    id: 1,
-    name: "product-hero-image.jpg",
-    url: "/placeholder.svg?height=600&width=800&text=Product+Hero",
-    type: "image",
-    size: "1.2 MB",
+    id:         1,
+    name:       "product-hero-image.jpg",
+    url:        "/placeholder.svg?height=600&width=800&text=Product+Hero",
+    type:       "image",
+    size:       "1.2 MB",
     dimensions: "1920x1080",
     uploadedAt: "2024-03-15T10:30:00",
-    folder: "products",
-    tags: ["hero", "featured"],
+    folder:     "products",
+    tags:       [ "hero", "featured" ],
   },
   {
-    id: 2,
-    name: "backpack-blue.jpg",
-    url: "/placeholder.svg?height=600&width=800&text=Backpack+Blue",
-    type: "image",
-    size: "0.8 MB",
+    id:         2,
+    name:       "backpack-blue.jpg",
+    url:        "/placeholder.svg?height=600&width=800&text=Backpack+Blue",
+    type:       "image",
+    size:       "0.8 MB",
     dimensions: "1200x800",
     uploadedAt: "2024-03-14T14:45:00",
-    folder: "products",
-    tags: ["backpack", "blue"],
+    folder:     "products",
+    tags:       [ "backpack", "blue" ],
   },
   {
-    id: 3,
-    name: "banner-summer-sale.jpg",
-    url: "/placeholder.svg?height=600&width=1200&text=Summer+Sale+Banner",
-    type: "image",
-    size: "1.5 MB",
+    id:         3,
+    name:       "banner-summer-sale.jpg",
+    url:        "/placeholder.svg?height=600&width=1200&text=Summer+Sale+Banner",
+    type:       "image",
+    size:       "1.5 MB",
     dimensions: "1920x600",
     uploadedAt: "2024-03-12T09:15:00",
-    folder: "banners",
-    tags: ["banner", "sale", "summer"],
+    folder:     "banners",
+    tags:       [
+      "banner", "sale", "summer"
+    ],
   },
   {
-    id: 4,
-    name: "travel-guide-cover.jpg",
-    url: "/placeholder.svg?height=600&width=800&text=Travel+Guide+Cover",
-    type: "image",
-    size: "0.9 MB",
+    id:         4,
+    name:       "travel-guide-cover.jpg",
+    url:        "/placeholder.svg?height=600&width=800&text=Travel+Guide+Cover",
+    type:       "image",
+    size:       "0.9 MB",
     dimensions: "1400x900",
     uploadedAt: "2024-03-10T16:20:00",
-    folder: "blog",
-    tags: ["blog", "travel", "cover"],
+    folder:     "blog",
+    tags:       [
+      "blog", "travel", "cover"
+    ],
   },
   {
-    id: 5,
-    name: "product-lifestyle.jpg",
-    url: "/placeholder.svg?height=600&width=800&text=Product+Lifestyle",
-    type: "image",
-    size: "1.1 MB",
+    id:         5,
+    name:       "product-lifestyle.jpg",
+    url:        "/placeholder.svg?height=600&width=800&text=Product+Lifestyle",
+    type:       "image",
+    size:       "1.1 MB",
     dimensions: "1600x1000",
     uploadedAt: "2024-03-08T11:30:00",
-    folder: "products",
-    tags: ["lifestyle", "outdoor"],
+    folder:     "products",
+    tags:       [ "lifestyle", "outdoor" ],
   },
   {
-    id: 6,
-    name: "team-photo.jpg",
-    url: "/placeholder.svg?height=600&width=800&text=Team+Photo",
-    type: "image",
-    size: "1.3 MB",
+    id:         6,
+    name:       "team-photo.jpg",
+    url:        "/placeholder.svg?height=600&width=800&text=Team+Photo",
+    type:       "image",
+    size:       "1.3 MB",
     dimensions: "1800x1200",
     uploadedAt: "2024-03-05T13:45:00",
-    folder: "about",
-    tags: ["team", "company"],
+    folder:     "about",
+    tags:       [ "team", "company" ],
   },
   {
-    id: 7,
-    name: "product-detail-1.jpg",
-    url: "/placeholder.svg?height=600&width=800&text=Product+Detail",
-    type: "image",
-    size: "0.7 MB",
+    id:         7,
+    name:       "product-detail-1.jpg",
+    url:        "/placeholder.svg?height=600&width=800&text=Product+Detail",
+    type:       "image",
+    size:       "0.7 MB",
     dimensions: "1000x1000",
     uploadedAt: "2024-03-03T09:10:00",
-    folder: "products",
-    tags: ["detail", "closeup"],
+    folder:     "products",
+    tags:       [ "detail", "closeup" ],
   },
   {
-    id: 8,
-    name: "blog-post-image.jpg",
-    url: "/placeholder.svg?height=600&width=800&text=Blog+Post+Image",
-    type: "image",
-    size: "0.9 MB",
+    id:         8,
+    name:       "blog-post-image.jpg",
+    url:        "/placeholder.svg?height=600&width=800&text=Blog+Post+Image",
+    type:       "image",
+    size:       "0.9 MB",
     dimensions: "1200x800",
     uploadedAt: "2024-03-01T15:20:00",
-    folder: "blog",
-    tags: ["blog", "article"],
+    folder:     "blog",
+    tags:       [ "blog", "article" ],
   },
 ]
 
 // Available folders
-const folders = ["All", "Products", "Banners", "Blog", "About"]
+const folders = [
+  "All", "Products", "Banners", "Blog", "About"
+]
 
 // Available tags
-const availableTags = ["hero", "featured", "backpack", "blue", "banner", "sale", "summer", "blog", "travel", "cover", "lifestyle", "outdoor", "team", "company", "detail", "closeup", "article"]
+const availableTags = [
+  "hero", "featured", "backpack", "blue", "banner", "sale", "summer", "blog", "travel", "cover", "lifestyle", "outdoor", "team", "company", "detail", "closeup", "article"
+]
 
 export default function MediaLibraryPage() {
-  const [media, setMedia] = useState(sampleMedia)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedFolder, setSelectedFolder] = useState("All")
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [currentPage, setCurrentPage] = useState(1)
+  const [ media, setMedia ] = useState(sampleMedia)
+  const [ searchQuery, setSearchQuery ] = useState("")
+  const [ selectedFolder, setSelectedFolder ] = useState("All")
+  const [ selectedTags, setSelectedTags ] = useState<string[]>([])
+  const [ viewMode, setViewMode ] = useState<"grid" | "list">("grid")
+  const [ currentPage, setCurrentPage ] = useState(1)
   const [itemsPerPage] = useState(6)
-  const [selectedItems, setSelectedItems] = useState<number[]>([])
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const [isUploading, setIsUploading] = useState(false)
-  const [showTagFilter, setShowTagFilter] = useState(false)
+  const [ selectedItems, setSelectedItems ] = useState<number[]>([])
+  const [ uploadProgress, setUploadProgress ] = useState(0)
+  const [ isUploading, setIsUploading ] = useState(false)
+  const [ showTagFilter, setShowTagFilter ] = useState(false)
 
   // Filter media based on search, folder, and tags
   const filteredMedia = media.filter((item) => {
@@ -167,7 +175,7 @@ export default function MediaLibraryPage() {
     if (
       searchQuery &&
       !item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !item.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      !item.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
     ) {
       return false
     }
@@ -178,7 +186,7 @@ export default function MediaLibraryPage() {
     }
 
     // Filter by tags
-    if (selectedTags.length > 0 && !selectedTags.some((tag) => item.tags.includes(tag))) {
+    if (selectedTags.length > 0 && !selectedTags.some(tag => item.tags.includes(tag))) {
       return false
     }
 
@@ -200,9 +208,9 @@ export default function MediaLibraryPage() {
   const handleSelectItem = (id: number) => {
     setSelectedItems((prev) => {
       if (prev.includes(id)) {
-        return prev.filter((itemId) => itemId !== id)
+        return prev.filter(itemId => itemId !== id)
       } else {
-        return [...prev, id]
+        return [ ...prev, id ]
       }
     })
   }
@@ -212,17 +220,17 @@ export default function MediaLibraryPage() {
     if (selectedItems.length === currentItems.length) {
       setSelectedItems([])
     } else {
-      setSelectedItems(currentItems.map((item) => item.id))
+      setSelectedItems(currentItems.map(item => item.id))
     }
   }
 
   // Handle delete selected
   const handleDeleteSelected = () => {
-    setMedia((prev) => prev.filter((item) => !selectedItems.includes(item.id)))
+    setMedia(prev => prev.filter(item => !selectedItems.includes(item.id)))
     setSelectedItems([])
     
     toast({
-      title: "Media Deleted",
+      title:       "Media Deleted",
       description: `${selectedItems.length} item(s)
 have
 been
@@ -256,9 +264,9 @@ deleted.`,
 
       // Add new media items
       const newMedia = Array.from(files).map((file, index) => ({
-        id: Date.now() + index,
+        id:   Date.now() + index,
         name: file.name,
-        url: URL.createObjectURL(file),
+        url:  URL.createObjectURL(file),
         type: file.type.startsWith("image/") ? "image" : "file",
         size: `
 $
@@ -268,16 +276,16 @@ $
 MB`,
         dimensions: "1200x800", // This would be determined from the actual image
         uploadedAt: new Date().toISOString(),
-        folder: selectedFolder === "All" ? "uploads" : selectedFolder.toLowerCase(),
-        tags: [],
+        folder:     selectedFolder === "All" ? "uploads" : selectedFolder.toLowerCase(),
+        tags:       [],
       }))
 
-      setMedia((prev) => [...newMedia, ...prev])
+      setMedia(prev => [ ...newMedia, ...prev ])
       setIsUploading(false)
       setUploadProgress(0)
 
       toast({
-        title: "Upload Complete",
+        title:       "Upload Complete",
         description: `
 $
 {
@@ -294,9 +302,9 @@ successfully.`,
   const handleTagSelect = (tag: string) => {
     setSelectedTags((prev) => {
       if (prev.includes(tag)) {
-        return prev.filter((t) => t !== tag)
+        return prev.filter(t => t !== tag)
       } else {
-        return [...prev, tag]
+        return [ ...prev, tag ]
       }
     })
   }
@@ -305,9 +313,9 @@ successfully.`,
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
+      year:  "numeric",
       month: "short",
-      day: "numeric",
+      day:   "numeric",
     }).format(date)
   }
 
@@ -315,7 +323,7 @@ successfully.`,
   const copyToClipboard = (url: string) => {
     navigator.clipboard.writeText(url)
     toast({
-      title: "URL Copied",
+      title:       "URL Copied",
       description: "Image URL has been copied to clipboard.",
     })
   }
@@ -382,7 +390,7 @@ successfully.`,
                             <SelectValue placeholder="Select folder" />
                           </SelectTrigger>
                           <SelectContent>
-                            {folders.filter(folder => folder !== "All").map((folder) => (
+                            {folders.filter(folder => folder !== "All").map(folder => (
                               <SelectItem key={folder} value={folder}>
                                 {folder}
                               </SelectItem>
@@ -452,7 +460,7 @@ successfully.`,
                     placeholder="Search media..."
                     className="pl-9"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                   />
                 </div>
 
@@ -462,7 +470,7 @@ successfully.`,
                       <SelectValue placeholder="Folder" />
                     </SelectTrigger>
                     <SelectContent>
-                      {folders.map((folder) => (
+                      {folders.map(folder => (
                         <SelectItem key={folder} value={folder}>
                           {folder}
                         </SelectItem>
@@ -516,7 +524,7 @@ $
                 <div className="mb-6 p-4 border rounded-md bg-muted/50 dark:bg-muted/20">
                   <h3 className="font-medium mb-2">Filter by Tags</h3>
                   <div className="flex flex-wrap gap-2">
-                    {availableTags.map((tag) => (
+                    {availableTags.map(tag => (
                       <Badge
                         key={tag}
                         variant={selectedTags.includes(tag) ? "default" : "outline"}
@@ -592,7 +600,7 @@ $
                 </div>
               ) : viewMode === "grid" ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
-                  {currentItems.map((item) => (
+                  {currentItems.map(item => (
                     <Card key={item.id} className="overflow-hidden">
                       <div className="relative aspect-video bg-muted">
                         <div className="absolute top-2 left-2 z-10">
@@ -657,7 +665,7 @@ $
                           </DropdownMenu>
                         </div>
                         <div className="mt-2 flex flex-wrap gap-1">
-                          {item.tags.slice(0, 3).map((tag) => (
+                          {item.tags.slice(0, 3).map(tag => (
                             <Badge key={tag} variant="secondary" className="text-xs capitalize">
                               {tag}
                             </Badge>
@@ -693,7 +701,7 @@ $
                       </tr>
                     </thead>
                     <tbody>
-                      {currentItems.map((item) => (
+                      {currentItems.map(item => (
                         <tr key={item.id} className="border-b last:border-b-0">
                           <td className="p-3">
                             <Checkbox
@@ -712,7 +720,7 @@ $
                           <td className="p-3 text-sm">{formatDate(item.uploadedAt)}</td>
                           <td className="p-3">
                             <div className="flex flex-wrap gap-1">
-                              {item.tags.slice(0, 2).map((tag) => (
+                              {item.tags.slice(0, 2).map(tag => (
                                 <Badge key={tag} variant="secondary" className="text-xs capitalize">
                                   {tag}
                                 </Badge>
@@ -781,7 +789,7 @@ $
                         />
                       </PaginationItem>
 
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                         <PaginationItem key={page}>
                           <PaginationLink isActive={currentPage === page} onClick={() => handlePageChange(page)}>
                             {page}

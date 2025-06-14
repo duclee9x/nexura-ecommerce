@@ -21,19 +21,19 @@ export async function updateAddress(
       return;
     }
     const tracer = api.trace.getTracer('updateAddress');
-    const validatedData = await withTracing(tracer, 'Validate Request', async (span) => {
+    const validatedData = await withTracing(tracer, 'Validate Request', async () => {
       const result = AddAndUpdateAddressSchema.safeParse({
-        id: address.id,
-        name: address.name,
-        street: address.street,
-        city: address.city,
-        state: address.state,
-        countryId: address.countryId,
-        zip: address.zip,
+        id:           address.id,
+        name:         address.name,
+        street:       address.street,
+        city:         address.city,
+        state:        address.state,
+        countryId:    address.countryId,
+        zip:          address.zip,
         vnProvinceId: address.vnProvinceId,
         vnDistrictId: address.vnDistrictId,
-        vnWardId: address.vnWardId,
-        isDefault: address.isDefault
+        vnWardId:     address.vnWardId,
+        isDefault:    address.isDefault
       });
 
       if (!result.success) {
@@ -64,17 +64,17 @@ export async function updateAddress(
         id: validatedData.id ? validatedData.id : undefined
       },
       data: {
-        name: validatedData.name,
-        street: validatedData.street,
-        city: validatedData.city || null,
-        state: validatedData.state || null,
-        zip: validatedData.zip || null,
-        countryId: validatedData.countryId,
+        name:         validatedData.name,
+        street:       validatedData.street,
+        city:         validatedData.city || null,
+        state:        validatedData.state || null,
+        zip:          validatedData.zip || null,
+        countryId:    validatedData.countryId,
         vnProvinceId: validatedData.vnProvinceId || null,
         vnDistrictId: validatedData.vnDistrictId || null,
-        vnWardId: validatedData.vnWardId || null,
-        isDefault: validatedData.isDefault,
-        updatedAt: new Date()
+        vnWardId:     validatedData.vnWardId || null,
+        isDefault:    validatedData.isDefault,
+        updatedAt:    new Date()
       }
     });
 
@@ -82,19 +82,19 @@ export async function updateAddress(
       success: true,
       message: 'Address updated successfully',
       address: {
-        id: updatedAddress.id.toString(),
-        name: updatedAddress.name,
-        street: updatedAddress.street,
-        city: updatedAddress.city || '',
-        state: updatedAddress.state || '',
-        countryId: updatedAddress.countryId.toString(),
-        zip: updatedAddress.zip || '',
+        id:           updatedAddress.id.toString(),
+        name:         updatedAddress.name,
+        street:       updatedAddress.street,
+        city:         updatedAddress.city || '',
+        state:        updatedAddress.state || '',
+        countryId:    updatedAddress.countryId.toString(),
+        zip:          updatedAddress.zip || '',
         vnProvinceId: updatedAddress.vnProvinceId?.toString() || '',
         vnDistrictId: updatedAddress.vnDistrictId?.toString() || '',
-        vnWardId: updatedAddress.vnWardId?.toString() || '',
-        isDefault: updatedAddress.isDefault,
-        createdAt: updatedAddress.createdAt.toISOString(),
-        updatedAt: updatedAddress.updatedAt.toISOString()
+        vnWardId:     updatedAddress.vnWardId?.toString() || '',
+        isDefault:    updatedAddress.isDefault,
+        createdAt:    updatedAddress.createdAt.toISOString(),
+        updatedAt:    updatedAddress.updatedAt.toISOString()
       }
     });
   } catch (error) {

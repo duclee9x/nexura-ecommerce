@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
     // Build where clause
     const where: Record<string, any> = {
-      status: "active",
+      status:     "active",
       visibility: "visible",
     }
 
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
     if (query) {
       const lowerQuery = query.toLowerCase()
       results.items = results.items.filter(
-        (product) =>
+        product =>
           product.name.toLowerCase().includes(lowerQuery) || product.description.toLowerCase().includes(lowerQuery),
       )
     }
@@ -75,7 +75,7 @@ export async function GET(request: Request) {
     // Return success response
     const response: ApiResponse<PaginatedResponse<Product>> = {
       success: true,
-      data: results,
+      data:    results,
     }
 
     return NextResponse.json(response)
@@ -84,9 +84,9 @@ export async function GET(request: Request) {
 
     // Return error response
     const response: ApiResponse<null> = {
-      success: false,
-      error: "Failed to fetch products",
-      message: error instanceof Error ? error.message : "Unknown error",
+      success:    false,
+      error:      "Failed to fetch products",
+      message:    error instanceof Error ? error.message : "Unknown error",
       statusCode: 500,
     }
 

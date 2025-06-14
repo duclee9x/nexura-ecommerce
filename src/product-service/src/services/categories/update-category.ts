@@ -24,7 +24,7 @@ export const updateCategory = async (call: ServerUnaryCall<UpdateCategoryRequest
         id: categoryId,
       },
       data: {
-        name: request.category.name,
+        name:     request.category.name,
         parentId: parentId
       },
     })

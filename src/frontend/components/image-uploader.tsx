@@ -12,15 +12,15 @@ import { toast } from "@/hooks/use-toast"
 import { X, ImageIcon } from "lucide-react"
 
 interface ImageUploaderProps {
-  currentImage?: string
+  currentImage?:   string
   onImageSelected: (imageUrl: string) => void
 }
 
 export function ImageUploader({ currentImage, onImageSelected }: ImageUploaderProps) {
-  const [activeTab, setActiveTab] = useState<"upload" | "url">("upload")
-  const [imageUrl, setImageUrl] = useState(currentImage || "")
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null)
-  const [isUploading, setIsUploading] = useState(false)
+  const [ activeTab, setActiveTab ] = useState<"upload" | "url">("upload")
+  const [ imageUrl, setImageUrl ] = useState(currentImage || "")
+  const [ uploadedImage, setUploadedImage ] = useState<string | null>(null)
+  const [ isUploading, setIsUploading ] = useState(false)
 
   // Sample images for gallery
   const galleryImages = [
@@ -40,9 +40,9 @@ export function ImageUploader({ currentImage, onImageSelected }: ImageUploaderPr
     // Check file type
     if (!file.type.startsWith("image/")) {
       toast({
-        title: "Invalid File Type",
+        title:       "Invalid File Type",
         description: "Please upload an image file (JPEG, PNG, GIF, etc.)",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
@@ -50,9 +50,9 @@ export function ImageUploader({ currentImage, onImageSelected }: ImageUploaderPr
     // Check file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast({
-        title: "File Too Large",
+        title:       "File Too Large",
         description: "Please upload an image smaller than 5MB",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
@@ -69,7 +69,7 @@ export function ImageUploader({ currentImage, onImageSelected }: ImageUploaderPr
       setIsUploading(false)
 
       toast({
-        title: "Image Uploaded",
+        title:       "Image Uploaded",
         description: "Your image has been uploaded successfully.",
       })
     }, 1500)
@@ -85,14 +85,14 @@ export function ImageUploader({ currentImage, onImageSelected }: ImageUploaderPr
       onImageSelected(imageUrl)
 
       toast({
-        title: "Image Added",
+        title:       "Image Added",
         description: "Your image URL has been added successfully.",
       })
     } catch (error) {
       toast({
-        title: "Invalid URL",
+        title:       "Invalid URL",
         description: error instanceof Error ? error.message : "Please enter a valid image URL",
-        variant: "destructive",
+        variant:     "destructive",
       })
     }
   }
@@ -103,7 +103,7 @@ export function ImageUploader({ currentImage, onImageSelected }: ImageUploaderPr
     onImageSelected(imageUrl)
 
     toast({
-      title: "Image Selected",
+      title:       "Image Selected",
       description: "Gallery image has been selected.",
     })
   }
@@ -115,7 +115,7 @@ export function ImageUploader({ currentImage, onImageSelected }: ImageUploaderPr
     onImageSelected("")
 
     toast({
-      title: "Image Removed",
+      title:       "Image Removed",
       description: "The featured image has been removed.",
     })
   }
@@ -141,7 +141,7 @@ export function ImageUploader({ currentImage, onImageSelected }: ImageUploaderPr
         </div>
       )}
 
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "upload" | "url")}>
+      <Tabs value={activeTab} onValueChange={v => setActiveTab(v as "upload" | "url")}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="upload">Upload</TabsTrigger>
           <TabsTrigger value="url">Image URL</TabsTrigger>
@@ -187,7 +187,7 @@ export function ImageUploader({ currentImage, onImageSelected }: ImageUploaderPr
                 type="url"
                 placeholder="https://example.com/image.jpg"
                 value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
+                onChange={e => setImageUrl(e.target.value)}
                 className="flex-1"
               />
               <Button onClick={handleUrlSubmit} disabled={!imageUrl}>

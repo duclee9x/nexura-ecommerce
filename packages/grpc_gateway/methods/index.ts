@@ -1,1 +1,0 @@
-// export { createGRPCClient } from "./client";
