@@ -345,7 +345,7 @@ export class Pipelines {
    * @returns Pushed result.
    */
   @func()
-  async pushImages(
+  async buildAndPushImages(
     @argument({
       defaultPath: "../",
       ignore: [
@@ -360,7 +360,8 @@ export class Pipelines {
     })
     source: Directory,
     services: string[],
-    frontendSecret: Secret
+    frontendSecret: Secret,
+    version: string = "latest"
   ): Promise<string> {
     const allowedService = [
       "user",
@@ -381,19 +382,20 @@ export class Pipelines {
       serviceList.map((service) => {
         if (service === "frontend") {
           return this.buildFrontend(source, frontendSecret).publish(
-            "ducleeclone/frontend:latest"
+            `ducleeclone/frontend:${version}`
           );
         }
         if (service === "workflow") {
           return this.buildWorkflow(source).publish(
-            "ducleeclone/workflow:latest"
+            `ducleeclone/workflow:${version}`
           );
         }
-        const imageName = `ducleeclone/${service}-service:latest`;
+        const imageName = `ducleeclone/${service}-service:${version}`;
         return this.buildBackend(service, source).publish(imageName);
       })
     ).then((results) => results.join("\n"));
   }
+
 
   @func()
   buildWorkflow(

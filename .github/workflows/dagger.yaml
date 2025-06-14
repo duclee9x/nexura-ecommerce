@@ -1,0 +1,64 @@
+name: dagger
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  detect-changes:
+      runs-on: ubuntu-latest
+      outputs:
+          service_changed: ${{ steps.diff-version.outputs.services }}
+      steps:
+          - name: Checkout
+            uses: actions/checkout@v4
+
+          - name: Get changed files
+            id: diff-version
+            run: |
+              git fetch origin main
+              git diff --name-only origin/main...HEAD | grep "^src/" | cut -d '/' -f2 | uniq | cut -d '-' -f1 | tr '\n' ',' | sed "s/\,$//g" >> $GITHUB_OUTPUT
+            
+  lint-check:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lint check source code
+        uses: dagger/dagger-for-github@8.0.0
+        with:
+            workdir: .dagger
+            args: lint
+            cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+            version: "latest"  # semver x.y.z
+  security-check:
+    name: security-check
+    runs-on: ubuntu-latest
+    steps:
+        - name: Lint check source code
+          uses: dagger/dagger-for-github@8.0.0
+          with:
+            workdir: .dagger
+            args: code-scan
+            cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+            version: "latest"  
+  build-and-push-image:
+    name: build-and-push-image
+    runs-on: ubuntu-latest
+    environment: dev
+    needs: ['detect-changes','lint-check', security-check]
+    steps:
+        - name: Set image version
+          id: vars
+          run: echo "version=$(TZ='Asia/Ho_Chi_Minh' date +%Y%x%d)-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+        - name: Write secrets to .env file
+          run: |
+            echo "NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY=${{ secrets.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY }}" >> .env
+            echo "NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT=${{ secrets.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT }}" >> .env
+            echo "NEXT_PUBLIC_IMAGEKIT_PRIVATE_KEY=${{ secrets.NEXT_PUBLIC_IMAGEKIT_PRIVATE_KEY }}" >> .env
+            echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}}" >> .env
+        - name: build services
+          uses: dagger/dagger-for-github@8.0.0
+          with:
+            workdir: .dagger
+            args: build-and-push-images --services=${{ needs.detect-changes.outputs.service_changed }} --version=${{ steps.vars.version }} --frontend-secret=file://.env
