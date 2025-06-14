@@ -36,6 +36,11 @@ jobs:
       - name: Lint check source code
         uses: dagger/dagger-for-github@8.0.0
         with:
+            verb: install
+            version: "latest"  # semver x.y.z
+      - name: Lint check source code
+        uses: dagger/dagger-for-github@8.0.0
+        with:
             args: lint
             cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
             version: "latest"  # semver x.y.z
