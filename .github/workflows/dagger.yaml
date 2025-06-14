@@ -37,7 +37,7 @@ jobs:
         id: "setup-dagger"
         uses: "camptocamp/setup-dagger@v1"
         with:
-          module-path: "./dagger.json"
+          module-path: "."
           cloud-token: "${{ secrets.DAGGER_CLOUD_TOKEN }}"
       - name: "Run Dagger"
         id: "run-dagger"
