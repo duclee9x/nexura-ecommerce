@@ -22,3 +22,4 @@ dev.db
 nexura.ts
 .sdk
 db/prisma-client
+bun.lock
