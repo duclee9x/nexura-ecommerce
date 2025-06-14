@@ -25,7 +25,10 @@ jobs:
   lint-check:
     name: lint
     runs-on: ubuntu-latest
+    environment: dev
     steps:
+      - name: Log info
+        run: echo $(pwd) && echo $(ls -la)
       - name: Lint check source code
         uses: dagger/dagger-for-github@8.0.0
         with:
@@ -35,6 +38,7 @@ jobs:
   security-check:
     name: security-check
     runs-on: ubuntu-latest
+    environment: dev
     steps:
         - name: Lint check source code
           uses: dagger/dagger-for-github@8.0.0
