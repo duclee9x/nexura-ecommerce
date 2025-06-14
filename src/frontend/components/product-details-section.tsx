@@ -28,20 +28,20 @@ import { useCurrency } from "@/contexts/currency-context"
 import { ImageViewer } from "@/components/image-viewer"
 
 interface ProductDetailsSectionProps {
-  product: Product
-  onImageClick?: (index: number) => void
-  onVariantSelect: (variant: ProductVariant | null) => void
-  selectedVariant: ProductVariant | null
-  onAddToCart?: () => void
-  onQuantityChange?: (value: number) => void
-  quantity?: number
-  currentImageIndex?: number
+  product:             Product
+  onImageClick?:       (index: number) => void
+  onVariantSelect:     (variant: ProductVariant | null) => void
+  selectedVariant:     ProductVariant | null
+  onAddToCart?:        () => void
+  onQuantityChange?:   (value: number) => void
+  quantity?:           number
+  currentImageIndex?:  number
   onImageIndexChange?: (index: number) => void
-  onGoToCart?: () => void
-  stockStatus: { status: string; color: string; stock: number }
-  maxQuantity?: number
-  isAddingToCart?: boolean
-  quantityDisabled?: boolean
+  onGoToCart?:         () => void
+  stockStatus:         { status: string; color: string; stock: number }
+  maxQuantity?:        number
+  isAddingToCart?:     boolean
+  quantityDisabled?:   boolean
 }
 
 export function ProductDetailsSection({
@@ -59,20 +59,20 @@ export function ProductDetailsSection({
   isAddingToCart = false,
   quantityDisabled = false,
 }: ProductDetailsSectionProps) {
-  const [mainCarouselRef, mainEmbla] = useEmblaCarousel()
-  const [thumbCarouselRef, thumbEmbla] = useEmblaCarousel({
+  const [ mainCarouselRef, mainEmbla ] = useEmblaCarousel()
+  const [ thumbCarouselRef, thumbEmbla ] = useEmblaCarousel({
     containScroll: 'keepSnaps',
-    dragFree: true,
+    dragFree:      true,
   })
   const { formatPrice } = useCurrency()
-  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
+  const [ isImageViewerOpen, setIsImageViewerOpen ] = useState(false)
 
   // Update carousel when currentImageIndex changes
   useEffect(() => {
     if (mainEmbla && typeof currentImageIndex === 'number') {
       mainEmbla.scrollTo(currentImageIndex)
     }
-  }, [currentImageIndex, mainEmbla])
+  }, [ currentImageIndex, mainEmbla ])
 
   // Sync main and thumb carousels
   useEffect(() => {
@@ -100,7 +100,9 @@ export function ProductDetailsSection({
     return () => {
       mainEmbla.off('select', onSelect)
     }
-  }, [mainEmbla, thumbEmbla, onImageIndexChange])
+  }, [
+    mainEmbla, thumbEmbla, onImageIndexChange
+  ])
 
   // Handle carousel navigation
   const scrollPrev = () => mainEmbla?.scrollPrev()
@@ -210,7 +212,9 @@ export function ProductDetailsSection({
           <h1 className="text-3xl font-bold">{product.name}</h1>
           <div className="flex items-center gap-2 mt-2">
             <div className="flex items-center">
-              {[1, 2, 3, 4, 5].map((star) => (
+              {[
+                1, 2, 3, 4, 5
+              ].map(star => (
                 <Star
                   key={star}
                   className={`h-5 w-5 ${star <= 4 ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"}`}
@@ -343,7 +347,7 @@ export function ProductDetailsSection({
           <div className="bg-muted/30 p-3 rounded-md">
             <h4 className="text-sm font-medium mb-2">Selected Configuration</h4>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-              {selectedVariant.attributes.map((attr) => (
+              {selectedVariant.attributes.map(attr => (
                 <div key={attr.id} className="flex justify-between">
                   <span className="text-muted-foreground">{attr.name}:</span>
                   <span className="font-medium">{attr.value}</span>

@@ -40,81 +40,81 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import UserHooks from "@/hooks/user-hooks"
 // Sample customer data
 const sampleCustomer = {
-  id: 1,
+  id:        1,
   firstName: "John",
-  lastName: "Doe",
-  email: "john.doe@example.com",
-  phone: "+1 (555) 123-4567",
-  company: "Acme Inc.",
-  notes: "Prefers email communication. Interested in premium products.",
-  status: "active",
-  orders: [
+  lastName:  "Doe",
+  email:     "john.doe@example.com",
+  phone:     "+1 (555) 123-4567",
+  company:   "Acme Inc.",
+  notes:     "Prefers email communication. Interested in premium products.",
+  status:    "active",
+  orders:    [
     {
-      id: "ORD-2023-1001",
-      date: "2023-03-15T10:30:00",
-      total: 165.99,
+      id:     "ORD-2023-1001",
+      date:   "2023-03-15T10:30:00",
+      total:  165.99,
       status: "delivered",
-      items: 2,
+      items:  2,
     },
     {
-      id: "ORD-2023-0845",
-      date: "2023-02-28T14:15:00",
-      total: 89.5,
+      id:     "ORD-2023-0845",
+      date:   "2023-02-28T14:15:00",
+      total:  89.5,
       status: "delivered",
-      items: 1,
+      items:  1,
     },
     {
-      id: "ORD-2023-0732",
-      date: "2023-01-17T09:45:00",
-      total: 245.0,
+      id:     "ORD-2023-0732",
+      date:   "2023-01-17T09:45:00",
+      total:  245.0,
       status: "delivered",
-      items: 3,
+      items:  3,
     },
     {
-      id: "ORD-2022-0698",
-      date: "2022-12-05T16:20:00",
-      total: 145.5,
+      id:     "ORD-2022-0698",
+      date:   "2022-12-05T16:20:00",
+      total:  145.5,
       status: "delivered",
-      items: 2,
+      items:  2,
     },
     {
-      id: "ORD-2022-0542",
-      date: "2022-11-10T11:30:00",
-      total: 75.99,
+      id:     "ORD-2022-0542",
+      date:   "2022-11-10T11:30:00",
+      total:  75.99,
       status: "delivered",
-      items: 1,
+      items:  1,
     },
   ],
   addresses: [
     {
-      id: 1,
-      type: "billing",
-      default: true,
-      firstName: "John",
-      lastName: "Doe",
-      company: "Acme Inc.",
-      address1: "123 Main Street",
-      address2: "Apt 4B",
-      city: "New York",
-      state: "NY",
+      id:         1,
+      type:       "billing",
+      default:    true,
+      firstName:  "John",
+      lastName:   "Doe",
+      company:    "Acme Inc.",
+      address1:   "123 Main Street",
+      address2:   "Apt 4B",
+      city:       "New York",
+      state:      "NY",
       postalCode: "10001",
-      country: "United States",
-      phone: "+1 (555) 123-4567",
+      country:    "United States",
+      phone:      "+1 (555) 123-4567",
     },
     {
-      id: 2,
-      type: "shipping",
-      default: true,
-      firstName: "John",
-      lastName: "Doe",
-      company: "Acme Inc.",
-      address1: "123 Main Street",
-      address2: "Apt 4B",
-      city: "New York",
-      state: "NY",
+      id:         2,
+      type:       "shipping",
+      default:    true,
+      firstName:  "John",
+      lastName:   "Doe",
+      company:    "Acme Inc.",
+      address1:   "123 Main Street",
+      address2:   "Apt 4B",
+      city:       "New York",
+      state:      "NY",
       postalCode: "10001",
-      country: "United States",
-      phone: "+1 (555) 123-4567",
+      country:    "United States",
+      phone:      "+1 (555) 123-4567",
     },
   ],
   totalSpent: 722.98,
@@ -138,14 +138,14 @@ export default function CustomerEditPage() {
   const customerId = params.id
   const { useDeleteUser } = UserHooks()
   const { mutateAsync: deleteUser } = useDeleteUser
-  const [isLoading, setIsLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState("profile")
-  const [customer, setCustomer] = useState(sampleCustomer)
-  const [hasChanges, setHasChanges] = useState(false)
-  const [emailData, setEmailData] = useState({
+  const [ isLoading, setIsLoading ] = useState(true)
+  const [ activeTab, setActiveTab ] = useState("profile")
+  const [ customer, setCustomer ] = useState(sampleCustomer)
+  const [ hasChanges, setHasChanges ] = useState(false)
+  const [ emailData, setEmailData ] = useState({
     template: "custom",
-    subject: "",
-    message: "",
+    subject:  "",
+    message:  "",
   })
 
   // Simulate loading customer data
@@ -161,9 +161,9 @@ export default function CustomerEditPage() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
+      year:  "numeric",
       month: "short",
-      day: "numeric",
+      day:   "numeric",
     }).format(date)
   }
 
@@ -171,10 +171,10 @@ export default function CustomerEditPage() {
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString)
     return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
+      year:   "numeric",
+      month:  "short",
+      day:    "numeric",
+      hour:   "numeric",
       minute: "numeric",
     }).format(date)
   }
@@ -186,7 +186,7 @@ export default function CustomerEditPage() {
     setCustomer((prev) => {
       // Handle nested properties
       if (name.includes(".")) {
-        const [parent, child] = name.split(".")
+        const [ parent, child ] = name.split(".")
         return {
           ...prev,
           [parent]: {
@@ -206,23 +206,23 @@ export default function CustomerEditPage() {
 
   // Handle email template change
   const handleEmailTemplateChange = (value: string) => {
-    setEmailData((prev) => ({ ...prev, template: value }))
+    setEmailData(prev => ({ ...prev, template: value }))
 
     // Set default subject and message based on template
     if (value === "welcome") {
-      setEmailData((prev) => ({
+      setEmailData(prev => ({
         ...prev,
         subject: `Welcome to NEXURA, ${customer.firstName}!`,
         message: `Dear ${customer.firstName},\n\nWelcome to NEXURA! We're thrilled to have you join our community of fashion enthusiasts.\n\nWith your new account, you can:\n- Track your orders\n- Save your favorite items\n- Get personalized recommendations\n\nIf you have any questions, feel free to reply to this email.\n\nBest regards,\nThe NEXURA Team`,
       }))
     } else if (value === "order_confirmation") {
-      setEmailData((prev) => ({
+      setEmailData(prev => ({
         ...prev,
         subject: "Your NEXURA Order Confirmation",
         message: `Dear ${customer.firstName},\n\nThank you for your order! We're processing it now and will send you another email when it ships.\n\nOrder Number: ORD-${Date.now().toString().slice(-7)}\n\nBest regards,\nThe NEXURA Team`,
       }))
     } else if (value === "custom") {
-      setEmailData((prev) => ({
+      setEmailData(prev => ({
         ...prev,
         subject: "",
         message: "",
@@ -233,7 +233,7 @@ export default function CustomerEditPage() {
   // Handle email input changes
   const handleEmailInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setEmailData((prev) => ({ ...prev, [name]: value }))
+    setEmailData(prev => ({ ...prev, [name]: value }))
   }
 
   // Handle save
@@ -242,14 +242,14 @@ export default function CustomerEditPage() {
     setHasChanges(false)
 
     toast({
-      title: "Customer Saved",
+      title:       "Customer Saved",
       description: "Customer information has been updated successfully.",
     })
   }
 
   // Handle status change
   const handleStatusChange = () => {
-    setCustomer((prev) => ({
+    setCustomer(prev => ({
       ...prev,
       status: prev.status === "active" ? "inactive" : "active",
     }))
@@ -271,14 +271,14 @@ export default function CustomerEditPage() {
     try {
       deleteUser({ id: customerId as string })
       toast({
-        title: "Customer Deleted",
+        title:       "Customer Deleted",
         description: "Customer has been deleted (In Inactive Status).",
-    })
+      })
 
       router.push("/admin/customers")
     } catch (error) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: error instanceof Error ? error.message : "Failed to delete customer.",
       })
     }
@@ -288,39 +288,39 @@ export default function CustomerEditPage() {
   const handleSendEmail = () => {
     // In a real app, this would send an email
     toast({
-      title: "Email Sent",
+      title:       "Email Sent",
       description: `Email has been sent to ${customer.email}.`,
     })
 
     // Reset email form
     setEmailData({
       template: "custom",
-      subject: "",
-      message: "",
+      subject:  "",
+      message:  "",
     })
   }
 
   // Handle add address
   const handleAddAddress = (type: string) => {
     const newAddress = {
-      id: Date.now(),
+      id:         Date.now(),
       type,
-      default: customer.addresses.filter((a) => a.type === type).length === 0,
-      firstName: customer.firstName,
-      lastName: customer.lastName,
-      company: customer.company,
-      address1: "",
-      address2: "",
-      city: "",
-      state: "",
+      default:    customer.addresses.filter(a => a.type === type).length === 0,
+      firstName:  customer.firstName,
+      lastName:   customer.lastName,
+      company:    customer.company,
+      address1:   "",
+      address2:   "",
+      city:       "",
+      state:      "",
       postalCode: "",
-      country: "United States",
-      phone: customer.phone,
+      country:    "United States",
+      phone:      customer.phone,
     }
 
-    setCustomer((prev) => ({
+    setCustomer(prev => ({
       ...prev,
-      addresses: [...prev.addresses, newAddress],
+      addresses: [ ...prev.addresses, newAddress ],
     }))
 
     setHasChanges(true)
@@ -328,9 +328,9 @@ export default function CustomerEditPage() {
 
   // Handle remove address
   const handleRemoveAddress = (id: number) => {
-    setCustomer((prev) => ({
+    setCustomer(prev => ({
       ...prev,
-      addresses: prev.addresses.filter((address) => address.id !== id),
+      addresses: prev.addresses.filter(address => address.id !== id),
     }))
 
     setHasChanges(true)
@@ -338,9 +338,9 @@ export default function CustomerEditPage() {
 
   // Handle address change
   const handleAddressChange = (id: number, field: string, value: string) => {
-    setCustomer((prev) => ({
+    setCustomer(prev => ({
       ...prev,
-      addresses: prev.addresses.map((address) => (address.id === id ? { ...address, [field]: value } : address)),
+      addresses: prev.addresses.map(address => (address.id === id ? { ...address, [field]: value } : address)),
     }))
 
     setHasChanges(true)
@@ -348,9 +348,9 @@ export default function CustomerEditPage() {
 
   // Handle set default address
   const handleSetDefaultAddress = (id: number, type: string) => {
-    setCustomer((prev) => ({
+    setCustomer(prev => ({
       ...prev,
-      addresses: prev.addresses.map((address) =>
+      addresses: prev.addresses.map(address =>
         address.type === type ? { ...address, default: address.id === id } : address,
       ),
     }))
@@ -474,7 +474,7 @@ export default function CustomerEditPage() {
                           <SelectValue placeholder="Select template" />
                         </SelectTrigger>
                         <SelectContent>
-                          {emailTemplates.map((template) => (
+                          {emailTemplates.map(template => (
                             <SelectItem key={template.id} value={template.id}>
                               {template.name}
                             </SelectItem>
@@ -526,9 +526,9 @@ export default function CustomerEditPage() {
           <div className="flex items-center mb-6">
             <Badge
               className={`${customer.status === "active"
-                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                  : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-                }`}
+                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+              }`}
             >
               {customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}
             </Badge>
@@ -668,7 +668,7 @@ export default function CustomerEditPage() {
                             </TableCell>
                           </TableRow>
                         ) : (
-                          customer.orders.map((order) => (
+                          customer.orders.map(order => (
                             <TableRow
                               key={order.id}
                               className="cursor-pointer hover:bg-muted/50"
@@ -682,13 +682,13 @@ export default function CustomerEditPage() {
                               <TableCell>
                                 <Badge
                                   className={`${order.status === "delivered"
-                                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                                      : order.status === "processing"
-                                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                                        : order.status === "shipped"
-                                          ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
-                                          : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                                    }`}
+                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                                    : order.status === "processing"
+                                      ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+                                      : order.status === "shipped"
+                                        ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
+                                        : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                                  }`}
                                 >
                                   {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                                 </Badge>
@@ -729,7 +729,7 @@ export default function CustomerEditPage() {
                         </Button>
                       </div>
 
-                      {customer.addresses.filter((a) => a.type === "billing").length === 0 ? (
+                      {customer.addresses.filter(a => a.type === "billing").length === 0 ? (
                         <div className="border rounded-md p-6 text-center text-muted-foreground">
                           <MapPin className="h-8 w-8 mx-auto mb-2" />
                           <p>No billing addresses</p>
@@ -737,8 +737,8 @@ export default function CustomerEditPage() {
                         </div>
                       ) : (
                         customer.addresses
-                          .filter((a) => a.type === "billing")
-                          .map((address) => (
+                          .filter(a => a.type === "billing")
+                          .map(address => (
                             <div key={address.id} className="border rounded-md p-4 relative">
                               {address.default && <Badge className="absolute top-4 right-4 bg-primary">Default</Badge>}
 
@@ -748,7 +748,7 @@ export default function CustomerEditPage() {
                                   <Input
                                     id={`billing-firstName-${address.id}`}
                                     value={address.firstName}
-                                    onChange={(e) => handleAddressChange(address.id, "firstName", e.target.value)}
+                                    onChange={e => handleAddressChange(address.id, "firstName", e.target.value)}
                                   />
                                 </div>
 
@@ -757,7 +757,7 @@ export default function CustomerEditPage() {
                                   <Input
                                     id={`billing-lastName-${address.id}`}
                                     value={address.lastName}
-                                    onChange={(e) => handleAddressChange(address.id, "lastName", e.target.value)}
+                                    onChange={e => handleAddressChange(address.id, "lastName", e.target.value)}
                                   />
                                 </div>
                               </div>
@@ -767,7 +767,7 @@ export default function CustomerEditPage() {
                                 <Input
                                   id={`billing-company-${address.id}`}
                                   value={address.company}
-                                  onChange={(e) => handleAddressChange(address.id, "company", e.target.value)}
+                                  onChange={e => handleAddressChange(address.id, "company", e.target.value)}
                                 />
                               </div>
 
@@ -776,7 +776,7 @@ export default function CustomerEditPage() {
                                 <Input
                                   id={`billing-address1-${address.id}`}
                                   value={address.address1}
-                                  onChange={(e) => handleAddressChange(address.id, "address1", e.target.value)}
+                                  onChange={e => handleAddressChange(address.id, "address1", e.target.value)}
                                 />
                               </div>
 
@@ -785,7 +785,7 @@ export default function CustomerEditPage() {
                                 <Input
                                   id={`billing-address2-${address.id}`}
                                   value={address.address2}
-                                  onChange={(e) => handleAddressChange(address.id, "address2", e.target.value)}
+                                  onChange={e => handleAddressChange(address.id, "address2", e.target.value)}
                                 />
                               </div>
 
@@ -795,7 +795,7 @@ export default function CustomerEditPage() {
                                   <Input
                                     id={`billing-city-${address.id}`}
                                     value={address.city}
-                                    onChange={(e) => handleAddressChange(address.id, "city", e.target.value)}
+                                    onChange={e => handleAddressChange(address.id, "city", e.target.value)}
                                   />
                                 </div>
 
@@ -804,7 +804,7 @@ export default function CustomerEditPage() {
                                   <Input
                                     id={`billing-state-${address.id}`}
                                     value={address.state}
-                                    onChange={(e) => handleAddressChange(address.id, "state", e.target.value)}
+                                    onChange={e => handleAddressChange(address.id, "state", e.target.value)}
                                   />
                                 </div>
 
@@ -813,7 +813,7 @@ export default function CustomerEditPage() {
                                   <Input
                                     id={`billing-postalCode-${address.id}`}
                                     value={address.postalCode}
-                                    onChange={(e) => handleAddressChange(address.id, "postalCode", e.target.value)}
+                                    onChange={e => handleAddressChange(address.id, "postalCode", e.target.value)}
                                   />
                                 </div>
                               </div>
@@ -823,7 +823,7 @@ export default function CustomerEditPage() {
                                 <Input
                                   id={`billing-country-${address.id}`}
                                   value={address.country}
-                                  onChange={(e) => handleAddressChange(address.id, "country", e.target.value)}
+                                  onChange={e => handleAddressChange(address.id, "country", e.target.value)}
                                 />
                               </div>
 
@@ -832,7 +832,7 @@ export default function CustomerEditPage() {
                                 <Input
                                   id={`billing-phone-${address.id}`}
                                   value={address.phone}
-                                  onChange={(e) => handleAddressChange(address.id, "phone", e.target.value)}
+                                  onChange={e => handleAddressChange(address.id, "phone", e.target.value)}
                                 />
                               </div>
 
@@ -872,7 +872,7 @@ export default function CustomerEditPage() {
                         </Button>
                       </div>
 
-                      {customer.addresses.filter((a) => a.type === "shipping").length === 0 ? (
+                      {customer.addresses.filter(a => a.type === "shipping").length === 0 ? (
                         <div className="border rounded-md p-6 text-center text-muted-foreground">
                           <MapPin className="h-8 w-8 mx-auto mb-2" />
                           <p>No shipping addresses</p>
@@ -880,8 +880,8 @@ export default function CustomerEditPage() {
                         </div>
                       ) : (
                         customer.addresses
-                          .filter((a) => a.type === "shipping")
-                          .map((address) => (
+                          .filter(a => a.type === "shipping")
+                          .map(address => (
                             <div key={address.id} className="border rounded-md p-4 relative">
                               {address.default && <Badge className="absolute top-4 right-4 bg-primary">Default</Badge>}
 
@@ -891,7 +891,7 @@ export default function CustomerEditPage() {
                                   <Input
                                     id={`shipping-firstName-${address.id}`}
                                     value={address.firstName}
-                                    onChange={(e) => handleAddressChange(address.id, "firstName", e.target.value)}
+                                    onChange={e => handleAddressChange(address.id, "firstName", e.target.value)}
                                   />
                                 </div>
 
@@ -900,7 +900,7 @@ export default function CustomerEditPage() {
                                   <Input
                                     id={`shipping-lastName-${address.id}`}
                                     value={address.lastName}
-                                    onChange={(e) => handleAddressChange(address.id, "lastName", e.target.value)}
+                                    onChange={e => handleAddressChange(address.id, "lastName", e.target.value)}
                                   />
                                 </div>
                               </div>
@@ -910,7 +910,7 @@ export default function CustomerEditPage() {
                                 <Input
                                   id={`shipping-company-${address.id}`}
                                   value={address.company}
-                                  onChange={(e) => handleAddressChange(address.id, "company", e.target.value)}
+                                  onChange={e => handleAddressChange(address.id, "company", e.target.value)}
                                 />
                               </div>
 
@@ -919,7 +919,7 @@ export default function CustomerEditPage() {
                                 <Input
                                   id={`shipping-address1-${address.id}`}
                                   value={address.address1}
-                                  onChange={(e) => handleAddressChange(address.id, "address1", e.target.value)}
+                                  onChange={e => handleAddressChange(address.id, "address1", e.target.value)}
                                 />
                               </div>
 
@@ -928,7 +928,7 @@ export default function CustomerEditPage() {
                                 <Input
                                   id={`shipping-address2-${address.id}`}
                                   value={address.address2}
-                                  onChange={(e) => handleAddressChange(address.id, "address2", e.target.value)}
+                                  onChange={e => handleAddressChange(address.id, "address2", e.target.value)}
                                 />
                               </div>
 
@@ -938,7 +938,7 @@ export default function CustomerEditPage() {
                                   <Input
                                     id={`shipping-city-${address.id}`}
                                     value={address.city}
-                                    onChange={(e) => handleAddressChange(address.id, "city", e.target.value)}
+                                    onChange={e => handleAddressChange(address.id, "city", e.target.value)}
                                   />
                                 </div>
 
@@ -947,7 +947,7 @@ export default function CustomerEditPage() {
                                   <Input
                                     id={`shipping-state-${address.id}`}
                                     value={address.state}
-                                    onChange={(e) => handleAddressChange(address.id, "state", e.target.value)}
+                                    onChange={e => handleAddressChange(address.id, "state", e.target.value)}
                                   />
                                 </div>
 
@@ -956,7 +956,7 @@ export default function CustomerEditPage() {
                                   <Input
                                     id={`shipping-postalCode-${address.id}`}
                                     value={address.postalCode}
-                                    onChange={(e) => handleAddressChange(address.id, "postalCode", e.target.value)}
+                                    onChange={e => handleAddressChange(address.id, "postalCode", e.target.value)}
                                   />
                                 </div>
                               </div>
@@ -966,7 +966,7 @@ export default function CustomerEditPage() {
                                 <Input
                                   id={`shipping-country-${address.id}`}
                                   value={address.country}
-                                  onChange={(e) => handleAddressChange(address.id, "country", e.target.value)}
+                                  onChange={e => handleAddressChange(address.id, "country", e.target.value)}
                                 />
                               </div>
 
@@ -975,7 +975,7 @@ export default function CustomerEditPage() {
                                 <Input
                                   id={`shipping-phone-${address.id}`}
                                   value={address.phone}
-                                  onChange={(e) => handleAddressChange(address.id, "phone", e.target.value)}
+                                  onChange={e => handleAddressChange(address.id, "phone", e.target.value)}
                                 />
                               </div>
 

@@ -12,16 +12,16 @@ import { GetAllUsers } from './get-all-user.ts';
 import { RegisterUserForAdmin } from './register-user-for-admin.ts';
 import { GetBatchUsers } from './get-batch-users.ts';
 export const userService: UntypedServiceImplementation = {
-    getUser: GetUser,
-    getAllUsers: GetAllUsers,
-    updateUser: UpdateUser,
-    deleteUser: DeleteUser,
-    registerUser: RegisterUser,
-    loginUser: LoginUser,
-    forgotPassword: forgotPassword,
-    validateOtp: validateOTP,
-    verifyAccount: verifyAccount,
-    resetPassword: resetPassword,
-    registerUserForAdmin: RegisterUserForAdmin,
-    getBatchUsers: GetBatchUsers,
+  getUser:              GetUser,
+  getAllUsers:          GetAllUsers,
+  updateUser:           UpdateUser,
+  deleteUser:           DeleteUser,
+  registerUser:         RegisterUser,
+  loginUser:            LoginUser,
+  forgotPassword:       forgotPassword,
+  validateOtp:          validateOTP,
+  verifyAccount:        verifyAccount,
+  resetPassword:        resetPassword,
+  registerUserForAdmin: RegisterUserForAdmin,
+  getBatchUsers:        GetBatchUsers,
 }

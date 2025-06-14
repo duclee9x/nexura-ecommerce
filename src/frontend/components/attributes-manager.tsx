@@ -26,27 +26,27 @@ import { SortableAttribute } from "./sortable-attribute"
 import { ProductAttribute } from "@nexura/grpc_gateway/protos"
 
 interface AttributesManagerProps {
-  attributes: ProductAttribute[]
-  onChange: (attributes: ProductAttribute[]) => void
+  attributes:           ProductAttribute[]
+  onChange:             (attributes: ProductAttribute[]) => void
   showAdvancedOptions?: boolean
 }
 
 export function AttributesManager({ attributes, onChange, showAdvancedOptions = true }: AttributesManagerProps) {
-  const [isAddingAttribute, setIsAddingAttribute] = useState(false)
-  const [newAttribute, setNewAttribute] = useState<ProductAttribute>({
-    id: "",
-    name: "",
-    required: false,
-    visible: true,
-    values: [],
-    variantable: false,
-    filterable: false,
-    searchable: false,
+  const [ isAddingAttribute, setIsAddingAttribute ] = useState(false)
+  const [ newAttribute, setNewAttribute ] = useState<ProductAttribute>({
+    id:           "",
+    name:         "",
+    required:     false,
+    visible:      true,
+    values:       [],
+    variantable:  false,
+    filterable:   false,
+    searchable:   false,
     displayOrder: 0,
-    productId: "",
+    productId:    "",
   })
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [shouldAddAttribute, setShouldAddAttribute] = useState(false)
+  const [ errors, setErrors ] = useState<Record<string, string>>({})
+  const [ shouldAddAttribute, setShouldAddAttribute ] = useState(false)
 
   
   const sensors = useSensors(
@@ -70,57 +70,61 @@ export function AttributesManager({ attributes, onChange, showAdvancedOptions = 
     const attributeId = `attr-${Date.now()}`
     const attributeToAdd = {
       ...newAttribute,
-      id: attributeId,
+      id:           attributeId,
       displayOrder: attributes.length,
     }
 
-    const updatedAttributes = [...attributes, attributeToAdd]
+    const updatedAttributes = [ ...attributes, attributeToAdd ]
     onChange(updatedAttributes)
 
     setNewAttribute({
-      id: "",
-      name: "",
-      required: false,
-      visible: true,
-      values: [],
-      variantable: false,
-      filterable: false,
-      searchable: false,
+      id:           "",
+      name:         "",
+      required:     false,
+      visible:      true,
+      values:       [],
+      variantable:  false,
+      filterable:   false,
+      searchable:   false,
       displayOrder: 0,
-      productId: "",
+      productId:    "",
     })
     setIsAddingAttribute(false)
     setErrors({})
 
     toast({
-      title: "Attribute Added",
+      title:       "Attribute Added",
       description: `${attributeToAdd.name} has been added to product attributes.`,
     })
-  }, [attributes, newAttribute, onChange])
+  }, [
+    attributes, newAttribute, onChange
+  ])
   
   useEffect(() => {
     if (shouldAddAttribute) {
       handleAddAttribute()
       setShouldAddAttribute(false)
     }
-  }, [shouldAddAttribute, newAttribute, handleAddAttribute])
+  }, [
+    shouldAddAttribute, newAttribute, handleAddAttribute
+  ])
 
   const handleDeleteAttribute = useCallback((attributeId: string) => {
-    const updatedAttributes = attributes.filter((attr) => attr.id !== attributeId)
+    const updatedAttributes = attributes.filter(attr => attr.id !== attributeId)
     onChange(updatedAttributes)
 
     toast({
-      title: "Attribute Deleted",
+      title:       "Attribute Deleted",
       description: "The attribute has been removed.",
     })
-  }, [attributes, onChange])
+  }, [ attributes, onChange ])
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event
 
     if (over && active.id !== over.id) {
-      const oldIndex = attributes.findIndex((attr) => attr.id === active.id)
-      const newIndex = attributes.findIndex((attr) => attr.id === over.id)
+      const oldIndex = attributes.findIndex(attr => attr.id === active.id)
+      const newIndex = attributes.findIndex(attr => attr.id === over.id)
 
       const reorderedAttributes = arrayMove(attributes, oldIndex, newIndex).map((attr, index) => ({
         ...attr,
@@ -130,11 +134,11 @@ export function AttributesManager({ attributes, onChange, showAdvancedOptions = 
       onChange(reorderedAttributes)
 
       toast({
-        title: "Attributes Reordered",
+        title:       "Attributes Reordered",
         description: "The display order of attributes has been updated.",
       })
     }
-  }, [attributes, onChange])
+  }, [ attributes, onChange ])
 
   return (
     <div className="attributes-manager space-y-4">
@@ -165,11 +169,11 @@ export function AttributesManager({ attributes, onChange, showAdvancedOptions = 
         </div>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={attributes.map((attr) => attr.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={attributes.map(attr => attr.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
               {attributes
                 .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
-                .map((attribute) => (
+                .map(attribute => (
                   <SortableAttribute
                     key={attribute.id}
                     attribute={attribute}

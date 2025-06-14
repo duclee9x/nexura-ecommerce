@@ -14,8 +14,8 @@ export async function getAddresses(
     const { userId } = call.request;
     if (!userId) {
       callback(null, {
-        success: false,
-        message: 'User ID is required',
+        success:   false,
+        message:   'User ID is required',
         addresses: []
       });
       return;
@@ -27,65 +27,65 @@ export async function getAddresses(
       },
       include: {
         country: {
-            select: {
-                id: true,
-                codeName: true
-            }
+          select: {
+            id:       true,
+            codeName: true
+          }
         },
         vnProvince: {
-            select: {
-                id: true,
-                fullName: true
-            }
+          select: {
+            id:       true,
+            fullName: true
+          }
         },
         vnDistrict: {
-            select: {
-                id: true,
-                fullName: true
-            }
+          select: {
+            id:       true,
+            fullName: true
+          }
         },
         vnWard: {
-            select: {
-                id: true,
-                fullName: true
-            }
+          select: {
+            id:       true,
+            fullName: true
+          }
         }
       }
     });
     GetAddressesSpan.setStatus({
-      code: SpanStatusCode.OK,
+      code:    SpanStatusCode.OK,
       message: 'Addresses fetched successfully'
     });
     GetAddressesSpan.end();
     if (!addresses) {
       callback(null, {
-        success: false,
-        message: 'Address not found',
+        success:   false,
+        message:   'Address not found',
         addresses: []
       });
       return;
     }
     callback(null, {
-      success: true,
-      message: 'Address fetched successfully',
-      addresses: addresses.map((address) => ({
-        id: address.id,
-        name: address.name,
-        street: address.street,
-        city: address.city || '',
-        state: address.state || '',
-        countryId: address.countryId.toString(),
-        zip: address.zip || '',
-        vnProvinceId: address.vnProvinceId?.toString() || '',
-        vnDistrictId: address.vnDistrictId?.toString() || '',
-        vnWardId: address.vnWardId?.toString() || '',
-        isDefault: address.isDefault,
-        createdAt: address.createdAt.toISOString(),
-        updatedAt: address.updatedAt.toISOString(),
-        countryName: address.country?.codeName || '',
+      success:   true,
+      message:   'Address fetched successfully',
+      addresses: addresses.map(address => ({
+        id:             address.id,
+        name:           address.name,
+        street:         address.street,
+        city:           address.city || '',
+        state:          address.state || '',
+        countryId:      address.countryId.toString(),
+        zip:            address.zip || '',
+        vnProvinceId:   address.vnProvinceId?.toString() || '',
+        vnDistrictId:   address.vnDistrictId?.toString() || '',
+        vnWardId:       address.vnWardId?.toString() || '',
+        isDefault:      address.isDefault,
+        createdAt:      address.createdAt.toISOString(),
+        updatedAt:      address.updatedAt.toISOString(),
+        countryName:    address.country?.codeName || '',
         vnProvinceName: address.vnProvince?.fullName || '',
         vnDistrictName: address.vnDistrict?.fullName || '',
-        vnWardName: address.vnWard?.fullName || ''
+        vnWardName:     address.vnWard?.fullName || ''
       }))
     });
   } catch (error) {

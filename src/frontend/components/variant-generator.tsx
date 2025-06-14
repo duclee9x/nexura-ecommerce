@@ -13,11 +13,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import type { ProductAttribute, ProductVariant, VariantAttribute } from "@nexura/grpc_gateway/protos"
 
 interface VariantGeneratorProps {
-  attributes: ProductAttribute[]
+  attributes:       ProductAttribute[]
   existingVariants: ProductVariant[]
-  onAddVariants: (variants: ProductVariant[]) => void
-  basePrice: number
-  baseSku: string
+  onAddVariants:    (variants: ProductVariant[]) => void
+  basePrice:        number
+  baseSku:          string
 }
 
 export function VariantGenerator({
@@ -27,24 +27,24 @@ export function VariantGenerator({
   basePrice,
   baseSku,
 }: VariantGeneratorProps) {
-  const [selectedAttributes, setSelectedAttributes] = useState<string[]>([])
-  const [generatedVariants, setGeneratedVariants] = useState<ProductVariant[]>([])
-  const [isGenerating, setIsGenerating] = useState(false)
+  const [ selectedAttributes, setSelectedAttributes ] = useState<string[]>([])
+  const [ generatedVariants, setGeneratedVariants ] = useState<ProductVariant[]>([])
+  const [ isGenerating, setIsGenerating ] = useState(false)
 
   // Get variantable attributes
-  const variantableAttributes = attributes.filter((attr) => attr.variantable)
+  const variantableAttributes = attributes.filter(attr => attr.variantable)
 
   // Initialize selected attributes with all variantable attributes
   useEffect(() => {
     if (variantableAttributes.length > 0 && selectedAttributes.length === 0) {
-      setSelectedAttributes(variantableAttributes.map((attr) => attr.id))
+      setSelectedAttributes(variantableAttributes.map(attr => attr.id))
     }
-  }, [variantableAttributes, selectedAttributes])
+  }, [ variantableAttributes, selectedAttributes ])
 
   // Toggle attribute selection
   const toggleAttributeSelection = (attributeId: string) => {
-    setSelectedAttributes((prev) =>
-      prev.includes(attributeId) ? prev.filter((id) => id !== attributeId) : [...prev, attributeId],
+    setSelectedAttributes(prev =>
+      prev.includes(attributeId) ? prev.filter(id => id !== attributeId) : [ ...prev, attributeId ],
     )
   }
 
@@ -52,9 +52,9 @@ export function VariantGenerator({
   const generateVariants = () => {
     if (selectedAttributes.length === 0) {
       toast({
-        title: "No attributes selected",
+        title:       "No attributes selected",
         description: "Please select at least one attribute to generate variants.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
@@ -63,14 +63,14 @@ export function VariantGenerator({
 
     // Get selected attributes with their values
     const selectedAttributesWithValues = attributes.filter(
-      (attr) => selectedAttributes.includes(attr.id) && attr.values.length > 0,
+      attr => selectedAttributes.includes(attr.id) && attr.values.length > 0,
     )
 
     if (selectedAttributesWithValues.length === 0) {
       toast({
-        title: "No attribute values",
+        title:       "No attribute values",
         description: "Selected attributes have no values. Please add values to generate variants.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       setIsGenerating(false)
       return
@@ -95,19 +95,19 @@ export function VariantGenerator({
 
       // Create a new variant
       return {
-        id: `var-gen-${Date.now()}-${index}`,
+        id:        `var-gen-${Date.now()}-${index}`,
         productId: "temp-product-id", // Will be replaced when added to product
-        name: variantName,
-        sku: variantSku,
-        price: basePrice,
-        stock: {
+        name:      variantName,
+        sku:       variantSku,
+        price:     basePrice,
+        stock:     {
           quantity: 0,
           reserved: 0,
         },
         lowStockThreshold: 5,
-        imageIds: [],
-        attributes: combination,
-        warehouseId: "",
+        imageIds:          [],
+        attributes:        combination,
+        warehouseId:       "",
       }
     })
 
@@ -127,9 +127,9 @@ export function VariantGenerator({
           newCombinations.push([
             ...combination,
             {
-              id: attribute.id,
-              name: attribute.name,
-              value: value,
+              id:         attribute.id,
+              name:       attribute.name,
+              value:      value,
               extraValue: "",
             },
           ])
@@ -145,7 +145,7 @@ export function VariantGenerator({
   // Create a descriptive name for a variant based on its attribute values
   const createVariantName = (combination: VariantAttribute[]) => {
     return combination
-      .map((attr) => attr.value)
+      .map(attr => attr.value)
       .filter(Boolean)
       .join(" / ")
   }
@@ -177,8 +177,8 @@ export function VariantGenerator({
       if (variant.attributes.length !== combination.length) return false
 
       // Check if all attribute values match
-      return combination.every((attr) =>
-        variant.attributes.some((v) => v.name === attr.name && v.value === attr.value),
+      return combination.every(attr =>
+        variant.attributes.some(v => v.name === attr.name && v.value === attr.value),
       )
     })
   }
@@ -189,12 +189,12 @@ export function VariantGenerator({
 
     // Filter out variants that already exist
     const newVariants = generatedVariants.filter(
-      (genVariant) => !findExistingVariant(genVariant.attributes, existingVariants),
+      genVariant => !findExistingVariant(genVariant.attributes, existingVariants),
     )
 
     if (newVariants.length === 0) {
       toast({
-        title: "No new variants",
+        title:       "No new variants",
         description: "All generated variants already exist.",
       })
       return
@@ -204,14 +204,14 @@ export function VariantGenerator({
     setGeneratedVariants([])
 
     toast({
-      title: "Variants Added",
+      title:       "Variants Added",
       description: `${newVariants.length} new variants have been added.`,
     })
   }
 
   // Get attribute name by ID
   const getAttributeName = (attributeId: string) => {
-    const attribute = attributes.find((attr) => attr.id === attributeId)
+    const attribute = attributes.find(attr => attr.id === attributeId)
     return attribute ? attribute.name : attributeId
   }
 
@@ -227,7 +227,7 @@ export function VariantGenerator({
             <Label>Select Attributes for Variant Generation</Label>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
               {variantableAttributes.length > 0 ? (
-                variantableAttributes.map((attribute) => (
+                variantableAttributes.map(attribute => (
                   <div key={attribute.id} className="flex items-center space-x-2">
                     <Checkbox
                       id={`attr-${attribute.id}`}
@@ -281,7 +281,7 @@ export function VariantGenerator({
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      {selectedAttributes.map((attrId) => (
+                      {selectedAttributes.map(attrId => (
                         <TableHead key={attrId}>{getAttributeName(attrId)}</TableHead>
                       ))}
                       <TableHead>SKU</TableHead>
@@ -296,13 +296,13 @@ export function VariantGenerator({
                       return (
                         <TableRow key={variant.id}>
                           {selectedAttributes.map((attrId) => {
-                            const attribute = variant.attributes.find((attr) => attr.id === attrId)
+                            const attribute = variant.attributes.find(attr => attr.id === attrId)
                             const value = attribute?.value
 
                             return (
                               <TableCell key={attrId}>
                                 {value ? (
-                                  attributes.find((a) => a.id === attrId)?.name.toLowerCase() === "color" ? (
+                                  attributes.find(a => a.id === attrId)?.name.toLowerCase() === "color" ? (
                                     <div className="flex items-center gap-2">
                                       <div
                                         className="w-5 h-5 rounded-full border"

@@ -12,110 +12,112 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { useCurrency } from "@/contexts/currency-context"
 
 type Product = {
-  id: string
-  name: string
-  price: number
+  id:       string
+  name:     string
+  price:    number
   category: string
-  image: string
+  image:    string
 }
 // Sample product data for search
 const products: Product[] = [
   {
-    id: "1",
-    name: "Urban Backpack",
-    price: 120,
+    id:       "1",
+    name:     "Urban Backpack",
+    price:    120,
     category: "backpack",
-    image: "/placeholder.svg?height=300&width=300",
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: "2",
-    name: "Hyper Backpack",
-    price: 140,
+    id:       "2",
+    name:     "Hyper Backpack",
+    price:    140,
     category: "backpack",
-    image: "/placeholder.svg?height=300&width=300",
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: "3",
-    name: "Smart Carry Backpack",
-    price: 95,
+    id:       "3",
+    name:     "Smart Carry Backpack",
+    price:    95,
     category: "backpack",
-    image: "/placeholder.svg?height=300&width=300",
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: "4",
-    name: "Aero Backpack",
-    price: 127,
+    id:       "4",
+    name:     "Aero Backpack",
+    price:    127,
     category: "backpack",
-    image: "/placeholder.svg?height=300&width=300",
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: "5",
-    name: "Commuter Backpack",
-    price: 110,
+    id:       "5",
+    name:     "Commuter Backpack",
+    price:    110,
     category: "backpack",
-    image: "/placeholder.svg?height=300&width=300",
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: "6",
-    name: "Weekender Duffel",
-    price: 150,
+    id:       "6",
+    name:     "Weekender Duffel",
+    price:    150,
     category: "bag",
-    image: "/placeholder.svg?height=300&width=300",
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: "7",
-    name: "Messenger Bag",
-    price: 85,
+    id:       "7",
+    name:     "Messenger Bag",
+    price:    85,
     category: "bag",
-    image: "/placeholder.svg?height=300&width=300",
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: "8",
-    name: "Laptop Sleeve",
-    price: 45,
+    id:       "8",
+    name:     "Laptop Sleeve",
+    price:    45,
     category: "accessory",
-    image: "/placeholder.svg?height=300&width=300",
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: "9",
-    name: "Travel Organizer",
-    price: 35,
+    id:       "9",
+    name:     "Travel Organizer",
+    price:    35,
     category: "accessory",
-    image: "/placeholder.svg?height=300&width=300",
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: "10",
-    name: "Water Bottle",
-    price: 18,
+    id:       "10",
+    name:     "Water Bottle",
+    price:    18,
     category: "accessory",
-    image: "/placeholder.svg?height=300&width=300",
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: "11",
-    name: "Extension Strap",
-    price: 12,
+    id:       "11",
+    name:     "Extension Strap",
+    price:    12,
     category: "accessory",
-    image: "/placeholder.svg?height=300&width=300",
+    image:    "/placeholder.svg?height=300&width=300",
   },
   {
-    id: "12",
-    name: "TSA-Approved Lock",
-    price: 16,
+    id:       "12",
+    name:     "TSA-Approved Lock",
+    price:    16,
     category: "accessory",
-    image: "/placeholder.svg?height=300&width=300",
+    image:    "/placeholder.svg?height=300&width=300",
   },
 ]
 
 // Popular search terms
-const popularSearches = ["backpack", "travel", "laptop", "water bottle", "organizer", "black"]
+const popularSearches = [
+  "backpack", "travel", "laptop", "water bottle", "organizer", "black"
+]
 
 export function SearchDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
   const router = useRouter()
   const { formatPrice } = useCurrency()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [searchResults, setSearchResults] = useState<Product[]>([])
-  const [isSearching, setIsSearching] = useState(false)
-  const [recentSearches, setRecentSearches] = useState<string[]>([])
+  const [ searchQuery, setSearchQuery ] = useState("")
+  const [ searchResults, setSearchResults ] = useState<Product[]>([])
+  const [ isSearching, setIsSearching ] = useState(false)
+  const [ recentSearches, setRecentSearches ] = useState<string[]>([])
 
   // Load recent searches from localStorage
   useEffect(() => {
@@ -134,7 +136,7 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean, onOpenChan
   const saveRecentSearch = (query: string) => {
     if (!query.trim()) return
 
-    const updatedSearches = [query, ...recentSearches.filter((item) => item !== query)].slice(0, 5)
+    const updatedSearches = [ query, ...recentSearches.filter(item => item !== query) ].slice(0, 5)
 
     setRecentSearches(updatedSearches)
     localStorage.setItem("nexura-recent-searches", JSON.stringify(updatedSearches))
@@ -152,7 +154,7 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean, onOpenChan
     // Simulate API call delay
     setTimeout(() => {
       const results = products.filter(
-        (product) =>
+        product =>
           product.name.toLowerCase().includes(query.toLowerCase()) ||
           product.category.toLowerCase().includes(query.toLowerCase()),
       )
@@ -220,12 +222,13 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean, onOpenChan
                 onChange={handleSearchChange}
                 autoFocus
               />
-            </form></DialogTitle>   
-            <DialogDescription>
-              {/* <Button variant="ghost" size="icon" className="rounded-full">
+            </form>
+          </DialogTitle>   
+          <DialogDescription>
+            {/* <Button variant="ghost" size="icon" className="rounded-full">
                 <X className="h-4 w-4" />
               </Button> */}
-            </DialogDescription>
+          </DialogDescription>
         </div>
         
         <div className="px-4 py-6 max-h-[70vh]">
@@ -237,7 +240,7 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean, onOpenChan
             searchResults.length > 0 ? (
               <ScrollArea className="max-h-[60vh]">
                 <div className="space-y-4">
-                  {searchResults.map((product) => (
+                  {searchResults.map(product => (
                     <div
                       key={product.id}
                       className="flex items-center gap-4 p-2 rounded-lg hover:bg-muted cursor-pointer"
@@ -274,7 +277,7 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean, onOpenChan
                   We couldn't find any products matching "{searchQuery}"
                 </p>
                 <div className="flex flex-wrap justify-center gap-2">
-                  {popularSearches.map((term) => (
+                  {popularSearches.map(term => (
                     <Button key={term} variant="outline" size="sm" onClick={() => handleQuickSearch(term)}>
                       {term}
                     </Button>
@@ -300,7 +303,7 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean, onOpenChan
               <div>
                 <h3 className="font-medium mb-3">Popular Searches</h3>
                 <div className="flex flex-wrap gap-2">
-                  {popularSearches.map((term) => (
+                  {popularSearches.map(term => (
                     <Button key={term} variant="outline" size="sm" onClick={() => handleQuickSearch(term)}>
                       {term}
                     </Button>
@@ -311,7 +314,9 @@ export function SearchDialog({ open, onOpenChange }: { open: boolean, onOpenChan
               <div>
                 <h3 className="font-medium mb-3">Popular Categories</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {["Backpacks", "Bags", "Accessories"].map((category) => (
+                  {[
+                    "Backpacks", "Bags", "Accessories"
+                  ].map(category => (
                     <div
                       key={category}
                       className="border dark:border-gray-800 rounded-lg p-4 text-center cursor-pointer hover:bg-muted"

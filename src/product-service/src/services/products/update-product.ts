@@ -21,9 +21,9 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
       },
       update: {},
       create: {
-        name: "Default Warehouse",
-        code: "WH-DEFAULT",
-        status: "active",
+        name:    "Default Warehouse",
+        code:    "WH-DEFAULT",
+        status:  "active",
         address: "Default Location",
         manager: "System",
         contact: "system@nexura.com"
@@ -38,15 +38,22 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
           }
         })
 
-        // Then create new related product relationships
-        const relatedProducts = request.relatedProductIds.map((id) => ({
-          fromProductId: product.id,
-          toProductId: id
-        }))
-
-        await prisma.relatedProduct.createMany({
-          data: relatedProducts
-        })
+        // Then create new related product relationships one by one to handle duplicates
+        for (const id of request.relatedProductIds) {
+          await tx.relatedProduct.upsert({
+            where: {
+              fromProductId_toProductId: {
+                fromProductId: product.id,
+                toProductId:   id
+              }
+            },
+            create: {
+              fromProductId: product.id,
+              toProductId:   id
+            },
+            update: {} // No update needed since the relationship exists
+          })
+        }
       }
       // Update product with all related data
       await tx.product.update({
@@ -54,70 +61,70 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
           id: product.id,
         },
         data: {
-          name: product.name,
-          slug: product.slug,
+          name:        product.name,
+          slug:        product.slug,
           description: product.description,
-          costPrice: product.costPrice,
-          basePrice: product.basePrice,
-          sku: product.sku,
-          barcode: product.barcode,
-          brandId: product.brandId,
-          featured: product.featured,
-          status: product.status,
-          taxable: product.taxable,
-          shippable: product.shippable,
-          categories: product.categories,
-          images: {
+          costPrice:   product.costPrice,
+          basePrice:   product.basePrice,
+          sku:         product.sku,
+          barcode:     product.barcode,
+          brandId:     product.brandId,
+          featured:    product.featured,
+          status:      product.status,
+          taxable:     product.taxable,
+          shippable:   product.shippable,
+          categories:  product.categories,
+          images:      {
             deleteMany: {
               id: {
                 notIn: product.images?.map(img => img.id) || []
               }
             },
-            upsert: product.images?.map((img) => ({
-              where: { id: img.id },
+            upsert: product.images?.map(img => ({
+              where:  { id: img.id },
               create: {
-                id: img.id,
-                url: img.url,
+                id:       img.id,
+                url:      img.url,
                 blurhash: img.blurhash,
-                isMain: img.isMain,
+                isMain:   img.isMain,
               },
               update: {
-                url: img.url,
+                url:      img.url,
                 blurhash: img.blurhash,
-                isMain: img.isMain,
+                isMain:   img.isMain,
               }
             })) || [],
           },
           attributes: {
             deleteMany: {},
-            create: product.attributes?.map((attr) => ({
-              name: attr.name,
-              required: attr.required,
-              visible: attr.visible,
-              values: attr.values,
-              variantable: attr.variantable,
-              filterable: attr.filterable,
-              searchable: attr.searchable,
+            create:     product.attributes?.map(attr => ({
+              name:         attr.name,
+              required:     attr.required,
+              visible:      attr.visible,
+              values:       attr.values,
+              variantable:  attr.variantable,
+              filterable:   attr.filterable,
+              searchable:   attr.searchable,
               displayOrder: attr.displayOrder,
             })) || [],
           },
           variants: {
             deleteMany: {},
-            create: product.variants?.map((variant) => ({
-              sku: variant.sku,
-              name: variant.name,
-              price: variant.price,
+            create:     product.variants?.map(variant => ({
+              sku:               variant.sku,
+              name:              variant.name,
+              price:             variant.price,
               lowStockThreshold: variant.lowStockThreshold,
-              imageIds: variant.imageIds,
-              attributes: {
-                create: variant.attributes?.map((attr) => ({
-                  name: attr.name,
-                  value: attr.value,
+              imageIds:          variant.imageIds,
+              attributes:        {
+                create: variant.attributes?.map(attr => ({
+                  name:       attr.name,
+                  value:      attr.value,
                   extraValue: attr.extraValue || "",
                 })) || [],
               },
               warehouseId: variant.warehouseId || defaultWarehouse.id,
-              stock: {
+              stock:       {
                 create: {
                   quantity: variant.stock?.quantity ?? undefined,
                   reserved: variant.stock?.reserved ?? undefined
@@ -127,14 +134,14 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
           },
           productTags: {
             deleteMany: {},
-            create: product.productTags?.map(productTag => {
+            create:     product.productTags?.map((productTag) => {
               if (!productTag?.tag?.name) {
                 throw new Error("Tag name is required");
               }
               return {
                 tag: {
                   connectOrCreate: {
-                    where: { name: productTag.tag.name },
+                    where:  { name: productTag.tag.name },
                     create: { name: productTag.tag.name }
                   }
                 }
@@ -145,13 +152,13 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
             upsert: {
               create: {
                 length: product.dimensions.length || 0,
-                width: product.dimensions.width || 0,
+                width:  product.dimensions.width || 0,
                 height: product.dimensions.height || 0,
                 weight: product.dimensions.weight || 0,
               },
               update: {
                 length: product.dimensions.length || 0,
-                width: product.dimensions.width || 0,
+                width:  product.dimensions.width || 0,
                 height: product.dimensions.height || 0,
                 weight: product.dimensions.weight || 0,
               }
@@ -160,33 +167,33 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
           seo: product.seo ? {
             upsert: {
               create: {
-                title: product.seo.title,
+                title:       product.seo.title,
                 description: product.seo.description,
-                keywords: product.seo.keywords,
+                keywords:    product.seo.keywords,
               },
               update: {
-                title: product.seo.title,
+                title:       product.seo.title,
                 description: product.seo.description,
-                keywords: product.seo.keywords,
+                keywords:    product.seo.keywords,
               }
             }
           } : undefined,
         },
         include: {
-          images: true,
+          images:     true,
           attributes: true,
-          variants: {
+          variants:   {
             include: {
               attributes: true,
-              warehouse: true,
-              stock: true
+              warehouse:  true,
+              stock:      true
             }
           },
           sizeCharts: {
             include: {
               columns: true,
-              rows: true,
-              images: true,
+              rows:    true,
+              images:  true,
             }
           },
           productTags: {
@@ -195,7 +202,7 @@ export const updateProduct = async (call: ServerUnaryCall<UpdateProductRequest, 
             }
           },
           dimensions: true,
-          seo: true
+          seo:        true
         }
       })
     })

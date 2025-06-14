@@ -17,26 +17,26 @@ export async function getProvincesByCountry(
         countryId
       },
       select: {
-        id: true,
-        name: true,
-        nameEn: true,
-        fullName: true,
-        fullNameEn: true,
-        administrativeUnitId: true,
+        id:                     true,
+        name:                   true,
+        nameEn:                 true,
+        fullName:               true,
+        fullNameEn:             true,
+        administrativeUnitId:   true,
         administrativeRegionId: true,
-        countryId: true
+        countryId:              true
       }
     });
 
     const provinces = provincesQuery.map(province => ({
-      id: province.id,
-      name: province.name,
-      nameEn: province.nameEn,
-      fullName: province.fullName,
-      fullNameEn: province.fullNameEn,
-      administrativeUnitId: province.administrativeUnitId,
+      id:                     province.id,
+      name:                   province.name,
+      nameEn:                 province.nameEn,
+      fullName:               province.fullName,
+      fullNameEn:             province.fullNameEn,
+      administrativeUnitId:   province.administrativeUnitId,
       administrativeRegionId: province.administrativeRegionId,
-      countryId: province.countryId
+      countryId:              province.countryId
     }));
 
     callback(null, { 

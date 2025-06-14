@@ -56,54 +56,54 @@ const availableTags = [
 export default function NewBlogPostPage() {
   const router = useRouter()
 
-  const [post, setPost] = useState<Partial<BlogPost>>({
-    title: "",
-    slug: "",
+  const [ post, setPost ] = useState<Partial<BlogPost>>({
+    title:   "",
+    slug:    "",
     content: "",
     excerpt: "",
-    author: {
-      id: 1,
-      name: "Sarah Johnson",
+    author:  {
+      id:     1,
+      name:   "Sarah Johnson",
       avatar: "/placeholder.svg?height=40&width=40",
     },
     featuredImage: "",
-    categories: [],
-    tags: [],
-    status: "draft",
-    dateCreated: new Date().toISOString(),
+    categories:    [],
+    tags:          [],
+    status:        "draft",
+    dateCreated:   new Date().toISOString(),
     allowComments: true,
   })
 
-  const [isLoading, setIsLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState("content")
-  const [selectedCategory, setSelectedCategory] = useState("")
-  const [selectedTag, setSelectedTag] = useState("")
-  const [publishDate, setPublishDate] = useState<Date | undefined>(undefined)
-  const [publishTime, setPublishTime] = useState("")
-  const [isScheduled, setIsScheduled] = useState(false)
+  const [ isLoading, setIsLoading ] = useState(false)
+  const [ activeTab, setActiveTab ] = useState("content")
+  const [ selectedCategory, setSelectedCategory ] = useState("")
+  const [ selectedTag, setSelectedTag ] = useState("")
+  const [ publishDate, setPublishDate ] = useState<Date | undefined>(undefined)
+  const [ publishTime, setPublishTime ] = useState("")
+  const [ isScheduled, setIsScheduled ] = useState(false)
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setPost((prev) => ({ ...prev, [name]: value }))
+    setPost(prev => ({ ...prev, [name]: value }))
   }
 
   // Handle content change from rich text editor
   const handleContentChange = (content: string) => {
-    setPost((prev) => ({ ...prev, content }))
+    setPost(prev => ({ ...prev, content }))
   }
 
   // Handle featured image change
   const handleFeaturedImageChange = (imageUrl: string) => {
-    setPost((prev) => ({ ...prev, featuredImage: imageUrl }))
+    setPost(prev => ({ ...prev, featuredImage: imageUrl }))
   }
 
   // Handle category selection
   const handleAddCategory = () => {
     if (selectedCategory && !post.categories?.includes(selectedCategory)) {
-      setPost((prev) => ({
+      setPost(prev => ({
         ...prev,
-        categories: [...(prev.categories || []), selectedCategory],
+        categories: [ ...(prev.categories || []), selectedCategory ],
       }))
       setSelectedCategory("")
     }
@@ -112,9 +112,9 @@ export default function NewBlogPostPage() {
   // Handle tag selection
   const handleAddTag = () => {
     if (selectedTag && !post.tags?.includes(selectedTag)) {
-      setPost((prev) => ({
+      setPost(prev => ({
         ...prev,
-        tags: [...(prev.tags || []), selectedTag],
+        tags: [ ...(prev.tags || []), selectedTag ],
       }))
       setSelectedTag("")
     }
@@ -122,17 +122,17 @@ export default function NewBlogPostPage() {
 
   // Handle removing a category
   const handleRemoveCategory = (category: string) => {
-    setPost((prev) => ({
+    setPost(prev => ({
       ...prev,
-      categories: prev.categories?.filter((c) => c !== category) || [],
+      categories: prev.categories?.filter(c => c !== category) || [],
     }))
   }
 
   // Handle removing a tag
   const handleRemoveTag = (tag: string) => {
-    setPost((prev) => ({
+    setPost(prev => ({
       ...prev,
-      tags: prev.tags?.filter((t) => t !== tag) || [],
+      tags: prev.tags?.filter(t => t !== tag) || [],
     }))
   }
 
@@ -144,25 +144,25 @@ export default function NewBlogPostPage() {
       .toLowerCase()
       .replace(/[^\w\s]/gi, "")
       .replace(/\s+/g, "-")
-    setPost((prev) => ({ ...prev, slug }))
+    setPost(prev => ({ ...prev, slug }))
   }
 
   // Handle save
   const handleSave = (status?: string) => {
     if (!post.title) {
       toast({
-        title: "Title Required",
+        title:       "Title Required",
         description: "Please enter a title for your blog post.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
 
     if (!post.slug) {
       toast({
-        title: "Slug Required",
+        title:       "Slug Required",
         description: "Please generate a slug for your blog post.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
@@ -172,7 +172,7 @@ export default function NewBlogPostPage() {
     // Update status if provided
     const updatedPost = {
       ...post,
-      status: status || post.status,
+      status:       status || post.status,
       dateModified: new Date().toISOString(),
     }
 
@@ -184,7 +184,7 @@ export default function NewBlogPostPage() {
         // Create date from selected date and time
         publishDateTime = new Date(publishDate)
         if (publishTime) {
-          const [hours, minutes] = publishTime.split(":").map(Number)
+          const [ hours, minutes ] = publishTime.split(":").map(Number)
           publishDateTime.setHours(hours, minutes)
         }
         updatedPost.status = "scheduled"
@@ -202,7 +202,7 @@ export default function NewBlogPostPage() {
     setTimeout(() => {
       setIsLoading(false)
       toast({
-        title: "Post Saved",
+        title:       "Post Saved",
         description: `Your post has been ${status || "saved"}.`,
       })
 
@@ -277,7 +277,7 @@ export default function NewBlogPostPage() {
                                 selected={publishDate}
                                 onSelect={handlePublishDateChange}
                                 initialFocus
-                                disabled={(date) => date < new Date()}
+                                disabled={date => date < new Date()}
                               />
                             </PopoverContent>
                           </Popover>
@@ -289,7 +289,7 @@ export default function NewBlogPostPage() {
                             id="publishTime"
                             type="time"
                             value={publishTime}
-                            onChange={(e) => setPublishTime(e.target.value)}
+                            onChange={e => setPublishTime(e.target.value)}
                           />
                         </div>
                       </div>
@@ -444,7 +444,7 @@ export default function NewBlogPostPage() {
                     <Label>Status</Label>
                     <Select
                       value={post.status}
-                      onValueChange={(value) => setPost((prev) => ({ ...prev, status: value }))}
+                      onValueChange={value => setPost(prev => ({ ...prev, status: value }))}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select status" />
@@ -461,12 +461,12 @@ export default function NewBlogPostPage() {
                     <Label>Author</Label>
                     <Select
                       value={post.author?.id.toString()}
-                      onValueChange={(value) =>
-                        setPost((prev) => ({
+                      onValueChange={value =>
+                        setPost(prev => ({
                           ...prev,
                           author: {
-                            id: Number.parseInt(value),
-                            name: value === "1" ? "Sarah Johnson" : "Michael Chen",
+                            id:     Number.parseInt(value),
+                            name:   value === "1" ? "Sarah Johnson" : "Michael Chen",
                             avatar: `/placeholder.svg?height=40&width=40&text=${value === "1" ? "SJ" : "MC"}`,
                           },
                         }))
@@ -487,7 +487,7 @@ export default function NewBlogPostPage() {
                   <div className="space-y-2">
                     <Label>Categories</Label>
                     <div className="flex flex-wrap gap-2 mb-2">
-                      {post.categories?.map((category) => (
+                      {post.categories?.map(category => (
                         <Badge key={category} variant="secondary" className="capitalize">
                           {category}
                           <button
@@ -506,8 +506,8 @@ export default function NewBlogPostPage() {
                         </SelectTrigger>
                         <SelectContent>
                           {availableCategories
-                            .filter((category) => !post.categories?.includes(category))
-                            .map((category) => (
+                            .filter(category => !post.categories?.includes(category))
+                            .map(category => (
                               <SelectItem key={category} value={category} className="capitalize">
                                 {category}
                               </SelectItem>
@@ -523,7 +523,7 @@ export default function NewBlogPostPage() {
                   <div className="space-y-2">
                     <Label>Tags</Label>
                     <div className="flex flex-wrap gap-2 mb-2">
-                      {post.tags?.map((tag) => (
+                      {post.tags?.map(tag => (
                         <Badge key={tag} variant="outline" className="capitalize">
                           {tag}
                           <button className="ml-1 hover:text-destructive" onClick={() => handleRemoveTag(tag)}>
@@ -539,8 +539,8 @@ export default function NewBlogPostPage() {
                         </SelectTrigger>
                         <SelectContent>
                           {availableTags
-                            .filter((tag) => !post.tags?.includes(tag))
-                            .map((tag) => (
+                            .filter(tag => !post.tags?.includes(tag))
+                            .map(tag => (
                               <SelectItem key={tag} value={tag} className="capitalize">
                                 {tag}
                               </SelectItem>
@@ -570,7 +570,7 @@ export default function NewBlogPostPage() {
                     <Switch
                       id="newsletter"
                       checked={post.sendNewsletter}
-                      onCheckedChange={(checked) => setPost((prev) => ({ ...prev, sendNewsletter: checked }))}
+                      onCheckedChange={checked => setPost(prev => ({ ...prev, sendNewsletter: checked }))}
                     />
                     <Label htmlFor="newsletter">Send to newsletter subscribers</Label>
                   </div>
@@ -579,7 +579,7 @@ export default function NewBlogPostPage() {
                     <Switch
                       id="comments"
                       checked={post.allowComments !== false}
-                      onCheckedChange={(checked) => setPost((prev) => ({ ...prev, allowComments: checked }))}
+                      onCheckedChange={checked => setPost(prev => ({ ...prev, allowComments: checked }))}
                     />
                     <Label htmlFor="comments">Allow comments</Label>
                   </div>
@@ -588,7 +588,7 @@ export default function NewBlogPostPage() {
                     <Switch
                       id="featured"
                       checked={post.isFeatured}
-                      onCheckedChange={(checked) => setPost((prev) => ({ ...prev, isFeatured: checked }))}
+                      onCheckedChange={checked => setPost(prev => ({ ...prev, isFeatured: checked }))}
                     />
                     <Label htmlFor="featured">Feature on homepage</Label>
                   </div>

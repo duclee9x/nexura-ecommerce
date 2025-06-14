@@ -30,22 +30,22 @@ import { ColorPicker } from "@/components/color-picker"
 import type { AttributeValue } from "@/types/product"
 
 interface AttributeValueManagerProps {
-  values: AttributeValue[]
-  onChange: (values: AttributeValue[]) => void
+  values:        AttributeValue[]
+  onChange:      (values: AttributeValue[]) => void
   attributeType: string
 }
 
 export function AttributeValueManager({ values, onChange, attributeType }: AttributeValueManagerProps) {
-  const [newValue, setNewValue] = useState<AttributeValue>({
-    id: "",
-    name: "",
-    slug: "",
-    color: attributeType === "color" ? "#000000" : undefined,
+  const [ newValue, setNewValue ] = useState<AttributeValue>({
+    id:           "",
+    name:         "",
+    slug:         "",
+    color:        attributeType === "color" ? "#000000" : undefined,
     displayOrder: values.length,
   })
-  const [isAddingValue, setIsAddingValue] = useState(false)
-  const [editingValueId, setEditingValueId] = useState<string | null>(null)
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [ isAddingValue, setIsAddingValue ] = useState(false)
+  const [ editingValueId, setEditingValueId ] = useState<string | null>(null)
+  const [ errors, setErrors ] = useState<Record<string, string>>({})
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -69,24 +69,24 @@ export function AttributeValueManager({ values, onChange, attributeType }: Attri
     const valueId = editingValueId || `value-${Date.now()}`
     const valueToAdd = {
       ...newValue,
-      id: valueId,
+      id:   valueId,
       slug: newValue.slug || newValue.name.toLowerCase().replace(/\s+/g, "-"),
     }
 
     let updatedValues
     if (editingValueId) {
-      updatedValues = values.map((value) => (value.id === editingValueId ? valueToAdd : value))
+      updatedValues = values.map(value => (value.id === editingValueId ? valueToAdd : value))
     } else {
-      updatedValues = [...values, valueToAdd]
+      updatedValues = [ ...values, valueToAdd ]
     }
 
     onChange(updatedValues)
 
     setNewValue({
-      id: "",
-      name: "",
-      slug: "",
-      color: attributeType === "color" ? "#000000" : undefined,
+      id:           "",
+      name:         "",
+      slug:         "",
+      color:        attributeType === "color" ? "#000000" : undefined,
       displayOrder: values.length,
     })
     setIsAddingValue(false)
@@ -94,7 +94,7 @@ export function AttributeValueManager({ values, onChange, attributeType }: Attri
     setErrors({})
 
     toast({
-      title: editingValueId ? "Value Updated" : "Value Added",
+      title:       editingValueId ? "Value Updated" : "Value Added",
       description: `${valueToAdd.name} has been ${editingValueId ? "updated" : "added"}.`,
     })
   }
@@ -106,11 +106,11 @@ export function AttributeValueManager({ values, onChange, attributeType }: Attri
   }
 
   const handleDeleteValue = (valueId: string) => {
-    const updatedValues = values.filter((value) => value.id !== valueId)
+    const updatedValues = values.filter(value => value.id !== valueId)
     onChange(updatedValues)
 
     toast({
-      title: "Value Deleted",
+      title:       "Value Deleted",
       description: "The value has been removed.",
     })
   }
@@ -119,8 +119,8 @@ export function AttributeValueManager({ values, onChange, attributeType }: Attri
     const { active, over } = event
 
     if (over && active.id !== over.id) {
-      const oldIndex = values.findIndex((value) => value.id === active.id)
-      const newIndex = values.findIndex((value) => value.id === over.id)
+      const oldIndex = values.findIndex(value => value.id === active.id)
+      const newIndex = values.findIndex(value => value.id === over.id)
 
       const reorderedValues = arrayMove(values, oldIndex, newIndex).map((value, index) => ({
         ...value,
@@ -130,14 +130,14 @@ export function AttributeValueManager({ values, onChange, attributeType }: Attri
       onChange(reorderedValues)
 
       toast({
-        title: "Values Reordered",
+        title:       "Values Reordered",
         description: "The display order of values has been updated.",
       })
     }
   }
 
   const handleColorChange = (color: string) => {
-    setNewValue((prev) => ({
+    setNewValue(prev => ({
       ...prev,
       color,
     }))
@@ -145,7 +145,7 @@ export function AttributeValueManager({ values, onChange, attributeType }: Attri
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setNewValue((prev) => ({
+    setNewValue(prev => ({
       ...prev,
       [name]: value,
     }))
@@ -161,7 +161,7 @@ export function AttributeValueManager({ values, onChange, attributeType }: Attri
 
   const generateSlug = () => {
     const slug = newValue.name.toLowerCase().replace(/\s+/g, "-")
-    setNewValue((prev) => ({ ...prev, slug }))
+    setNewValue(prev => ({ ...prev, slug }))
   }
 
   const SortableValue = ({ value }: { value: AttributeValue }) => {
@@ -217,10 +217,10 @@ export function AttributeValueManager({ values, onChange, attributeType }: Attri
             setIsAddingValue(false)
             setEditingValueId(null)
             setNewValue({
-              id: "",
-              name: "",
-              slug: "",
-              color: attributeType === "color" ? "#000000" : undefined,
+              id:           "",
+              name:         "",
+              slug:         "",
+              color:        attributeType === "color" ? "#000000" : undefined,
               displayOrder: values.length,
             })
           }}
@@ -302,11 +302,11 @@ export function AttributeValueManager({ values, onChange, attributeType }: Attri
         </div>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={values.map((value) => value.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={values.map(value => value.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
               {values
                 .sort((a, b) => a.displayOrder - b.displayOrder)
-                .map((value) => (
+                .map(value => (
                   <SortableValue key={value.id} value={value} />
                 ))}
             </div>

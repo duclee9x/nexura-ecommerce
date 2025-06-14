@@ -2,12 +2,12 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 interface ColorButtonProps {
-  onClick: () => void
-  name: string
-  color: string
+  onClick:     () => void
+  name:        string
+  color:       string
   isSelected?: boolean
-  disabled?: boolean
-  isColor?: boolean
+  disabled?:   boolean
+  isColor?:    boolean
 }
 
 export function ColorButton({

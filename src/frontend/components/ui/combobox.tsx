@@ -33,20 +33,20 @@ import {
 } from "@/components/ui/alert-dialog"
 
 interface Item {
-  id: string
+  id:    string
   value: string
   label: string
 }
 
 interface ComboboxProps {
-  type: string
-  items: Item[]
-  value?: string
-  placeholder?: string
-  onChange?: (value: string) => void
+  type:          string
+  items:         Item[]
+  value?:        string
+  placeholder?:  string
+  onChange?:     (value: string) => void
   onCreateItem?: (name: string) => Promise<Item>
   onDeleteItem?: (id: string) => Promise<void>
-  className?: string
+  className?:    string
 }
 
 export function Combobox({
@@ -59,10 +59,10 @@ export function Combobox({
   onDeleteItem,
   className,
 }: ComboboxProps) {
-  const [open, setOpen] = React.useState(false)
-  const [search, setSearch] = React.useState("")
-  const [isCreating, setIsCreating] = React.useState(false)
-  const [newItemName, setNewItemName] = React.useState("")
+  const [ open, setOpen ] = React.useState(false)
+  const [ search, setSearch ] = React.useState("")
+  const [ isCreating, setIsCreating ] = React.useState(false)
+  const [ newItemName, setNewItemName ] = React.useState("")
 
   const filteredItems = React.useMemo(() => {
     if (!search) return items
@@ -71,7 +71,7 @@ export function Combobox({
       item.label.toLowerCase().includes(searchLower) || 
       item.value.toLowerCase().includes(searchLower)
     )
-  }, [items, search])
+  }, [ items, search ])
 
   const handleCreate = async () => {
     if (!newItemName.trim() || !onCreateItem) return
@@ -83,14 +83,14 @@ export function Combobox({
       setOpen(false)
       setNewItemName("")
       toast({
-        title: "Success",
+        title:       "Success",
         description: `New ${type} created successfully.`,
       })
     } catch (error) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: error instanceof Error ? error.message : `Failed to create new ${type}.`,
-        variant: "destructive",
+        variant:     "destructive",
       })
     } finally {
       setIsCreating(false)
@@ -106,14 +106,14 @@ export function Combobox({
         onChange?.("")
       }
       toast({
-        title: "Success",
+        title:       "Success",
         description: `${type} deleted successfully.`,
       })
     } catch (error) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: error instanceof Error ? error.message : `Failed to delete ${type}.`,
-        variant: "destructive",
+        variant:     "destructive",
       })
     }
   }
@@ -127,7 +127,7 @@ export function Combobox({
           aria-expanded={open}
           className={cn("justify-between", className)}
         >
-          {value ? items.find((item) => item.value === value)?.label : placeholder || `Select ${type}...`}
+          {value ? items.find(item => item.value === value)?.label : placeholder || `Select ${type}...`}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -146,7 +146,7 @@ export function Combobox({
                     <Input
                       placeholder={`Enter new ${type} name...`}
                       value={newItemName}
-                      onChange={(e) => setNewItemName(e.target.value)}
+                      onChange={e => setNewItemName(e.target.value)}
                       className="flex-1"
                     />
                     <Button
@@ -165,7 +165,7 @@ export function Combobox({
               <>
                 <CommandSeparator />
                 <CommandGroup>
-                  {filteredItems.map((item) => (
+                  {filteredItems.map(item => (
                     <CommandItem
                       key={item.id}
                       value={item.value}
@@ -190,7 +190,7 @@ export function Combobox({
                                 variant="ghost"
                                 size="icon"
                                 className="h-6 w-6 hover:bg-destructive/10 hover:text-destructive"
-                                onClick={(e) => e.stopPropagation()}
+                                onClick={e => e.stopPropagation()}
                               >
                                 <Trash2 className="h-3 w-3" />
                               </Button>

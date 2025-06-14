@@ -34,28 +34,28 @@ import type { ProductAttribute, AttributeValue } from "@/types/product"
 
 interface EnhancedAttributeManagerProps {
   attributes: ProductAttribute[]
-  onChange: (attributes: ProductAttribute[]) => void
+  onChange:   (attributes: ProductAttribute[]) => void
 }
 
 export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttributeManagerProps) {
-  const [expandedAttribute, setExpandedAttribute] = useState<string | null>(null)
-  const [newAttribute, setNewAttribute] = useState<ProductAttribute>({
-    id: "",
-    name: "",
-    slug: "",
-    type: "text",
-    required: false,
-    visible: true,
-    filterable: true,
-    searchable: true,
-    variantable: false,
+  const [ expandedAttribute, setExpandedAttribute ] = useState<string | null>(null)
+  const [ newAttribute, setNewAttribute ] = useState<ProductAttribute>({
+    id:           "",
+    name:         "",
+    slug:         "",
+    type:         "text",
+    required:     false,
+    visible:      true,
+    filterable:   true,
+    searchable:   true,
+    variantable:  false,
     displayOrder: attributes.length,
-    values: [],
+    values:       [],
   })
-  const [isAddingAttribute, setIsAddingAttribute] = useState(false)
-  const [editingAttributeId, setEditingAttributeId] = useState<string | null>(null)
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [activeTab, setActiveTab] = useState<"general" | "values">("general")
+  const [ isAddingAttribute, setIsAddingAttribute ] = useState(false)
+  const [ editingAttributeId, setEditingAttributeId ] = useState<string | null>(null)
+  const [ errors, setErrors ] = useState<Record<string, string>>({})
+  const [ activeTab, setActiveTab ] = useState<"general" | "values">("general")
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -65,7 +65,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
   )
 
   const toggleAttribute = (attributeId: string) => {
-    setExpandedAttribute((prev) => (prev === attributeId ? null : attributeId))
+    setExpandedAttribute(prev => (prev === attributeId ? null : attributeId))
   }
 
   const handleAddAttribute = () => {
@@ -83,31 +83,31 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
     const attributeId = editingAttributeId || `attr-${Date.now()}`
     const attributeToAdd = {
       ...newAttribute,
-      id: attributeId,
+      id:   attributeId,
       slug: newAttribute.slug || newAttribute.name.toLowerCase().replace(/\s+/g, "-"),
     }
 
     let updatedAttributes
     if (editingAttributeId) {
-      updatedAttributes = attributes.map((attr) => (attr.id === editingAttributeId ? attributeToAdd : attr))
+      updatedAttributes = attributes.map(attr => (attr.id === editingAttributeId ? attributeToAdd : attr))
     } else {
-      updatedAttributes = [...attributes, attributeToAdd]
+      updatedAttributes = [ ...attributes, attributeToAdd ]
     }
 
     onChange(updatedAttributes)
 
     setNewAttribute({
-      id: "",
-      name: "",
-      slug: "",
-      type: "text",
-      required: false,
-      visible: true,
-      filterable: true,
-      searchable: true,
-      variantable: false,
+      id:           "",
+      name:         "",
+      slug:         "",
+      type:         "text",
+      required:     false,
+      visible:      true,
+      filterable:   true,
+      searchable:   true,
+      variantable:  false,
       displayOrder: attributes.length,
-      values: [],
+      values:       [],
     })
     setIsAddingAttribute(false)
     setEditingAttributeId(null)
@@ -115,7 +115,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
     setActiveTab("general")
 
     toast({
-      title: editingAttributeId ? "Attribute Updated" : "Attribute Added",
+      title:       editingAttributeId ? "Attribute Updated" : "Attribute Added",
       description: `${attributeToAdd.name} has been ${editingAttributeId ? "updated" : "added"}.`,
     })
   }
@@ -128,11 +128,11 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
   }
 
   const handleDeleteAttribute = (attributeId: string) => {
-    const updatedAttributes = attributes.filter((attr) => attr.id !== attributeId)
+    const updatedAttributes = attributes.filter(attr => attr.id !== attributeId)
     onChange(updatedAttributes)
 
     toast({
-      title: "Attribute Deleted",
+      title:       "Attribute Deleted",
       description: "The attribute has been removed.",
     })
   }
@@ -160,7 +160,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
   }
 
   const handleNewAttributeValuesChange = (values: AttributeValue[]) => {
-    setNewAttribute((prev) => ({
+    setNewAttribute(prev => ({
       ...prev,
       values,
     }))
@@ -170,8 +170,8 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
     const { active, over } = event
 
     if (over && active.id !== over.id) {
-      const oldIndex = attributes.findIndex((attr) => attr.id === active.id)
-      const newIndex = attributes.findIndex((attr) => attr.id === over.id)
+      const oldIndex = attributes.findIndex(attr => attr.id === active.id)
+      const newIndex = attributes.findIndex(attr => attr.id === over.id)
 
       const reorderedAttributes = arrayMove(attributes, oldIndex, newIndex).map((attr, index) => ({
         ...attr,
@@ -181,7 +181,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
       onChange(reorderedAttributes)
 
       toast({
-        title: "Attributes Reordered",
+        title:       "Attributes Reordered",
         description: "The display order of attributes has been updated.",
       })
     }
@@ -189,7 +189,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setNewAttribute((prev) => ({
+    setNewAttribute(prev => ({
       ...prev,
       [name]: value,
     }))
@@ -205,7 +205,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
 
   const generateSlug = () => {
     const slug = newAttribute.name.toLowerCase().replace(/\s+/g, "-")
-    setNewAttribute((prev) => ({ ...prev, slug }))
+    setNewAttribute(prev => ({ ...prev, slug }))
   }
 
   const SortableAttribute = ({ attribute }: { attribute: ProductAttribute }) => {
@@ -299,7 +299,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
                   <Input
                     id={`attr-${attribute.id}-name`}
                     value={attribute.name}
-                    onChange={(e) => handleAttributeChange(attribute.id, "name", e.target.value)}
+                    onChange={e => handleAttributeChange(attribute.id, "name", e.target.value)}
                   />
                 </div>
 
@@ -308,7 +308,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
                   <Input
                     id={`attr-${attribute.id}-slug`}
                     value={attribute.slug}
-                    onChange={(e) => handleAttributeChange(attribute.id, "slug", e.target.value)}
+                    onChange={e => handleAttributeChange(attribute.id, "slug", e.target.value)}
                   />
                 </div>
               </div>
@@ -340,7 +340,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
                   <Input
                     id={`attr-${attribute.id}-description`}
                     value={attribute.description || ""}
-                    onChange={(e) => handleAttributeChange(attribute.id, "description", e.target.value)}
+                    onChange={e => handleAttributeChange(attribute.id, "description", e.target.value)}
                     placeholder="Optional description"
                   />
                 </div>
@@ -353,7 +353,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
                   <Switch
                     id={`attr-${attribute.id}-required`}
                     checked={attribute.required}
-                    onCheckedChange={(checked) => handleAttributeChange(attribute.id, "required", checked)}
+                    onCheckedChange={checked => handleAttributeChange(attribute.id, "required", checked)}
                   />
                   <Label htmlFor={`attr-${attribute.id}-required`}>Required</Label>
                 </div>
@@ -362,7 +362,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
                   <Switch
                     id={`attr-${attribute.id}-visible`}
                     checked={attribute.visible}
-                    onCheckedChange={(checked) => handleAttributeChange(attribute.id, "visible", checked)}
+                    onCheckedChange={checked => handleAttributeChange(attribute.id, "visible", checked)}
                   />
                   <Label htmlFor={`attr-${attribute.id}-visible`}>Visible on product page</Label>
                 </div>
@@ -373,7 +373,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
                   <Switch
                     id={`attr-${attribute.id}-variantable`}
                     checked={attribute.variantable}
-                    onCheckedChange={(checked) => handleAttributeChange(attribute.id, "variantable", checked)}
+                    onCheckedChange={checked => handleAttributeChange(attribute.id, "variantable", checked)}
                   />
                   <Label htmlFor={`attr-${attribute.id}-variantable`}>Use for variants</Label>
                 </div>
@@ -382,7 +382,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
                   <Switch
                     id={`attr-${attribute.id}-filterable`}
                     checked={attribute.filterable}
-                    onCheckedChange={(checked) => handleAttributeChange(attribute.id, "filterable", checked)}
+                    onCheckedChange={checked => handleAttributeChange(attribute.id, "filterable", checked)}
                   />
                   <Label htmlFor={`attr-${attribute.id}-filterable`}>Use in filters</Label>
                 </div>
@@ -391,7 +391,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
                   <Switch
                     id={`attr-${attribute.id}-searchable`}
                     checked={attribute.searchable}
-                    onCheckedChange={(checked) => handleAttributeChange(attribute.id, "searchable", checked)}
+                    onCheckedChange={checked => handleAttributeChange(attribute.id, "searchable", checked)}
                   />
                   <Label htmlFor={`attr-${attribute.id}-searchable`}>Include in search</Label>
                 </div>
@@ -401,7 +401,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
 
               <AttributeValueManager
                 values={attribute.values}
-                onChange={(values) => handleAttributeValuesChange(attribute.id, values)}
+                onChange={values => handleAttributeValuesChange(attribute.id, values)}
                 attributeType={attribute.type}
               />
             </div>
@@ -491,7 +491,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
               <Select
                 value={newAttribute.type}
                 onValueChange={(value: "text" | "number" | "boolean" | "select" | "color") =>
-                  setNewAttribute((prev) => ({ ...prev, type: value }))
+                  setNewAttribute(prev => ({ ...prev, type: value }))
                 }
               >
                 <SelectTrigger id="attr-type">
@@ -524,7 +524,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
               <Switch
                 id="attr-required"
                 checked={newAttribute.required}
-                onCheckedChange={(checked) => setNewAttribute((prev) => ({ ...prev, required: checked }))}
+                onCheckedChange={checked => setNewAttribute(prev => ({ ...prev, required: checked }))}
               />
               <Label htmlFor="attr-required">Required</Label>
             </div>
@@ -533,7 +533,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
               <Switch
                 id="attr-visible"
                 checked={newAttribute.visible}
-                onCheckedChange={(checked) => setNewAttribute((prev) => ({ ...prev, visible: checked }))}
+                onCheckedChange={checked => setNewAttribute(prev => ({ ...prev, visible: checked }))}
               />
               <Label htmlFor="attr-visible">Visible on product page</Label>
             </div>
@@ -544,7 +544,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
               <Switch
                 id="attr-variantable"
                 checked={newAttribute.variantable}
-                onCheckedChange={(checked) => setNewAttribute((prev) => ({ ...prev, variantable: checked }))}
+                onCheckedChange={checked => setNewAttribute(prev => ({ ...prev, variantable: checked }))}
               />
               <Label htmlFor="attr-variantable">Use for variants</Label>
             </div>
@@ -553,7 +553,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
               <Switch
                 id="attr-filterable"
                 checked={newAttribute.filterable}
-                onCheckedChange={(checked) => setNewAttribute((prev) => ({ ...prev, filterable: checked }))}
+                onCheckedChange={checked => setNewAttribute(prev => ({ ...prev, filterable: checked }))}
               />
               <Label htmlFor="attr-filterable">Use in filters</Label>
             </div>
@@ -562,7 +562,7 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
               <Switch
                 id="attr-searchable"
                 checked={newAttribute.searchable}
-                onCheckedChange={(checked) => setNewAttribute((prev) => ({ ...prev, searchable: checked }))}
+                onCheckedChange={checked => setNewAttribute(prev => ({ ...prev, searchable: checked }))}
               />
               <Label htmlFor="attr-searchable">Include in search</Label>
             </div>
@@ -609,11 +609,11 @@ export function EnhancedAttributeManager({ attributes, onChange }: EnhancedAttri
         </div>
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={attributes.map((attr) => attr.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={attributes.map(attr => attr.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
               {attributes
                 .sort((a, b) => a.displayOrder - b.displayOrder)
-                .map((attribute) => (
+                .map(attribute => (
                   <SortableAttribute key={attribute.id} attribute={attribute} />
                 ))}
             </div>

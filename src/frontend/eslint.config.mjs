@@ -14,12 +14,12 @@ export default defineConfig([
     ".next/*",
   ]),
   {
-    files: ["**/*.{js,jsx,ts,tsx}"],
+    files:           ["**/*.{js,jsx,ts,tsx}"],
     // ignores: ["node_modules/*", "dist/*", "build/*", "public/*", ".next/*"],
     languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-      parser: typescriptParser,
+      ecmaVersion:   "latest",
+      sourceType:    "module",
+      parser:        typescriptParser,
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
@@ -28,22 +28,22 @@ export default defineConfig([
     },
     plugins: {
       react,
-      "react-hooks": reactHooks,
+      "react-hooks":        reactHooks,
       "@typescript-eslint": typescriptEslint,
-      next: nextPlugin,
+      next:                 nextPlugin,
     },
     rules: {
       // ✅ React rules
-      "react/display-name": "off",
+      "react/display-name":       "off",
       "react/react-in-jsx-scope": "off",
-      "react/prop-types": "off",
+      "react/prop-types":         "off",
 
       // ✅ React Hooks
-      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/rules-of-hooks":  "error",
       "react-hooks/exhaustive-deps": "warn",
 
       // ✅ TypeScript
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": [ "warn", { argsIgnorePattern: "^_" } ],
 
       // ✅ Next.js (only manually picked rules — here's an example)
       "next/google-font-display": "error",

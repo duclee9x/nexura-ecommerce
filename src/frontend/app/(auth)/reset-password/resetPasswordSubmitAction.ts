@@ -3,7 +3,7 @@
 import { emailSchema, resetPasswordSchema, verificationSchema } from "./resetPasswordFormSchema"
 import UserHooks from "@/hooks/user-hooks"
 
-export type FormState = {message: string, success: boolean, field?: Record<string, string>, issue?: string[]}
+export type FormState = { message: string, success: boolean, field?: Record<string, string>, issue?: string[] }
 export async function handleSubmitEmailAction(prev: FormState, data: FormData) :Promise<FormState> {
   const parsedData = emailSchema.safeParse({email: data.get('email')})
   
@@ -11,8 +11,8 @@ export async function handleSubmitEmailAction(prev: FormState, data: FormData) :
     return {
       message: "Invalid user credentials", 
       success: false, 
-      field: {email: data.get('email')?.toString() ?? ""}, 
-      issue: parsedData.error.issues.map(issue => issue.message)
+      field:   {email: data.get('email')?.toString() ?? ""}, 
+      issue:   parsedData.error.issues.map(issue => issue.message)
     }
   }
   
@@ -26,8 +26,8 @@ export async function handleSubmitVerificationAction(prev: FormState, data: Form
     return {
       message: "Invalid verification code", 
       success: false, 
-      field: {code: data.get('code')?.toString() ?? ""}, 
-      issue: parsedData.error.issues.map(issue => issue.message)
+      field:   {code: data.get('code')?.toString() ?? ""}, 
+      issue:   parsedData.error.issues.map(issue => issue.message)
     }
   }
 
@@ -43,8 +43,8 @@ export async function handleSubmitResetPasswordAction(prev: FormState, data: For
     return {
       message: "Invalid reset password", 
       success: false, 
-      field: {password: data.get('password')?.toString() ?? "", confirmPassword: data.get('confirmPassword')?.toString() ?? "", token: data.get('token')?.toString() ?? "", email: data.get('email')?.toString() ?? ""}, 
-      issue: parsedData.error.issues.map(issue => issue.message)
+      field:   {password: data.get('password')?.toString() ?? "", confirmPassword: data.get('confirmPassword')?.toString() ?? "", token: data.get('token')?.toString() ?? "", email: data.get('email')?.toString() ?? ""}, 
+      issue:   parsedData.error.issues.map(issue => issue.message)
     }
   }
 

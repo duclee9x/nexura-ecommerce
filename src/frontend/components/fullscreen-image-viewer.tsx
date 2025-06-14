@@ -5,14 +5,14 @@ import { X, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface FullscreenImageViewerProps {
-  images: string[]
+  images:       string[]
   initialIndex: number
-  isOpen: boolean
-  onClose: () => void
+  isOpen:       boolean
+  onClose:      () => void
 }
 
 export function FullscreenImageViewer({ images, initialIndex, isOpen, onClose }: FullscreenImageViewerProps) {
-  const [currentIndex, setCurrentIndex] = useState(initialIndex)
+  const [ currentIndex, setCurrentIndex ] = useState(initialIndex)
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback(
@@ -21,17 +21,19 @@ export function FullscreenImageViewer({ images, initialIndex, isOpen, onClose }:
 
       switch (e.key) {
         case "ArrowLeft":
-          setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))
+          setCurrentIndex(prev => (prev === 0 ? images.length - 1 : prev - 1))
           break
         case "ArrowRight":
-          setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))
+          setCurrentIndex(prev => (prev === images.length - 1 ? 0 : prev + 1))
           break
         case "Escape":
           onClose()
           break
       }
     },
-    [isOpen, images.length, onClose],
+    [
+      isOpen, images.length, onClose
+    ],
   )
 
   // Add and remove event listeners
@@ -75,7 +77,7 @@ export function FullscreenImageViewer({ images, initialIndex, isOpen, onClose }:
           variant="ghost"
           size="icon"
           className="absolute left-4 text-white hover:bg-white/20 h-12 w-12"
-          onClick={() => setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1))}
+          onClick={() => setCurrentIndex(prev => (prev === 0 ? images.length - 1 : prev - 1))}
         >
           <ChevronLeft className="h-8 w-8" />
         </Button>
@@ -97,7 +99,7 @@ export function FullscreenImageViewer({ images, initialIndex, isOpen, onClose }:
           variant="ghost"
           size="icon"
           className="absolute right-4 text-white hover:bg-white/20 h-12 w-12"
-          onClick={() => setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1))}
+          onClick={() => setCurrentIndex(prev => (prev === images.length - 1 ? 0 : prev + 1))}
         >
           <ChevronRight className="h-8 w-8" />
         </Button>

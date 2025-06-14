@@ -24,8 +24,8 @@ import { useCart } from "@/contexts/cart-context"
 import { useWishlist } from "@/contexts/wishlist-context"
 export function SiteHeader() {
   const pathname = usePathname()
-  const [isMounted, setIsMounted] = useState(false)
-  const [searchOpen, setSearchOpen] = useState(false)
+  const [ isMounted, setIsMounted ] = useState(false)
+  const [ searchOpen, setSearchOpen ] = useState(false)
   const { user } = useSession()
   const { itemCount: cartItemCount } = useCart()
   const { wishlistItems } = useWishlist()
@@ -52,15 +52,15 @@ export function SiteHeader() {
       <div className="container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 text-center h-16 items-center">
         <div className="hidden lg:flex items-center gap-8 flex-1">
           <nav className="lg:flex items-center space-x-6 text-sm">
-            {navigation.map((item) => (
+            {navigation.map(item => (
               <Link
                 key={item.name}
                 href={{
                   pathname: item.href,
-                  query: item.category ? { category: item.category } : undefined,
+                  query:    item.category ? { category: item.category } : undefined,
                 }}
                 className={`text-muted hover:text-primary/80 ${pathname === item.href ? "text-primary font-medium" : "text-muted-foreground/60 transition-colors"
-                  }`}
+                }`}
               >
                 {item.name}
               </Link>
@@ -90,12 +90,14 @@ export function SiteHeader() {
                 <DropdownMenuItem asChild>
                   <Link href="/login">
                     <LogIn className="h-4 w-4 mr-2" />
-                    Sign In</Link>
+                    Sign In
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/register">
                     <UserPlus className="h-4 w-4 mr-2" />
-                    Create Account</Link>
+                    Create Account
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
               </>) : (<>
@@ -108,17 +110,20 @@ export function SiteHeader() {
                 <DropdownMenuItem asChild>
                   <Link href="/profile">
                     <UserPen className="h-4 w-4 mr-2" />
-                    My Profile</Link>
+                    My Profile
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/orders">
                     <BaggageClaim className="h-4 w-4 mr-2" />
-                    My Orders</Link>
+                    My Orders
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/logout">
                     <LogOut className="h-4 w-4 mr-2" />
-                    Logout</Link>
+                    Logout
+                  </Link>
                 </DropdownMenuItem>
               </>)}
             </DropdownMenuContent>
@@ -129,7 +134,8 @@ export function SiteHeader() {
               <Heart className={cn(
                 "h-5 w-5",
                 wishlistItems.length > 0 && "fill-current"
-              )} />
+              )}
+              />
               {isMounted && wishlistItems.length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {wishlistItems.length}
@@ -143,7 +149,8 @@ export function SiteHeader() {
               <ShoppingBag className={cn(
                 "h-5 w-5",
                 cartItemCount > 0 && "fill-green-200"
-              )} />
+              )}
+              />
               {isMounted && cartItemCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {cartItemCount}
@@ -172,12 +179,12 @@ export function SiteHeader() {
                 </div>
 
                 <nav className="flex flex-col gap-4 py-8">
-                  {navigation.map((item) => (
+                  {navigation.map(item => (
                     <SheetClose asChild key={item.name}>
                       <Link
                         href={item.href}
                         className={`px-2 py-1 ${pathname === item.href ? "text-foreground font-medium" : "text-foreground/60"
-                          }`}
+                        }`}
                       >
                         {item.name}
                       </Link>

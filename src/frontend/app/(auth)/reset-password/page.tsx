@@ -13,10 +13,10 @@ import { useActionState } from "react"
 
 type PasswordState = {
   hasChangedPassword: boolean
-  password: string
-  confirmPassword: string
-  token: string
-  email: string
+  password:           string
+  confirmPassword:    string
+  token:              string
+  email:              string
 }
 
 type PasswordStateAction = 
@@ -29,12 +29,12 @@ export default function ResetPasswordPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
-  const [tokenStatus, setTokenStatus] = useState<"loading" | "valid" | "invalid">("loading")
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [ isLoading, setIsLoading ] = useState(false)
+  const [ tokenStatus, setTokenStatus ] = useState<"loading" | "valid" | "invalid">("loading")
+  const [ showPassword, setShowPassword ] = useState(false)
+  const [ showConfirmPassword, setShowConfirmPassword ] = useState(false)
   
-  const [passwordState, setPasswordState] = useReducer((state: PasswordState, action: PasswordStateAction) => {
+  const [ passwordState, setPasswordState ] = useReducer((state: PasswordState, action: PasswordStateAction) => {
     switch (action.type) {
       case 'SET_PASSWORD':
         return { ...state, password: action.password }
@@ -49,10 +49,10 @@ export default function ResetPasswordPage() {
     }
   }, {
     hasChangedPassword: false,
-    password: "",
-    confirmPassword: "",
-    token: "",
-    email: "",
+    password:           "",
+    confirmPassword:    "",
+    token:              "",
+    email:              "",
   })
 
   const [state] = useActionState(handleSubmitResetPasswordAction, {message: "", success: false})
@@ -92,23 +92,23 @@ export default function ResetPasswordPage() {
       
       if (result.success) {
         toast({
-          title: "Password reset successful",
+          title:       "Password reset successful",
           description: "Your password has been reset successfully. Please login with your new password.",
-          variant: "default",
+          variant:     "default",
         })
         router.push("/login")
       } else {
         toast({
-          title: "Password reset failed",
+          title:       "Password reset failed",
           description: result.message,
-          variant: "destructive",
+          variant:     "destructive",
         })
       }
     } catch (error) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: error instanceof Error ? error.message : "An unknown error occurred",
-        variant: "destructive",
+        variant:     "destructive",
       })
     } finally {
       setIsLoading(false)
@@ -150,7 +150,7 @@ export default function ResetPasswordPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   value={passwordState.password}
-                  onChange={(e) => setPasswordState({ type: 'SET_PASSWORD', password: e.target.value })}
+                  onChange={e => setPasswordState({ type: 'SET_PASSWORD', password: e.target.value })}
                   placeholder="Enter your new password"
                   required
                   minLength={8}
@@ -179,7 +179,7 @@ export default function ResetPasswordPage() {
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   value={passwordState.confirmPassword}
-                  onChange={(e) => setPasswordState({ type: 'SET_CONFIRM_PASSWORD', confirmPassword: e.target.value })}
+                  onChange={e => setPasswordState({ type: 'SET_CONFIRM_PASSWORD', confirmPassword: e.target.value })}
                   placeholder="Confirm your new password"
                   required
                   minLength={8}

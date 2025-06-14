@@ -21,12 +21,12 @@ export const GetBatchPayments: handleUnaryCall<GetBatchPaymentsRequest, GetBatch
     });
 
     // Map Prisma payment to proto Payment message
-    const paymentsProto = payments.map((payment) => ({
-      id: payment.id,
-      method: payment.provider,
-      subtotal: payment.amount,
-      total: payment.amount,
-      status: payment.status as PaymentStatus,
+    const paymentsProto = payments.map(payment => ({
+      id:        payment.id,
+      method:    payment.provider,
+      subtotal:  payment.amount,
+      total:     payment.amount,
+      status:    payment.status as PaymentStatus,
       createdAt: payment.createdAt.toISOString(),
       updatedAt: payment.updatedAt.toISOString(),
     }));
@@ -35,7 +35,7 @@ export const GetBatchPayments: handleUnaryCall<GetBatchPaymentsRequest, GetBatch
   } catch (error) {
     console.error('Error in GetBatchPayments:', error);
     callback({
-      code: Status.INTERNAL,
+      code:    Status.INTERNAL,
       message: 'Failed to fetch batch payments',
       details: error instanceof Error ? error.message : 'Unknown error'
     });

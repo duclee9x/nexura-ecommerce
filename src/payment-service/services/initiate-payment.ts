@@ -27,10 +27,10 @@ export const InitiatePayment: handleUnaryCall<InitiatePaymentRequest, InitiatePa
   if (provider === PaymentProvider.COD) {
     const payment = await prisma.payment.create({
       data: {
-        amount: amount,
+        amount:   amount,
         currency: currency,
         provider: provider,
-        status: mapPaymentStatus(ProtoPaymentStatus.PAYMENT_PENDING),
+        status:   mapPaymentStatus(ProtoPaymentStatus.PAYMENT_PENDING),
       }
     })
     callback(null, { paymentId: payment.id, provider: provider, redirectUrl: "", status: ProtoPaymentStatus.PAYMENT_PENDING });

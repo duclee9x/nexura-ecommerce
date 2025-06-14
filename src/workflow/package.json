@@ -1,0 +1,18 @@
+{
+  "name": "@nexura/workflow",
+  "version": "1.0.0",
+  "description": "dapr workflow application",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "bun build --bytecode --sourcemap index.ts --target bun --outdir ./dist",
+    "lint": "eslint . --config ../../packages/eslint/eslint.config.js",
+    "lint:fix": "eslint . --fix --config ../../packages/eslint/eslint.config.js"
+  },
+  "dependencies": {
+    "@dapr/dapr": "^3.5.2",
+    "express": "^4.18.2"
+  }
+}

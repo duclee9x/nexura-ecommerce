@@ -5,8 +5,12 @@ import { cookies } from "next/headers"
 import { SessionData } from "./config/iron-session"
 import { sessionOptions } from "./config/iron-session"
 import { getIronSession } from "iron-session"
-const publicRoutes = ["/login", "/register", "/forgot-password", "/reset-password", "/verify-email"]
-const authRoutes = ["/admin", "/profile", "/orders", "/api/user/avatar"]
+const publicRoutes = [
+  "/login", "/register", "/forgot-password", "/reset-password", "/verify-email"
+]
+const authRoutes = [
+  "/admin", "/profile", "/orders", "/api/user/avatar"
+]
 
 // This is a simplified middleware example
 export async function middleware(request: NextRequest) {

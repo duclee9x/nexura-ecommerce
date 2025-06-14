@@ -11,28 +11,28 @@ import { Badge } from "@/components/ui/badge"
 import { Star } from "lucide-react"
 
 interface Review {
-  id: number
-  rating: number
+  id:      number
+  rating:  number
   comment: string
   images?: string[]
   user: {
-    name: string
+    name:   string
     avatar: string
-    date: string
+    date:   string
   }
-  likes: number
+  likes:    number
   verified: boolean
 }
 
 interface ReviewImageViewerProps {
-  reviews: Review[]
+  reviews:            Review[]
   currentReviewIndex: number
-  currentImageIndex: number
-  isOpen: boolean
-  onClose: () => void
-  onReviewChange: (index: number) => void
-  onImageChange: (index: number) => void
-  formatDate: (date: string) => string
+  currentImageIndex:  number
+  isOpen:             boolean
+  onClose:            () => void
+  onReviewChange:     (index: number) => void
+  onImageChange:      (index: number) => void
+  formatDate:         (date: string) => string
 }
 
 export function ReviewImageViewer({
@@ -45,7 +45,7 @@ export function ReviewImageViewer({
   onImageChange,
   formatDate,
 }: ReviewImageViewerProps) {
-  const [isLoading, setIsLoading] = useState(true)
+  const [ isLoading, setIsLoading ] = useState(true)
   const currentReview = reviews[currentReviewIndex]
   const currentImages = useMemo(() => currentReview?.images || [], [currentReview])
 
@@ -53,25 +53,33 @@ export function ReviewImageViewer({
     if (currentImages.length > 0) {
       onImageChange((currentImageIndex - 1 + currentImages.length) % currentImages.length)
     }
-  }, [currentImages, currentImageIndex, onImageChange])
+  }, [
+    currentImages, currentImageIndex, onImageChange
+  ])
 
   const handleNextImage = useCallback(() => {
     if (currentImages.length > 0) {
       onImageChange((currentImageIndex + 1) % currentImages.length)
     }
-  }, [currentImages, currentImageIndex, onImageChange])
+  }, [
+    currentImages, currentImageIndex, onImageChange
+  ])
 
   const handlePrevReview = useCallback(() => {
     const newIndex = (currentReviewIndex - 1 + reviews.length) % reviews.length
     onReviewChange(newIndex)
     onImageChange(0) // Reset image index when changing reviews
-  }, [currentReviewIndex, reviews, onReviewChange, onImageChange])
+  }, [
+    currentReviewIndex, reviews, onReviewChange, onImageChange
+  ])
 
   const handleNextReview = useCallback(() => {
     const newIndex = (currentReviewIndex + 1) % reviews.length
     onReviewChange(newIndex)
     onImageChange(0) // Reset image index when changing reviews
-  }, [currentReviewIndex, reviews, onReviewChange, onImageChange])
+  }, [
+    currentReviewIndex, reviews, onReviewChange, onImageChange
+  ])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -105,7 +113,9 @@ export function ReviewImageViewer({
       document.removeEventListener("keydown", handleKeyDown)
       document.body.style.overflow = "unset"
     }
-  }, [isOpen, currentReviewIndex, currentImageIndex, onClose, handlePrevImage, handleNextImage, handlePrevReview, handleNextReview])
+  }, [
+    isOpen, currentReviewIndex, currentImageIndex, onClose, handlePrevImage, handleNextImage, handlePrevReview, handleNextReview
+  ])
 
   if (!currentReview) return null
 
@@ -178,7 +188,9 @@ export function ReviewImageViewer({
                 </div>
                 <div className="flex items-center gap-2 mt-1">
                   <div className="flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
+                    {[
+                      1, 2, 3, 4, 5
+                    ].map(star => (
                       <Star
                         key={star}
                         className={`h-4 w-4 ${

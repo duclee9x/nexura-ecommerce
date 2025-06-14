@@ -10,69 +10,69 @@ import type { ChatMessage, ChatConversation } from "@/types/schema"
 
 // Sample conversation
 const initialConversation: ChatConversation = {
-  id: 1,
-  customerId: 1,
-  customerName: "John Doe",
-  status: "active",
+  id:              1,
+  customerId:      1,
+  customerName:    "John Doe",
+  status:          "active",
   lastMessageDate: new Date().toISOString(),
-  dateCreated: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-  messages: [
+  dateCreated:     new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
+  messages:        [
     {
-      id: 1,
+      id:             1,
       conversationId: 1,
-      sender: "customer",
-      senderId: 1,
-      content: "Hello, I have a question about the Pro Traveler Backpack. Does it have a laptop compartment?",
-      read: true,
-      dateCreated: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
+      sender:         "customer",
+      senderId:       1,
+      content:        "Hello, I have a question about the Pro Traveler Backpack. Does it have a laptop compartment?",
+      read:           true,
+      dateCreated:    new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
     },
     {
-      id: 2,
+      id:             2,
       conversationId: 1,
-      sender: "admin",
-      senderId: 1,
+      sender:         "admin",
+      senderId:       1,
       content:
         "Hi John! Yes, the Pro Traveler Backpack has a padded laptop compartment that can fit laptops up to 15.6 inches. It's located in the back section for better weight distribution and protection.",
-      read: true,
+      read:        true,
       dateCreated: new Date(Date.now() - 1000 * 60 * 60 * 23.9).toISOString(), // 23.9 hours ago
     },
     {
-      id: 3,
+      id:             3,
       conversationId: 1,
-      sender: "customer",
-      senderId: 1,
-      content: "That's perfect! One more question - is it water resistant?",
-      read: true,
-      dateCreated: new Date(Date.now() - 1000 * 60 * 60 * 23.8).toISOString(), // 23.8 hours ago
+      sender:         "customer",
+      senderId:       1,
+      content:        "That's perfect! One more question - is it water resistant?",
+      read:           true,
+      dateCreated:    new Date(Date.now() - 1000 * 60 * 60 * 23.8).toISOString(), // 23.8 hours ago
     },
     {
-      id: 4,
+      id:             4,
       conversationId: 1,
-      sender: "admin",
-      senderId: 1,
+      sender:         "admin",
+      senderId:       1,
       content:
         "Yes, it's made with water-resistant materials and includes a rain cover for heavy downpours. Your laptop and other belongings will stay dry!",
-      read: true,
+      read:        true,
       dateCreated: new Date(Date.now() - 1000 * 60 * 60 * 23.7).toISOString(), // 23.7 hours ago
     },
     {
-      id: 5,
+      id:             5,
       conversationId: 1,
-      sender: "customer",
-      senderId: 1,
-      content: "Great! I think I'll place an order today. Thanks for your help!",
-      read: true,
-      dateCreated: new Date(Date.now() - 1000 * 60 * 60 * 23.6).toISOString(), // 23.6 hours ago
+      sender:         "customer",
+      senderId:       1,
+      content:        "Great! I think I'll place an order today. Thanks for your help!",
+      read:           true,
+      dateCreated:    new Date(Date.now() - 1000 * 60 * 60 * 23.6).toISOString(), // 23.6 hours ago
     },
   ],
 }
 
 export function ChatBubble() {
-  const [isOpen, setIsOpen] = useState(false)
-  const [isMinimized, setIsMinimized] = useState(false)
-  const [conversation, setConversation] = useState<ChatConversation | null>(null)
-  const [message, setMessage] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const [ isOpen, setIsOpen ] = useState(false)
+  const [ isMinimized, setIsMinimized ] = useState(false)
+  const [ conversation, setConversation ] = useState<ChatConversation | null>(null)
+  const [ message, setMessage ] = useState("")
+  const [ isLoading, setIsLoading ] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Simulate loading conversation
@@ -86,14 +86,14 @@ export function ChatBubble() {
         setIsLoading(false)
       }, 1000)
     }
-  }, [isOpen, conversation])
+  }, [ isOpen, conversation ])
 
   // Scroll to bottom when messages change
   useEffect(() => {
     if (isOpen && messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
     }
-  }, [conversation?.messages, isOpen])
+  }, [ conversation?.messages, isOpen ])
 
   // Format time
   const formatMessageTime = (dateString: string) => {
@@ -123,13 +123,13 @@ export function ChatBubble() {
 
     messages.forEach((message) => {
       const messageDate = formatMessageDate(message.dateCreated)
-      const existingGroup = groups.find((group) => group.date === messageDate)
+      const existingGroup = groups.find(group => group.date === messageDate)
 
       if (existingGroup) {
         existingGroup.messages.push(message)
       } else {
         groups.push({
-          date: messageDate,
+          date:     messageDate,
           messages: [message],
         })
       }
@@ -143,20 +143,20 @@ export function ChatBubble() {
     if (!message.trim() || !conversation) return
 
     const newMessage: ChatMessage = {
-      id: Date.now(),
+      id:             Date.now(),
       conversationId: conversation.id,
-      sender: "customer",
-      senderId: 1,
-      content: message,
-      read: false,
-      dateCreated: new Date().toISOString(),
+      sender:         "customer",
+      senderId:       1,
+      content:        message,
+      read:           false,
+      dateCreated:    new Date().toISOString(),
     }
 
     setConversation((prev) => {
       if (!prev) return null
       return {
         ...prev,
-        messages: [...prev.messages, newMessage],
+        messages:        [ ...prev.messages, newMessage ],
         lastMessageDate: newMessage.dateCreated,
       }
     })
@@ -175,20 +175,20 @@ export function ChatBubble() {
       const randomResponse = adminResponses[Math.floor(Math.random() * adminResponses.length)]
 
       const adminMessage: ChatMessage = {
-        id: Date.now(),
+        id:             Date.now(),
         conversationId: conversation.id,
-        sender: "admin",
-        senderId: 1,
-        content: randomResponse,
-        read: true,
-        dateCreated: new Date().toISOString(),
+        sender:         "admin",
+        senderId:       1,
+        content:        randomResponse,
+        read:           true,
+        dateCreated:    new Date().toISOString(),
       }
 
       setConversation((prev) => {
         if (!prev) return null
         return {
           ...prev,
-          messages: [...prev.messages, adminMessage],
+          messages:        [ ...prev.messages, adminMessage ],
           lastMessageDate: adminMessage.dateCreated,
         }
       })
@@ -232,7 +232,7 @@ export function ChatBubble() {
                     groupMessagesByDate(conversation.messages).map((group, index) => (
                       <div key={index}>
                         <div className="text-xs text-center text-muted-foreground py-2">{group.date}</div>
-                        {group.messages.map((message) => (
+                        {group.messages.map(message => (
                           <div
                             key={message.id}
                             className={`mb-2 flex flex-col ${message.sender === "admin" ? "items-start" : "items-end"}`}
@@ -265,7 +265,7 @@ export function ChatBubble() {
                   <Textarea
                     rows={1}
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+                    onChange={e => setMessage(e.target.value)}
                     placeholder="Type your message..."
                     className="resize-none flex-grow"
                     onKeyDown={(e) => {

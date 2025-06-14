@@ -1,0 +1,9 @@
+{
+  "type": "module",
+  "dependencies": {
+    "typescript": "^5.5.4"
+  },
+  "dagger": {
+    "runtime": "bun"
+  }
+}

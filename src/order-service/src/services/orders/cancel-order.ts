@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 // Helper function to convert string to OrderStatus
 function toOrderStatus(status: string): OrderStatus {
-  return OrderStatus[status as keyof typeof OrderStatus] || OrderStatus.ORDER_FAILED;
+  return OrderStatus[status as keyof typeof OrderStatus]
 }
 
 
@@ -19,7 +19,7 @@ export async function cancelOrder(call: ServerUnaryCall<CancelOrderRequest, Canc
 
     if (!order) {
       callback({
-        code: Status.NOT_FOUND,
+        code:    Status.NOT_FOUND,
         message: 'Order not found'
       });
       return;
@@ -29,9 +29,9 @@ export async function cancelOrder(call: ServerUnaryCall<CancelOrderRequest, Canc
 
     // Check if order can be cancelled
     if (currentStatus === OrderStatus.ORDER_COMPLETED || 
-        currentStatus === OrderStatus.ORDER_CANCELLED) {
+      currentStatus === OrderStatus.ORDER_CANCELLED) {
       callback({
-        code: Status.INVALID_ARGUMENT,
+        code:    Status.INVALID_ARGUMENT,
         message: `Order cannot be cancelled in current status: ${order.status}`
       });
       return;
@@ -39,7 +39,7 @@ export async function cancelOrder(call: ServerUnaryCall<CancelOrderRequest, Canc
 
     const updatedOrder = await prisma.order.update({
       where: { id: call.request.orderId },
-      data: {
+      data:  {
         status: OrderStatus.ORDER_CANCELLED
       },
       include: {
@@ -49,13 +49,13 @@ export async function cancelOrder(call: ServerUnaryCall<CancelOrderRequest, Canc
 
     callback(null, {
       orderId: updatedOrder.id,
-      status: OrderStatus.ORDER_CANCELLED,
+      status:  OrderStatus.ORDER_CANCELLED,
       message: 'Order cancelled successfully'
     });
   } catch (error) {
     console.error('Error cancelling order:', error);
     callback({
-      code: Status.INTERNAL,
+      code:    Status.INTERNAL,
       message: 'Failed to cancel order'
     });
   }

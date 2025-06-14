@@ -6,15 +6,22 @@
     "packages/*"
   ],
   "scripts": {
-    "proto": "cp ./packages/grpc_gateway/protos/nexura.proto ./src/email-service/protos && docker compose -f docker-compose-dev.yml up protoc -d && mv packages/grpc_gateway/protos/generated/nexura_pb2* src/email-service/protos"
+    "proto": "docker compose -f docker-compose-dev.yml up protoc -d",
+    "prisma:generate": "prisma generate",
+    "lint": "eslint . --config packages/eslint/eslint.config.js"
   },
   "private": true,
   "devDependencies": {
     "@types/bun": "latest",
     "prettier": "^3.5.3",
-    "eslint": "^9.25.1"
+    "eslint": "^9.25.1",
+    "prisma": "^6.6.0"
+
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "dependencies": {
+    "@dapr/dapr": "^3.5.2"
   }
 }

@@ -11,9 +11,9 @@ import { GlobalLoader } from "@/components/global-loader"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "NEXURA - Premium Backpacks & Travel Gear",
+  title:       "NEXURA - Premium Backpacks & Travel Gear",
   description: "Discover premium quality backpacks and travel gear designed for business travelers and adventurers.",
-  generator: 'Đức Lee'
+  generator:   'Đức Lee'
 }
 
 export const viewport: Viewport = {
@@ -21,7 +21,7 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: light)", color: "white" },
     { media: "(prefers-color-scheme: dark)", color: "#020817" },
   ],
-  width: "device-width",
+  width:        "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,

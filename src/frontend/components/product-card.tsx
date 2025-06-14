@@ -17,11 +17,11 @@ import { cn, getStockStatus } from "@/lib/utils"
 import { useSession } from "@/contexts/session-context"
 import CartHooks from "@/hooks/cart-hooks"
 type ProductCardProps = {
-  categories: Category[] | undefined
-  product: Product
-  viewMode?: "grid" | "list"
-  isInWishlist: boolean | undefined
-  onWishlistToggle: () => Promise<void>
+  categories:        Category[] | undefined
+  product:           Product
+  viewMode?:         "grid" | "list"
+  isInWishlist:      boolean | undefined
+  onWishlistToggle:  () => Promise<void>
   isWishlistLoading: boolean | null
 }
 
@@ -36,12 +36,12 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
   const { mutateAsync: updateQuantity } = useUpdateItem
 
   const { formatPrice } = useCurrency()
-  const [isAdding, setIsAdding] = useState(false)
+  const [ isAdding, setIsAdding ] = useState(false)
   const mainImage = product.images.find(img => img.isMain) || product.images[0]
   const defaultVariant = product.variants[0]
-  const [showQuickView, setShowQuickView] = useState(false)
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(defaultVariant)
-  const [quantity, setQuantity] = useState(1)
+  const [ showQuickView, setShowQuickView ] = useState(false)
+  const [ selectedVariant, setSelectedVariant ] = useState<ProductVariant | null>(defaultVariant)
+  const [ quantity, setQuantity ] = useState(1)
   const { currency } = useCurrency()
   // Check if product is in cart
   const isInCart = items.some(
@@ -55,16 +55,16 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
   const handleAddToCart = () => {
     if (!selectedVariant) return
     addItem({
-      productId: product.id,
-      variantId: selectedVariant.id,
+      productId:    product.id,
+      variantId:    selectedVariant.id,
       quantity,
-      image: mainImage?.url || "",
-      userId: user.id,
+      image:        mainImage?.url || "",
+      userId:       user.id,
       currencyCode: currency
     })
     setIsAdding(true)
     toast({
-      title: "Item added to cart",
+      title:       "Item added to cart",
       description: `${product.name} - ${selectedVariant.sku}`,
     })
   }
@@ -112,13 +112,14 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
             <Heart className={cn(
               "h-4 w-4",
               isInWishlist && "fill-current"
-            )} />
+            )}
+            />
           </Button>}
         </div>
         <div className="p-4 flex-1 flex flex-col">
           <div className="flex-1">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-sm text-text-muted capitalize"> {product.categories.map((category) => categories?.find((c) => c.id === category)?.name).join(", ")}</span>
+              <span className="text-sm text-text-muted capitalize"> {product.categories.map(category => categories?.find(c => c.id === category)?.name).join(", ")}</span>
               <div className="flex items-center">
                 <Star className="h-3 w-3 fill-current text-brand-accent" />
                 <span className="text-xs ml-1 text-text-base">4.5</span>
@@ -164,7 +165,8 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
       <div className={cn(
         "group relative",
         viewMode === 'grid' ? "flex flex-col" : "flex gap-4"
-      )}>
+      )}
+      >
         {isWishlistLoading && <Button
           variant="ghost"
           size="icon"
@@ -179,14 +181,16 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
           <Heart className={cn(
             "h-5 w-5",
             isInWishlist && "fill-current"
-          )} />
+          )}
+          />
         </Button>}
         <Link href={`/products/${product.slug}`}>
           {/* Product Image */}
           <div className={cn(
             "relative overflow-hidden rounded-lg",
             viewMode === 'grid' ? "aspect-square" : "w-32 h-32"
-          )}>
+          )}
+          >
             <Image
               src={mainImage?.url || "/placeholder.svg"}
               alt={product.name}
@@ -202,9 +206,10 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
           <div className={cn(
             "flex flex-col",
             viewMode === 'grid' ? "mt-4" : "flex-1"
-          )}>
+          )}
+          >
             <div className="flex items-center justify-between mb-1">
-              <span className="text-sm text-text-muted capitalize"> {product.categories.map((category) => categories?.find((c) => c.id === category)?.name).join(" - ")}</span>
+              <span className="text-sm text-text-muted capitalize"> {product.categories.map(category => categories?.find(c => c.id === category)?.name).join(" - ")}</span>
               <div className="flex items-center">
                 <Star className="h-3 w-3 fill-current text-brand-accent" />
                 <span className="text-xs ml-1 text-text-base">4.5</span>
@@ -229,7 +234,8 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
                 {isAdding ? <Check className="h-4 w-4" /> : <ShoppingBag className="h-4 w-4" />}
               </Button>
             </div>
-          </div></Link>
+          </div>
+        </Link>
       </div>
 
       {/* Quick View Modal */}

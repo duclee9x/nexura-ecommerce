@@ -94,14 +94,14 @@ function WishlistContent() {
     try {
       await removeWishlist({ wishlistId: id, userId: user.id })
       toast({
-        title: "Item removed",
+        title:       "Item removed",
         description: "The item has been removed from your wishlist.",
       })
     } catch (error) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: "Failed to remove item from wishlist. Please try again.",
-        variant: "destructive",
+        variant:     "destructive",
       })
     }
   }
@@ -129,7 +129,7 @@ function WishlistContent() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {wishlistItems.map((item) => (
+            {wishlistItems.map(item => (
               <Card key={item.id} className="overflow-hidden relative">
                 <Button
                   variant="ghost"

@@ -2,15 +2,14 @@ import { getIronSession } from "iron-session"
 import { cookies } from "next/headers"
 import { NextRequest, NextResponse } from "next/server"
 import { sessionOptions, SessionData } from "@/config/iron-session"
-import UserHooks from "@/hooks/user-hooks"
+import { loginUserGateway } from "@nexura/grpc_gateway/gateway"
+
 export async function POST(request: NextRequest) {
-  const { useLogin } = UserHooks()
   try {
     const cookieStore = await cookies()
     const session = await getIronSession<SessionData>(cookieStore, sessionOptions)
     const { email, password } = await request.json()
-    const { mutateAsync: login } = useLogin
-    const { success, message, user } = await login({ email, password })
+    const { success, message, user } = await loginUserGateway({ email, password })
 
     if (!success || !user) {
       return NextResponse.json(

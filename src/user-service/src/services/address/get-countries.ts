@@ -12,16 +12,16 @@ export async function getCountries(
   try {
     const countriesQuery = await prisma.country.findMany({
       select: {
-        id: true,
-        name: true,
+        id:       true,
+        name:     true,
         codeName: true
       }
     });
 
-    const countries = countriesQuery.map(country => {
+    const countries = countriesQuery.map((country) => {
       const countryObj: Country = {
-        id: country.id,
-        name: country.name,
+        id:       country.id,
+        name:     country.name,
         codeName: country.codeName
       };
       return countryObj;

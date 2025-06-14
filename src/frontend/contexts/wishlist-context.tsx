@@ -6,15 +6,15 @@ import { WishlistItem } from "@nexura/grpc_gateway/protos"
 import { useSession } from "./session-context"
 import ProductHooks from "@/hooks/product-hooks"
 export type WishlistContextType = {
-  wishlistItems: WishlistItem[]
-  isLoading: boolean
+  wishlistItems:     WishlistItem[]
+  isLoading:         boolean
   isWishlistLoading: boolean
 }
 
 // Create context with a default value that matches the shape but is obviously not functional
 const defaultWishlistContext: WishlistContextType = {
-  wishlistItems: [],
-  isLoading: false,
+  wishlistItems:     [],
+  isLoading:         false,
   isWishlistLoading: false,
 }
 
@@ -25,7 +25,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const { user } = useSession()
   const { useGetWishlist } = ProductHooks()
   const { data: wishlistItems, isLoading: isWishlistLoading } = useGetWishlist(user?.id || "")
-  const [isReady, setIsReady] = useState(false)
+  const [ isReady, setIsReady ] = useState(false)
 
   useEffect(() => {
     if (!user) return 
@@ -38,7 +38,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     <WishlistContext.Provider
       value={{
         wishlistItems: wishlistItems || [],
-        isLoading: !isReady,
+        isLoading:     !isReady,
         isWishlistLoading,
       }}
     >

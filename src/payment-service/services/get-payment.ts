@@ -1,6 +1,6 @@
 import { PrismaClient } from '../src/db/prisma-client'
 import type { handleUnaryCall, sendUnaryData, ServerUnaryCall } from '@grpc/grpc-js'
-import { GetPaymentRequest, GetPaymentResponse, PaymentStatus, PaymentProvider, InitiatePaymentRequest } from '@nexura/grpc_gateway/protos'
+import { GetPaymentRequest, GetPaymentResponse, PaymentStatus } from '@nexura/grpc_gateway/protos'
 
 
 const prisma = new PrismaClient()
@@ -21,11 +21,11 @@ export const GetPayment: handleUnaryCall<GetPaymentRequest, GetPaymentResponse> 
 
   // Map Prisma payment to proto Payment message
   const paymentProto = {
-    id: payment.id,
-    method: payment.provider,
-    subtotal: payment.amount,
-    total: payment.amount,
-    status: payment.status as PaymentStatus,
+    id:        payment.id,
+    method:    payment.provider,
+    subtotal:  payment.amount,
+    total:     payment.amount,
+    status:    payment.status as PaymentStatus,
     createdAt: payment.createdAt.toISOString(),
     updatedAt: payment.updatedAt.toISOString(),
   };

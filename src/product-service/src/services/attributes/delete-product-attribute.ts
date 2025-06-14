@@ -15,7 +15,7 @@ export const deleteProductAttribute = async (call: ServerUnaryCall<DeleteProduct
       throw new Error("Attribute ID is required")
     }
 
-    const attributes = await prisma.productAttribute.delete({
+    await prisma.productAttribute.delete({
       where: {
         id: attributeId,
       },

@@ -26,13 +26,13 @@ export default function RegisterPage() {
   const { useRegisterUser } = UserHooks()
   const { mutateAsync: registerUser } = useRegisterUser
   const form = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
+    resolver:      zodResolver(registerSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email:           "",
+      password:        "",
       confirmPassword: "",
-      firstName: "",
-      lastName: "",
+      firstName:       "",
+      lastName:        "",
     },
   })
 
@@ -40,9 +40,9 @@ export default function RegisterPage() {
     try {
       await registerUser({
         firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        password: data.password,
+        lastName:  data.lastName,
+        email:     data.email,
+        password:  data.password,
       })
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to register")

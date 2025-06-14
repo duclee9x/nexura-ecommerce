@@ -16,7 +16,9 @@ export default function AuthLayout({
     if (!isLoading && user) {
       router.push("/")
     }
-  }, [isLoading, user, router])
+  }, [
+    isLoading, user, router
+  ])
 
   if (isLoading) {
     return (

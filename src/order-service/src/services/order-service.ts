@@ -9,20 +9,22 @@ import { deleteOrderNote } from './orders/delete-note-order'
 import { updateTrackingNumber } from './orders/update-tracking-number'
 import { listAllOrders } from './orders/list-all-orders'
 import { getOrdersForAdmin } from './orders/get-orders-for-admin'
+import { updateOrderPayment } from './orders/update-payment-order'
 import type { UntypedServiceImplementation } from '@grpc/grpc-js'
 
 export const orderService: UntypedServiceImplementation = {
-  createOrder,
-  getOrder,
-  getOrdersForAdmin,
-  updateOrderStatus,
-  getOrderStatus,
-  cancelOrder,
-  listOrders,
-  addOrderNote,
-  deleteOrderNote,
-  updateTrackingNumber,
-  listAllOrders
+  createOrder,          
+  getOrder,             
+  getOrdersForAdmin,    
+  updateOrderStatus,    
+  getOrderStatus,       
+  cancelOrder,          
+  listOrders,           
+  addOrderNote,         
+  deleteOrderNote,      
+  updateTrackingNumber, 
+  listAllOrders,        
+  updateOrderPayment
 }
 
 

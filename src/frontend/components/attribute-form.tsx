@@ -10,13 +10,13 @@ import { cn } from "@/lib/utils"
 import { ProductAttribute } from "@nexura/grpc_gateway/protos"
 
 interface AttributeFormProps {
-  mode: "edit" | "add"
-  attribute: ProductAttribute
-  onSave: (attribute: ProductAttribute) => void
-  onCancel: () => void
+  mode:                 "edit" | "add"
+  attribute:            ProductAttribute
+  onSave:               (attribute: ProductAttribute) => void
+  onCancel:             () => void
   showAdvancedOptions?: boolean
-  errors?: Record<string, string>
-  title?: string
+  errors?:              Record<string, string>
+  title?:               string
 }
 
 export function AttributeForm({ 
@@ -26,9 +26,9 @@ export function AttributeForm({
   showAdvancedOptions = true, 
   title = "Attribute Details"
 }: AttributeFormProps) {
-  const [inputValue, setInputValue] = useState("")
-  const [formData, setFormData] = useState<ProductAttribute>(attribute)
-  const [errorsState, setErrors] = useState<Record<string, string>>({})
+  const [ inputValue, setInputValue ] = useState("")
+  const [ formData, setFormData ] = useState<ProductAttribute>(attribute)
+  const [ errorsState, setErrors ] = useState<Record<string, string>>({})
 
   useEffect(() => {
     setFormData(attribute)
@@ -38,14 +38,14 @@ export function AttributeForm({
     if (!inputValue.trim()) return
     const updatedFormData = {
       ...formData,
-      values: [...formData.values, inputValue.trim()]
+      values: [ ...formData.values, inputValue.trim() ]
     }
     setFormData(updatedFormData)
     setInputValue("")
   }
 
   const handleRemoveValue = (value: string) => {
-    const updatedValues = formData.values.filter((val) => val !== value)
+    const updatedValues = formData.values.filter(val => val !== value)
     const updatedFormData = { ...formData, values: updatedValues }
     setFormData(updatedFormData)
   }
@@ -60,7 +60,7 @@ export function AttributeForm({
     // Call onSave with the current form data
     onSave({
       ...formData,
-      id: formData.id || `attr-${Date.now()}`,
+      id:           formData.id || `attr-${Date.now()}`,
       displayOrder: formData.displayOrder || 0
     })
   }
@@ -84,7 +84,7 @@ export function AttributeForm({
           <Input
             id="attr-name"
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            onChange={e => setFormData({ ...formData, name: e.target.value })}
             placeholder="e.g., Color, Size, Material"
             className={cn(errorsState.name && "border-destructive")}
           />
@@ -97,7 +97,7 @@ export function AttributeForm({
             <Input
               id="attr-values"
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={e => setInputValue(e.target.value)}
               placeholder="Enter value and press Enter"
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -138,7 +138,7 @@ export function AttributeForm({
             <Switch
               id="attr-required"
               checked={formData.required}
-              onCheckedChange={(checked) => setFormData({ ...formData, required: checked })}
+              onCheckedChange={checked => setFormData({ ...formData, required: checked })}
             />
             <Label htmlFor="attr-required">Required</Label>
           </div>
@@ -147,7 +147,7 @@ export function AttributeForm({
             <Switch
               id="attr-visible"
               checked={formData.visible}
-              onCheckedChange={(checked) => setFormData({ ...formData, visible: checked })}
+              onCheckedChange={checked => setFormData({ ...formData, visible: checked })}
             />
             <Label htmlFor="attr-visible">Visible on product page</Label>
           </div>
@@ -163,7 +163,7 @@ export function AttributeForm({
                   <Switch
                     id="attr-variantable"
                     checked={formData.variantable}
-                    onCheckedChange={(checked) => setFormData({ ...formData, variantable: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, variantable: checked })}
                   />
                   <Label htmlFor="attr-variantable" className="text-sm">
                     Use for variants
@@ -173,7 +173,7 @@ export function AttributeForm({
                   <Switch
                     id="attr-filterable"
                     checked={formData.filterable}
-                    onCheckedChange={(checked) => setFormData({ ...formData, filterable: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, filterable: checked })}
                   />
                   <Label htmlFor="attr-filterable" className="text-sm">
                     Use in filters
@@ -183,7 +183,7 @@ export function AttributeForm({
                   <Switch
                     id="attr-searchable"
                     checked={formData.searchable}
-                    onCheckedChange={(checked) => setFormData({ ...formData, searchable: checked })}
+                    onCheckedChange={checked => setFormData({ ...formData, searchable: checked })}
                   />
                   <Label htmlFor="attr-searchable" className="text-sm">
                     Include in search

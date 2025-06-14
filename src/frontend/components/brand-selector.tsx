@@ -26,36 +26,36 @@ import { Brand } from "@nexura/grpc_gateway/protos"
 
 interface BrandSelectorProps {
   selectedBrandId: string | null
-  onBrandSelect: (brandId: string) => void
-  onBrandCreate: (brand: Brand) => void
-  brands: Brand[] | undefined
+  onBrandSelect:   (brandId: string) => void
+  onBrandCreate:   (brand: Brand) => void
+  brands:          Brand[] | undefined
 }
 
 export function BrandSelector({ selectedBrandId, onBrandSelect, onBrandCreate, brands }: BrandSelectorProps) {
-  const [open, setOpen] = useState(false)
-  const [isAddingBrand, setIsAddingBrand] = useState(false)
-  const [newBrandName, setNewBrandName] = useState("")
-  const [newBrandLogo, setNewBrandLogo] = useState<File | null>(null)
-  const [searchQuery, setSearchQuery] = useState("")
+  const [ open, setOpen ] = useState(false)
+  const [ isAddingBrand, setIsAddingBrand ] = useState(false)
+  const [ newBrandName, setNewBrandName ] = useState("")
+  const [ newBrandLogo, setNewBrandLogo ] = useState<File | null>(null)
+  const [ searchQuery, setSearchQuery ] = useState("")
   const queryClient = useQueryClient()
-  const selectedBrand = brands?.find((brand) => brand.id === selectedBrandId)
+  const selectedBrand = brands?.find(brand => brand.id === selectedBrandId)
 
   const filteredBrands = searchQuery
-    ? brands?.filter((brand) => brand.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    ? brands?.filter(brand => brand.name.toLowerCase().includes(searchQuery.toLowerCase()))
     : brands
 
   const handleCreateBrand = () => {
     if (!newBrandName.trim()) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: "Brand name is required",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
 
     const newBrand: Brand = {
-      id: `brand-${Date.now()}`,
+      id:   `brand-${Date.now()}`,
       name: newBrandName.trim(),
       logo: newBrandLogo ? URL.createObjectURL(newBrandLogo) : "",
     }
@@ -73,7 +73,7 @@ export function BrandSelector({ selectedBrandId, onBrandSelect, onBrandCreate, b
     setOpen(false)
 
     toast({
-      title: "Brand Created",
+      title:       "Brand Created",
       description: `${newBrand.name} has been added to your brands.`,
     })
   }
@@ -127,7 +127,7 @@ export function BrandSelector({ selectedBrandId, onBrandSelect, onBrandCreate, b
                 </Button>
               </CommandEmpty>
               <CommandGroup>
-                {filteredBrands?.map((brand) => (
+                {filteredBrands?.map(brand => (
                   <CommandItem
                     key={brand.id}
                     value={brand.name}
@@ -185,7 +185,7 @@ export function BrandSelector({ selectedBrandId, onBrandSelect, onBrandCreate, b
               <Input
                 id="brand-name"
                 value={newBrandName}
-                onChange={(e) => setNewBrandName(e.target.value)}
+                onChange={e => setNewBrandName(e.target.value)}
                 placeholder="Enter brand name"
               />
             </div>

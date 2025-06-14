@@ -16,17 +16,17 @@ import {
 } from "@/components/ui/breadcrumb"
 
 export interface Category {
-  id: string
-  name: string
+  id:       string
+  name:     string
   parentId: string | null
 }
 
 interface CategoryTreeProps {
-  categories: Category[] | undefined
-  selectedCategories: string[]
-  onCategorySelect: (categoryIds: string[]) => void
-  onCategoryUpdate: (category: Category) => void
-  onCategoryCreate: (category: Category, parentCategoryId: string) => void
+  categories:          Category[] | undefined
+  selectedCategories:  string[]
+  onCategorySelect:    (categoryIds: string[]) => void
+  onCategoryUpdate:    (category: Category) => void
+  onCategoryCreate:    (category: Category, parentCategoryId: string) => void
   allowMultipleRoots?: boolean
 }
 
@@ -38,14 +38,14 @@ export function CategoryTree({
   onCategoryCreate,
   allowMultipleRoots = false,
 }: CategoryTreeProps) {
-  const [expandedCategories, setExpandedCategories] = useState<string[]>([])
-  const [isAddingCategory, setIsAddingCategory] = useState(false)
-  const [newCategoryName, setNewCategoryName] = useState("")
-  const [newCategoryParentId, setNewCategoryParentId] = useState<string | null>(null)
-  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
-  const [editingCategoryName, setEditingCategoryName] = useState("")
-  const [error, setError] = useState<string | null>(null)
-  const [hoveredCategoryId, setHoveredCategoryId] = useState<string | null>(null)
+  const [ expandedCategories, setExpandedCategories ] = useState<string[]>([])
+  const [ isAddingCategory, setIsAddingCategory ] = useState(false)
+  const [ newCategoryName, setNewCategoryName ] = useState("")
+  const [ newCategoryParentId, setNewCategoryParentId ] = useState<string | null>(null)
+  const [ editingCategoryId, setEditingCategoryId ] = useState<string | null>(null)
+  const [ editingCategoryName, setEditingCategoryName ] = useState("")
+  const [ error, setError ] = useState<string | null>(null)
+  const [ hoveredCategoryId, setHoveredCategoryId ] = useState<string | null>(null)
  
 
   useEffect(() => {
@@ -62,8 +62,8 @@ export function CategoryTree({
         }
       }
     })
-    setExpandedCategories((prev) => [...prev, ...Array.from(parentsToExpand)])
-  }, [categories, selectedCategories])
+    setExpandedCategories(prev => [ ...prev, ...Array.from(parentsToExpand) ])
+  }, [ categories, selectedCategories ])
 
   const getCategoryPath = (categoryId: string): Category[] => {
     const path: Category[] = []
@@ -94,8 +94,8 @@ export function CategoryTree({
   }
 
   const toggleCategory = (categoryId: string) => {
-    setExpandedCategories((prev) =>
-      prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId],
+    setExpandedCategories(prev =>
+      prev.includes(categoryId) ? prev.filter(id => id !== categoryId) : [ ...prev, categoryId ],
     )
   }
 
@@ -103,7 +103,7 @@ export function CategoryTree({
     if (!allowMultipleRoots) {
       const rootId = getRootCategoryId(categoryId)
       const currentRootIds = selectedCategories
-        .map((id) => getRootCategoryId(id))
+        .map(id => getRootCategoryId(id))
         .filter((id): id is string => id !== null)
         .filter((id, index, self) => self.indexOf(id) === index)
 
@@ -118,31 +118,31 @@ export function CategoryTree({
     if (selectedCategories.includes(categoryId)) {
       const childrenIds = categories?.filter(c => c.parentId === categoryId)
         .map(c => c.id)
-      onCategorySelect(selectedCategories.filter((id) => id !== categoryId && !childrenIds?.includes(id)))
+      onCategorySelect(selectedCategories.filter(id => id !== categoryId && !childrenIds?.includes(id)))
     } else {
-      onCategorySelect([...selectedCategories, categoryId])
+      onCategorySelect([ ...selectedCategories, categoryId ])
     }
   }
 
   const handleAddCategory = () => {
     if (!newCategoryName.trim()) {
       toast({
-        title: "Error",
+        title:       "Error",
         description: "Category name is required",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
 
     const newCategory: Category = {
-      id: `cat-${Date.now()}`,
-      name: newCategoryName.trim(),
+      id:       `cat-${Date.now()}`,
+      name:     newCategoryName.trim(),
       parentId: newCategoryParentId,
     }
 
     onCategoryCreate(newCategory, newCategoryParentId || "")
     if (newCategoryParentId && !expandedCategories.includes(newCategoryParentId)) {
-      setExpandedCategories((prev) => [...prev, newCategoryParentId])
+      setExpandedCategories(prev => [ ...prev, newCategoryParentId ])
     }
 
     setIsAddingCategory(false)
@@ -258,10 +258,10 @@ export function CategoryTree({
                 <div className="flex items-center">
                   <Input
                     value={editingCategoryName}
-                    onChange={(e) => setEditingCategoryName(e.target.value)}
+                    onChange={e => setEditingCategoryName(e.target.value)}
                     className="h-7 py-1"
                     autoFocus
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={e => e.stopPropagation()}
                   />
                   <Button
                     variant="ghost"
@@ -379,7 +379,7 @@ export function CategoryTree({
           <div className="flex items-center gap-2">
             <Input
               value={newCategoryName}
-              onChange={(e) => setNewCategoryName(e.target.value)}
+              onChange={e => setNewCategoryName(e.target.value)}
               placeholder="Category name"
               className="flex-1"
               autoFocus

@@ -46,19 +46,19 @@ export default function UserHooks() {
     useGetSession: () =>
       useQuery({
         queryKey: ["userSession"],
-        queryFn: async () => {
-            const response = await fetch("/api/auth/session");
-            if (!response.ok) {
-              throw new Error("Failed to fetch session");
-            }
-            const data = await response.json();
-            if (!data.user) {
-              return null
-            }
-            return data.user
+        queryFn:  async () => {
+          const response = await fetch("/api/auth/session");
+          if (!response.ok) {
+            throw new Error("Failed to fetch session");
+          }
+          const data = await response.json();
+          if (!data.user) {
+            return null
+          }
+          return data.user
         },
         refetchOnWindowFocus: false,
-        staleTime: 1000 * 60 * 5,
+        staleTime:            1000 * 60 * 5,
         
       }),
     useVerifyAccount: useMutation({
@@ -85,8 +85,8 @@ export default function UserHooks() {
     useGetAllUsers: () =>
       useQuery({
         queryKey: ["allUsers"],
-        queryFn: async () => {
-          return await getAllUsersGateway().then((res) => res.users).catch((error) => {
+        queryFn:  async () => {
+          return await getAllUsersGateway().then(res => res.users).catch((error) => {
             throw error;
           });
         },
@@ -95,7 +95,7 @@ export default function UserHooks() {
     useLogin: useMutation({
       mutationFn: async (credentials: { email: string; password: string }) => {
         const response = await fetch("/api/auth/login", {
-          method: "POST",
+          method:  "POST",
           headers: {
             "Content-Type": "application/json",
           },
@@ -154,8 +154,8 @@ export default function UserHooks() {
     }),
     useGetAddresses: (userId: string | null) =>
       useQuery({
-        queryKey: ["addresses", userId],
-        queryFn: async () => {
+        queryKey: [ "addresses", userId ],
+        queryFn:  async () => {
           if (!userId) {
             throw new Error("User ID is required");
           }
@@ -171,7 +171,7 @@ export default function UserHooks() {
     useGetCountries: () =>
       useQuery({
         queryKey: ["countries"],
-        queryFn: async () => {
+        queryFn:  async () => {
           return await getCountriesGateway().catch((error) => {
             throw new Error("Server has encountered an error");
           });
@@ -181,8 +181,8 @@ export default function UserHooks() {
 
     useGetProvinces: (countryId: string) =>
       useQuery({
-        queryKey: ["provinces", countryId],
-        queryFn: async () => {
+        queryKey: [ "provinces", countryId ],
+        queryFn:  async () => {
           return await getProvincesByCountryGateway({ countryId }).catch((error) => {
             throw new Error("Server has encountered an error");
           });
@@ -193,8 +193,8 @@ export default function UserHooks() {
 
     useGetDistricts: (provinceId: string) =>
       useQuery({
-        queryKey: ["districts", provinceId],
-        queryFn: async () => {
+        queryKey: [ "districts", provinceId ],
+        queryFn:  async () => {
           return await getDistrictsByProvinceGateway({
             provinceId,
           }).catch((error) => {
@@ -207,8 +207,8 @@ export default function UserHooks() {
 
     useGetWards: (districtId: string) =>
       useQuery({
-        queryKey: ["wards", districtId],
-        queryFn: async () => {
+        queryKey: [ "wards", districtId ],
+        queryFn:  async () => {
           return await getWardsByDistrictGateway({ districtId }).catch((error) => {
             throw new Error("Server has encountered an error");
           });

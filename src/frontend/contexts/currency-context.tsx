@@ -14,19 +14,19 @@ export const currencies = {
 export type CurrencyCode = keyof typeof currencies
 
 type CurrencyContextType = {
-  currency: CurrencyCode
-  setCurrency: (currency: CurrencyCode) => void
-  formatPrice: (price: number) => string
+  currency:     CurrencyCode
+  setCurrency:  (currency: CurrencyCode) => void
+  formatPrice:  (price: number) => string
   convertPrice: (price: number) => number
-  formatDate: (dateString: string, short?: boolean) => string
+  formatDate:   (dateString: string, short?: boolean) => string
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined)
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   // Default to USD, but try to detect user's locale
-  const [currency, setCurrency] = useState<CurrencyCode>("USD")
-  const [mounted, setMounted] = useState(false)
+  const [ currency, setCurrency ] = useState<CurrencyCode>("USD")
+  const [ mounted, setMounted ] = useState(false)
 
   // Initialize currency from localStorage when component mounts
   useEffect(() => {
@@ -61,7 +61,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     if (mounted) {
       localStorage.setItem("nexura-currency", currency)
     }
-  }, [currency, mounted])
+  }, [ currency, mounted ])
 
   // Convert price from USD to selected currency
   const convertPrice = (price: number): number => {
@@ -85,20 +85,20 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     }
 
     const datePart = date.toLocaleDateString(locale, {
-      year: "numeric",
+      year:  "numeric",
       month: "long",
-      day: "numeric",
+      day:   "numeric",
     });
     const timePart = date.toLocaleTimeString(locale, {
-      hour: "numeric",
+      hour:   "numeric",
       minute: "2-digit",
       hour12: true,
     });
     if (short) {
       return `${date.toLocaleDateString(locale, {
-        year: "numeric",
+        year:  "numeric",
         month: "numeric",
-        day: "numeric",
+        day:   "numeric",
       })}`;
     }
     return `${datePart} - ${timePart}`;

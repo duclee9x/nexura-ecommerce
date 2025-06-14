@@ -60,7 +60,9 @@ export default function PaymentSuccessPage() {
           <div className="border dark:border-gray-800 rounded-lg p-6 mb-8">
             <h2 className="text-xl font-bold mb-4">Order Status</h2>
             <div className="space-y-8">
-              {[1, 2, 3, 4].map((i) => (
+              {[
+                1, 2, 3, 4
+              ].map(i => (
                 <div key={i} className="flex items-start gap-4">
                   <Skeleton className="h-6 w-6 rounded-full" />
                   <div className="space-y-2">
@@ -125,10 +127,10 @@ export default function PaymentSuccessPage() {
               <h2 className="text-sm font-medium text-muted-foreground mb-1">Order Date</h2>
               <p className="font-medium">{formatDate(order.createdAt)}</p>
             </div>
-              <div>
-                <h2 className="text-sm font-medium text-muted-foreground mb-1">Estimated Delivery</h2>
-                <p className="font-medium">{estimatedDelivery}</p>
-              </div>
+            <div>
+              <h2 className="text-sm font-medium text-muted-foreground mb-1">Estimated Delivery</h2>
+              <p className="font-medium">{estimatedDelivery}</p>
+            </div>
             <div>
               <h2 className="text-sm font-medium text-muted-foreground mb-1">Payment Method</h2>
               <p className="font-medium">{order.payment?.method}</p>
@@ -178,7 +180,7 @@ export default function PaymentSuccessPage() {
                 <div className="absolute left-0 -translate-x-1/2 w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
                   <Clock className="h-4 w-4 text-muted-foreground" />
                 </div>
-              <div>
+                <div>
                   <h3 className="font-medium">Delivered</h3>
                   <p className="text-sm text-muted-foreground">Estimated delivery: {estimatedDelivery}</p>
                 </div>

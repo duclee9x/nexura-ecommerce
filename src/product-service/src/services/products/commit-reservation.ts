@@ -14,7 +14,7 @@ export async function commitReservation(
 
     // Get the reservation with its items, variants and their stock
     const reservation = await prisma.reservation.findUnique({
-      where: { id: reservationId },
+      where:   { id: reservationId },
       include: {
         items: {
           include: {
@@ -63,7 +63,7 @@ export async function commitReservation(
 
         await tx.stock.update({
           where: { variantId: item.variantId },
-          data: {
+          data:  {
             quantity,
             reserved: reserved - item.quantity
           }

@@ -82,9 +82,9 @@ function ErrorState({ message, onRetry }: { message: string; onRetry?: () => voi
 
 interface filterType {
   categories: string[]
-  types: string[]
-  colors: string[]
-  features: string[]
+  types:      string[]
+  colors:     string[]
+  features:   string[]
 }
 
 export default function ProductCatalogPage() {
@@ -92,18 +92,18 @@ export default function ProductCatalogPage() {
   const searchParams = useSearchParams()
   const categoryParam = searchParams.get("category")
   const { formatPrice } = useCurrency()
-  const [viewMode, setViewMode] = useState("grid")
-  const [sortBy, setSortBy] = useState("featured")
-  const [priceRange, setPriceRange] = useState([0, 200])
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
-  const [filters, setFilters] = useState<filterType>({
+  const [ viewMode, setViewMode ] = useState("grid")
+  const [ sortBy, setSortBy ] = useState("featured")
+  const [ priceRange, setPriceRange ] = useState([ 0, 200 ])
+  const [ filteredProducts, setFilteredProducts ] = useState<Product[]>([])
+  const [ filters, setFilters ] = useState<filterType>({
     categories: categoryParam ? [categoryParam] : [],
-    types: [],
-    colors: [],
-    features: [],
+    types:      [],
+    colors:     [],
+    features:   [],
   })
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isWishlistLoading, setIsWishlistLoading] = useState<{ [key: string]: boolean }>({})
+  const [ searchQuery, setSearchQuery ] = useState("")
+  const [ isWishlistLoading, setIsWishlistLoading ] = useState<{ [key: string]: boolean }>({})
 
   const { data: categories, isLoading: isCategoriesLoading } = useGetCategories()
   const {
@@ -120,12 +120,13 @@ export default function ProductCatalogPage() {
   const { mutateAsync: addToWishlist } = useAddWishlist
   const { mutateAsync: removeFromWishlist } = useRemoveWishlist
   const { data: wishlistItems } = useGetWishlist(user?.id || "")
+  console.log(products, 'product')
 
   // Move the filtering logic to a separate function
   const filterProducts = (products: Product[] | undefined) => {
     if (!products) return [];
     
-    return products.filter(product => {
+    return products.filter((product) => {
       // Search query filter
       if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
@@ -165,13 +166,17 @@ export default function ProductCatalogPage() {
       const filtered = filterProducts(products);
       setFilteredProducts(filtered);
     }
-  }, [products, searchQuery, filters, priceRange]);
+  }, [
+    products, searchQuery, filters, priceRange
+  ]);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
       router.push("/login")
     }
-  }, [isUserLoading, user, router])
+  }, [
+    isUserLoading, user, router
+  ])
 
   const handleFilterChange = (filterType: keyof filterType, value: string) => {
     setFilters((prev) => {
@@ -179,12 +184,12 @@ export default function ProductCatalogPage() {
       if (currentFilters.includes(value)) {
         return {
           ...prev,
-          [filterType]: currentFilters.filter((item) => item !== value),
+          [filterType]: currentFilters.filter(item => item !== value),
         }
       } else {
         return {
           ...prev,
-          [filterType]: [...currentFilters, value],
+          [filterType]: [ ...currentFilters, value ],
         }
       }
     })
@@ -193,11 +198,11 @@ export default function ProductCatalogPage() {
   const clearAllFilters = () => {
     setFilters({
       categories: [],
-      types: [],
-      colors: [],
-      features: [],
+      types:      [],
+      colors:     [],
+      features:   [],
     })
-    setPriceRange([0, 200])
+    setPriceRange([ 0, 200 ])
     setSearchQuery("")
   }
 
@@ -365,7 +370,7 @@ export default function ProductCatalogPage() {
                       id="mobile-search"
                       placeholder="Search products..."
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={e => setSearchQuery(e.target.value)}
                     />
                   </div>
 
@@ -375,7 +380,7 @@ export default function ProductCatalogPage() {
                       <Label>Price Range</Label>
                     </div>
                     <Slider
-                      defaultValue={[0, 200]}
+                      defaultValue={[ 0, 200 ]}
                       min={0}
                       max={200}
                       step={5}
@@ -388,7 +393,6 @@ export default function ProductCatalogPage() {
                     </span>
 
                   </div>
-
                   {/* Categories */}
                   <Accordion type="single" collapsible defaultValue="categories">
                     <AccordionItem value="categories">
@@ -396,7 +400,7 @@ export default function ProductCatalogPage() {
                       <AccordionContent>
                         <div className="space-y-2">
                           {products?.reduce((acc: string[], product) => {
-                            product.categories.forEach(category => {
+                            product.categories.forEach((category) => {
                               if (!acc.includes(category)) {
                                 acc.push(category)
                               }
@@ -409,7 +413,7 @@ export default function ProductCatalogPage() {
                                 checked={filters.categories.includes(category)}
                                 onCheckedChange={() => handleFilterChange("categories", category)}
                               />
-                              <Label htmlFor={`mobile-category-${category}`}>{categories?.find((c) => c.id === category)?.name}</Label>
+                              <Label htmlFor={`mobile-category-${category}`}>{categories?.find(c => c.id === category)?.name}</Label>
                             </div>
                           ))}
                         </div>
@@ -424,7 +428,7 @@ export default function ProductCatalogPage() {
                       <AccordionContent>
                         <div className="space-y-2">
                           {products?.reduce((acc: string[], product) => {
-                            product.variants.forEach(variant => {
+                            product.variants.forEach((variant) => {
                               const colorAttribute = variant.attributes.find((attr: { name: string; extraValue?: string }) =>
                                 attr.name.toLowerCase() === 'color'
                               )
@@ -474,7 +478,7 @@ export default function ProductCatalogPage() {
             <Input
               placeholder="Search products..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
             />
           </div>
 
@@ -483,7 +487,7 @@ export default function ProductCatalogPage() {
               <h3 className="font-medium">Price Range</h3>
             </div>
             <Slider
-              defaultValue={[0, 200]}
+              defaultValue={[ 0, 200 ]}
               min={0}
               max={200}
               step={5}
@@ -500,7 +504,7 @@ export default function ProductCatalogPage() {
             <h3 className="font-medium">Categories</h3>
             <div className="space-y-2">
               {products?.reduce((acc: string[], product) => {
-                product.categories.forEach(category => {
+                product.categories.forEach((category) => {
                   if (!acc.includes(category)) {
                     acc.push(category)
                   }
@@ -513,7 +517,7 @@ export default function ProductCatalogPage() {
                     checked={filters.categories.includes(category)}
                     onCheckedChange={() => handleFilterChange("categories", category)}
                   />
-                  <Label htmlFor={`category-${category}`}>{categories?.find((c) => c.id === category)?.name}</Label>
+                  <Label htmlFor={`category-${category}`}>{categories?.find(c => c.id === category)?.name}</Label>
                 </div>
               ))}
             </div>
@@ -523,7 +527,7 @@ export default function ProductCatalogPage() {
             <h3 className="font-medium">Colors</h3>
             <div className="space-y-2">
               {products?.reduce((acc: string[], product) => {
-                product.variants.forEach(variant => {
+                product.variants.forEach((variant) => {
                   const colorAttribute = variant.attributes.find((attr: { name: string; extraValue?: string }) =>
                     attr.name.toLowerCase() === 'color'
                   )
@@ -621,16 +625,16 @@ export default function ProductCatalogPage() {
                     variant="ghost"
                     size="icon"
                     className="h-4 w-4 p-0 hover:bg-transparent"
-                    onClick={() => setPriceRange([0, 200])}
+                    onClick={() => setPriceRange([ 0, 200 ])}
                   >
                     <X className="h-3 w-3" />
                   </Button>
                 </div>
               )}
 
-              {filters.categories.map((category) => (
+              {filters.categories.map(category => (
                 <div key={category} className="flex items-center bg-muted text-sm rounded-full px-3 py-1">
-                  <span className="mr-1">Category: {categories?.find((c) => c.id === category)?.name}</span>
+                  <span className="mr-1">Category: {categories?.find(c => c.id === category)?.name}</span>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -642,7 +646,7 @@ export default function ProductCatalogPage() {
                 </div>
               ))}
 
-              {filters.colors.map((color) => (
+              {filters.colors.map(color => (
                 <div key={color} className="flex items-center bg-muted text-sm rounded-full px-3 py-1">
                   <div
                     className="w-3 h-3 rounded-full border border-border mr-1"
@@ -671,7 +675,7 @@ export default function ProductCatalogPage() {
             </div>
           ) : viewMode === "grid" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
+              {products.map(product => (
                 <ProductCard
                   key={product.id}
                   product={product}
@@ -685,7 +689,7 @@ export default function ProductCatalogPage() {
             </div>
           ) : (
             <div className="space-y-6">
-              {products.map((product) => (
+              {products.map(product => (
                 <ProductCard
                   key={product.id}
                   product={product}

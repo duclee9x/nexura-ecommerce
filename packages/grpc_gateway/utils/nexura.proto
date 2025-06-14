@@ -452,10 +452,10 @@ message ListRecommendationsResponse {
     repeated string product_ids = 1;
 }
 
-// ---------------Product Catalog----------------
+// ---------------Product----------------
 message Empty {}
 
-service ProductCatalogService {
+service ProductService {
     rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse) {}
     rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse) {}
     rpc DeleteProduct(DeleteProductRequest) returns (DeleteProductResponse) {}
@@ -979,7 +979,7 @@ enum ServiceName {
   UNSPECIFIED = 0;
   CART_SERVICE = 1;
   USER_SERVICE = 2;
-  PRODUCT_CATALOG_SERVICE = 3;
+  PRODUCT_SERVICE = 3;
   RECOMMENDATION_SERVICE = 4;
   SHIPPING_SERVICE = 5;
   CURRENCY_SERVICE = 6;
@@ -1002,11 +1002,21 @@ service OrderService {
   rpc GetOrdersForAdmin(GetOrdersForAdminRequest) returns (GetOrdersForAdminResponse) {}
   rpc CancelOrder(CancelOrderRequest) returns (CancelOrderResponse) {}
   rpc UpdateOrderStatus(UpdateOrderStatusRequest) returns (UpdateOrderStatusResponse) {}
+  rpc UpdateOrderPayment(UpdateOrderPaymentRequest) returns (UpdateOrderPaymentResponse) {}
   rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse) {}
   rpc AddOrderNote(AddOrderNoteRequest) returns (AddOrderNoteResponse) {}
   rpc DeleteOrderNote(DeleteOrderNoteRequest) returns (DeleteOrderNoteResponse) {}
   rpc UpdateTrackingNumber(UpdateTrackingNumberRequest) returns (UpdateTrackingNumberResponse) {}
   rpc ListAllOrders(Empty) returns (ListAllOrdersResponse) {}
+}
+
+message UpdateOrderPaymentRequest {
+  string order_id = 1;
+  string payment_id = 2;
+}
+
+message UpdateOrderPaymentResponse {
+  bool success = 1;
 }
 
 message GetOrdersForAdminRequest {
@@ -1066,10 +1076,12 @@ message CreateOrderRequest {
   string user_id = 1;
   string cart_id = 2;
   repeated OrderItem items = 3;
-  OrderStatus status = 4;
-  string paymentId = 5;
-  Payment payment = 8;
-  Shipping shipping = 9;
+  string payment_method = 4;
+  double payment_subtotal = 5;
+  double payment_total = 6;
+  string shipping_method = 7;
+  double shipping_cost = 8;
+  ExtendedAddress shipping_address = 9;
   repeated Coupon coupons = 10;
   string currency_code = 11;
 }
@@ -1180,7 +1192,7 @@ enum StepStatus {
 
 message ValidateAndReserveRequest {
   string user_id = 1;
-  repeated EnrichedCartItem items = 2;
+  repeated OrderItem items = 2;
 }
 
 message EnrichedCartItem {

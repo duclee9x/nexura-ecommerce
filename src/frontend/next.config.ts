@@ -1,6 +1,6 @@
 import type { NextConfig } from 'next'
 import path from 'path';
-
+ 
 const nextConfig: NextConfig = {
   webpack: (config, { isServer }) => {
     if (!isServer) {
@@ -35,22 +35,24 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60,
 
   },
+  
   eslint: {
+
     ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: true,
   },
-  output: 'standalone',
+  output:                'standalone',
   outputFileTracingRoot: path.resolve(__dirname, '../../'),
-  experimental: {
+  experimental:          {
     turbo: {
       memoryLimit: 1024,
     },
     // viewTransitions: true,
-    webpackBuildWorker: true,
+    webpackBuildWorker:        true,
     parallelServerBuildTraces: true,
-    parallelServerCompiles: true,
+    parallelServerCompiles:    true,
   },
 }
 

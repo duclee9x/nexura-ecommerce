@@ -29,12 +29,12 @@ import {
 
 interface RichTextEditorProps {
   initialContent?: string
-  onChange: (content: string) => void
+  onChange:        (content: string) => void
 }
 
 export function RichTextEditor({ initialContent = "", onChange }: RichTextEditorProps) {
-  const [activeTab, setActiveTab] = useState<"visual" | "html">("visual")
-  const [htmlContent, setHtmlContent] = useState(initialContent)
+  const [ activeTab, setActiveTab ] = useState<"visual" | "html">("visual")
+  const [ htmlContent, setHtmlContent ] = useState(initialContent)
   const editorRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

@@ -13,9 +13,9 @@ export function isServiceError(error: unknown): error is ServiceError {
   );
 }
 export function handleError(error: ServiceError, callback: any) {
-   callback(
+  callback(
     {
-      code: Status.INTERNAL,
+      code:    Status.INTERNAL,
       details: error.message,
     },
     null

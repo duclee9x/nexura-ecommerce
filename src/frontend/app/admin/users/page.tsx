@@ -59,54 +59,62 @@ import { useToast } from "@/hooks/use-toast"
 // Sample admin users data
 const initialAdminUsers = [
   {
-    id: 1,
-    name: "Admin User",
-    email: "admin@nexura.com",
-    avatar: "/placeholder.svg?height=40&width=40",
-    role: "Super Admin",
+    id:          1,
+    name:        "Admin User",
+    email:       "admin@nexura.com",
+    avatar:      "/placeholder.svg?height=40&width=40",
+    role:        "Super Admin",
     permissions: ["all"],
-    lastActive: "2023-07-15T10:30:00",
-    status: "active",
+    lastActive:  "2023-07-15T10:30:00",
+    status:      "active",
   },
   {
-    id: 2,
-    name: "John Manager",
-    email: "john@nexura.com",
-    avatar: "/placeholder.svg?height=40&width=40",
-    role: "Inventory Manager",
-    permissions: ["inventory.view", "inventory.edit", "products.view"],
-    lastActive: "2023-07-14T16:45:00",
-    status: "active",
+    id:          2,
+    name:        "John Manager",
+    email:       "john@nexura.com",
+    avatar:      "/placeholder.svg?height=40&width=40",
+    role:        "Inventory Manager",
+    permissions: [
+      "inventory.view", "inventory.edit", "products.view"
+    ],
+    lastActive:  "2023-07-14T16:45:00",
+    status:      "active",
   },
   {
-    id: 3,
-    name: "Sarah Admin",
-    email: "sarah@nexura.com",
-    avatar: "/placeholder.svg?height=40&width=40",
-    role: "Order Manager",
-    permissions: ["orders.view", "orders.edit", "customers.view"],
-    lastActive: "2023-07-13T09:15:00",
-    status: "active",
+    id:          3,
+    name:        "Sarah Admin",
+    email:       "sarah@nexura.com",
+    avatar:      "/placeholder.svg?height=40&width=40",
+    role:        "Order Manager",
+    permissions: [
+      "orders.view", "orders.edit", "customers.view"
+    ],
+    lastActive:  "2023-07-13T09:15:00",
+    status:      "active",
   },
   {
-    id: 4,
-    name: "Michael Content",
-    email: "michael@nexura.com",
-    avatar: "/placeholder.svg?height=40&width=40",
-    role: "Content Manager",
-    permissions: ["blog.view", "blog.edit", "products.view"],
-    lastActive: "2023-07-10T14:20:00",
-    status: "inactive",
+    id:          4,
+    name:        "Michael Content",
+    email:       "michael@nexura.com",
+    avatar:      "/placeholder.svg?height=40&width=40",
+    role:        "Content Manager",
+    permissions: [
+      "blog.view", "blog.edit", "products.view"
+    ],
+    lastActive:  "2023-07-10T14:20:00",
+    status:      "inactive",
   },
   {
-    id: 5,
-    name: "Lisa Support",
-    email: "lisa@nexura.com",
-    avatar: "/placeholder.svg?height=40&width=40",
-    role: "Customer Support",
-    permissions: ["orders.view", "customers.view", "customers.edit"],
-    lastActive: "2023-07-15T08:30:00",
-    status: "active",
+    id:          5,
+    name:        "Lisa Support",
+    email:       "lisa@nexura.com",
+    avatar:      "/placeholder.svg?height=40&width=40",
+    role:        "Customer Support",
+    permissions: [
+      "orders.view", "customers.view", "customers.edit"
+    ],
+    lastActive:  "2023-07-15T08:30:00",
+    status:      "active",
   },
 ]
 
@@ -127,21 +135,21 @@ const roles = [
 ]
 
 export default function AdminUsersPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [roleFilter, setRoleFilter] = useState("all")
-  const [adminUsers, setAdminUsers] = useState(initialAdminUsers)
-  const [isAddUserOpen, setIsAddUserOpen] = useState(false)
-  const [isEditUserOpen, setIsEditUserOpen] = useState(false)
-  const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<any>(null)
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [newUser, setNewUser] = useState({
-    name: "",
-    email: "",
-    role: "",
-    password: "",
+  const [ searchQuery, setSearchQuery ] = useState("")
+  const [ statusFilter, setStatusFilter ] = useState("all")
+  const [ roleFilter, setRoleFilter ] = useState("all")
+  const [ adminUsers, setAdminUsers ] = useState(initialAdminUsers)
+  const [ isAddUserOpen, setIsAddUserOpen ] = useState(false)
+  const [ isEditUserOpen, setIsEditUserOpen ] = useState(false)
+  const [ isResetPasswordOpen, setIsResetPasswordOpen ] = useState(false)
+  const [ selectedUser, setSelectedUser ] = useState<any>(null)
+  const [ newPassword, setNewPassword ] = useState("")
+  const [ confirmPassword, setConfirmPassword ] = useState("")
+  const [ newUser, setNewUser ] = useState({
+    name:            "",
+    email:           "",
+    role:            "",
+    password:        "",
     confirmPassword: "",
   })
 
@@ -174,20 +182,20 @@ export default function AdminUsersPage() {
   // Handle promote customer to admin
   const handlePromoteCustomer = (customer: any) => {
     const newAdminUser = {
-      id: Math.max(...adminUsers.map((u) => u.id)) + 1,
-      name: customer.name,
-      email: customer.email,
-      avatar: "/placeholder.svg?height=40&width=40",
-      role: "Customer Support", // Default role
-      permissions: ["orders.view", "customers.view"],
-      lastActive: new Date().toISOString(),
-      status: "active",
+      id:          Math.max(...adminUsers.map(u => u.id)) + 1,
+      name:        customer.name,
+      email:       customer.email,
+      avatar:      "/placeholder.svg?height=40&width=40",
+      role:        "Customer Support", // Default role
+      permissions: [ "orders.view", "customers.view" ],
+      lastActive:  new Date().toISOString(),
+      status:      "active",
     }
 
-    setAdminUsers([...adminUsers, newAdminUser])
+    setAdminUsers([ ...adminUsers, newAdminUser ])
 
     toast({
-      title: "Customer promoted",
+      title:       "Customer promoted",
       description: `${customer.name} has been successfully promoted to admin role.`,
     })
   }
@@ -197,49 +205,49 @@ export default function AdminUsersPage() {
     // Validate form
     if (!newUser.name || !newUser.email || !newUser.role || !newUser.password) {
       toast({
-        title: "Validation error",
+        title:       "Validation error",
         description: "Please fill in all required fields.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
 
     if (newUser.password !== newUser.confirmPassword) {
       toast({
-        title: "Passwords don't match",
+        title:       "Passwords don't match",
         description: "Please make sure your passwords match.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
 
     // Create new user
     const userToAdd = {
-      id: Math.max(...adminUsers.map((u) => u.id)) + 1,
-      name: newUser.name,
-      email: newUser.email,
-      avatar: "/placeholder.svg?height=40&width=40",
-      role: roles.find((r) => r.id === newUser.role)?.name || newUser.role,
+      id:          Math.max(...adminUsers.map(u => u.id)) + 1,
+      name:        newUser.name,
+      email:       newUser.email,
+      avatar:      "/placeholder.svg?height=40&width=40",
+      role:        roles.find(r => r.id === newUser.role)?.name || newUser.role,
       permissions: [],
-      lastActive: new Date().toISOString(),
-      status: "active",
+      lastActive:  new Date().toISOString(),
+      status:      "active",
     }
 
-    setAdminUsers([...adminUsers, userToAdd])
+    setAdminUsers([ ...adminUsers, userToAdd ])
 
     // Reset form
     setNewUser({
-      name: "",
-      email: "",
-      role: "",
-      password: "",
+      name:            "",
+      email:           "",
+      role:            "",
+      password:        "",
       confirmPassword: "",
     })
 
     setIsAddUserOpen(false)
 
     toast({
-      title: "Admin user created",
+      title:       "Admin user created",
       description: `${userToAdd.name} has been successfully added as an admin user.`,
     })
   }
@@ -254,12 +262,12 @@ export default function AdminUsersPage() {
   const handleSaveEditedUser = () => {
     if (!selectedUser) return
 
-    setAdminUsers(adminUsers.map((user) => (user.id === selectedUser.id ? selectedUser : user)))
+    setAdminUsers(adminUsers.map(user => (user.id === selectedUser.id ? selectedUser : user)))
 
     setIsEditUserOpen(false)
 
     toast({
-      title: "User updated",
+      title:       "User updated",
       description: `${selectedUser.name}'s information has been updated successfully.`,
     })
   }
@@ -268,10 +276,10 @@ export default function AdminUsersPage() {
   const handleToggleUserStatus = (id: number, currentStatus: string) => {
     const newStatus = currentStatus === "active" ? "inactive" : "active"
 
-    setAdminUsers(adminUsers.map((user) => (user.id === id ? { ...user, status: newStatus } : user)))
+    setAdminUsers(adminUsers.map(user => (user.id === id ? { ...user, status: newStatus } : user)))
 
     toast({
-      title: `User ${newStatus === "active" ? "activated" : "deactivated"}`,
+      title:       `User ${newStatus === "active" ? "activated" : "deactivated"}`,
       description: `The user has been ${newStatus === "active" ? "activated" : "deactivated"} successfully.`,
     })
   }
@@ -290,18 +298,18 @@ export default function AdminUsersPage() {
 
     if (!newPassword) {
       toast({
-        title: "Password required",
+        title:       "Password required",
         description: "Please enter a new password.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
 
     if (newPassword !== confirmPassword) {
       toast({
-        title: "Passwords don't match",
+        title:       "Passwords don't match",
         description: "Please make sure your passwords match.",
-        variant: "destructive",
+        variant:     "destructive",
       })
       return
     }
@@ -309,17 +317,17 @@ export default function AdminUsersPage() {
     setIsResetPasswordOpen(false)
 
     toast({
-      title: "Password reset",
+      title:       "Password reset",
       description: `Password for ${selectedUser.name} has been reset successfully.`,
     })
   }
 
   // Handle delete user
   const handleDeleteUser = (id: number) => {
-    setAdminUsers(adminUsers.filter((user) => user.id !== id))
+    setAdminUsers(adminUsers.filter(user => user.id !== id))
 
     toast({
-      title: "User deleted",
+      title:       "User deleted",
       description: "The admin user has been successfully deleted.",
     })
   }
@@ -328,10 +336,10 @@ export default function AdminUsersPage() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
     return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
+      month:  "short",
+      day:    "numeric",
+      year:   "numeric",
+      hour:   "2-digit",
       minute: "2-digit",
     }).format(date)
   }
@@ -373,7 +381,7 @@ export default function AdminUsersPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {customers.map((customer) => (
+                        {customers.map(customer => (
                           <TableRow key={customer.id}>
                             <TableCell className="font-medium">{customer.name}</TableCell>
                             <TableCell>{customer.email}</TableCell>
@@ -416,7 +424,7 @@ export default function AdminUsersPage() {
                         placeholder="e.g. John Smith"
                         className="col-span-3"
                         value={newUser.name}
-                        onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                        onChange={e => setNewUser({ ...newUser, name: e.target.value })}
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -429,19 +437,19 @@ export default function AdminUsersPage() {
                         placeholder="e.g. john@example.com"
                         className="col-span-3"
                         value={newUser.email}
-                        onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                        onChange={e => setNewUser({ ...newUser, email: e.target.value })}
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor="role" className="text-right">
                         Role <span className="text-destructive">*</span>
                       </Label>
-                      <Select value={newUser.role} onValueChange={(value) => setNewUser({ ...newUser, role: value })}>
+                      <Select value={newUser.role} onValueChange={value => setNewUser({ ...newUser, role: value })}>
                         <SelectTrigger className="col-span-3">
                           <SelectValue placeholder="Select a role" />
                         </SelectTrigger>
                         <SelectContent>
-                          {roles.map((role) => (
+                          {roles.map(role => (
                             <SelectItem key={role.id} value={role.id}>
                               {role.name}
                             </SelectItem>
@@ -453,7 +461,7 @@ export default function AdminUsersPage() {
                       <div className="grid grid-cols-4 gap-4">
                         <div className="col-start-2 col-span-3">
                           <p className="text-sm text-muted-foreground">
-                            {roles.find((r) => r.id === newUser.role)?.description}
+                            {roles.find(r => r.id === newUser.role)?.description}
                           </p>
                         </div>
                       </div>
@@ -467,7 +475,7 @@ export default function AdminUsersPage() {
                         type="password"
                         className="col-span-3"
                         value={newUser.password}
-                        onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                        onChange={e => setNewUser({ ...newUser, password: e.target.value })}
                       />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -479,7 +487,7 @@ export default function AdminUsersPage() {
                         type="password"
                         className="col-span-3"
                         value={newUser.confirmPassword}
-                        onChange={(e) => setNewUser({ ...newUser, confirmPassword: e.target.value })}
+                        onChange={e => setNewUser({ ...newUser, confirmPassword: e.target.value })}
                       />
                     </div>
                   </div>
@@ -510,7 +518,7 @@ export default function AdminUsersPage() {
                       placeholder="Search users..."
                       className="pl-8"
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={e => setSearchQuery(e.target.value)}
                     />
                   </div>
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -529,7 +537,7 @@ export default function AdminUsersPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Roles</SelectItem>
-                      {roles.map((role) => (
+                      {roles.map(role => (
                         <SelectItem key={role.id} value={role.name}>
                           {role.name}
                         </SelectItem>
@@ -558,7 +566,7 @@ export default function AdminUsersPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredUsers.map((user) => (
+                    filteredUsers.map(user => (
                       <TableRow key={user.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
@@ -694,7 +702,7 @@ export default function AdminUsersPage() {
                 <Input
                   id="edit-name"
                   value={selectedUser.name}
-                  onChange={(e) => setSelectedUser({ ...selectedUser, name: e.target.value })}
+                  onChange={e => setSelectedUser({ ...selectedUser, name: e.target.value })}
                   className="col-span-3"
                 />
               </div>
@@ -706,7 +714,7 @@ export default function AdminUsersPage() {
                   id="edit-email"
                   type="email"
                   value={selectedUser.email}
-                  onChange={(e) => setSelectedUser({ ...selectedUser, email: e.target.value })}
+                  onChange={e => setSelectedUser({ ...selectedUser, email: e.target.value })}
                   className="col-span-3"
                 />
               </div>
@@ -715,11 +723,11 @@ export default function AdminUsersPage() {
                   Role
                 </Label>
                 <Select
-                  value={roles.find((r) => r.name === selectedUser.role)?.id || ""}
-                  onValueChange={(value) =>
+                  value={roles.find(r => r.name === selectedUser.role)?.id || ""}
+                  onValueChange={value =>
                     setSelectedUser({
                       ...selectedUser,
-                      role: roles.find((r) => r.id === value)?.name || "",
+                      role: roles.find(r => r.id === value)?.name || "",
                     })
                   }
                 >
@@ -727,7 +735,7 @@ export default function AdminUsersPage() {
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
-                    {roles.map((role) => (
+                    {roles.map(role => (
                       <SelectItem key={role.id} value={role.id}>
                         {role.name}
                       </SelectItem>
@@ -741,7 +749,7 @@ export default function AdminUsersPage() {
                 </Label>
                 <Select
                   value={selectedUser.status}
-                  onValueChange={(value) => setSelectedUser({ ...selectedUser, status: value })}
+                  onValueChange={value => setSelectedUser({ ...selectedUser, status: value })}
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Select status" />
@@ -791,7 +799,7 @@ export default function AdminUsersPage() {
                 id="new-password"
                 type="password"
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={e => setNewPassword(e.target.value)}
                 className="col-span-3"
               />
             </div>
@@ -803,7 +811,7 @@ export default function AdminUsersPage() {
                 id="confirm-new-password"
                 type="password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={e => setConfirmPassword(e.target.value)}
                 className="col-span-3"
               />
             </div>

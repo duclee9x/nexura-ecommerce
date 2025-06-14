@@ -11,24 +11,24 @@ import { toast } from "@/hooks/use-toast"
 import { MapPin, Phone, Mail, Clock, CheckCircle } from "lucide-react"
 
 export default function ContactPage() {
-  const [formState, setFormState] = useState({
-    name: "",
-    email: "",
+  const [ formState, setFormState ] = useState({
+    name:    "",
+    email:   "",
     subject: "general",
     message: "",
   })
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [ isSubmitting, setIsSubmitting ] = useState(false)
+  const [ isSubmitted, setIsSubmitted ] = useState(false)
 
   
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormState((prev) => ({ ...prev, [name]: value }))
+    setFormState(prev => ({ ...prev, [name]: value }))
   }
 
   const handleRadioChange = (value: string) => {
-    setFormState((prev) => ({ ...prev, subject: value }))
+    setFormState(prev => ({ ...prev, subject: value }))
   }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -41,14 +41,14 @@ export default function ContactPage() {
       setIsSubmitted(true)
 
       toast({
-        title: "Message sent",
+        title:       "Message sent",
         description: "We've received your message and will get back to you soon.",
       })
 
       // Reset form after submission
       setFormState({
-        name: "",
-        email: "",
+        name:    "",
+        email:   "",
         subject: "general",
         message: "",
       })

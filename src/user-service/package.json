@@ -8,7 +8,7 @@
   "scripts": {
     "start": "bun ./dist/index.ts",
     "dev": "bun src/index.ts",
-    "build": "bun build --bytecode --sourcemap src/index.ts --target bun --outdir dist && mkdir -p dist/generated && cp ../../packages/grpc_gateway/utils/generated/nexura_reflection_descriptor.pb dist/generated/",
+    "build": "bun build --minify --sourcemap src/index.ts --target bun --outdir dist && mkdir -p dist/generated && cp ../../packages/grpc_gateway/utils/generated/nexura_reflection_descriptor.pb dist/generated/",
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:prod": "prisma migrate deploy",
@@ -16,7 +16,8 @@
     "prisma:resolve": "prisma migrate resolve",
     "prisma:migrate:deploy": "prisma migrate deploy && prisma generate",
     "prisma:studio": "prisma studio",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint . --config ../../packages/eslint/eslint.config.js",
+    "lint:fix": "eslint . --fix --config ../../packages/eslint/eslint.config.js",
     "format": "prettier --write \"src/**/*.ts\""
 
   },

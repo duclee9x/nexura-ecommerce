@@ -34,69 +34,67 @@ import { useQueryClient } from "@tanstack/react-query"
 // Add mock review data
 const mockReviews = [
   {
-    id: 1,
-    rating: 5,
+    id:      1,
+    rating:  5,
     comment: "Excellent product! The quality is outstanding and it exceeded my expectations. Would definitely recommend to others.",
-    images: [
+    images:  [
       "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&auto=format&fit=crop&q=60",
       "https://images.unsplash.com/photo-1546938576-6e6a62bd779f?w=800&auto=format&fit=crop&q=60",
       "https://images.unsplash.com/photo-1552346989-e069318e20a5?w=800&auto=format&fit=crop&q=60"
     ],
     user: {
-      name: "John Doe",
+      name:   "John Doe",
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
-      date: "2024-03-15"
+      date:   "2024-03-15"
     },
-    likes: 12,
+    likes:    12,
     verified: true
   },
   {
-    id: 2,
-    rating: 4,
+    id:      2,
+    rating:  4,
     comment: "Good product overall. The build quality is nice but there's room for improvement in some areas.",
-    images: [
+    images:  [
       "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=800&auto=format&fit=crop&q=60",
       "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=800&auto=format&fit=crop&q=60"
     ],
     user: {
-      name: "Sarah Smith",
+      name:   "Sarah Smith",
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
-      date: "2024-03-10"
+      date:   "2024-03-10"
     },
-    likes: 8,
+    likes:    8,
     verified: true
   },
   {
-    id: 3,
-    rating: 5,
+    id:      3,
+    rating:  5,
     comment: "Perfect fit for my needs. The customer service was also very helpful when I had questions.",
-    images: [
+    images:  [
       "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&auto=format&fit=crop&q=60",
       "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=800&auto=format&fit=crop&q=60",
       "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800&auto=format&fit=crop&q=60",
       "https://images.unsplash.com/photo-1584735175315-9d5df23860e6?w=800&auto=format&fit=crop&q=60"
     ],
     user: {
-      name: "Mike Johnson",
+      name:   "Mike Johnson",
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Mike",
-      date: "2024-03-05"
+      date:   "2024-03-05"
     },
-    likes: 15,
+    likes:    15,
     verified: true
   },
   {
-    id: 4,
-    rating: 3,
+    id:      4,
+    rating:  3,
     comment: "It's okay but a bit pricey for what you get. Delivery was quick though.",
-    images: [
-      "https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=800&auto=format&fit=crop&q=60"
-    ],
-    user: {
-      name: "Emily Brown",
+    images:  ["https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=800&auto=format&fit=crop&q=60"],
+    user:    {
+      name:   "Emily Brown",
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emily",
-      date: "2024-02-28"
+      date:   "2024-02-28"
     },
-    likes: 4,
+    likes:    4,
     verified: false
   }
 ]
@@ -199,16 +197,16 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const { wishlistItems } = useWishlist()
 
   // State hooks
-  const [quantity, setQuantity] = useState(1)
-  const [activeTab, setActiveTab] = useState("description")
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null)
-  const [isAddingToCart, setIsAddingToCart] = useState(false)
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
-  const [isWishlistLoading, setIsWishlistLoading] = useState<{ [key: string]: boolean }>({})
-  const [currentReviewIndex, setCurrentReviewIndex] = useState(0)
-  const [currentReviewImageIndex, setCurrentReviewImageIndex] = useState(0)
-  const [isReviewImageViewerOpen, setIsReviewImageViewerOpen] = useState(false)
+  const [ quantity, setQuantity ] = useState(1)
+  const [ activeTab, setActiveTab ] = useState("description")
+  const [ selectedVariant, setSelectedVariant ] = useState<ProductVariant | null>(null)
+  const [ isAddingToCart, setIsAddingToCart ] = useState(false)
+  const [ currentImageIndex, setCurrentImageIndex ] = useState(0)
+  const [ isImageViewerOpen, setIsImageViewerOpen ] = useState(false)
+  const [ isWishlistLoading, setIsWishlistLoading ] = useState<{ [key: string]: boolean }>({})
+  const [ currentReviewIndex, setCurrentReviewIndex ] = useState(0)
+  const [ currentReviewImageIndex, setCurrentReviewImageIndex ] = useState(0)
+  const [ isReviewImageViewerOpen, setIsReviewImageViewerOpen ] = useState(false)
 
   // Custom hooks
   const { useAddItem, useGetCart } = CartHooks()
@@ -225,10 +223,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   const { mutateAsync: removeFromWishlist } = useRemoveWishlist
 
   // Embla carousel hooks
-  const [mainCarouselRef, mainEmbla] = useEmblaCarousel()
-  const [thumbCarouselRef, thumbEmbla] = useEmblaCarousel({
+  const [ mainCarouselRef, mainEmbla ] = useEmblaCarousel()
+  const [ thumbCarouselRef, thumbEmbla ] = useEmblaCarousel({
     containScroll: 'keepSnaps',
-    dragFree: true,
+    dragFree:      true,
   })
 
   // Effect hooks
@@ -256,7 +254,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     return () => {
       mainEmbla.off('select', onSelect)
     }
-  }, [mainEmbla, thumbEmbla])
+  }, [ mainEmbla, thumbEmbla ])
 
   useEffect(() => {
     setQuantity(1)
@@ -297,7 +295,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       <ErrorState 
         message={errorMessage}
         onRetry={() => {
-          queryClient.invalidateQueries({ queryKey: ['product', slug] });
+          queryClient.invalidateQueries({ queryKey: [ 'product', slug ] });
         }}
       />
     )
@@ -310,26 +308,26 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     const currentItemOnCart = cart.items.find(item => item.productId === product.id && item.variantId === selectedVariant.id);
     if (quantity + (currentItemOnCart?.quantity || 0) > (selectedVariant.stock?.quantity || 0)) {
       toast({
-        title: "Not enough stock",
+        title:       "Not enough stock",
         description: "You cannot add more items than are available in stock.",
-        variant: "destructive"
+        variant:     "destructive"
       });
       return;
     }
     try {
       await addItem({
-        userId: user?.id || '',
-        productId: product.id,
-        variantId: selectedVariant.id,
-        image: product.images[0]?.url || "",
+        userId:       user?.id || '',
+        productId:    product.id,
+        variantId:    selectedVariant.id,
+        image:        product.images[0]?.url || "",
         quantity,
         currencyCode: currency,
       });
     } catch (error) {
       toast({
-        title: "Failed to add to cart",
+        title:       "Failed to add to cart",
         description: error instanceof Error ? error.message : "Please try again later.",
-        variant: "destructive"
+        variant:     "destructive"
       });
     } finally {
       setIsAddingToCart(false)
@@ -358,9 +356,9 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   // Format date
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
+      year:  'numeric',
       month: 'long',
-      day: 'numeric'
+      day:   'numeric'
     })
   }
   const handleWishlistToggle = async (productId: string) => {
@@ -371,11 +369,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
       if (isInWishlist) {
         removeFromWishlist({
           wishlistId: isInWishlist.id,
-          userId: user?.id || '',
+          userId:     user?.id || '',
         })
       } else {
         addToWishlist({
-          userId: user?.id || '',
+          userId:    user?.id || '',
           productId: productId,
         })
       }
@@ -538,12 +536,12 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                   <h3 className="text-xl font-semibold">Product Attributes</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {product.attributes
-                      .filter((attr) => !attr.variantable)
-                      .map((attribute) => (
+                      .filter(attr => !attr.variantable)
+                      .map(attribute => (
                         <div key={attribute.id} className="border-b pb-2">
                           <span className="font-medium">{attribute.name}</span>
                           <div className="mt-1">
-                            {attribute.values.map((value) => (
+                            {attribute.values.map(value => (
                               <Badge key={value} variant="outline" className="mr-2 mb-1">
                                 {value}
                               </Badge>
@@ -565,13 +563,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                       <div className="flex items-baseline gap-2">
                         <span className="text-4xl font-bold">{averageRating.toFixed(1)}</span>
                         <div className="flex items-center">
-                          {[1, 2, 3, 4, 5].map((star) => (
+                          {[
+                            1, 2, 3, 4, 5
+                          ].map(star => (
                             <Star
                               key={star}
                               className={`h-5 w-5 ${star <= Math.round(averageRating)
-                                  ? "text-yellow-400 fill-yellow-400"
-                                  : "text-muted-foreground"
-                                }`}
+                                ? "text-yellow-400 fill-yellow-400"
+                                : "text-muted-foreground"
+                              }`}
                             />
                           ))}
                         </div>
@@ -580,7 +580,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                       <div className="space-y-2">
                         {Object.entries(ratingDistribution)
                           .sort(([a], [b]) => Number(b) - Number(a))
-                          .map(([rating, percentage]) => (
+                          .map(([ rating, percentage ]) => (
                             <div key={rating} className="flex items-center gap-2">
                               <div className="flex items-center gap-1 w-12">
                                 <span>{rating}</span>
@@ -626,13 +626,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
                               </div>
                               <div className="flex items-center gap-2 mt-1">
                                 <div className="flex">
-                                  {[1, 2, 3, 4, 5].map((star) => (
+                                  {[
+                                    1, 2, 3, 4, 5
+                                  ].map(star => (
                                     <Star
                                       key={star}
                                       className={`h-4 w-4 ${star <= review.rating
-                                          ? "text-yellow-400 fill-yellow-400"
-                                          : "text-muted-foreground"
-                                        }`}
+                                        ? "text-yellow-400 fill-yellow-400"
+                                        : "text-muted-foreground"
+                                      }`}
                                     />
                                   ))}
                                 </div>
@@ -698,13 +700,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {product.relatedProducts.map(relatedProduct => (
               <ProductCard 
-              key={relatedProduct.id} 
-              product={relatedProduct} 
-              viewMode="grid" 
-              categories={categories}
-              isInWishlist={wishlistItems.some(item => item.productId === relatedProduct.id)}
-              onWishlistToggle={() => handleWishlistToggle(relatedProduct.id)}
-              isWishlistLoading={isWishlistLoading[relatedProduct.id]}
+                key={relatedProduct.id} 
+                product={relatedProduct} 
+                viewMode="grid" 
+                categories={categories}
+                isInWishlist={wishlistItems.some(item => item.productId === relatedProduct.id)}
+                onWishlistToggle={() => handleWishlistToggle(relatedProduct.id)}
+                isWishlistLoading={isWishlistLoading[relatedProduct.id]}
               />
             ))}
           </div>

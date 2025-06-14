@@ -1,0 +1,12 @@
+version: 1
+common:
+  resourcesPath: ./components
+apps:
+  - appID: dapr-workflow
+    appDirPath: ./
+    command: ["bun", "run", "start"]
+    appPort: 8166
+    daprHTTPPort: 3684
+    daprGRPCPort: 50380
+    env:
+      DEBUG: true

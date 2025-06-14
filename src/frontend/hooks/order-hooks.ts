@@ -10,11 +10,15 @@ import {
   deleteOrderNoteGateway,
   updateTrackingNumberGateway,
   listAllOrdersGateway,
+  createOrderGateway,
+  getOrderWorkflowGateway,
+  createOrderWorkflowGateway,
 } from "@nexura/grpc_gateway/gateway";
 import { toast } from "@/components/ui/use-toast";
 // import type { OrderStatus as OrderStatusType, CreateSagaOrderRequest } from "@nexura/grpc_gateway/protos"
 import {
   AddOrderNoteRequest,
+  CreateOrderRequest,
   DeleteOrderNoteRequest,
   OrderStatus,
 } from "@nexura/grpc_gateway/protos";
@@ -30,14 +34,23 @@ const defaultConfig: QueryConfig = {
 export default function OrderHooks() {
   const queryClient = useQueryClient();
   return {
+    useGetOrderWorkflow: (instanceID: string) => {
+      return useQuery({
+        queryKey: [ "orderWorkflow", instanceID ],
+        queryFn:  async () => {
+          const response = await getOrderWorkflowGateway(instanceID);
+          return response;
+        },
+      });
+    },
     useGetOrder: (orderId: string | null) => {
       return useQuery({
-        queryKey: ["order", orderId],
-        queryFn: async () => {
+        queryKey: [ "order", orderId ],
+        queryFn:  async () => {
           if (!orderId) {
             throw new Error("Order ID is required");
           }
-          const response = await getOrderGateway(orderId);
+          const response = await getOrderGateway({ orderId });
           return response.order;
         },
         enabled: !!orderId,
@@ -47,8 +60,8 @@ export default function OrderHooks() {
 
     useListOrders: (userId: string) => {
       return useQuery({
-        queryKey: ["orders", userId],
-        queryFn: async () => {
+        queryKey: [ "orders", userId ],
+        queryFn:  async () => {
           try {
             const response = await listOrdersGateway({ userId });
             return response.orders;
@@ -64,7 +77,7 @@ export default function OrderHooks() {
     useListAllOrders: () => {
       return useQuery({
         queryKey: ["allOrders"],
-        queryFn: async () => {
+        queryFn:  async () => {
           const response = await listAllOrdersGateway();
           return response.orders;
         },
@@ -74,10 +87,10 @@ export default function OrderHooks() {
 
     useGetOrderStatus: (orderId: string) => {
       return useQuery({
-        queryKey: ["orderStatus", orderId],
-        queryFn: async () => {
+        queryKey: [ "orderStatus", orderId ],
+        queryFn:  async () => {
           try {
-            const response = await getOrderStatusGateway(orderId);
+            const response = await getOrderStatusGateway({ orderId });
             return response.status;
           } catch (error) {
             throw error;
@@ -86,6 +99,24 @@ export default function OrderHooks() {
         ...defaultConfig,
       });
     },
+    useCreateOrderWorkflow: useMutation({
+      mutationFn: async (order: CreateOrderRequest) => {
+        const response = await createOrderWorkflowGateway(order);
+        return response;
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["orders"] });
+        queryClient.invalidateQueries({ queryKey: ["order"] });
+        toast({
+          title:       "Order created",
+          description: "Order created successfully",
+        });
+      },
+      onError: (error) => {
+        throw error;
+      },
+      ...defaultConfig,
+    }),
 
     useCreateSagaOrder: useMutation({
       mutationFn: async (order: CreateSagaOrderRequest) => {
@@ -101,7 +132,7 @@ export default function OrderHooks() {
         queryClient.invalidateQueries({ queryKey: ["product"] });
         queryClient.invalidateQueries({ queryKey: ["cart"] });
         toast({
-          title: "Order created",
+          title:       "Order created",
           description: "Order created successfully",
         });
       },
@@ -124,7 +155,7 @@ export default function OrderHooks() {
         queryClient.invalidateQueries({ queryKey: ["orders"] });
         queryClient.invalidateQueries({ queryKey: ["order"] });
         toast({
-          title: "Order note added",
+          title:       "Order note added",
           description: "Order note added successfully",
         });
       },
@@ -136,10 +167,10 @@ export default function OrderHooks() {
         status,
       }: {
         orderId: string;
-        status: OrderStatus;
+        status:  OrderStatus;
       }) => {
         try {
-          const response = await updateOrderStatusGateway(orderId, status);
+          const response = await updateOrderStatusGateway({ orderId, status });
           return response;
         } catch (error) {
           throw error;
@@ -149,7 +180,7 @@ export default function OrderHooks() {
         queryClient.invalidateQueries({ queryKey: ["orders"] });
         queryClient.invalidateQueries({ queryKey: ["order"] });
         toast({
-          title: "Order status updated",
+          title:       "Order status updated",
           description: "Order status updated successfully",
         });
       },
@@ -164,7 +195,7 @@ export default function OrderHooks() {
         orderId,
         trackingNumber,
       }: {
-        orderId: string;
+        orderId:        string;
         trackingNumber: string;
       }) => {
         try {
@@ -181,7 +212,7 @@ export default function OrderHooks() {
         queryClient.invalidateQueries({ queryKey: ["orders"] });
         queryClient.invalidateQueries({ queryKey: ["order"] });
         toast({
-          title: "Tracking number updated",
+          title:       "Tracking number updated",
           description: "Tracking number updated successfully",
         });
       },
@@ -203,7 +234,7 @@ export default function OrderHooks() {
         queryClient.invalidateQueries({ queryKey: ["orders"] });
         queryClient.invalidateQueries({ queryKey: ["order"] });
         toast({
-          title: "Order note deleted",
+          title:       "Order note deleted",
           description: "Order note deleted successfully",
         });
       },
@@ -212,7 +243,7 @@ export default function OrderHooks() {
     useCancelOrder: useMutation({
       mutationFn: async (orderId: string) => {
         try {
-          const response = await cancelOrderGateway(orderId);
+          const response = await cancelOrderGateway({ orderId });
           return response;
         } catch (error) {
           throw error;
@@ -222,7 +253,7 @@ export default function OrderHooks() {
         queryClient.invalidateQueries({ queryKey: ["orders"] });
         queryClient.invalidateQueries({ queryKey: ["order"] });
         toast({
-          title: "Order cancelled",
+          title:       "Order cancelled",
           description: "Order cancelled successfully",
         });
       },

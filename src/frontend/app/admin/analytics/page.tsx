@@ -53,7 +53,9 @@ const categoryData = [
   { name: "Accessories", value: 30 },
 ]
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28"]
+const COLORS = [
+  "#0088FE", "#00C49F", "#FFBB28"
+]
 
 const topProducts = [
   { id: 1, name: "Urban Backpack", sales: 128, revenue: 15360 },
@@ -84,7 +86,7 @@ const customerAcquisition = [
 ]
 
 export default function AnalyticsPage() {
-  const [timeRange, setTimeRange] = useState("7d")
+  const [ timeRange, setTimeRange ] = useState("7d")
   const { formatPrice } = useCurrency()
   
   return (
@@ -218,9 +220,9 @@ export default function AnalyticsPage() {
                         <BarChart
                           data={salesData}
                           margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
+                            top:    5,
+                            right:  30,
+                            left:   20,
                             bottom: 5,
                           }}
                         >
@@ -228,8 +230,8 @@ export default function AnalyticsPage() {
                           <XAxis dataKey="name" />
                           <YAxis />
                           <Tooltip
-                            formatter={(value) => [`$${value}`, "Sales"]}
-                            labelFormatter={(label) => `Month: ${label}`}
+                            formatter={value => [ `$${value}`, "Sales" ]}
+                            labelFormatter={label => `Month: ${label}`}
                           />
                           <Bar dataKey="sales" fill="#3b82f6" />
                         </BarChart>
@@ -249,16 +251,16 @@ export default function AnalyticsPage() {
                         <LineChart
                           data={dailySales}
                           margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
+                            top:    5,
+                            right:  30,
+                            left:   20,
                             bottom: 5,
                           }}
                         >
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="name" />
                           <YAxis />
-                          <Tooltip formatter={(value) => [`$${value}`, "Sales"]} />
+                          <Tooltip formatter={value => [ `$${value}`, "Sales" ]}/>
                           <Line
                             type="monotone"
                             dataKey="sales"
@@ -291,7 +293,7 @@ export default function AnalyticsPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {topProducts.map((product) => (
+                        {topProducts.map(product => (
                           <TableRow key={product.id}>
                             <TableCell className="font-medium">{product.name}</TableCell>
                             <TableCell className="text-right">{product.sales}</TableCell>
@@ -334,7 +336,7 @@ export default function AnalyticsPage() {
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
-                          <Tooltip formatter={(value) => [`${value}%`, "Percentage"]} />
+                          <Tooltip formatter={value => [ `${value}%`, "Percentage" ]}/>
                           <Legend />
                         </PieChart>
                       </ResponsiveContainer>
@@ -353,9 +355,9 @@ export default function AnalyticsPage() {
                         <BarChart
                           data={salesData}
                           margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
+                            top:    5,
+                            right:  30,
+                            left:   20,
                             bottom: 5,
                           }}
                         >
@@ -434,9 +436,9 @@ export default function AnalyticsPage() {
                         <AreaChart
                           data={customerAcquisition}
                           margin={{
-                            top: 10,
-                            right: 30,
-                            left: 0,
+                            top:    10,
+                            right:  30,
+                            left:   0,
                             bottom: 0,
                           }}
                         >
@@ -466,9 +468,9 @@ export default function AnalyticsPage() {
                         <LineChart
                           data={salesData}
                           margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
+                            top:    5,
+                            right:  30,
+                            left:   20,
                             bottom: 5,
                           }}
                         >
@@ -555,16 +557,16 @@ export default function AnalyticsPage() {
                         <LineChart
                           data={salesData}
                           margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
+                            top:    5,
+                            right:  30,
+                            left:   20,
                             bottom: 5,
                           }}
                         >
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="name" />
                           <YAxis />
-                          <Tooltip formatter={(value) => [`$${Number(value) * 100}`, "Inventory Value"]} />
+                          <Tooltip formatter={value => [ `$${Number(value) * 100}`, "Inventory Value" ]}/>
                           <Line
                             type="monotone"
                             dataKey="sales"
@@ -605,7 +607,7 @@ export default function AnalyticsPage() {
                             <Cell fill="#f59e0b" />
                             <Cell fill="#ef4444" />
                           </Pie>
-                          <Tooltip formatter={(value) => [`${value}%`, "Percentage"]} />
+                          <Tooltip formatter={value => [ `${value}%`, "Percentage" ]}/>
                           <Legend />
                         </PieChart>
                       </ResponsiveContainer>

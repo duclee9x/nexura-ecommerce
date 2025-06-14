@@ -9,33 +9,33 @@ import type { PaginatedResponse } from "@/types/schema"
 
 // Mock database for demo purposes
 const mockDb = {
-  products: [] as any[],
-  customers: [] as any[],
-  orders: [] as any[],
+  products:   [] as any[],
+  customers:  [] as any[],
+  orders:     [] as any[],
   blog_posts: [] as any[],
   warehouses: [] as any[],
-  users: [] as any[],
+  users:      [] as any[],
 }
 
 export async function query<T>(
   table: keyof typeof mockDb,
   options?: {
-    where?: Record<string, any>
-    limit?: number
-    offset?: number
-    orderBy?: string
+    where?:          Record<string, any>
+    limit?:          number
+    offset?:         number
+    orderBy?:        string
     orderDirection?: "asc" | "desc"
   },
 ): Promise<T[]> {
   // Simulate database query with delay
-  await new Promise((resolve) => setTimeout(resolve, 100))
+  await new Promise(resolve => setTimeout(resolve, 100))
 
   let results = [...mockDb[table]]
 
   // Apply where filters
   if (options?.where) {
-    Object.entries(options.where).forEach(([key, value]) => {
-      results = results.filter((item) => item[key] === value)
+    Object.entries(options.where).forEach(([ key, value ]) => {
+      results = results.filter(item => item[key] === value)
     })
   }
 
@@ -64,19 +64,19 @@ export async function query<T>(
 
 export async function getById<T>(table: keyof typeof mockDb, id: string): Promise<T | null> {
   // Simulate database query with delay
-  await new Promise((resolve) => setTimeout(resolve, 50))
+  await new Promise(resolve => setTimeout(resolve, 50))
 
-  const result = mockDb[table].find((item) => item.id === id)
+  const result = mockDb[table].find(item => item.id === id)
   return (result || null) as T | null
 }
 
 export async function insert<T>(table: keyof typeof mockDb, data: T): Promise<T> {
   // Simulate database insert with delay
-  await new Promise((resolve) => setTimeout(resolve, 150))
+  await new Promise(resolve => setTimeout(resolve, 150))
 
   // Generate an ID if not provided
   const dataWithId = {
-    id: (data as any).id || crypto.randomUUID(),
+    id:        (data as any).id || crypto.randomUUID(),
     createdAt: (data as any).createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ...data,
@@ -88,9 +88,9 @@ export async function insert<T>(table: keyof typeof mockDb, data: T): Promise<T>
 
 export async function update<T>(table: keyof typeof mockDb, id: string, data: Partial<T>): Promise<T> {
   // Simulate database update with delay
-  await new Promise((resolve) => setTimeout(resolve, 150))
+  await new Promise(resolve => setTimeout(resolve, 150))
 
-  const index = mockDb[table].findIndex((item) => item.id === id)
+  const index = mockDb[table].findIndex(item => item.id === id)
 
   if (index === -1) {
     throw new Error(`Item with id ${id} not found in ${table}`)
@@ -108,9 +108,9 @@ export async function update<T>(table: keyof typeof mockDb, id: string, data: Pa
 
 export async function remove(table: keyof typeof mockDb, id: string): Promise<boolean> {
   // Simulate database delete with delay
-  await new Promise((resolve) => setTimeout(resolve, 100))
+  await new Promise(resolve => setTimeout(resolve, 100))
 
-  const index = mockDb[table].findIndex((item) => item.id === id)
+  const index = mockDb[table].findIndex(item => item.id === id)
 
   if (index === -1) {
     return false
@@ -123,22 +123,22 @@ export async function remove(table: keyof typeof mockDb, id: string): Promise<bo
 export async function paginate<T>(
   table: keyof typeof mockDb,
   options: {
-    page: number
-    pageSize: number
-    where?: Record<string, any>
-    orderBy?: string
+    page:            number
+    pageSize:        number
+    where?:          Record<string, any>
+    orderBy?:        string
     orderDirection?: "asc" | "desc"
   },
 ): Promise<PaginatedResponse<T>> {
   // Simulate database query with delay
-  await new Promise((resolve) => setTimeout(resolve, 200))
+  await new Promise(resolve => setTimeout(resolve, 200))
 
   let results = [...mockDb[table]]
 
   // Apply where filters
   if (options?.where) {
-    Object.entries(options.where).forEach(([key, value]) => {
-      results = results.filter((item) => item[key] === value)
+    Object.entries(options.where).forEach(([ key, value ]) => {
+      results = results.filter(item => item[key] === value)
     })
   }
 
@@ -167,11 +167,11 @@ export async function paginate<T>(
   results = results.slice(offset, offset + pageSize)
 
   return {
-    items: results as T[],
+    items:      results as T[],
     total,
     page,
     pageSize,
     totalPages: Math.ceil(total / pageSize),
-    hasMore: page * pageSize < total,
+    hasMore:    page * pageSize < total,
   }
 }

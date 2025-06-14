@@ -13,60 +13,60 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 // Sample orders data
 const orders = [
   {
-    id: "123456789",
-    date: "March 15, 2024",
+    id:     "123456789",
+    date:   "March 15, 2024",
     status: "Processing",
-    items: [
+    items:  [
       {
-        id: 1,
-        name: "Urban Backpack",
-        price: 120,
+        id:       1,
+        name:     "Urban Backpack",
+        price:    120,
         quantity: 1,
-        image: "/placeholder.svg?height=300&width=300",
+        image:    "/placeholder.svg?height=300&width=300",
       },
       {
-        id: 8,
-        name: "Laptop Sleeve",
-        price: 45,
+        id:       8,
+        name:     "Laptop Sleeve",
+        price:    45,
         quantity: 1,
-        image: "/placeholder.svg?height=300&width=300",
+        image:    "/placeholder.svg?height=300&width=300",
       },
     ],
     total: 190.2,
   },
   {
-    id: "987654321",
-    date: "February 28, 2024",
+    id:     "987654321",
+    date:   "February 28, 2024",
     status: "Delivered",
-    items: [
+    items:  [
       {
-        id: 2,
-        name: "Hyper Backpack",
-        price: 140,
+        id:       2,
+        name:     "Hyper Backpack",
+        price:    140,
         quantity: 1,
-        image: "/placeholder.svg?height=300&width=300",
+        image:    "/placeholder.svg?height=300&width=300",
       },
     ],
     total: 151.2,
   },
   {
-    id: "456789123",
-    date: "January 15, 2024",
+    id:     "456789123",
+    date:   "January 15, 2024",
     status: "Delivered",
-    items: [
+    items:  [
       {
-        id: 10,
-        name: "Water Bottle",
-        price: 18,
+        id:       10,
+        name:     "Water Bottle",
+        price:    18,
         quantity: 2,
-        image: "/placeholder.svg?height=300&width=300",
+        image:    "/placeholder.svg?height=300&width=300",
       },
       {
-        id: 11,
-        name: "Extension Strap",
-        price: 12,
+        id:       11,
+        name:     "Extension Strap",
+        price:    12,
         quantity: 1,
-        image: "/placeholder.svg?height=300&width=300",
+        image:    "/placeholder.svg?height=300&width=300",
       },
     ],
     total: 51.84,
@@ -75,9 +75,9 @@ const orders = [
 
 export default function OrdersPage() {
   const router = useRouter()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [timeFilter, setTimeFilter] = useState("all")
+  const [ searchQuery, setSearchQuery ] = useState("")
+  const [ statusFilter, setStatusFilter ] = useState("all")
+  const [ timeFilter, setTimeFilter ] = useState("all")
 
   // Filter orders based on search query and filters
   const filteredOrders = orders.filter((order) => {
@@ -135,7 +135,7 @@ export default function OrdersPage() {
             placeholder="Search by order number"
             className="pl-9"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
           />
         </div>
 
@@ -185,7 +185,7 @@ export default function OrdersPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {filteredOrders.map((order) => (
+          {filteredOrders.map(order => (
             <div key={order.id} className="border dark:border-gray-800 rounded-lg p-6">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
                 <div>
@@ -218,7 +218,7 @@ export default function OrdersPage() {
               </div>
 
               <div className="flex flex-wrap gap-4">
-                {order.items.map((item) => (
+                {order.items.map(item => (
                   <div key={item.id} className="flex items-center gap-3">
                     <div className="relative w-16 h-16 border dark:border-gray-800">
                       <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />

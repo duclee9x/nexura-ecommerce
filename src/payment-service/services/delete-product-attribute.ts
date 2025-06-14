@@ -1,8 +1,7 @@
-import { PrismaClient } from '@prisma/client'
-import { handleError } from '../../utils/error'
-import { sendUnaryData } from '@grpc/grpc-js'
-import { DeleteProductAttributesResponse, DeleteProductAttributesRequest } from '@/src/proto/nexura'
-import { ServerUnaryCall } from '@grpc/grpc-js'
+import { PrismaClient } from '../src/db/prisma-client'
+import { handleError } from "@nexura/common/utils";
+import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js'
+import { DeleteProductAttributesResponse, DeleteProductAttributesRequest } from '@nexura/grpc_gateway/protos';
 
 const prisma = new PrismaClient()
 
@@ -15,7 +14,7 @@ export const deleteProductAttribute = async (call: ServerUnaryCall<DeleteProduct
       throw new Error("Attribute ID is required")
     }
 
-    const attributes = await prisma.productAttribute.delete({
+    await prisma.productAttribute.delete({
       where: {
         id: attributeId,
       },
@@ -27,6 +26,6 @@ export const deleteProductAttribute = async (call: ServerUnaryCall<DeleteProduct
 
     callback(null, response)
   } catch (error) {
-    handleError(error, callback)
+    handleError(error as ServiceError, callback)
   }
 }

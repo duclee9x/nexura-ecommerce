@@ -17,20 +17,22 @@ import Form from "next/form"
 type RegistrationFormValues = z.infer <typeof registrationFormSchema>
 
 export function RegistrationForm() {
-  const [state, formAction, isPending] = useActionState(onRegisterSubmitAction, { message: "", success: false, field: {}, issue: [] })
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [
+    state, formAction, isPending
+  ] = useActionState(onRegisterSubmitAction, { message: "", success: false, field: {}, issue: [] })
+  const [ showPassword, setShowPassword ] = useState(false)
+  const [ showConfirmPassword, setShowConfirmPassword ] = useState(false)
 
   const form = useForm<RegistrationFormValues>({
-    resolver: zodResolver(registrationFormSchema),
+    resolver:      zodResolver(registrationFormSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      password: "",
+      firstName:       "",
+      lastName:        "",
+      email:           "",
+      phone:           "",
+      password:        "",
       confirmPassword: "",
-      acceptTerms: false,
+      acceptTerms:     false,
       acceptMarketing: false,
       ...(state?.field ?? {}),
     },
@@ -157,7 +159,8 @@ export function RegistrationForm() {
                     className="pr-10"
                   />
                   <button
-                    type="button" tabIndex={-1}
+                    type="button"
+                    tabIndex={-1}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-base"
                     onClick={() => setShowPassword(!showPassword)}
                   >
@@ -189,7 +192,8 @@ export function RegistrationForm() {
                     className="pr-10"
                   />
                   <button
-                    type="button" tabIndex={-1}
+                    type="button"
+                    tabIndex={-1}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-base"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
@@ -275,7 +279,7 @@ export function RegistrationForm() {
             </>
           )}
         </Button>
-          ) : (
+        ) : (
           <div className="mt-4 p-4 bg-success/10 border border-success/20 rounded-lg">
             <h3 className="text-success font-medium mb-2">Account Created Successfully!</h3>
             <p className="text-sm text-text-base">

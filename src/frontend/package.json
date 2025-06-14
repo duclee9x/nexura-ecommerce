@@ -8,7 +8,8 @@
     "start": "next start",
     "generate-proto": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./ ./protos/nexura.proto",
     "gen-proto": "proto-loader-gen-types --longs=String --enums=String --defaults --oneofs --grpcLib=@grpc/grpc-js --outDir=protos/generated protos/nexura.proto",
-    "lint": "next lint",
+    "lint": "eslint . --config ../../packages/eslint/eslint.config.js",
+    "lint:fix": "eslint . --fix --config ../../packages/eslint/eslint.config.js",
     "start:prod": "node .next/standalone/server.js"
   },
   "dependencies": {

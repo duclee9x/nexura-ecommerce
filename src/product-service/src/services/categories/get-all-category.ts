@@ -14,9 +14,9 @@ export const getAllCategory = async (call: ServerUnaryCall<Empty, GetAllCategory
     }
 
     const response: GetAllCategoryResponse = {
-      categories: categories.map((category) => ({
-        id: category.id,
-        name: category.name,
+      categories: categories.map(category => ({
+        id:       category.id,
+        name:     category.name,
         parentId: category.parentId || "",
       })),
     }

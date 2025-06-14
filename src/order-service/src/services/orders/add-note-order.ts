@@ -12,7 +12,7 @@ export const addOrderNote = async (call: ServerUnaryCall<AddOrderNoteRequest, Ad
     const { orderId, note } = call.request
     if (!orderId || !note) {
       callback({
-        code: Status.INVALID_ARGUMENT,
+        code:    Status.INVALID_ARGUMENT,
         message: 'Invalid request'
       })
       return
@@ -22,7 +22,7 @@ export const addOrderNote = async (call: ServerUnaryCall<AddOrderNoteRequest, Ad
       // Create order with initial status
       const order = await tx.order.update({
         where: { id: orderId },
-        data: {
+        data:  {
           notes: {
             create: {
               note: note
@@ -39,10 +39,10 @@ export const addOrderNote = async (call: ServerUnaryCall<AddOrderNoteRequest, Ad
       })
       logger.info("Order note added successfully", { orderId, note })
       callback(null, {
-        notes: order.notes.map((note) => ({
-          id: note.id,
-          orderId: note.orderId,
-          note: note.note,
+        notes: order.notes.map(note => ({
+          id:        note.id,
+          orderId:   note.orderId,
+          note:      note.note,
           createdAt: note.createdAt.toISOString()
         }))
       })
@@ -52,7 +52,7 @@ export const addOrderNote = async (call: ServerUnaryCall<AddOrderNoteRequest, Ad
   } catch (error) {
     logger.error('Error creating order:', error)
     callback({
-      code: Status.INTERNAL,
+      code:    Status.INTERNAL,
       message: 'Failed to create order'
     })
   }

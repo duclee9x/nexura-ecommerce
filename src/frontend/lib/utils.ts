@@ -61,13 +61,13 @@ export const getPaymentStatusBadgeColor = (status: PaymentStatus) => {
   }
 }
 export const convertIdToName = (list: any[], id: string, attribute: string) => {
-  const item = list.find((item) => item.id.toString() === id)
+  const item = list.find(item => item.id.toString() === id)
   return item?.[attribute]
 }
 export const generateAvatar = (name: string) => {
   const avatar = createAvatar(initials, {
-      seed: name[0],
-      size: 100,
+    seed: name[0],
+    size: 100,
   });
   return avatar.toDataUri();
 }
