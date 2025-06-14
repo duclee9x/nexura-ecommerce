@@ -33,17 +33,16 @@ jobs:
         run: "echo $(pwd)"
       - name: Log info
         run: "ls -la"
-      - name: Lint check source code
-        uses: dagger/dagger-for-github@8.0.0
+      - name: "Set up Dagger"
+        id: "setup-dagger"
+        uses: "camptocamp/setup-dagger@v1"
         with:
-            verb: install
-            version: "latest"  # semver x.y.z
-      - name: Lint check source code
-        uses: dagger/dagger-for-github@8.0.0
-        with:
-            args: lint
-            cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
-            version: "latest"  # semver x.y.z
+          module-path: "./dagger.json"
+          cloud-token: "${{ secrets.DAGGER_CLOUD_TOKEN }}"
+      - name: "Run Dagger"
+        id: "run-dagger"
+        run: |
+          dagger call lint
   security-check:
     name: security-check
     runs-on: ubuntu-latest
