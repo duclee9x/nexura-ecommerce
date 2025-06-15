@@ -58,9 +58,18 @@ jobs:
           uses: azure/setup-helm@v4.3.0
           with:
             version: 'v3.17.0'
+        - name: Sops Binary Installer
+          uses: mdgreenwald/mozilla-sops-action@v1.6.0
+          with:
+            version: 'latest'
+          id: install
         - name: Generate manifest using helm
+          env: 
+            SOPS_AGE_KEY: ${{ secrets.AGE_ENCRYPT_KEY }}
           run: |
+            ./sops-all.sh decrypt
             mkdir -p ../manifest/apps/dev/{cart,frontend,order,product,payment,user,workflow}
+            helm template dev helm/apps/common -f helm/apps/common/values.yaml,helm/apps/common/sops.values.yaml > ../manifest/apps/dev/cart/manifest.yaml
             helm template dev helm/apps/cart > ../manifest/apps/dev/cart/manifest.yaml
             helm template dev helm/apps/frontend > ../manifest/apps/dev/frontend/manifest.yaml
             helm template dev helm/apps/order > ../manifest/apps/dev/order/manifest.yaml
@@ -76,7 +85,7 @@ jobs:
             mkdir -p ../manifest/infra/dev/{metallb,istio,cert-manager,dapr}
             helm template metallb metallb/metallb --create-namespace --namespace metallb-system --version 0.15.2 > ../manifest/infra/dev/metallb/manifest.yaml
             helm dependency build helm/infra/cert-manager
-            helm template cert-manager-resource helm/infra/cert-manager > ../manifest/infra/dev/cert-manager/manifest.yaml
+            helm template cert-manager-resource helm/infra/cert-manager -f helm/infra/cert-manager/values.yaml,helm/infra/cert-manager/sops.values.yaml > ../manifest/infra/dev/cert-manager/manifest.yaml
             wget https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml > ../manifest/infra/dev/istio/crd.yaml
             helm template istio-base istio/base -n istio-system --create-namespace > ../manifest/infra/dev/istio/base.yaml
             helm template istiod istio/istiod --namespace istio-system --set profile=ambient > ../manifest/infra/dev/istio/istiod.yaml
@@ -88,6 +97,11 @@ jobs:
             repository: https://github.com/duclee9x/nexura-rendered-manifest.git
             token: ${{ secrets.SSH_PRIVATE_KEY }}
             path: manifest
+        - name: encrypt manifest repo
+          env:
+            SOPS_AGE_KEY: ${{ secrets.AGE_ENCRYPT_KEY }}
+          run: |
+            ./sops-all.sh encrypt
         - name: Create Pull Request
           uses: peter-evans/create-pull-request@v7
           with:
