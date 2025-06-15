@@ -30,8 +30,7 @@ export class Pipelines {
       .withExec(["apk", "add", "npm"])
       .withExec(["addgroup", "-g", "10001", "-S", "bun_runner"])
       .withExec(["adduser", "-S", "nexura", "-u", "10001", "-G", "bun_runner"])
-      .withUser("nexura")
-;
+      .withUser("nexura");
   }
 
   /**
@@ -51,7 +50,7 @@ export class Pipelines {
         ".git",
         "**/node_modules",
         "prisma-client",
-        ".dagger"
+        ".dagger",
       ],
     })
     source: Directory
@@ -175,10 +174,11 @@ export class Pipelines {
     source: Directory
   ): Container {
     return this.bunImage
-      .withDirectory(".", source, {owner: "nexura"})
+      .withDirectory(".", source, { owner: "nexura" })
       .withMountedCache(
         "./node_modules",
-        dag.cacheVolume("monorepo_node_modules"), { owner: "nexura" }
+        dag.cacheVolume("monorepo_node_modules"),
+        { owner: "nexura" }
       )
       .withExec(["bun", "install", "--frozen-lockfile"]);
   }
@@ -216,41 +216,36 @@ export class Pipelines {
       .withWorkdir("/app")
       .withMountedCache(
         "./node_modules",
-        dag.cacheVolume("monorepo_node_modules"), { owner: "nexura" }
+        dag.cacheVolume("monorepo_node_modules"),
+        { owner: "nexura" }
       )
       .withDirectory(".", source, {
-        include: ["./packages", "start.sh"], owner: "nexura",
+        include: ["./packages", "start.sh"],
+        owner: "nexura",
       })
       .withDirectory(
         "./packages/grpc_gateway/utils/generated",
         this.genProtoc(
           source.file("./packages/grpc_gateway/utils/nexura.proto")
-        ), { owner: "nexura" }
+        ),
+        { owner: "nexura" }
       )
       .withFile("./package.json", packages.file("./package.json"))
       .withDirectory(
         `./src/${service + "-service"}`,
-        source.directory(`./src/${service + "-service"}`), { owner: "nexura" }
+        source.directory(`./src/${service + "-service"}`),
+        { owner: "nexura" }
       )
       .withEnvVariable("DATABASE_URL", "file:./dev.db")
       .withWorkdir(`src/${service + "-service"}`)
       .withExec(["bun", "prisma:generate"])
       .withExec(["bun", "run", "build"])
-      .withExec([
-        "cp",
-        "-t",
-        ".",
-        "../../start.sh"
-      ]);
-    
+      .withExec(["cp", "-t", ".", "../../start.sh"]);
+
     return this.bunImage
       .withDirectory(".", artifactContainer.directory("."), {
-        include: [
-          "dist",
-          "prisma",
-          "src/db",
-          "start.sh",
-        ], owner: "nexura"
+        include: ["dist", "prisma", "src/db", "start.sh"],
+        owner: "nexura",
       })
       .withEnvVariable("JWT_ACCESS_SECRET", "production")
       .withEnvVariable("JWT_REFRESH_SECRET", "production")
@@ -285,26 +280,32 @@ export class Pipelines {
       .withWorkdir("/app")
       .withMountedCache(
         "./node_modules",
-        dag.cacheVolume("monorepo_node_modules"), { owner: "nexura" }
+        dag.cacheVolume("monorepo_node_modules"),
+        { owner: "nexura" }
       )
       .withDirectory(".", source, {
-        include: ["./packages", "start.sh"], owner: "nexura"
+        include: ["./packages", "start.sh"],
+        owner: "nexura",
       })
       .withDirectory(
         "./packages/grpc_gateway/utils/generated",
         this.genProtoc(
           source.file("./packages/grpc_gateway/utils/nexura.proto")
-        ), { owner: "nexura" }
+        ),
+        { owner: "nexura" }
       )
       .withFile("./package.json", packages.file("./package.json"))
-      .withDirectory(`./src/frontend`, source.directory(`./src/frontend`), { owner: "nexura" })
+      .withDirectory(`./src/frontend`, source.directory(`./src/frontend`), {
+        owner: "nexura",
+      })
       .withWorkdir(`src/frontend`)
-      .withMountedSecret(".env", frontendSecret, {owner: "nexura"})
+      .withMountedSecret(".env", frontendSecret, { owner: "nexura" })
       .withEnvVariable("DAPR_PORT", "50000")
-      .withExec(["bun", "run", "build"])
+      .withExec(["bun", "run", "build"]);
     return this.bunImage
       .withDirectory(".", artifactContainer.directory("."), {
-        include: [".next", "public"], owner: "nexura"
+        include: [".next", "public"],
+        owner: "nexura",
       })
       .withWorkdir(".next/standalone/src/frontend")
       .withExec(["sh", "-c", "mv ../../../static .next"])
@@ -375,27 +376,29 @@ export class Pipelines {
     const serviceList = services.filter((service) =>
       allowedService.includes(service)
     );
-    if (serviceList.length === 0) {
-      return "No services to push";
-    }
-    return await Promise.all(
-      serviceList.map((service) => {
-        if (service === "frontend") {
-          return this.buildFrontend(source, frontendSecret).publish(
-            `ducleeclone/frontend:${version}`
-          );
-        }
-        if (service === "workflow") {
-          return this.buildWorkflow(source).publish(
-            `ducleeclone/workflow:${version}`
-          );
-        }
-        const imageName = `ducleeclone/${service}-service:${version}`;
-        return this.buildBackend(service, source).publish(imageName);
-      })
-    ).then((results) => results.join("\n"));
-  }
 
+    const buildServices = async (list: string[]): Promise<string> => {
+      // build services contain in list, if none of them provided, build all services
+      return await Promise.all(
+        list.map((service) => {
+          if (service === "frontend") {
+            return this.buildFrontend(source, frontendSecret).publish(
+              `ducleeclone/frontend:${version}`
+            );
+          }
+          if (service === "workflow") {
+            return this.buildWorkflow(source).publish(
+              `ducleeclone/workflow:${version}`
+            );
+          }
+          const imageName = `ducleeclone/${service}-service:${version}`;
+          return this.buildBackend(service, source).publish(imageName);
+        })
+      ).then((results) => results.join("\n"));
+    };
+
+    return serviceList.length === 0 ? buildServices(allowedService) : buildServices(serviceList) ;
+  }
 
   @func()
   buildWorkflow(
@@ -418,25 +421,31 @@ export class Pipelines {
       .withWorkdir("/app")
       .withMountedCache(
         "./node_modules",
-        dag.cacheVolume("monorepo_node_modules"), { owner: "nexura" }
+        dag.cacheVolume("monorepo_node_modules"),
+        { owner: "nexura" }
       )
       .withDirectory(".", source, {
-        include: ["./packages", "start.sh"], owner: "nexura"
+        include: ["./packages", "start.sh"],
+        owner: "nexura",
       })
       .withDirectory(
         "./packages/grpc_gateway/utils/generated",
         this.genProtoc(
           source.file("./packages/grpc_gateway/utils/nexura.proto")
-        ), { owner: "nexura" }
+        ),
+        { owner: "nexura" }
       )
       .withFile("./package.json", packages.file("./package.json"))
-      .withDirectory(`./src/workflow`, source.directory(`./src/workflow`), { owner: "nexura" })
+      .withDirectory(`./src/workflow`, source.directory(`./src/workflow`), {
+        owner: "nexura",
+      })
       .withWorkdir(`src/workflow`)
       .withExec(["bun", "run", "build"]);
 
     return this.bunImage
       .withDirectory(".", artifactContainer.directory("."), {
-        include: ["dist"], owner: "nexura"
+        include: ["dist"],
+        owner: "nexura",
       })
       .withWorkdir("./dist")
       .withEnvVariable("NODE_ENV", "production")
