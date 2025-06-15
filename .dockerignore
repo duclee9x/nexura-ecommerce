@@ -8,3 +8,5 @@ prisma-client
 **/*/node_modules
 **/*/dist
 **/*/prisma-client
+age-key.txt
+helm

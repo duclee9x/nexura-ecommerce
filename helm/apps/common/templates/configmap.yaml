@@ -1,0 +1,8 @@
+{{ with .Values.config.imagekit }}
+apiVersion: v1
+data:
+  imagekit-endpoint: {{ toYaml . }}
+kind: ConfigMap
+metadata:
+  name: app-config
+{{ end }}

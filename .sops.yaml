@@ -1,0 +1,5 @@
+creation_rules:
+    # upon creation of a file that matches the pattern *.dev.yaml,
+    # KMS set A as well as PGP and age is used
+    - path_regex: ".*\\.secret\\.yaml$"
+      age: 'age1hcsl2aqps28a8jqnxut24asxhccm9up33v7vzhwt39f6lx2g5pasrmp5q8'
