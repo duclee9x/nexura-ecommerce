@@ -7,9 +7,10 @@
 set -e
 
 ACTION=$1
+TARGET_DIR=${2:-.}  # default to current directory if not provided
 
 if [[ "$ACTION" != "encrypt" && "$ACTION" != "decrypt" ]]; then
-  echo "Usage: $0 [encrypt|decrypt]"
+  echo "Usage: $0 [encrypt|decrypt] [path]"
   exit 1
 fi
 
@@ -17,10 +18,10 @@ fi
 MATCH_PATTERN='.*\.secret\.yaml$'
 
 # Find files matching pattern
-FILES=$(find . -type f | grep -E "$MATCH_PATTERN")
+FILES=$(find "$TARGET_DIR" -type f | grep -E "$MATCH_PATTERN")
 
 if [[ -z "$FILES" ]]; then
-  echo "No matching files found."
+  echo "No matching files found in $TARGET_DIR."
   exit 0
 fi
 
