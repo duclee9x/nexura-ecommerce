@@ -20,7 +20,7 @@ jobs:
           run: |
             cd app
             git fetch origin main
-            echo "services=$(git diff --name-only origin/main...HEAD | grep "^src/" | cut -d '/' -f2 | uniq | cut -d '-' -f1 | tr '\n' ',' | sed "s/\,$//g") >> $GITHUB_OUTPUT
+            echo "services=$(git diff --name-only origin/main...HEAD | grep '^src/' | cut -d '/' -f2 | uniq | cut -d '-' -f1 | tr '\n' ',' | sed 's/,$//g')" >> $GITHUB_OUTPUT
         - name: Set image version
           id: vars
           run: echo "version=$(TZ='Asia/Ho_Chi_Minh' date +%Y%m%d)-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
