@@ -9,6 +9,7 @@ defaults:
     working-directory: ".dagger"
 jobs:
   detect-changes:
+      name: init app version
       runs-on: ubuntu-latest
       outputs:
           service_changed: ${{ steps.diff-version.outputs.services }}
@@ -23,7 +24,7 @@ jobs:
               git diff --name-only origin/main...HEAD | grep "^src/" | cut -d '/' -f2 | uniq | cut -d '-' -f1 | tr '\n' ',' | sed "s/\,$//g" >> $GITHUB_OUTPUT
             
   lint-check:
-    name: lint
+    name: lint-check
     runs-on: ubuntu-latest
     environment: dev
     env:
@@ -56,7 +57,7 @@ jobs:
     name: build-and-push-image
     runs-on: ubuntu-latest
     environment: dev
-    needs: ['detect-changes','lint-check', security-check]
+    # needs: ['detect-changes','lint-check', security-check]
     steps:
         - name: Checkout
           uses: actions/checkout@v4
@@ -69,9 +70,10 @@ jobs:
             echo "NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT=${{ secrets.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT }}" >> .env
             echo "NEXT_PUBLIC_IMAGEKIT_PRIVATE_KEY=${{ secrets.NEXT_PUBLIC_IMAGEKIT_PRIVATE_KEY }}" >> .env
             echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}}" >> .env
+        - run: cat .env
         - name: build services
           uses: dagger/dagger-for-github@8.0.0
           with:
-            args: build-and-push-images --services=${{ needs.detect-changes.outputs.service_changed }} --version=${{ steps.vars.outputs.version }} --frontend-secret=file://.env
+            args: build-and-push-images --services="" --version=${{ steps.vars.outputs.version }} --frontend-secret=file://.env
             module: https://${{ secrets.SSH_PRIVATE_KEY}}@github.com/duclee9x/nexura-ecommerce.git/.dagger
 

@@ -55,7 +55,12 @@ export class Pipelines {
     })
     source: Directory
   ): Container {
-    return this.installPackage(source).withExec(["bun", "lint"]);
+    return dag
+      .container()
+      .from("oven/bun:1.2.11-alpine")
+      .withDirectory(".",source)
+      .withExec(["bun", "install", "eslint"])
+      .withExec(["bun", "lint"]);
   }
 
   /**
@@ -265,7 +270,6 @@ export class Pipelines {
       ignore: [
         "node_modules",
         ".next",
-        "**/.env",
         "dist",
         ".git",
         "**/node_modules",
