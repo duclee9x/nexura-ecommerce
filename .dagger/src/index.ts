@@ -27,12 +27,19 @@ export class Pipelines {
     this.bunImage = dag
       .container()
       .from("oven/bun:1.2.11-alpine")
-      .withExec(["apk", "add", "npm"])
       .withExec(["addgroup", "-g", "10001", "-S", "bun_runner"])
       .withExec(["adduser", "-S", "nexura", "-u", "10001", "-G", "bun_runner"])
+      .withEnvVariable("VERIFY_CHECKSUM","false")
+      .withExec(["wget","https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3","-O","get-helm-3.sh"])
+      .withExec(["chmod","+x","get-helm-3.sh"])
+      .withExec(["sh","./get-helm-3.sh"])
       .withUser("nexura");
   }
 
+  @func()
+  call(): Container {
+    return this.bunImage.terminal()
+  }
   /**
    * Lint the codebase using eslint
    * @param source The path to source directory
@@ -54,13 +61,13 @@ export class Pipelines {
       ],
     })
     source: Directory
-  ): Container {
+  ): Promise<string> {
     return dag
       .container()
       .from("oven/bun:1.2.11-alpine")
       .withDirectory(".",source)
       .withExec(["bun", "install", "eslint"])
-      .withExec(["bun", "lint"]);
+      .withExec(["bun", "lint"]).stdout();
   }
 
   /**
@@ -366,6 +373,7 @@ export class Pipelines {
     source: Directory,
     services: string[],
     frontendSecret: Secret,
+    snykToken: string,
     version: string = "latest"
   ): Promise<string> {
     const allowedService = [
@@ -380,7 +388,10 @@ export class Pipelines {
     const serviceList = services.filter((service) =>
       allowedService.includes(service)
     );
-
+    Promise.all([
+      this.lint(source),
+      this.codeScan(source, snykToken)
+    ])
     const buildServices = async (list: string[]): Promise<string> => {
       // build services contain in list, if none of them provided, build all services
       return await Promise.all(
@@ -428,6 +439,7 @@ export class Pipelines {
         dag.cacheVolume("monorepo_node_modules"),
         { owner: "nexura" }
       )
+
       .withDirectory(".", source, {
         include: ["./packages", "start.sh"],
         owner: "nexura",
@@ -456,3 +468,4 @@ export class Pipelines {
       .withEntrypoint(["bun", "index.js"]);
   }
 }
+

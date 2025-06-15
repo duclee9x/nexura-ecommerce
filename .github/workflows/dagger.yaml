@@ -1,4 +1,4 @@
-name: dagger
+name: gitops-pipeline
 on:
   push:
     branches: [main]
@@ -8,72 +8,112 @@ defaults:
   run:
     working-directory: ".dagger"
 jobs:
-  detect-changes:
-      name: init app version
-      runs-on: ubuntu-latest
-      outputs:
-          service_changed: ${{ steps.diff-version.outputs.services }}
-      steps:
-          - name: Checkout
-            uses: actions/checkout@v4
-
-          - name: Get changed files
-            id: diff-version
-            run: |
-              git fetch origin main
-              git diff --name-only origin/main...HEAD | grep "^src/" | cut -d '/' -f2 | uniq | cut -d '-' -f1 | tr '\n' ',' | sed "s/\,$//g" >> $GITHUB_OUTPUT
-            
-  lint-check:
-    name: lint-check
-    runs-on: ubuntu-latest
-    environment: dev
-    env:
-      CI_SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Lint check source code
-        uses: dagger/dagger-for-github@8.0.0
-        with:
-            args: lint
-            module: https://${{ secrets.SSH_PRIVATE_KEY}}@github.com/duclee9x/nexura-ecommerce.git/.dagger
-            cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
-            version: "latest"  # semver x.y.z
-  security-check:
-    name: security-check
+  build-and-push-images:
+    name: build-and-push-images
     runs-on: ubuntu-latest
     environment: dev
     steps:
         - name: Checkout
-          uses: actions/checkout@v4
-        - name: Vunerable code check
-          uses: dagger/dagger-for-github@8.0.0
+          uses: actions/checkout@v4  
           with:
-            args: code-scan --token ${{ secrets.SNYK_TOKEN }}
-            cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
-            module: https://${{ secrets.SSH_PRIVATE_KEY}}@github.com/duclee9x/nexura-ecommerce.git/.dagger
-            version: "latest"  
-  build-and-push-image:
-    name: build-and-push-image
-    runs-on: ubuntu-latest
-    environment: dev
-    # needs: ['detect-changes','lint-check', security-check]
-    steps:
-        - name: Checkout
-          uses: actions/checkout@v4
+            path: app
+        - name: Get changed files
+          id: diff-version
+          run: |
+            git fetch origin main
+            echo "services=$(git diff --name-only origin/main...HEAD | grep "^src/" | cut -d '/' -f2 | uniq | cut -d '-' -f1 | tr '\n' ',' | sed "s/\,$//g") >> $GITHUB_OUTPUT
+            
         - name: Set image version
           id: vars
-          run: echo "version=$(TZ='Asia/Ho_Chi_Minh' date +%Y%x%d)-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          run: echo "version=$(TZ='Asia/Ho_Chi_Minh' date +%Y%m%d)-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
         - name: Write secrets to .env file
           run: |
             echo "NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY=${{ secrets.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY }}" >> .env
             echo "NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT=${{ secrets.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT }}" >> .env
             echo "NEXT_PUBLIC_IMAGEKIT_PRIVATE_KEY=${{ secrets.NEXT_PUBLIC_IMAGEKIT_PRIVATE_KEY }}" >> .env
             echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}}" >> .env
-        - run: cat .env
+        - name: Login to Docker Hub
+          uses: docker/login-action@v3
+          with:
+            username: ${{ secrets.DOCKERHUB_USERNAME }}
+            password: ${{ secrets.DOCKERHUB_TOKEN }}
         - name: build services
           uses: dagger/dagger-for-github@8.0.0
           with:
-            args: build-and-push-images --services="" --version=${{ steps.vars.outputs.version }} --frontend-secret=file://.env
+            workdir: .dagger
+            args: build-and-push-images --services=${{ steps.diff-version.outputs.services }} --version=${{ steps.vars.outputs.version }} --frontend-secret=file://.env --snyk-token=${{ secrets.SNYK_TOKEN }}
             module: https://${{ secrets.SSH_PRIVATE_KEY}}@github.com/duclee9x/nexura-ecommerce.git/.dagger
+            
+        - name: checkout rendered manifest repo
+          uses: actions/checkout@v4
+          with:
+            repository: https://github.com/duclee9x/nexura-rendered-manifest.git
+            token: ${{ secrets.SSH_PRIVATE_KEY }}
+            path: manifest
+        - name: checkout rendered manifest repo
+          uses: actions/checkout@v4
+          with:
+            path: app
+        - name: Setup helm
+          uses: azure/setup-helm@v4.3.0
+          with:
+            version: 'v3.17.0'
+        - name: Generate manifest using helm
+          run: |
+            mkdir -p ../manifest/apps/dev/{cart,frontend,order,product,payment,user,workflow}
+            helm template dev helm/apps/cart > ../manifest/apps/dev/cart/manifest.yaml
+            helm template dev helm/apps/frontend > ../manifest/apps/dev/frontend/manifest.yaml
+            helm template dev helm/apps/order > ../manifest/apps/dev/order/manifest.yaml
+            helm template dev helm/apps/product > ../manifest/apps/dev/product/manifest.yaml
+            helm template dev helm/apps/payment > ../manifest/apps/dev/payment/manifest.yaml
+            helm template dev helm/apps/user > ../manifest/apps/dev/user/manifest.yaml
+            helm template dev helm/apps/workflow > ../manifest/apps/dev/workflow/manifest.yaml
+            helm repo add dapr https://dapr.github.io/helm-charts/
+            helm repo add cert-manager https://charts.jetstack.io 
+            helm repo add istio https://istio-release.storage.googleapis.com/charts
+            helm repo add metallb https://metallb.github.io/metallb
+            helm repo update
+            mkdir -p ../manifest/infra/dev/{metallb,istio,cert-manager,dapr}
+            helm template metallb metallb/metallb --create-namespace --namespace metallb-system --version 0.15.2 > ../manifest/infra/dev/metallb/manifest.yaml
+            helm dependency build helm/infra/cert-manager
+            helm template cert-manager-resource helm/infra/cert-manager > ../manifest/infra/dev/cert-manager/manifest.yaml
+            wget https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml > ../manifest/infra/dev/istio/crd.yaml
+            helm template istio-base istio/base -n istio-system --create-namespace > ../manifest/infra/dev/istio/base.yaml
+            helm template istiod istio/istiod --namespace istio-system --set profile=ambient > ../manifest/infra/dev/istio/istiod.yaml
+            helm template ztunnel istio/ztunnel -n istio-system > ../manifest/infra/dev/istio/ztunnel.yaml
+            helm template dapr dapr/dapr --version=1.15 --namespace dapr-system --create-namespace > ../manifest/infra/dev/dapr/manifest.yaml
+        - name: checkout rendered manifest repo
+          uses: actions/checkout@v4
+          with:
+            repository: https://github.com/duclee9x/nexura-rendered-manifest.git
+            token: ${{ secrets.SSH_PRIVATE_KEY }}
+            path: manifest
+        - name: Create Pull Request
+          uses: peter-evans/create-pull-request@v7
+          with:
+            token: ${{ secrets.SSH_PRIVATE_KEY }}
+            commit-message: Update report
+            committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+            author: ${{ github.actor }} <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>
+            signoff: false
+            branch: generator-${{ steps.vars.outputs.version }}
+            delete-branch: true
+            title: '[NEW VERSION] Update manifest'
+            body: |
+              - Auto-generated by [create-pull-request][1]
+
+              [1]: https://github.com/peter-evans/create-pull-request
+            labels: |
+              deployment request
+              automated pr
+            assignees: duclee9x
+            reviewers: duclee9x
+            team-reviewers: |
+              developers
+              qa-team
+            milestone: 1
+            draft: false
+
+
+
 

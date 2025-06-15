@@ -23,3 +23,6 @@ nexura.ts
 .sdk
 db/prisma-client
 bun.lock
+values.secret.yaml
+helm/infra/cert-manager/values.yaml
+age-key.txt
