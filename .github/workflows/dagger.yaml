@@ -11,7 +11,7 @@ jobs:
     environment: dev
     steps:
         - name: Checkout
-          uses: actions/checkout@v4  
+          uses: actions/checkout@v4
           with:
             path: app
         - name: Get changed files
@@ -30,6 +30,8 @@ jobs:
             echo "NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT=${{ secrets.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT }}" >> .env
             echo "NEXT_PUBLIC_IMAGEKIT_PRIVATE_KEY=${{ secrets.NEXT_PUBLIC_IMAGEKIT_PRIVATE_KEY }}" >> .env
             echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}}" >> .env
+            echo "$(pwd)"
+            echo "$(ls)"
         - name: Login to Docker Hub
           uses: docker/login-action@v3
           with:
@@ -37,15 +39,15 @@ jobs:
             password: ${{ secrets.DOCKERHUB_TOKEN }}
         - name: build services
           uses: dagger/dagger-for-github@8.0.0
-          with:
-            workdir: .dagger
+          
+          with: 
+            workdir: app/.dagger
             args: build-and-push-images --services=${{ steps.diff-version.outputs.services }} --version=${{ steps.vars.outputs.version }} --frontend-secret=file://.env --snyk-token=${{ secrets.SNYK_TOKEN }}
             module: https://${{ secrets.SSH_PRIVATE_KEY}}@github.com/duclee9x/nexura-ecommerce.git/.dagger
-            
         - name: checkout rendered manifest repo
           uses: actions/checkout@v4
           with:
-            repository: https://github.com/duclee9x/nexura-rendered-manifest.git
+            repository: duclee9x/nexura-rendered-manifest
             token: ${{ secrets.SSH_PRIVATE_KEY }}
             path: manifest
         - name: checkout rendered manifest repo
