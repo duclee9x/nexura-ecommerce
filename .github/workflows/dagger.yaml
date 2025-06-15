@@ -26,18 +26,16 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     environment: dev
+    env:
+      CI_SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Log info
-        run: "echo $(pwd)"
-      - name: Log info
-        run: "ls -la"
       - name: Lint check source code
         uses: dagger/dagger-for-github@8.0.0
         with:
             args: lint
-            module: .
+            module: https://${{ secrets.SSH_PRIVATE_KEY}}@github.com/duclee9x/nexura-ecommerce.git/.dagger
             cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
             version: "latest"  # semver x.y.z
   security-check:
@@ -47,11 +45,12 @@ jobs:
     steps:
         - name: Checkout
           uses: actions/checkout@v4
-        - name: Lint check source code
+        - name: Vunerable code check
           uses: dagger/dagger-for-github@8.0.0
           with:
-            args: code-scan
+            args: code-scan --token ${{ secrets.SNYK_TOKEN }}
             cloud-token: ${{ secrets.DAGGER_CLOUD_TOKEN }}
+            module: https://${{ secrets.SSH_PRIVATE_KEY}}@github.com/duclee9x/nexura-ecommerce.git/.dagger
             version: "latest"  
   build-and-push-image:
     name: build-and-push-image
@@ -73,4 +72,6 @@ jobs:
         - name: build services
           uses: dagger/dagger-for-github@8.0.0
           with:
-            args: build-and-push-images --services=${{ needs.detect-changes.outputs.service_changed }} --version=${{ steps.vars.version }} --frontend-secret=file://.env
+            args: build-and-push-images --services=${{ needs.detect-changes.outputs.service_changed }} --version=${{ steps.vars.outputs.version }} --frontend-secret=file://.env
+            module: https://${{ secrets.SSH_PRIVATE_KEY}}@github.com/duclee9x/nexura-ecommerce.git/.dagger
+
