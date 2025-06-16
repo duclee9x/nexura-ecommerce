@@ -58,10 +58,12 @@ template_app() {
   local path_and_flags=$2
   local out_path="../manifest/apps/dev/$name/manifest.yaml"
 
-  echo "Rendering app: $name (image.tag=$version)"
-    if [[ "$name" == "common" ]]; then
+  echo "Rendering app: $name"
+  if [[ "$name" == "common" ]]; then
+    echo "Running command: helm template dev $path_and_flags > $out_path"
     helm template dev "$path_and_flags" > "$out_path"
   else
+    echo "Running command: helm template dev $path_and_flags --set image.tag=$version > $out_path"
     helm template dev "$path_and_flags" --set image.tag="$version" > "$out_path"
   fi
 }
@@ -101,6 +103,7 @@ template_infra() {
 # === Main rendering logic ===
 ran_anything=false
 
+echo "[Image version]: $version"
 # Handle app rendering
 if $apps_flag_set; then
   if [[ -n "$services" ]]; then
