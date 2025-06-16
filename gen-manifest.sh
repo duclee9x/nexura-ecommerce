@@ -5,13 +5,14 @@ set -euo pipefail
 # === Default flags ===
 generate_infra=false
 apps_flag_set=false
+enable_apps=true
 services=""
 version=""
-enable_apps=true  # NEW: default is true
 
-# === Parse args ===
+# === Parse args (order-independent) ===
 while [[ $# -gt 0 ]]; do
-  case "$1" in
+  key="$1"
+  case "$key" in
     --infra)
       generate_infra=true
       shift
@@ -19,17 +20,33 @@ while [[ $# -gt 0 ]]; do
     --apps)
       apps_flag_set=true
       shift
+      if [[ $# -gt 0 && "$1" != --* ]]; then
+        services="$1"
+        shift
+      fi
       ;;
     --version)
-      version="$2"
-      shift 2
+      shift
+      if [[ $# -gt 0 ]]; then
+        version="$1"
+        shift
+      else
+        echo "❌ Error: --version requires a value"
+        exit 1
+      fi
       ;;
     --enable-apps)
-      enable_apps=$2
-      shift 2
+      shift
+      if [[ $# -gt 0 ]]; then
+        enable_apps="$1"
+        shift
+      else
+        echo "❌ Error: --enable-apps requires a value (true/false)"
+        exit 1
+      fi
       ;;
     *)
-      services="$1"
+      echo "⚠️ Unknown argument: $1"
       shift
       ;;
   esac
