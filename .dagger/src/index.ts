@@ -264,7 +264,7 @@ export class Pipelines {
       .withEnvVariable("JWT_REFRESH_SECRET", "production")
       .withEnvVariable("DATABASE_URL", "file:./dev.db")
       .withEnvVariable("NODE_ENV", "production")
-      .withEntrypoint(["./start.sh"]);
+      .withEntrypoint(["/bin/sh","-c","./start.sh"]);
   }
 
   /**
