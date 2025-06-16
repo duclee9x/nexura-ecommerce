@@ -5,5 +5,10 @@
 cloudflareEmail: ledangduc7601@gmail.com
 cloudflareToken: "irOLQyfuK3hUIVzPfwO8PCy1ZYG8Il0Gskn_NnmT"
 acmeEmail: {}
+environment:
+  staging:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+  production:
+    server: https://acme-v02.api.letsencrypt.org/directory
 cert-manager:
   installCRDs: true

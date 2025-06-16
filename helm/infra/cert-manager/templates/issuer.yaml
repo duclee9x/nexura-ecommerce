@@ -2,10 +2,11 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: letsencrypt-prod
+  namespace: default
 spec:
   acme:
     # The ACME server URL
-    server: https://acme-v02.api.letsencrypt.org/directory
+    server: {{ .Values.environment.staging.server }} 
     # Email address used for ACME registration
     email: {{ default "admin@duclee.store" .Values.acmeEmail }}
     # Name of a secret used to store the ACME account private key
