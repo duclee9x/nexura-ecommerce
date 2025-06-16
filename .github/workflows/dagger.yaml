@@ -29,7 +29,6 @@ jobs:
 
         - name: Write secrets to .env file
           working-directory: app/.dagger
-          if: ${{ vars.PUSH_NEEDED == 'true' }}
           run: |
             echo "NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY=${{ secrets.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY }}" >> .env
             echo "NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT=${{ secrets.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT }}" >> .env
@@ -43,7 +42,8 @@ jobs:
             password: ${{ secrets.DOCKERHUB_TOKEN }}
 
         - name: build services
-          uses: dagger/dagger-for-github@8.0.0
+          uses: dagger/dagger-for-github@8.0.
+          if: ${{ vars.PUSH_NEEDED == 'true' }}
           with: 
             workdir: app/.dagger
             args: build-and-push-images --services=${{ steps.diff-version.outputs.services }} --version=${{ steps.vars.outputs.version }} --frontend-secret=file://.env --snyk-token=${{ secrets.SNYK_TOKEN }}
