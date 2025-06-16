@@ -60,9 +60,9 @@ template_app() {
 
   echo "Rendering app: $name (image.tag=$version)"
     if [[ "$name" == "common" ]]; then
-    helm template dev "$chart_path" $extra_flags > "$out_path"
+    helm template dev "$path_and_flags" > "$out_path"
   else
-    helm template dev "$chart_path" $extra_flags --set image.tag="$version" > "$out_path"
+    helm template dev "$path_and_flags" --set image.tag="$version" > "$out_path"
   fi
 }
 
