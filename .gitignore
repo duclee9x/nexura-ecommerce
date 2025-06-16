@@ -23,5 +23,4 @@ nexura.ts
 .sdk
 db/prisma-client
 bun.lock
-helm/infra/cert-manager/values.yaml
 age-key.txt
