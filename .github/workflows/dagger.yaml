@@ -20,7 +20,7 @@ jobs:
           working-directory: app
           run: |
             git fetch origin main
-            echo "services=$(services=$(git diff --name-only origin/main...HEAD | grep '^src/' | cut -d '/' -f2 | uniq | cut -d '-' -f1 | tr '\n' ',' | sed 's/,$//'); [[ -z \"$services\" ]] && echo 'user,product,payment,order,cart,frontend,workflow' || echo \"$services\")" >> $GITHUB_OUTPUT
+            echo "services=$(git diff --name-only origin/main...HEAD | grep '^src/' | cut -d '/' -f2 | uniq | cut -d '-' -f1 | tr '\n' ',' | sed 's/,$//' | sed 's/^$/user,product,payment,order,cart,frontend,workflow/')" >> $GITHUB_OUTPUT
 
         - name: Set image version
           id: vars
