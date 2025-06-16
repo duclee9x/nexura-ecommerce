@@ -94,10 +94,6 @@ jobs:
               automated pr
             assignees: duclee9x
             reviewers: duclee9x
-            team-reviewers: |
-              developers
-              qa-team
-            milestone: 1
             draft: false
 
 
