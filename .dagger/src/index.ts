@@ -90,9 +90,9 @@ export class Pipelines {
     })
     source: Directory,
     token: string,
-    variant: string = "alpine"
+    variant: string = "alpine",
   ): Promise<string> {
-    return dag.snykDagger().snykCodeTest(token, variant, source);
+    return dag.snykDagger().snykCodeTest(token, variant, source, {extraArgs: ["--severityThreshold=high"]});
   }
 
   /**
