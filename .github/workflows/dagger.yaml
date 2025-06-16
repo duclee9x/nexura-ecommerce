@@ -28,6 +28,7 @@ jobs:
           run: echo "version=$(TZ='Asia/Ho_Chi_Minh' date +%Y%m%d)-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
         - name: Write secrets to .env file
+          if: ${{ vars.PUSH_NEEDED == 'true' }}
           working-directory: app/.dagger
           run: |
             echo "NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY=${{ secrets.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY }}" >> .env
@@ -36,6 +37,7 @@ jobs:
             echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}}" >> .env
 
         - name: Login to Docker Hub
+          if: ${{ vars.PUSH_NEEDED == 'true' }}
           uses: docker/login-action@v3
           with:
             username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -78,12 +80,12 @@ jobs:
             ./sops-all.sh decrypt .
             ./gen-manifest.sh --infra --enable-apps=${{ vars.PUSH_NEEDED }} --version ${{ steps.vars.outputs.version }} ${{ steps.diff-version.outputs.services }} 
         
-        - name: encrypt manifest repo
-          working-directory: manifest
-          env:
-            SOPS_AGE_KEY: ${{ secrets.AGE_ENCRYPT_KEY }}
-          run: |
-            ./sops-all.sh encrypt
+        # - name: encrypt manifest repo
+        #   working-directory: manifest
+        #   env:
+        #     SOPS_AGE_KEY: ${{ secrets.AGE_ENCRYPT_KEY }}
+        #   run: |
+        #     ./sops-all.sh encrypt
 
         - name: Create Pull Request
           uses: peter-evans/create-pull-request@v7
