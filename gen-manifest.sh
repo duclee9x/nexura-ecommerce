@@ -3,7 +3,6 @@
 set -euo pipefail
 
 # === Default flags ===
-generate_infra=false
 apps_flag_set=false
 enable_apps=true
 services=""
@@ -12,10 +11,6 @@ version=""
 # === Parse args (order-independent) ===
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --infra)
-      generate_infra=true
-      shift
-      ;;
     --apps)
       apps_flag_set=true
       shift
@@ -63,7 +58,6 @@ declare -A apps=(
 
 # === Ensure output folders exist ===
 mkdir -p ../manifest/apps/dev/{common,cart,frontend,order,product,payment,user,workflow}
-mkdir -p ../manifest/infra/dev/{metallb,istio,cert-manager,dapr}
 
 # === Render one app ===
 template_app() {
@@ -81,37 +75,6 @@ template_app() {
   fi
 }
 
-# === Render infra components ===
-template_infra() {
-  echo "Adding Helm repos..."
-  helm repo add dapr https://dapr.github.io/helm-charts
-  helm repo add cert-manager https://charts.jetstack.io
-  helm repo add istio https://istio-release.storage.googleapis.com/charts
-  helm repo add metallb https://metallb.github.io/metallb
-  helm repo update
-
-  echo "Rendering infra templates..."
-
-  helm template metallb metallb/metallb \
-    --create-namespace --namespace metallb --version 0.15.2 \
-    > ../manifest/infra/dev/metallb/manifest.yaml
-
-  helm dependency build helm/infra/cert-manager/
-  helm template cert-manager-resource helm/infra/cert-manager --namespace cert-manager \
-    -f helm/infra/cert-manager/values.yaml,helm/infra/cert-manager/sops.values.yaml \
-    > ../manifest/infra/dev/cert-manager/manifest.yaml
-
-  wget -qO ../manifest/infra/dev/istio/crd.yaml https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
-  helm template istio-base istio/base -n istio --create-namespace \
-    > ../manifest/infra/dev/istio/base.yaml
-  helm template istiod istio/istiod --namespace istio --set profile=ambient \
-    > ../manifest/infra/dev/istio/istiod.yaml
-  helm template ztunnel istio/ztunnel -n istio \
-    > ../manifest/infra/dev/istio/ztunnel.yaml
-
-  helm template dapr dapr/dapr --version=1.15 --namespace dapr --create-namespace \
-    > ../manifest/infra/dev/dapr/manifest.yaml
-}
 
 # === Main rendering logic ===
 ran_anything=false
@@ -156,20 +119,12 @@ else
   echo "⚠️  App rendering disabled by --enable-apps=false"
 fi
 
-# Handle infra rendering
-if $generate_infra; then
-  template_infra
-  ran_anything=true
-fi
-
 # If nothing ran, show help
 if ! $ran_anything; then
   echo "❌ Nothing to render. Usage:"
   echo "  $0 --version <tag> [--apps] [--infra] [--enable-apps true|false] [cart,user,...]"
   echo "Examples:"
   echo "  $0 --version v1.2.3                          # all apps"
-  echo "  $0 --version v1.2.3 --infra                 # all apps + infra"
   echo "  $0 --version v1.2.3 --apps cart,user        # only cart + user"
-  echo "  $0 --version v1.2.3 --infra --enable-apps false  # only infra"
   exit 1
 fi
