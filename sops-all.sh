@@ -22,6 +22,7 @@ MATCH_PATTERN='.*\.secret\.yaml$'
 
 # Find files matching pattern
 FILES=$(find "$TARGET_DIR" -type f | grep -E "$MATCH_PATTERN")
+echo "[INFO] Matching pattern files: $FILES"
 
 if [[ -z "$FILES" ]]; then
   echo "No matching files found in $TARGET_DIR."
