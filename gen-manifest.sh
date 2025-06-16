@@ -59,7 +59,11 @@ template_app() {
   local out_path="../manifest/apps/dev/$name/manifest.yaml"
 
   echo "Rendering app: $name (image.tag=$version)"
-  helm template dev $path_and_flags --set image.tag="$version" > "$out_path"
+    if [[ "$name" == "common" ]]; then
+    helm template dev "$chart_path" $extra_flags > "$out_path"
+  else
+    helm template dev "$chart_path" $extra_flags --set image.tag="$version" > "$out_path"
+  fi
 }
 
 # === Render infra components ===
@@ -77,7 +81,7 @@ template_infra() {
     --create-namespace --namespace metallb-system --version 0.15.2 \
     > ../manifest/infra/dev/metallb/manifest.yaml
 
-  helm dependency build helm/infra/cert-manager
+  helm dependency build helm/infra/cert-manager/
   helm template cert-manager-resource helm/infra/cert-manager \
     -f helm/infra/cert-manager/values.yaml,helm/infra/cert-manager/sops.values.yaml \
     > ../manifest/infra/dev/cert-manager/manifest.yaml

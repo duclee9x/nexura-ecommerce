@@ -45,3 +45,4 @@ for file in $FILES; do
 done
 
 echo "✅ Done."
+exit 0
