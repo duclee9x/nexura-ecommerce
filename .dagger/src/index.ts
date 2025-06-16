@@ -259,6 +259,7 @@ export class Pipelines {
         include: ["dist", "prisma", "src/db", "start.sh"],
         owner: "nexura",
       })
+      .withExec(["chmod","+x","./start.sh"])
       .withEnvVariable("JWT_ACCESS_SECRET", "production")
       .withEnvVariable("JWT_REFRESH_SECRET", "production")
       .withEnvVariable("DATABASE_URL", "file:./dev.db")
