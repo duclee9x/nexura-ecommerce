@@ -7,7 +7,8 @@ on:
 jobs:
   build-and-push-images:
     name: build-and-push-images
-    runs-on: ubuntu-latest
+    runs-on: 
+      group: self-hosted
     environment: dev
     steps:
         - name: Checkout
@@ -16,13 +17,13 @@ jobs:
             path: app
         - name: Get changed files
           id: diff-version
-          shell: bash
+          working-directory: app
           run: |
-            cd app
             git fetch origin main
             echo "services=$(git diff --name-only origin/main...HEAD | grep '^src/' | cut -d '/' -f2 | uniq | cut -d '-' -f1 | tr '\n' ',' | sed 's/,$//g')" >> $GITHUB_OUTPUT
         - name: Set image version
           id: vars
+          working-directory: app
           run: echo "version=$(TZ='Asia/Ho_Chi_Minh' date +%Y%m%d)-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
         - name: Write secrets to .env file
           working-directory: app/.dagger
@@ -38,7 +39,6 @@ jobs:
             password: ${{ secrets.DOCKERHUB_TOKEN }}
         - name: build services
           uses: dagger/dagger-for-github@8.0.0
-          
           with: 
             workdir: app/.dagger
             args: build-and-push-images --services=${{ steps.diff-version.outputs.services }} --version=${{ steps.vars.outputs.version }} --frontend-secret=file://.env --snyk-token=${{ secrets.SNYK_TOKEN }}
