@@ -4,7 +4,7 @@
 #   ./sops-all.sh encrypt   → Encrypt all matching files in-place
 #   ./sops-all.sh decrypt   → Decrypt all matching files to sops.values.yaml
 
-set -e
+set -euo pipefail
 
 ACTION=$1
 TARGET_DIR=${2:-.}  # default to current directory if not provided
@@ -13,6 +13,9 @@ if [[ "$ACTION" != "encrypt" && "$ACTION" != "decrypt" ]]; then
   echo "Usage: $0 [encrypt|decrypt] [path]"
   exit 1
 fi
+
+echo "[INFO] Action: $ACTION"
+echo "[INFO] Running in: $(pwd)"
 
 # File pattern to match
 MATCH_PATTERN='.*\.secret\.yaml$'
