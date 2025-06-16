@@ -7,4 +7,3 @@ cloudflareToken: "irOLQyfuK3hUIVzPfwO8PCy1ZYG8Il0Gskn_NnmT"
 acmeEmail: {}
 cert-manager:
   installCRDs: true
-  namespace: "cert-manager"

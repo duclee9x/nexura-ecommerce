@@ -80,23 +80,23 @@ template_infra() {
   echo "Rendering infra templates..."
 
   helm template metallb metallb/metallb \
-    --create-namespace --namespace metallb-system --version 0.15.2 \
+    --create-namespace --namespace metallb --version 0.15.2 \
     > ../manifest/infra/dev/metallb/manifest.yaml
 
   helm dependency build helm/infra/cert-manager/
-  helm template cert-manager-resource helm/infra/cert-manager \
+  helm template cert-manager-resource helm/infra/cert-manager --namespace cert-manager \
     -f helm/infra/cert-manager/values.yaml,helm/infra/cert-manager/sops.values.yaml \
     > ../manifest/infra/dev/cert-manager/manifest.yaml
 
   wget -qO ../manifest/infra/dev/istio/crd.yaml https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
-  helm template istio-base istio/base -n istio-system --create-namespace \
+  helm template istio-base istio/base -n istio --create-namespace \
     > ../manifest/infra/dev/istio/base.yaml
   helm template istiod istio/istiod --namespace istio-system --set profile=ambient \
     > ../manifest/infra/dev/istio/istiod.yaml
   helm template ztunnel istio/ztunnel -n istio-system \
     > ../manifest/infra/dev/istio/ztunnel.yaml
 
-  helm template dapr dapr/dapr --version=1.15 --namespace dapr-system --create-namespace \
+  helm template dapr dapr/dapr --version=1.15 --namespace dapr --create-namespace \
     > ../manifest/infra/dev/dapr/manifest.yaml
 }
 
