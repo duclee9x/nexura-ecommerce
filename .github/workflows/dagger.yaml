@@ -63,10 +63,11 @@ jobs:
             version: 'latest'
           id: install
         - name: Generate manifest using helm
+          working-directory: app
           env: 
             SOPS_AGE_KEY: ${{ secrets.AGE_ENCRYPT_KEY }}
           run: |
-            ./sops-all.sh decrypt
+            ./sops-all.sh encrypt
             mkdir -p ../manifest/apps/dev/{cart,frontend,order,product,payment,user,workflow}
             helm template dev helm/apps/common -f helm/apps/common/values.yaml,helm/apps/common/sops.values.yaml > ../manifest/apps/dev/cart/manifest.yaml
             helm template dev helm/apps/cart > ../manifest/apps/dev/cart/manifest.yaml
@@ -97,6 +98,7 @@ jobs:
             token: ${{ secrets.SSH_PRIVATE_KEY }}
             path: manifest
         - name: encrypt manifest repo
+          working-directory: manifest
           env:
             SOPS_AGE_KEY: ${{ secrets.AGE_ENCRYPT_KEY }}
           run: |
@@ -104,6 +106,7 @@ jobs:
         - name: Create Pull Request
           uses: peter-evans/create-pull-request@v7
           with:
+            path: manifest
             token: ${{ secrets.SSH_PRIVATE_KEY }}
             commit-message: Update report
             committer: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
