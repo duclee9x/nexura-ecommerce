@@ -7,8 +7,7 @@ on:
 jobs:
   build-and-push-images:
     name: build-and-push-images
-    runs-on: 
-      group: self-hosted
+    runs-on: self-hosted
     environment: dev
     steps:
         - name: Checkout
