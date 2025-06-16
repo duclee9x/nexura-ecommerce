@@ -4,7 +4,7 @@ set -euo pipefail
 
 # === Default flags ===
 generate_infra=false
-generate_all_apps=false
+apps_flag_set=false
 services=""
 version=""
 
@@ -16,7 +16,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --apps)
-      generate_all_apps=true
+      apps_flag_set=true
       shift
       ;;
     --version)
@@ -30,9 +30,9 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# === Check version flag for apps ===
-if { $generate_all_apps || [[ -n "$services" ]]; } && [[ -z "$version" ]]; then
-  echo "❌ Error: --version <value> is required when rendering app manifests."
+# === Check version for apps ===
+if [[ -z "$version" ]]; then
+  echo "❌ Error: --version <value> is required when rendering apps"
   exit 1
 fi
 
@@ -52,7 +52,7 @@ declare -A apps=(
 mkdir -p ../manifest/apps/dev/{common,cart,frontend,order,product,payment,user,workflow}
 mkdir -p ../manifest/infra/dev/{metallb,istio,cert-manager,dapr}
 
-# === Render app with version ===
+# === Render one app ===
 template_app() {
   local name=$1
   local path_and_flags=$2
@@ -94,40 +94,47 @@ template_infra() {
     > ../manifest/infra/dev/dapr/manifest.yaml
 }
 
-# === Execute selected rendering ===
+# === Main rendering logic ===
 ran_anything=false
 
-if $generate_all_apps; then
+# Handle app rendering
+if $apps_flag_set; then
+  if [[ -n "$services" ]]; then
+    IFS=',' read -ra requested <<< "$services"
+    for svc in "${requested[@]}"; do
+      svc_trimmed=$(echo "$svc" | xargs)
+      if [[ -n "${apps[$svc_trimmed]:-}" ]]; then
+        template_app "$svc_trimmed" "${apps[$svc_trimmed]}"
+        ran_anything=true
+      else
+        echo "⚠️  Warning: Unknown service '$svc_trimmed', skipping."
+      fi
+    done
+  else
+    echo "⚠️  --apps was defined but no services specified. Skipping app rendering."
+  fi
+else
+  # No --apps flag → render all apps
   for name in "${!apps[@]}"; do
     template_app "$name" "${apps[$name]}"
   done
   ran_anything=true
 fi
 
-if [[ -n "$services" ]]; then
-  IFS=',' read -ra requested <<< "$services"
-  for svc in "${requested[@]}"; do
-    svc_trimmed=$(echo "$svc" | xargs)
-    if [[ -n "${apps[$svc_trimmed]:-}" ]]; then
-      template_app "$svc_trimmed" "${apps[$svc_trimmed]}"
-      ran_anything=true
-    else
-      echo "⚠️  Warning: Unknown service '$svc_trimmed', skipping."
-    fi
-  done
-fi
-
+# Handle infra rendering
 if $generate_infra; then
   template_infra
   ran_anything=true
 fi
 
+# If nothing ran, show help
 if ! $ran_anything; then
   echo "❌ Nothing to render. Usage:"
-  echo "  $0 --version <tag> [--apps] [--infra] [service1,service2,...]"
+  echo "  $0 --version <tag> [--apps] [--infra] [cart,user,...]"
   echo "Examples:"
-  echo "  $0 --version v1.2.3 --apps"
-  echo "  $0 --version v1.2.3 cart,user"
-  echo "  $0 --version v1.2.3 --infra order,workflow"
+  echo "  $0 --version v1.2.3                        # all apps"
+  echo "  $0 --version v1.2.3 --infra               # all apps + infra"
+  echo "  $0 --version v1.2.3 --apps cart,user      # only cart + user"
+  echo "  $0 --version v1.2.3 --apps                # no apps rendered (warn)"
   exit 1
 fi

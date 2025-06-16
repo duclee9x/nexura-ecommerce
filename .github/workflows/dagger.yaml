@@ -66,6 +66,7 @@ jobs:
           env: 
             SOPS_AGE_KEY: ${{ secrets.AGE_ENCRYPT_KEY }}
           run: |
+            set -x
             chmod +x ./sops-all.sh
             chmod +x ./gen-manifest.sh
             ./sops-all.sh encrypt
