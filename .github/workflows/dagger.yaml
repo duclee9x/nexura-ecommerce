@@ -69,7 +69,7 @@ jobs:
             set -x
             chmod +x ./sops-all.sh
             chmod +x ./gen-manifest.sh
-            ./sops-all.sh encrypt
+            ./sops-all.sh encrypt .
             ./gen-manifest.sh --infra --version ${{ steps.vars.outputs.version }} ${{ steps.diff-version.outputs.services }} 
         - name: checkout rendered manifest repo
           uses: actions/checkout@v4
