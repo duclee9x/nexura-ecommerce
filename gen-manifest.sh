@@ -127,7 +127,7 @@ else
   done
   ran_anything=true
 fi
-
+echo "[Check]: $(ls ../manifest)"
 # Handle infra rendering
 if $generate_infra; then
   template_infra
