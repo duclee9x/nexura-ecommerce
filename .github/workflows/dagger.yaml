@@ -66,6 +66,8 @@ jobs:
           env: 
             SOPS_AGE_KEY: ${{ secrets.AGE_ENCRYPT_KEY }}
           run: |
+            chmod +x ./sops-all.sh
+            chmod +x ./gen-manifest.sh.sh
             ./sops-all.sh encrypt
             ./gen-manifest.sh --infra --version ${{ steps.vars.outputs.version }} ${{ steps.diff-version.outputs.services }} 
         - name: checkout rendered manifest repo
