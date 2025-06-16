@@ -2,10 +2,11 @@
 
 set -euo pipefail
 
-# === Flags ===
+# === Default flags ===
 generate_infra=false
 generate_all_apps=false
 services=""
+version=""
 
 # === Parse args ===
 while [[ $# -gt 0 ]]; do
@@ -18,6 +19,10 @@ while [[ $# -gt 0 ]]; do
       generate_all_apps=true
       shift
       ;;
+    --version)
+      version="$2"
+      shift 2
+      ;;
     *)
       services="$1"
       shift
@@ -25,7 +30,13 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# === Service map ===
+# === Check version flag for apps ===
+if { $generate_all_apps || [[ -n "$services" ]]; } && [[ -z "$version" ]]; then
+  echo "❌ Error: --version <value> is required when rendering app manifests."
+  exit 1
+fi
+
+# === App service map ===
 declare -A apps=(
   [common]="helm/apps/common -f helm/apps/common/values.yaml,helm/apps/common/sops.values.yaml"
   [cart]="helm/apps/cart"
@@ -41,17 +52,17 @@ declare -A apps=(
 mkdir -p ../manifest/apps/dev/{common,cart,frontend,order,product,payment,user,workflow}
 mkdir -p ../manifest/infra/dev/{metallb,istio,cert-manager,dapr}
 
-# === Template app ===
+# === Render app with version ===
 template_app() {
   local name=$1
   local path_and_flags=$2
   local out_path="../manifest/apps/dev/$name/manifest.yaml"
 
-  echo "Rendering app: $name"
-  helm template dev $path_and_flags > "$out_path"
+  echo "Rendering app: $name (image.tag=$version)"
+  helm template dev $path_and_flags --set image.tag="$version" > "$out_path"
 }
 
-# === Template infra ===
+# === Render infra components ===
 template_infra() {
   echo "Adding Helm repos..."
   helm repo add dapr https://dapr.github.io/helm-charts
@@ -83,7 +94,7 @@ template_infra() {
     > ../manifest/infra/dev/dapr/manifest.yaml
 }
 
-# === Render requested ===
+# === Execute selected rendering ===
 ran_anything=false
 
 if $generate_all_apps; then
@@ -113,11 +124,10 @@ fi
 
 if ! $ran_anything; then
   echo "❌ Nothing to render. Usage:"
-  echo "  $0 [--apps] [--infra] [service1,service2,...]"
+  echo "  $0 --version <tag> [--apps] [--infra] [service1,service2,...]"
   echo "Examples:"
-  echo "  $0 --apps"
-  echo "  $0 --infra"
-  echo "  $0 cart,user"
-  echo "  $0 --infra workflow,order"
+  echo "  $0 --version v1.2.3 --apps"
+  echo "  $0 --version v1.2.3 cart,user"
+  echo "  $0 --version v1.2.3 --infra order,workflow"
   exit 1
 fi

@@ -36,12 +36,12 @@ jobs:
           with:
             username: ${{ secrets.DOCKERHUB_USERNAME }}
             password: ${{ secrets.DOCKERHUB_TOKEN }}
-        - name: build services
-          uses: dagger/dagger-for-github@8.0.0
-          with: 
-            workdir: app/.dagger
-            args: build-and-push-images --services=${{ steps.diff-version.outputs.services }} --version=${{ steps.vars.outputs.version }} --frontend-secret=file://.env --snyk-token=${{ secrets.SNYK_TOKEN }}
-            module: https://${{ secrets.SSH_PRIVATE_KEY}}@github.com/duclee9x/nexura-ecommerce.git/.dagger
+        # - name: build services
+        #   uses: dagger/dagger-for-github@8.0.0
+        #   with: 
+        #     workdir: app/.dagger
+        #     args: build-and-push-images --services=${{ steps.diff-version.outputs.services }} --version=${{ steps.vars.outputs.version }} --frontend-secret=file://.env --snyk-token=${{ secrets.SNYK_TOKEN }}
+        #     module: https://${{ secrets.SSH_PRIVATE_KEY}}@github.com/duclee9x/nexura-ecommerce.git/.dagger
         - name: checkout rendered manifest repo
           uses: actions/checkout@v4
           with:
@@ -67,7 +67,7 @@ jobs:
             SOPS_AGE_KEY: ${{ secrets.AGE_ENCRYPT_KEY }}
           run: |
             ./sops-all.sh encrypt
-            ./gen-manifest.sh
+            ./gen-manifest.sh --infra --version ${{ steps.vars.outputs.version }} ${{ steps.diff-version.outputs.services }} 
         - name: checkout rendered manifest repo
           uses: actions/checkout@v4
           with:
