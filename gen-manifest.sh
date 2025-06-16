@@ -11,8 +11,7 @@ version=""
 
 # === Parse args (order-independent) ===
 while [[ $# -gt 0 ]]; do
-  key="$1"
-  case "$key" in
+  case "$1" in
     --infra)
       generate_infra=true
       shift
@@ -25,25 +24,23 @@ while [[ $# -gt 0 ]]; do
         shift
       fi
       ;;
+    --version=*)
+      version="${1#*=}"
+      shift
+      ;;
     --version)
       shift
-      if [[ $# -gt 0 ]]; then
-        version="$1"
-        shift
-      else
-        echo "❌ Error: --version requires a value"
-        exit 1
-      fi
+      version="$1"
+      shift
+      ;;
+    --enable-apps=*)
+      enable_apps="${1#*=}"
+      shift
       ;;
     --enable-apps)
       shift
-      if [[ $# -gt 0 ]]; then
-        enable_apps="$1"
-        shift
-      else
-        echo "❌ Error: --enable-apps requires a value (true/false)"
-        exit 1
-      fi
+      enable_apps="$1"
+      shift
       ;;
     *)
       echo "⚠️ Unknown argument: $1"
