@@ -15,7 +15,7 @@ if [[ "$ACTION" != "encrypt" && "$ACTION" != "decrypt" ]]; then
 fi
 
 echo "[INFO] Action: $ACTION"
-echo "[INFO] Running in: $(pwd)"
+echo "[INFO] Running in: $TARGET_DIR"
 
 # File pattern to match
 MATCH_PATTERN='.*\.secret\.yaml$'
