@@ -61,10 +61,10 @@ template_app() {
   echo "Rendering app: $name"
   if [[ "$name" == "common" ]]; then
     echo "Running command: helm template dev $path_and_flags > $out_path"
-    helm template dev "$path_and_flags" > "$out_path"
+    eval "helm template dev $path_and_flags > $out_path"
   else
     echo "Running command: helm template dev $path_and_flags --set image.tag=$version > $out_path"
-    helm template dev "$path_and_flags" --set image.tag="$version" > "$out_path"
+    eval "helm template dev $path_and_flags --set image.tag=$version > $out_path"
   fi
 }
 
