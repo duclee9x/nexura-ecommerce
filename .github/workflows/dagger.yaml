@@ -42,7 +42,7 @@ jobs:
             password: ${{ secrets.DOCKERHUB_TOKEN }}
 
         - name: build services
-          uses: dagger/dagger-for-github@8.0.
+          uses: dagger/dagger-for-github@8.0.0
           if: ${{ vars.PUSH_NEEDED == 'true' }}
           with: 
             workdir: app/.dagger
