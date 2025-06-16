@@ -7,6 +7,7 @@ generate_infra=false
 apps_flag_set=false
 services=""
 version=""
+enable_apps=true  # NEW: default is true
 
 # === Parse args ===
 while [[ $# -gt 0 ]]; do
@@ -23,18 +24,16 @@ while [[ $# -gt 0 ]]; do
       version="$2"
       shift 2
       ;;
+    --enable-apps)
+      enable_apps=$2
+      shift 2
+      ;;
     *)
       services="$1"
       shift
       ;;
   esac
 done
-
-# === Check version for apps ===
-if [[ -z "$version" ]]; then
-  echo "❌ Error: --version <value> is required when rendering apps"
-  exit 1
-fi
 
 # === App service map ===
 declare -A apps=(
@@ -91,9 +90,9 @@ template_infra() {
   wget -qO ../manifest/infra/dev/istio/crd.yaml https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml
   helm template istio-base istio/base -n istio --create-namespace \
     > ../manifest/infra/dev/istio/base.yaml
-  helm template istiod istio/istiod --namespace istio-system --set profile=ambient \
+  helm template istiod istio/istiod --namespace istio --set profile=ambient \
     > ../manifest/infra/dev/istio/istiod.yaml
-  helm template ztunnel istio/ztunnel -n istio-system \
+  helm template ztunnel istio/ztunnel -n istio \
     > ../manifest/infra/dev/istio/ztunnel.yaml
 
   helm template dapr dapr/dapr --version=1.15 --namespace dapr --create-namespace \
@@ -104,30 +103,45 @@ template_infra() {
 ran_anything=false
 
 echo "[Image version]: $version"
+echo "[Enable apps]: $enable_apps"
+
 # Handle app rendering
-if $apps_flag_set; then
-  if [[ -n "$services" ]]; then
-    IFS=',' read -ra requested <<< "$services"
-    for svc in "${requested[@]}"; do
-      svc_trimmed=$(echo "$svc" | xargs)
-      if [[ -n "${apps[$svc_trimmed]:-}" ]]; then
-        template_app "$svc_trimmed" "${apps[$svc_trimmed]}"
-        ran_anything=true
-      else
-        echo "⚠️  Warning: Unknown service '$svc_trimmed', skipping."
-      fi
-    done
+if [[ "$enable_apps" == "true" ]]; then
+  if $apps_flag_set; then
+    if [[ -z "$version" ]]; then
+      echo "❌ Error: --version <value> is required when rendering apps"
+      exit 1
+    fi
+
+    if [[ -n "$services" ]]; then
+      IFS=',' read -ra requested <<< "$services"
+      for svc in "${requested[@]}"; do
+        svc_trimmed=$(echo "$svc" | xargs)
+        if [[ -n "${apps[$svc_trimmed]:-}" ]]; then
+          template_app "$svc_trimmed" "${apps[$svc_trimmed]}"
+          ran_anything=true
+        else
+          echo "⚠️  Warning: Unknown service '$svc_trimmed', skipping."
+        fi
+      done
+    else
+      echo "⚠️  --apps was defined but no services specified. Skipping app rendering."
+    fi
   else
-    echo "⚠️  --apps was defined but no services specified. Skipping app rendering."
+    # No --apps flag → render all apps
+    if [[ -z "$version" ]]; then
+      echo "❌ Error: --version <value> is required when rendering apps"
+      exit 1
+    fi
+    for name in "${!apps[@]}"; do
+      template_app "$name" "${apps[$name]}"
+    done
+    ran_anything=true
   fi
 else
-  # No --apps flag → render all apps
-  for name in "${!apps[@]}"; do
-    template_app "$name" "${apps[$name]}"
-  done
-  ran_anything=true
+  echo "⚠️  App rendering disabled by --enable-apps=false"
 fi
-echo "[Check]: $(ls ../manifest)"
+
 # Handle infra rendering
 if $generate_infra; then
   template_infra
@@ -137,11 +151,11 @@ fi
 # If nothing ran, show help
 if ! $ran_anything; then
   echo "❌ Nothing to render. Usage:"
-  echo "  $0 --version <tag> [--apps] [--infra] [cart,user,...]"
+  echo "  $0 --version <tag> [--apps] [--infra] [--enable-apps true|false] [cart,user,...]"
   echo "Examples:"
-  echo "  $0 --version v1.2.3                        # all apps"
-  echo "  $0 --version v1.2.3 --infra               # all apps + infra"
-  echo "  $0 --version v1.2.3 --apps cart,user      # only cart + user"
-  echo "  $0 --version v1.2.3 --apps                # no apps rendered (warn)"
+  echo "  $0 --version v1.2.3                          # all apps"
+  echo "  $0 --version v1.2.3 --infra                 # all apps + infra"
+  echo "  $0 --version v1.2.3 --apps cart,user        # only cart + user"
+  echo "  $0 --version v1.2.3 --infra --enable-apps false  # only infra"
   exit 1
 fi
