@@ -93,7 +93,6 @@ jobs:
               deployment request
               automated pr
             assignees: duclee9x
-            reviewers: duclee9x
             draft: false
 
 
