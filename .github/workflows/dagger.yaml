@@ -68,29 +68,7 @@ jobs:
             SOPS_AGE_KEY: ${{ secrets.AGE_ENCRYPT_KEY }}
           run: |
             ./sops-all.sh encrypt
-            mkdir -p ../manifest/apps/dev/{cart,frontend,order,product,payment,user,workflow}
-            helm template dev helm/apps/common -f helm/apps/common/values.yaml,helm/apps/common/sops.values.yaml > ../manifest/apps/dev/cart/manifest.yaml
-            helm template dev helm/apps/cart > ../manifest/apps/dev/cart/manifest.yaml
-            helm template dev helm/apps/frontend > ../manifest/apps/dev/frontend/manifest.yaml
-            helm template dev helm/apps/order > ../manifest/apps/dev/order/manifest.yaml
-            helm template dev helm/apps/product > ../manifest/apps/dev/product/manifest.yaml
-            helm template dev helm/apps/payment > ../manifest/apps/dev/payment/manifest.yaml
-            helm template dev helm/apps/user > ../manifest/apps/dev/user/manifest.yaml
-            helm template dev helm/apps/workflow > ../manifest/apps/dev/workflow/manifest.yaml
-            helm repo add dapr https://dapr.github.io/helm-charts/
-            helm repo add cert-manager https://charts.jetstack.io 
-            helm repo add istio https://istio-release.storage.googleapis.com/charts
-            helm repo add metallb https://metallb.github.io/metallb
-            helm repo update
-            mkdir -p ../manifest/infra/dev/{metallb,istio,cert-manager,dapr}
-            helm template metallb metallb/metallb --create-namespace --namespace metallb-system --version 0.15.2 > ../manifest/infra/dev/metallb/manifest.yaml
-            helm dependency build helm/infra/cert-manager
-            helm template cert-manager-resource helm/infra/cert-manager -f helm/infra/cert-manager/values.yaml,helm/infra/cert-manager/sops.values.yaml > ../manifest/infra/dev/cert-manager/manifest.yaml
-            wget https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.3.0/standard-install.yaml > ../manifest/infra/dev/istio/crd.yaml
-            helm template istio-base istio/base -n istio-system --create-namespace > ../manifest/infra/dev/istio/base.yaml
-            helm template istiod istio/istiod --namespace istio-system --set profile=ambient > ../manifest/infra/dev/istio/istiod.yaml
-            helm template ztunnel istio/ztunnel -n istio-system > ../manifest/infra/dev/istio/ztunnel.yaml
-            helm template dapr dapr/dapr --version=1.15 --namespace dapr-system --create-namespace > ../manifest/infra/dev/dapr/manifest.yaml
+            ./gen-manifest.sh
         - name: checkout rendered manifest repo
           uses: actions/checkout@v4
           with:
