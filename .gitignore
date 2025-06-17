@@ -25,3 +25,4 @@ db/prisma-client
 bun.lock
 age-key.txt
 vault-server
+ingress.yaml
