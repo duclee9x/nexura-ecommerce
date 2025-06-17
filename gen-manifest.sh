@@ -4,13 +4,17 @@ set -euo pipefail
 
 # === Default flags ===
 apps_flag_set=false
-enable_apps=true
 services=""
 version=""
 
 # === Parse args (order-independent) ===
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --apps=*)
+      apps_flag_set=true
+      services="${1#*=}"
+      shift
+      ;;
     --apps)
       apps_flag_set=true
       shift
@@ -26,15 +30,6 @@ while [[ $# -gt 0 ]]; do
     --version)
       shift
       version="$1"
-      shift
-      ;;
-    --enable-apps=*)
-      enable_apps="${1#*=}"
-      shift
-      ;;
-    --enable-apps)
-      shift
-      enable_apps="$1"
       shift
       ;;
     *)
@@ -75,56 +70,47 @@ template_app() {
   fi
 }
 
-
 # === Main rendering logic ===
 ran_anything=false
 
 echo "[Image version]: $version"
-echo "[Enable apps]: $enable_apps"
 
-# Handle app rendering
-if [[ "$enable_apps" == "true" ]]; then
-  if $apps_flag_set; then
-    if [[ -z "$version" ]]; then
-      echo "❌ Error: --version <value> is required when rendering apps"
-      exit 1
-    fi
+# Validate version
+if [[ -z "$version" ]]; then
+  echo "❌ Error: --version <value> is required"
+  exit 1
+fi
 
-    if [[ -n "$services" ]]; then
-      IFS=',' read -ra requested <<< "$services"
-      for svc in "${requested[@]}"; do
-        svc_trimmed=$(echo "$svc" | xargs)
-        if [[ -n "${apps[$svc_trimmed]:-}" ]]; then
-          template_app "$svc_trimmed" "${apps[$svc_trimmed]}"
-          ran_anything=true
-        else
-          echo "⚠️  Warning: Unknown service '$svc_trimmed', skipping."
-        fi
-      done
-    else
-      echo "⚠️  --apps was defined but no services specified. Skipping app rendering."
-    fi
-  else
-    # No --apps flag → render all apps
-    if [[ -z "$version" ]]; then
-      echo "❌ Error: --version <value> is required when rendering apps"
-      exit 1
-    fi
-    for name in "${!apps[@]}"; do
-      template_app "$name" "${apps[$name]}"
+if $apps_flag_set; then
+  if [[ -n "$services" ]]; then
+    IFS=',' read -ra requested <<< "$services"
+    for svc in "${requested[@]}"; do
+      svc_trimmed=$(echo "$svc" | xargs)
+      if [[ -n "${apps[$svc_trimmed]:-}" ]]; then
+        template_app "$svc_trimmed" "${apps[$svc_trimmed]}"
+        ran_anything=true
+      else
+        echo "⚠️  Warning: Unknown service '$svc_trimmed', skipping."
+      fi
     done
-    ran_anything=true
+  else
+    echo "⚠️  --apps was defined but no services specified. Skipping rendering."
   fi
 else
-  echo "⚠️  App rendering disabled by --enable-apps=false"
+  # No --apps → render all
+  for name in "${!apps[@]}"; do
+    template_app "$name" "${apps[$name]}"
+    ran_anything=true
+  done
 fi
 
 # If nothing ran, show help
 if ! $ran_anything; then
   echo "❌ Nothing to render. Usage:"
-  echo "  $0 --version <tag> [--apps] [--infra] [--enable-apps true|false] [cart,user,...]"
+  echo "  $0 --version <tag> [--apps=cart,user,...]"
   echo "Examples:"
   echo "  $0 --version v1.2.3                          # all apps"
-  echo "  $0 --version v1.2.3 --apps cart,user        # only cart + user"
+  echo "  $0 --version v1.2.3 --apps cart,user         # only cart + user"
+  echo "  $0 --version v1.2.3 --apps=cart,user         # also valid"
   exit 1
 fi

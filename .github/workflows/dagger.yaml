@@ -80,7 +80,7 @@ jobs:
             chmod +x ./sops-all.sh
             chmod +x ./gen-manifest.sh
             ./sops-all.sh decrypt .
-            ./gen-manifest.sh --enable-apps=${{ vars.PUSH_NEEDED }} --version ${{ steps.vars.outputs.version }} ${{ steps.diff-version.outputs.services }} 
+            ./gen-manifest.sh --version ${{ steps.vars.outputs.version }} --apps ${{ steps.diff-version.outputs.services }} 
         
         # - name: encrypt manifest repo
         #   working-directory: manifest
