@@ -257,7 +257,7 @@ export class Pipelines {
     return this.bunImage
       .withDirectory(".", artifactContainer.directory("."), {
         include: ["dist", "prisma", "src/db", "start.sh"],
-        owner: "nexura",
+        owner: "10001",
       })
       .withExec(["chmod","+x","./start.sh"])
       .withEnvVariable("JWT_ACCESS_SECRET", "production")
@@ -293,31 +293,31 @@ export class Pipelines {
       .withMountedCache(
         "./node_modules",
         dag.cacheVolume("monorepo_node_modules"),
-        { owner: "nexura" }
+        { owner: "10001" }
       )
       .withDirectory(".", source, {
         include: ["./packages", "start.sh"],
-        owner: "nexura",
+        owner: "10001",
       })
       .withDirectory(
         "./packages/grpc_gateway/utils/generated",
         this.genProtoc(
           source.file("./packages/grpc_gateway/utils/nexura.proto")
         ),
-        { owner: "nexura" }
+        { owner: "10001" }
       )
       .withFile("./package.json", packages.file("./package.json"))
       .withDirectory(`./src/frontend`, source.directory(`./src/frontend`), {
-        owner: "nexura",
+        owner: "10001",
       })
       .withWorkdir(`src/frontend`)
-      .withMountedSecret(".env", frontendSecret, { owner: "nexura" })
+      .withMountedSecret(".env", frontendSecret, { owner: "10001" })
       .withEnvVariable("DAPR_PORT", "50000")
       .withExec(["bun", "run", "build"]);
     return this.bunImage
       .withDirectory(".", artifactContainer.directory("."), {
         include: [".next", "public"],
-        owner: "nexura",
+        owner: "10001",
       })
       .withWorkdir(".next/standalone/src/frontend")
       .withExec(["sh", "-c", "mv ../../../static .next"])
@@ -438,23 +438,23 @@ export class Pipelines {
       .withMountedCache(
         "./node_modules",
         dag.cacheVolume("monorepo_node_modules"),
-        { owner: "nexura" }
+        { owner: "10001" }
       )
 
       .withDirectory(".", source, {
         include: ["./packages", "start.sh"],
-        owner: "nexura",
+        owner: "10001",
       })
       .withDirectory(
         "./packages/grpc_gateway/utils/generated",
         this.genProtoc(
           source.file("./packages/grpc_gateway/utils/nexura.proto")
         ),
-        { owner: "nexura" }
+        { owner: "10001" }
       )
       .withFile("./package.json", packages.file("./package.json"))
       .withDirectory(`./src/workflow`, source.directory(`./src/workflow`), {
-        owner: "nexura",
+        owner: "10001",
       })
       .withWorkdir(`src/workflow`)
       .withExec(["bun", "run", "build"]);
@@ -462,7 +462,7 @@ export class Pipelines {
     return this.bunImage
       .withDirectory(".", artifactContainer.directory("."), {
         include: ["dist"],
-        owner: "nexura",
+        owner: "10001",
       })
       .withWorkdir("./dist")
       .withEnvVariable("NODE_ENV", "production")
