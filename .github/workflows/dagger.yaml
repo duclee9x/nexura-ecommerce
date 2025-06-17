@@ -82,12 +82,12 @@ jobs:
             ./sops-all.sh decrypt .
             ./gen-manifest.sh --version ${{ steps.vars.outputs.version }} --apps ${{ steps.diff-version.outputs.services }} 
         
-        # - name: encrypt manifest repo
-        #   working-directory: manifest
-        #   env:
-        #     SOPS_AGE_KEY: ${{ secrets.AGE_ENCRYPT_KEY }}
-        #   run: |
-        #     ./sops-all.sh encrypt
+        - name: encrypt manifest repo
+          working-directory: manifest
+          env:
+            SOPS_AGE_KEY: ${{ secrets.AGE_ENCRYPT_KEY }}
+          run: |
+            ./sops-all.sh encrypt
 
         - name: Create Pull Request
           uses: peter-evans/create-pull-request@v7

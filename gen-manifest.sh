@@ -41,7 +41,7 @@ done
 
 # === App service map ===
 declare -A apps=(
-  [common]="helm/apps/common -f helm/apps/common/values.yaml,helm/apps/common/sops.values.yaml"
+  [common]="helm/apps/common"
   [cart]="helm/apps/cart"
   [frontend]="helm/apps/frontend"
   [order]="helm/apps/order"
@@ -59,15 +59,8 @@ template_app() {
   local name=$1
   local path_and_flags=$2
   local out_path="../manifest/apps/dev/$name/manifest.yaml"
-
-  echo "Rendering app: $name"
-  if [[ "$name" == "common" ]]; then
-    echo "Running command: helm template dev $path_and_flags > $out_path"
-    eval "helm template dev $path_and_flags > $out_path"
-  else
-    echo "Running command: helm template dev $path_and_flags --set image.tag=$version > $out_path"
-    eval "helm template dev $path_and_flags --set image.tag=$version > $out_path"
-  fi
+  echo "Running command: helm template dev $path_and_flags --set image.tag=$version > $out_path"
+  eval "helm template dev $path_and_flags --set image.tag=$version > $out_path"
 }
 
 # === Main rendering logic ===
@@ -84,6 +77,9 @@ fi
 if $apps_flag_set; then
   if [[ -n "$services" ]]; then
     IFS=',' read -ra requested <<< "$services"
+    echo "Running command: helm template dev "${apps[common]}" > ../manifest/apps/dev/common/manifest.yaml"
+    eval "helm template dev "${apps[common]}" > ../manifest/apps/dev/common/manifest.yaml"
+
     for svc in "${requested[@]}"; do
       svc_trimmed=$(echo "$svc" | xargs)
       if [[ -n "${apps[$svc_trimmed]:-}" ]]; then
