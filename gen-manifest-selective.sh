@@ -9,7 +9,7 @@
 set -e
 
 APPS_ALL=(common order payment cart product user workflow frontend)
-INFRA_ALL=(external-secrets cert-manager istio-base istiod istio-gateway dapr tempo loki prometheus k8s-monitoring)
+INFRA_ALL=(external-secrets cert-manager istio-base istiod istio-gateway dapr tempo loki kube-prometheus-stack k8s-monitoring)
 
 APPS=()
 INFRA=()
