@@ -24,6 +24,6 @@ nexura.ts
 db/prisma-client
 bun.lock
 age-key.txt
-vault-server/data
-vault-server/certs
+provision/vault-server/data/*
+provision/vault-server/certs/*
 ingress.yaml
