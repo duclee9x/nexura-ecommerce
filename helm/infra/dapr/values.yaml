@@ -1,6 +1,0 @@
-global:
-  registry: ghcr.io/dapr
-  tag: '1.15.5'
-  imagePullPolicy: IfNotPresent
-  mtls:
-    enabled: false

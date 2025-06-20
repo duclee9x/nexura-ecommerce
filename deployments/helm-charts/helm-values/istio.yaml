@@ -1,0 +1,2 @@
+global:
+  istioNamespace: api-gateway

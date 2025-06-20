@@ -1,5 +1,0 @@
-# Default values for cert-manager.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-cloudflareEmail: ledangduc7601@gmail.com
-cloudflareToken: irOLQyfuK3hUIVzPfwO8PCy1ZYG8Il0Gskn_NnmT

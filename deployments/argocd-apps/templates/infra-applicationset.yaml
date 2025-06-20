@@ -1,0 +1,38 @@
+# applicationsets/infra-applicationset.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: infra-applicationset
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: cert-manager
+            path: infra/cert-manager
+            namespace: cert-manager
+          - name: kiali
+            path: infra/kiali
+            namespace: api-gateway
+          - name: lgtm
+            path: infra/lgtm
+            namespace: monitoring
+          - name: external-secrets
+            path: infra/external-secrets
+            namespace: secrets
+  template:
+    metadata:
+      name: '{{name}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/duclee9x/nexura-rendered-manifest
+        targetRevision: HEAD
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

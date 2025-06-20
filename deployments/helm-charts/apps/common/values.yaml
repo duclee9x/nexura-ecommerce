@@ -1,0 +1,86 @@
+config:
+  imagekit: https://ik.imagekit.io/duclee9x/
+  
+
+certManager:
+  namespace: cert-manager
+  enabled: true
+  acmeKeyName: duclee-acme-key 
+  emailACME: admin@duclee.store
+  domainACME: duclee.store
+  issuer: staging
+  cloudflareEmail: ledangduc7601@gmail.com
+  stagingACME: https://acme-staging-v02.api.letsencrypt.org/directory
+  productionACME: https://acme-v02.api.letsencrypt.org/directory
+  dnsNames:
+  - duclee.store
+  - vault.duclee.store
+  - alertmanager.duclee.store
+  - grafana.duclee.store
+  - prometheus.duclee.store
+istio:
+  namespace: api-gateway
+  domain: duclee.store
+
+certificates:
+  - name: monitoring
+    namespace: monitoring
+    dnsNames:
+      - grafana.duclee.store
+      - alertmanager.duclee.store
+      - prometheus.duclee.store
+  - name: api-gateway
+    namespace: api-gateway
+    dnsNames:
+      - duclee.store
+
+externalSecret:
+  clusterSecretStore: 
+    namespace: external-secrets 
+    provider:
+      vault:
+        server: "http://100.97.60.85:8200"
+        path: "kv"
+        version: "v2"
+        auth:
+          tokenSecretRef:
+            name: vault-token
+            key: token
+            namespace: default
+  refreshInterval: "1m"
+  secrets:
+    - app-jwt:  
+        namespace: default
+        values:
+        - path: nexura
+          key: access-secret
+        - path: nexura
+          key: refresh-secret
+        - path: nexura
+          key: session-secret
+    - app-db:
+        namespace: default
+        values:
+        - path: nexura
+          key: payment-database-url
+        - path: nexura
+          key: user-database-url
+        - path: nexura
+          key: cart-database-url
+        - path: nexura
+          key: order-database-url
+        - path: nexura
+          key: product-database-url
+    - frontend:
+        namespace: default
+        values:
+        - path: nexura
+          key: imagekit-public-key
+        - path: nexura
+          key: imagekit-private-key
+    - cloudflare:
+        namespace: cert-manager
+        values:
+        - path: nexura
+          key: cloudflareToken
+      

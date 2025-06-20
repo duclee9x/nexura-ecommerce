@@ -1,0 +1,36 @@
+dependencies:
+- name: feature-annotation-autodiscovery
+  repository: ""
+  version: 1.0.0
+- name: feature-application-observability
+  repository: ""
+  version: 1.0.0
+- name: feature-auto-instrumentation
+  repository: ""
+  version: 1.0.0
+- name: feature-cluster-events
+  repository: ""
+  version: 1.0.0
+- name: feature-cluster-metrics
+  repository: ""
+  version: 1.0.0
+- name: feature-integrations
+  repository: ""
+  version: 1.0.0
+- name: feature-node-logs
+  repository: ""
+  version: 1.0.0
+- name: feature-pod-logs
+  repository: ""
+  version: 1.0.0
+- name: feature-profiling
+  repository: ""
+  version: 1.0.0
+- name: feature-prometheus-operator-objects
+  repository: ""
+  version: 1.0.0
+- name: alloy-operator
+  repository: https://grafana.github.io/helm-charts
+  version: 0.3.0
+digest: sha256:ce160061607e23c301c2141e5e22f1360d2ea97b3193f120f9a1b571034477b2
+generated: "2025-06-05T19:30:26.169719-05:00"

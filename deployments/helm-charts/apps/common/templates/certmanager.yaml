@@ -1,0 +1,21 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: {{ include "common.fullname" . }}-{{ .Values.certManager.issuer }}
+spec:
+  acme:
+    # The ACME server URL
+    server: {{ if eq .Values.certManager.issuer "production" }}{{ .Values.certManager.productionACME }}{{ else }}{{ .Values.certManager.stagingACME }}{{end}}
+    # Email address used for ACME registration
+    email: {{ default "admin@duclee.store" .Values.certManager.emailACME }}
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: {{ .Values.certManager.acmeKeyName }}
+    # Enable the DNS01 challenge provider
+    solvers:
+      - dns01:
+          cloudflare:
+            email: {{ .Values.certManager.cloudflareEmail }}
+            apiTokenSecretRef:
+              name: cloudflare
+              key: cloudflareToken

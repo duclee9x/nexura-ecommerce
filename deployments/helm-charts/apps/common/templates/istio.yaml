@@ -1,0 +1,53 @@
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: {{ include "common.fullname" . | printf "%s-gateway" }}
+spec:
+  selector:
+    istio: gateway  
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    tls:
+      httpsRedirect: true
+    hosts:
+      {{- toYaml .Values.certManager.dnsNames | nindent 4 }}
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: {{ .Values.istio.namespace | printf "%s-tls" }} # This should match the Certificate secretName
+    hosts:
+      {{- toYaml .Values.certManager.dnsNames | nindent 4 }}
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "common.fullname" . | printf "%s-virtualservice" }}
+spec:
+  hosts:
+    {{- toYaml .Values.certManager.dnsNames | nindent 4 }}
+  gateways:
+    - {{ include "common.fullname" . | printf "%s-gateway" | quote }}
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: frontend.default.svc.cluster.local
+            port:
+              number: 3000
+---
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: default
+spec:
+  mtls:
+    mode: STRICT
