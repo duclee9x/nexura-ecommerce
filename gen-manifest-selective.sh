@@ -69,6 +69,11 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# If --infra was provided with no value, set to all infra
+if [[ "$*" =~ "--infra" ]] && [ ${#INFRA[@]} -eq 0 ]; then
+  INFRA=("${INFRA_ALL[@]}")
+fi
+
 # If neither APPS nor INFRA provided, use all
 if [ ${#APPS[@]} -eq 0 ] && [ ${#INFRA[@]} -eq 0 ]; then
   APPS=("${APPS_ALL[@]}")
