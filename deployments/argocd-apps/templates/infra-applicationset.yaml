@@ -8,18 +8,36 @@ spec:
   generators:
     - list:
         elements:
+          - name: external-secrets
+            path: infra/external-secrets
+            namespace: external-secrets
           - name: cert-manager
             path: infra/cert-manager
             namespace: cert-manager
-          - name: kiali
-            path: infra/kiali
+          - name: istio-base
+            path: infra/istio/base
             namespace: api-gateway
-          - name: lgtm
-            path: infra/lgtm
+          - name: istiod
+            path: infra/istio/istiod
+            namespace: api-gateway
+          - name: istio-gateway
+            path: infra/istio/gateway
+            namespace: api-gateway
+          - name: dapr
+            path: infra/dapr
+            namespace: dapr
+          - name: tempo
+            path: infra/monitoring/tempo
             namespace: monitoring
-          - name: external-secrets
-            path: infra/external-secrets
-            namespace: secrets
+          - name: loki
+            path: infra/monitoring/loki
+            namespace: monitoring
+          - name: kube-prometheus-stack
+            path: infra/monitoring/prometheus
+            namespace: monitoring
+          - name: k8s-monitoring
+            path: infra/monitoring/k8s-monitoring
+            namespace: monitoring
   template:
     metadata:
       name: '{{name}}'
