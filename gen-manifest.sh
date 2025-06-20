@@ -121,7 +121,7 @@ helm template istio-gateway deployments/helm-charts/istio-gateway/ -f deployment
 helm template dapr deployments/helm-charts/dapr/ -f deployments/helm-charts/helm-values/dapr.yaml -n dapr --create-namespace --create-namespace -o yaml > ../manifest/infra/dev/dapr/manifest.yaml
 helm template tempo deployments/helm-charts/tempo/ -f deployments/helm-charts/helm-values/tempo.yaml -n monitoring --create-namespace -o yaml > ../manifest/infra/dev/monitoring/tempo.yaml
 helm template loki deployments/helm-charts/loki/ -f deployments/helm-charts/helm-values/loki.yaml -n monitoring --create-namespace -o yaml > ../manifest/infra/dev/monitoring/loki.yaml
-helm template prometheus deployments/helm-charts/kube-prometheus-stack/ -f deployments/helm-charts/helm-values/prometheus.yaml -n monitoring --create-namespace -o yaml > ../manifest/infra/dev/monitoring/prometheus.yaml
+helm template prometheus deployments/helm-charts/prometheus/ -f deployments/helm-charts/helm-values/prometheus.yaml -n monitoring --create-namespace -o yaml > ../manifest/infra/dev/monitoring/prometheus.yaml
 helm template k8s-monitoring deployments/helm-charts/k8s-monitoring/ -f deployments/helm-charts/helm-values/monitoring.yaml -n monitoring --create-namespace -o yaml > ../manifest/infra/dev/monitoring/k8s-monitoring.yaml
 
 helm template common deployments/helm-charts/apps/common  --set image.tag=$version -o yaml > ../manifest/apps/dev/common/manifest.yaml

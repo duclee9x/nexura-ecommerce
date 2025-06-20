@@ -9,7 +9,7 @@
 set -e
 
 APPS_ALL=(common order payment cart product user workflow frontend)
-INFRA_ALL=(external-secrets cert-manager istio-base istiod istio-gateway dapr tempo loki kube-prometheus-stack k8s-monitoring)
+INFRA_ALL=(external-secrets cert-manager istio-base istiod istio-gateway dapr tempo loki prometheus k8s-monitoring)
 
 APPS=()
 INFRA=()
@@ -115,9 +115,9 @@ for infra in "${INFRA[@]}"; do
       mkdir -p ../manifest/infra/dev/monitoring
       helm template loki deployments/helm-charts/loki/ -f deployments/helm-charts/helm-values/loki.yaml --include-crds -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/loki.yaml
       ;;
-    kube-prometheus-stack)
+    prometheus)
       mkdir -p ../manifest/infra/dev/monitoring
-      helm template kube-prometheus-stack deployments/helm-charts/kube-prometheus-stack/ -f deployments/helm-charts/helm-values/prometheus.yaml --include-crds -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/prometheus.yaml
+      helm template kube-prometheus deployments/helm-charts/prometheus/ -f deployments/helm-charts/helm-values/prometheus.yaml --include-crds -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/prometheus.yaml
       ;;
     k8s-monitoring)
       mkdir -p ../manifest/infra/dev/monitoring
