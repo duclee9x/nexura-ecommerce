@@ -6,7 +6,7 @@
 require:
     kubectl apply -f provision/vault-token.yaml
 
-kind-lb:
+lb:
     cloud-provider-kind -enable-lb-port-mapping
 
 [working-directory: 'provision/vault-server']
