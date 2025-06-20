@@ -79,33 +79,43 @@ fi
 for infra in "${INFRA[@]}"; do
   case $infra in
     external-secrets)
+      mkdir -p ../manifest/infra/dev/external-secrets
       helm template external-secrets deployments/helm-charts/external-secrets/ -n external-secrets --create-namespace > ../manifest/infra/dev/external-secrets/manifest.yaml
       ;;
     cert-manager)
+      mkdir -p ../manifest/infra/dev/cert-manager
       helm template cert-manager deployments/helm-charts/cert-manager/ -f deployments/helm-charts/helm-values/cert-manager.yaml -n cert-manager --create-namespace > ../manifest/infra/dev/cert-manager/manifest.yaml
       ;;
     istio-base)
+      mkdir -p ../manifest/infra/dev/istio
       helm template istio-base deployments/helm-charts/istio-base/ -f deployments/helm-charts/helm-values/istio.yaml -n api-gateway --create-namespace > ../manifest/infra/dev/istio/base.yaml
       ;;
     istiod)
+      mkdir -p ../manifest/infra/dev/istio
       helm template istiod deployments/helm-charts/istiod/ -f deployments/helm-charts/helm-values/istio.yaml -n api-gateway --create-namespace > ../manifest/infra/dev/istio/istiod.yaml
       ;;
     istio-gateway)
+      mkdir -p ../manifest/infra/dev/istio
       helm template istio-gateway deployments/helm-charts/istio-gateway/ -f deployments/helm-charts/helm-values/istio.yaml -n api-gateway --create-namespace > ../manifest/infra/dev/istio/gateway.yaml
       ;;
     dapr)
+      mkdir -p ../manifest/infra/dev/dapr
       helm template dapr deployments/helm-charts/dapr/ -f deployments/helm-charts/helm-values/dapr.yaml -n dapr --create-namespace --create-namespace > ../manifest/infra/dev/dapr/manifest.yaml
       ;;
     tempo)
+      mkdir -p ../manifest/infra/dev/monitoring
       helm template tempo deployments/helm-charts/tempo/ -f deployments/helm-charts/helm-values/tempo.yaml -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/tempo.yaml
       ;;
     loki)
+      mkdir -p ../manifest/infra/dev/monitoring
       helm template loki deployments/helm-charts/loki/ -f deployments/helm-charts/helm-values/loki.yaml -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/loki.yaml
       ;;
     kube-prometheus-stack)
+      mkdir -p ../manifest/infra/dev/monitoring
       helm template kube-prometheus-stack deployments/helm-charts/kube-prometheus-stack/ -f deployments/helm-charts/helm-values/prometheus.yaml -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/prometheus.yaml
       ;;
     k8s-monitoring)
+      mkdir -p ../manifest/infra/dev/monitoring
       helm template k8s-monitoring deployments/helm-charts/k8s-monitoring/ -f deployments/helm-charts/helm-values/monitoring.yaml -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/k8s-monitoring.yaml
       ;;
     *)
@@ -123,27 +133,35 @@ if [ ${#APPS[@]} -gt 0 ]; then
   for app in "${APPS[@]}"; do
     case $app in
       common)
+        mkdir -p ../manifest/apps/dev/common
         helm template common deployments/helm-charts/apps/common --set image.tag=$VERSION > ../manifest/apps/dev/common/manifest.yaml
         ;;
       order)
+        mkdir -p ../manifest/apps/dev/order
         helm template order deployments/helm-charts/apps/order --set image.tag=$VERSION > ../manifest/apps/dev/order/manifest.yaml
         ;;
       payment)
+        mkdir -p ../manifest/apps/dev/payment
         helm template payment deployments/helm-charts/apps/payment --set image.tag=$VERSION > ../manifest/apps/dev/payment/manifest.yaml
         ;;
       cart)
+        mkdir -p ../manifest/apps/dev/cart
         helm template cart deployments/helm-charts/apps/cart --set image.tag=$VERSION > ../manifest/apps/dev/cart/manifest.yaml
         ;;
       product)
+        mkdir -p ../manifest/apps/dev/product
         helm template product deployments/helm-charts/apps/product --set image.tag=$VERSION > ../manifest/apps/dev/product/manifest.yaml
         ;;
       user)
+        mkdir -p ../manifest/apps/dev/user
         helm template user deployments/helm-charts/apps/user --set image.tag=$VERSION > ../manifest/apps/dev/user/manifest.yaml
         ;;
       workflow)
+        mkdir -p ../manifest/apps/dev/workflow
         helm template workflow deployments/helm-charts/apps/workflow --set image.tag=$VERSION > ../manifest/apps/dev/workflow/manifest.yaml
         ;;
       frontend)
+        mkdir -p ../manifest/apps/dev/frontend
         helm template frontend deployments/helm-charts/apps/frontend --set image.tag=$VERSION > ../manifest/apps/dev/frontend/manifest.yaml
         ;;
       *)
