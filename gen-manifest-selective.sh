@@ -79,34 +79,34 @@ fi
 for infra in "${INFRA[@]}"; do
   case $infra in
     external-secrets)
-      helm template external-secrets deployments/helm-charts/external-secrets/ -n external-secrets --create-namespace -o yaml > ../manifest/infra/dev/external-secrets/manifest.yaml
+      helm template external-secrets deployments/helm-charts/external-secrets/ -n external-secrets --create-namespace > ../manifest/infra/dev/external-secrets/manifest.yaml
       ;;
     cert-manager)
-      helm template cert-manager deployments/helm-charts/cert-manager/ -f deployments/helm-charts/helm-values/cert-manager.yaml -n cert-manager --create-namespace -o yaml > ../manifest/infra/dev/cert-manager/manifest.yaml
+      helm template cert-manager deployments/helm-charts/cert-manager/ -f deployments/helm-charts/helm-values/cert-manager.yaml -n cert-manager --create-namespace > ../manifest/infra/dev/cert-manager/manifest.yaml
       ;;
     istio-base)
-      helm template istio-base deployments/helm-charts/istio-base/ -f deployments/helm-charts/helm-values/istio.yaml -n api-gateway --create-namespace -o yaml > ../manifest/infra/dev/istio/base.yaml
+      helm template istio-base deployments/helm-charts/istio-base/ -f deployments/helm-charts/helm-values/istio.yaml -n api-gateway --create-namespace > ../manifest/infra/dev/istio/base.yaml
       ;;
     istiod)
-      helm template istiod deployments/helm-charts/istiod/ -f deployments/helm-charts/helm-values/istio.yaml -n api-gateway --create-namespace -o yaml > ../manifest/infra/dev/istio/istiod.yaml
+      helm template istiod deployments/helm-charts/istiod/ -f deployments/helm-charts/helm-values/istio.yaml -n api-gateway --create-namespace > ../manifest/infra/dev/istio/istiod.yaml
       ;;
     istio-gateway)
-      helm template istio-gateway deployments/helm-charts/istio-gateway/ -f deployments/helm-charts/helm-values/istio.yaml -n api-gateway --create-namespace -o yaml > ../manifest/infra/dev/istio/gateway.yaml
+      helm template istio-gateway deployments/helm-charts/istio-gateway/ -f deployments/helm-charts/helm-values/istio.yaml -n api-gateway --create-namespace > ../manifest/infra/dev/istio/gateway.yaml
       ;;
     dapr)
-      helm template dapr deployments/helm-charts/dapr/ -f deployments/helm-charts/helm-values/dapr.yaml -n dapr --create-namespace --create-namespace -o yaml > ../manifest/infra/dev/dapr/manifest.yaml
+      helm template dapr deployments/helm-charts/dapr/ -f deployments/helm-charts/helm-values/dapr.yaml -n dapr --create-namespace --create-namespace > ../manifest/infra/dev/dapr/manifest.yaml
       ;;
     tempo)
-      helm template tempo deployments/helm-charts/tempo/ -f deployments/helm-charts/helm-values/tempo.yaml -n monitoring --create-namespace -o yaml > ../manifest/infra/dev/monitoring/tempo.yaml
+      helm template tempo deployments/helm-charts/tempo/ -f deployments/helm-charts/helm-values/tempo.yaml -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/tempo.yaml
       ;;
     loki)
-      helm template loki deployments/helm-charts/loki/ -f deployments/helm-charts/helm-values/loki.yaml -n monitoring --create-namespace -o yaml > ../manifest/infra/dev/monitoring/loki.yaml
+      helm template loki deployments/helm-charts/loki/ -f deployments/helm-charts/helm-values/loki.yaml -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/loki.yaml
       ;;
     kube-prometheus-stack)
-      helm template kube-prometheus-stack deployments/helm-charts/kube-prometheus-stack/ -f deployments/helm-charts/helm-values/prometheus.yaml -n monitoring --create-namespace -o yaml > ../manifest/infra/dev/monitoring/prometheus.yaml
+      helm template kube-prometheus-stack deployments/helm-charts/kube-prometheus-stack/ -f deployments/helm-charts/helm-values/prometheus.yaml -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/prometheus.yaml
       ;;
     k8s-monitoring)
-      helm template k8s-monitoring deployments/helm-charts/k8s-monitoring/ -f deployments/helm-charts/helm-values/monitoring.yaml -n monitoring --create-namespace -o yaml > ../manifest/infra/dev/monitoring/k8s-monitoring.yaml
+      helm template k8s-monitoring deployments/helm-charts/k8s-monitoring/ -f deployments/helm-charts/helm-values/monitoring.yaml -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/k8s-monitoring.yaml
       ;;
     *)
       echo "Unknown infra: $infra"
@@ -123,28 +123,28 @@ if [ ${#APPS[@]} -gt 0 ]; then
   for app in "${APPS[@]}"; do
     case $app in
       common)
-        helm template common deployments/helm-charts/apps/common --set image.tag=$VERSION -o yaml > ../manifest/apps/dev/common/manifest.yaml
+        helm template common deployments/helm-charts/apps/common --set image.tag=$VERSION > ../manifest/apps/dev/common/manifest.yaml
         ;;
       order)
-        helm template order deployments/helm-charts/apps/order --set image.tag=$VERSION -o yaml > ../manifest/apps/dev/order/manifest.yaml
+        helm template order deployments/helm-charts/apps/order --set image.tag=$VERSION > ../manifest/apps/dev/order/manifest.yaml
         ;;
       payment)
-        helm template payment deployments/helm-charts/apps/payment --set image.tag=$VERSION -o yaml > ../manifest/apps/dev/payment/manifest.yaml
+        helm template payment deployments/helm-charts/apps/payment --set image.tag=$VERSION > ../manifest/apps/dev/payment/manifest.yaml
         ;;
       cart)
-        helm template cart deployments/helm-charts/apps/cart --set image.tag=$VERSION -o yaml > ../manifest/apps/dev/cart/manifest.yaml
+        helm template cart deployments/helm-charts/apps/cart --set image.tag=$VERSION > ../manifest/apps/dev/cart/manifest.yaml
         ;;
       product)
-        helm template product deployments/helm-charts/apps/product --set image.tag=$VERSION -o yaml > ../manifest/apps/dev/product/manifest.yaml
+        helm template product deployments/helm-charts/apps/product --set image.tag=$VERSION > ../manifest/apps/dev/product/manifest.yaml
         ;;
       user)
-        helm template user deployments/helm-charts/apps/user --set image.tag=$VERSION -o yaml > ../manifest/apps/dev/user/manifest.yaml
+        helm template user deployments/helm-charts/apps/user --set image.tag=$VERSION > ../manifest/apps/dev/user/manifest.yaml
         ;;
       workflow)
-        helm template workflow deployments/helm-charts/apps/workflow --set image.tag=$VERSION -o yaml > ../manifest/apps/dev/workflow/manifest.yaml
+        helm template workflow deployments/helm-charts/apps/workflow --set image.tag=$VERSION > ../manifest/apps/dev/workflow/manifest.yaml
         ;;
       frontend)
-        helm template frontend deployments/helm-charts/apps/frontend --set image.tag=$VERSION -o yaml > ../manifest/apps/dev/frontend/manifest.yaml
+        helm template frontend deployments/helm-charts/apps/frontend --set image.tag=$VERSION > ../manifest/apps/dev/frontend/manifest.yaml
         ;;
       *)
         echo "Unknown app: $app"
