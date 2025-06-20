@@ -33,7 +33,7 @@ helm-infra:
     helm upgrade --install dapr deployments/helm-charts/dapr/ -f deployments/helm-charts/helm-values/dapr.yaml -n dapr --create-namespace --create-namespace
     helm upgrade --install tempo deployments/helm-charts/tempo/ -f deployments/helm-charts/helm-values/tempo.yaml -n monitoring --create-namespace
     helm upgrade --install loki deployments/helm-charts/loki/ -f deployments/helm-charts/helm-values/loki.yaml -n monitoring --create-namespace 
-    helm upgrade --install prometheus deployments/helm-charts/kube-prometheus-stack/ -f deployments/helm-charts/helm-values/prometheus.yaml -n monitoring --create-namespace
+    helm upgrade --install prometheus deployments/helm-charts/prometheus/ -f deployments/helm-charts/helm-values/prometheus.yaml -n monitoring --create-namespace
     helm upgrade --install k8s-monitoring deployments/helm-charts/k8s-monitoring/ -f deployments/helm-charts/helm-values/monitoring.yaml -n monitoring --create-namespace 
 unprovision:
     kind delete clusters kind
