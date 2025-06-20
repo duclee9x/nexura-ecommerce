@@ -1,0 +1,61 @@
+cluster: # Cluster configuration, including the cluster name
+  name: nexura-cluster
+
+destinations:
+  - name: prometheus
+    type: prometheus
+    url: http://prometheus-operator-server.monitoring.svc.cluster.local:80
+  - name: loki
+    type: loki
+    url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
+  - name: tempo
+    type: otlp
+    url: http://tempo.monitoring.svc.cluster.local:4317
+# Features to enable, which determines what data to collect
+clusterMetrics:
+  enabled: false
+
+clusterEvents:
+  enabled: false
+
+podLogs:
+  enabled: true
+
+profiling:
+  enabled: false
+# Telemetry collector definitions
+alloy-metrics:
+  enabled: true
+alloy-singleton:
+  enabled: true
+alloy-profiles:
+  enabled: false
+alloy-logs:
+  enabled: true
+autoInstrumentation:
+  enabled: true
+
+applicationObservability:
+  enabled: true
+  receivers:
+    otlp:
+      grpc:
+        enabled: true
+        port: 4317
+        includeMetadata: true
+      http:
+        enabled: true
+        port: 4318
+
+alloy-receiver:
+  enabled: true
+  alloy:
+    extraPorts:
+      - name: otlp-grpc
+        port: 4317
+        targetPort: 4317
+        protocol: TCP
+      - name: otlp-http
+        port: 4318
+        targetPort: 4318
+        protocol: TCP

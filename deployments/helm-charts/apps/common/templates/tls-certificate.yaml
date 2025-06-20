@@ -1,0 +1,20 @@
+---
+{{- if .Values.certificates }}
+{{- range .Values.certificates }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .name | printf "%s-cert" }}
+  namespace: {{ .namespace }}
+spec:
+  secretName: {{ .name | printf "%s-tls" | quote }}
+  issuerRef:
+    name: {{include "common.fullname" $ }}-{{ $.Values.certManager.issuer }}
+    kind: ClusterIssuer
+  dnsNames:
+{{- range .dnsNames }}
+    - {{ . }}
+{{- end }}
+{{- end }}
+{{- end }}

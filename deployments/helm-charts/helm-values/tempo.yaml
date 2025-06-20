@@ -1,0 +1,13 @@
+tempo:
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: "http://prometheus-server.monitoring/api/v1/write"
+  
+  overrides:
+    defaults: 
+     metrics_generator:
+       processors:
+         - service-graphs
+         - span-metrics
+
+   
