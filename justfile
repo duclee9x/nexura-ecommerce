@@ -47,6 +47,6 @@ install-argo:
 argo-pass:
     kubectl get secret argocd-initial-admin-secret -n argocd -o yaml | yq .data.password | base64 -d
     @echo 
-argo-url: argo-pass
+argo: argo-pass
     @echo "Argocd URL: http://localhost:8080"
     kubectl port-forward svc/argocd-server -n argocd 8080:80

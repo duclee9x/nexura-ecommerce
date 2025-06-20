@@ -22,7 +22,7 @@ jobs:
             git fetch origin main
             services=$(git diff --name-only origin/main...HEAD | grep '^src/' | cut -d '/' -f2 | uniq | cut -d '-' -f1 | tr '\n' ',' | sed 's/,$//')
             if [ -z "$services" ]; then
-              services="user,product,payment,order,cart,frontend,workflow"
+              services="user,product,payment,order,cart,frontend,workflow,common"
             fi
             echo "services=$services" >> "$GITHUB_OUTPUT"
         - name: Set image version
