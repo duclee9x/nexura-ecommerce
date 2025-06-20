@@ -85,43 +85,43 @@ for infra in "${INFRA[@]}"; do
   case $infra in
     external-secrets)
       mkdir -p ../manifest/infra/dev/external-secrets
-      helm template external-secrets deployments/helm-charts/external-secrets/ -n external-secrets --create-namespace > ../manifest/infra/dev/external-secrets/manifest.yaml
+      helm template external-secrets deployments/helm-charts/external-secrets/ --include-crds -n external-secrets --create-namespace > ../manifest/infra/dev/external-secrets/manifest.yaml
       ;;
     cert-manager)
       mkdir -p ../manifest/infra/dev/cert-manager
-      helm template cert-manager deployments/helm-charts/cert-manager/ -f deployments/helm-charts/helm-values/cert-manager.yaml -n cert-manager --create-namespace > ../manifest/infra/dev/cert-manager/manifest.yaml
+      helm template cert-manager deployments/helm-charts/cert-manager/ -f deployments/helm-charts/helm-values/cert-manager.yaml --include-crds -n cert-manager --create-namespace > ../manifest/infra/dev/cert-manager/manifest.yaml
       ;;
     istio-base)
       mkdir -p ../manifest/infra/dev/istio
-      helm template istio-base deployments/helm-charts/istio-base/ -f deployments/helm-charts/helm-values/istio.yaml -n api-gateway --create-namespace > ../manifest/infra/dev/istio/base.yaml
+      helm template istio-base deployments/helm-charts/istio-base/ -f deployments/helm-charts/helm-values/istio.yaml --include-crds -n api-gateway --create-namespace > ../manifest/infra/dev/istio/base.yaml
       ;;
     istiod)
       mkdir -p ../manifest/infra/dev/istio
-      helm template istiod deployments/helm-charts/istiod/ -f deployments/helm-charts/helm-values/istio.yaml -n api-gateway --create-namespace > ../manifest/infra/dev/istio/istiod.yaml
+      helm template istiod deployments/helm-charts/istiod/ -f deployments/helm-charts/helm-values/istio.yaml --include-crds -n api-gateway --create-namespace > ../manifest/infra/dev/istio/istiod.yaml
       ;;
     istio-gateway)
       mkdir -p ../manifest/infra/dev/istio
-      helm template istio-gateway deployments/helm-charts/istio-gateway/ -f deployments/helm-charts/helm-values/istio.yaml -n api-gateway --create-namespace > ../manifest/infra/dev/istio/gateway.yaml
+      helm template istio-gateway deployments/helm-charts/istio-gateway/ -f deployments/helm-charts/helm-values/istio.yaml --include-crds -n api-gateway --create-namespace > ../manifest/infra/dev/istio/gateway.yaml
       ;;
     dapr)
       mkdir -p ../manifest/infra/dev/dapr
-      helm template dapr deployments/helm-charts/dapr/ -f deployments/helm-charts/helm-values/dapr.yaml -n dapr --create-namespace --create-namespace > ../manifest/infra/dev/dapr/manifest.yaml
+      helm template dapr deployments/helm-charts/dapr/ -f deployments/helm-charts/helm-values/dapr.yaml --include-crds -n dapr --create-namespace > ../manifest/infra/dev/dapr/manifest.yaml
       ;;
     tempo)
       mkdir -p ../manifest/infra/dev/monitoring
-      helm template tempo deployments/helm-charts/tempo/ -f deployments/helm-charts/helm-values/tempo.yaml -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/tempo.yaml
+      helm template tempo deployments/helm-charts/tempo/ -f deployments/helm-charts/helm-values/tempo.yaml --include-crds -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/tempo.yaml
       ;;
     loki)
       mkdir -p ../manifest/infra/dev/monitoring
-      helm template loki deployments/helm-charts/loki/ -f deployments/helm-charts/helm-values/loki.yaml -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/loki.yaml
+      helm template loki deployments/helm-charts/loki/ -f deployments/helm-charts/helm-values/loki.yaml --include-crds -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/loki.yaml
       ;;
     kube-prometheus-stack)
       mkdir -p ../manifest/infra/dev/monitoring
-      helm template kube-prometheus-stack deployments/helm-charts/kube-prometheus-stack/ -f deployments/helm-charts/helm-values/prometheus.yaml -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/prometheus.yaml
+      helm template kube-prometheus-stack deployments/helm-charts/kube-prometheus-stack/ -f deployments/helm-charts/helm-values/prometheus.yaml --include-crds -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/prometheus.yaml
       ;;
     k8s-monitoring)
       mkdir -p ../manifest/infra/dev/monitoring
-      helm template k8s-monitoring deployments/helm-charts/k8s-monitoring/ -f deployments/helm-charts/helm-values/monitoring.yaml -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/k8s-monitoring.yaml
+      helm template k8s-monitoring deployments/helm-charts/k8s-monitoring/ -f deployments/helm-charts/helm-values/monitoring.yaml --include-crds -n monitoring --create-namespace > ../manifest/infra/dev/monitoring/k8s-monitoring.yaml
       ;;
     *)
       echo "Unknown infra: $infra"

@@ -39,3 +39,14 @@ unprovision:
     kind delete clusters kind
 provision:
     kind create cluster --config provision/kind.yaml
+
+install-argo:
+    kubectl create namespace argocd
+    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+    
+argo-pass:
+    kubectl get secret argocd-initial-admin-secret -n argocd -o yaml | yq .data.password | base64 -d
+    @echo 
+argo-url: argo-pass
+    @echo "Argocd URL: http://localhost:8080"
+    kubectl port-forward svc/argocd-server -n argocd 8080:80
