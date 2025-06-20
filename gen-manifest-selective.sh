@@ -19,19 +19,39 @@ VERSION=""
 while [[ $# -gt 0 ]]; do
   case $1 in
     --apps)
-      IFS=',' read -ra APPS <<< "$2"
-      shift 2
+      if [[ -n "$2" && "$2" != --* ]]; then
+        IFS=',' read -ra APPS <<< "$2"
+        shift 2
+      else
+        APPS=()
+        shift 1
+      fi
       ;;
     --apps=*)
-      IFS=',' read -ra APPS <<< "${1#*=}"
+      val="${1#*=}"
+      if [[ -n "$val" ]]; then
+        IFS=',' read -ra APPS <<< "$val"
+      else
+        APPS=()
+      fi
       shift 1
       ;;
     --infra)
-      IFS=',' read -ra INFRA <<< "$2"
-      shift 2
+      if [[ -n "$2" && "$2" != --* ]]; then
+        IFS=',' read -ra INFRA <<< "$2"
+        shift 2
+      else
+        INFRA=()
+        shift 1
+      fi
       ;;
     --infra=*)
-      IFS=',' read -ra INFRA <<< "${1#*=}"
+      val="${1#*=}"
+      if [[ -n "$val" ]]; then
+        IFS=',' read -ra INFRA <<< "$val"
+      else
+        INFRA=()
+      fi
       shift 1
       ;;
     --version)
