@@ -27,3 +27,4 @@ age-key.txt
 provision/vault-server/data/*
 provision/vault-server/certs/*
 ingress.yaml
+argo-repo.yaml

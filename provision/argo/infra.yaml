@@ -1,0 +1,49 @@
+# applicationsets/infra-applicationset.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: infra-applicationset
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+
+spec:
+  generators:
+    - list:
+        elements:
+          - name: external-secrets
+            path: infra/dev/external-secrets
+            namespace: external-secrets
+          - name: cert-manager
+            path: infra/dev/cert-manager
+            namespace: cert-manager
+          - name: istio
+            path: infra/dev/istio
+            namespace: api-gateway
+          - name: dapr
+            path: infra/dev/dapr
+            namespace: dapr
+          - name: monitoring
+            path: infra/dev/monitoring
+            namespace: monitoring
+  template:
+    metadata:
+      name: '{{name}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: "0"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/duclee9x/nexura-rendered-manifest
+        targetRevision: HEAD
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+        - PruneLast=true

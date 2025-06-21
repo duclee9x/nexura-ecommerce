@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+    name: nexura-apps
+    namespace: argocd
+    annotations:
+        argocd.argoproj.io/sync-wave: "1"
+spec:
+    generators:
+        - git:
+            repoURL: https://github.com/duclee9x/nexura-rendered-manifest.git
+            revision: main
+            directories:
+                - path: apps/*/*
+    template:
+        metadata:
+            name: '{{path.basename}}-apps'
+            annotations:
+                argocd.argoproj.io/sync-wave: "1"
+        spec:
+            project: default
+            source:
+                repoURL: https://github.com/duclee9x/nexura-rendered-manifest.git
+                targetRevision: HEAD
+                path: '{{path}}'
+            destination:
+                server: https://kubernetes.default.svc
+                namespace: 'default'
+            syncPolicy:
+                automated:
+                    prune: true
+                    selfHeal: true
+                syncOptions:
+                  - CreateNamespace=true
+                  - PruneLast=true
