@@ -83,4 +83,9 @@ externalSecret:
         values:
         - path: nexura
           key: cloudflareToken
+    - smtp-secret:
+        namespace: default
+        values:
+        - path: nexura
+          key: smtp-password
       

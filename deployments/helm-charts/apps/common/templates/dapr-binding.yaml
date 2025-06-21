@@ -1,0 +1,23 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: smtp
+spec:
+  type: bindings.smtp
+  version: v1
+  metadata:
+  - name: host
+    value: "smtp.zoho.com"
+  - name: port
+    value: "587"
+  - name: user
+    value: "duclee@zohomail.com"
+  - name: password
+    secretKeyRef:
+      name: smtp-secret
+      key:  dmyp
+  - name: skipTLSVerify
+    value: false
+  - name: emailFrom
+    value: "admin@duclee.store"
+  

@@ -196,7 +196,7 @@ const sendOTPToEmail = async (email: string, otp: string, resetToken: string) =>
     api.context.with(api.trace.setSpan(api.context.active(), span), async () => {
       logger.info('Sending OTP to email ' + email, { traceId: span.spanContext().traceId });
       span.setAttribute('client.request.email', email);
-      const BINDING_NAME = "MailService"
+      const BINDING_NAME = "smtp"
       const BINDING_OPERATION = "create"
       const client = new DaprClient({
         daprHost:              process.env.DAPR_HOST,
