@@ -49,18 +49,6 @@ istio:
     istio: gateway
   credentialName: duclee-tls
 
-certificates:
-  - name: monitoring
-    namespace: monitoring
-    dnsNames:
-      - grafana.duclee.store
-      - alertmanager.duclee.store
-      - prometheus.duclee.store
-  - name: api-gateway
-    namespace: api-gateway
-    dnsNames:
-      - duclee.store
-
 externalSecret:
   clusterSecretStore: 
     namespace: external-secrets 

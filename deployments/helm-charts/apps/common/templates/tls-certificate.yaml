@@ -3,7 +3,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: {{ .Values.certManager.certName }}
-  namespace: {{ .Values.certManager.namespace }}
+  namespace: api-gateway
 spec:
   secretName: {{ .Values.certManager.certName | printf "%s-tls" | quote }}
   issuerRef:
