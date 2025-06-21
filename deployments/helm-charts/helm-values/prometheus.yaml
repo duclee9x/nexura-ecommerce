@@ -1,16 +1,5 @@
 alertmanager:
   enabled: true
-  ingress:
-    enabled: true
-    ingressClassName: "istio"
-    hosts: 
-      - alertmanager.duclee.store
-    paths: 
-    - /
-    tls: 
-    - secretName: monitoring-tls
-      hosts:
-      - alertmanager.duclee.store
 
 grafana:
   enabled: true
@@ -21,17 +10,7 @@ grafana:
       org_role: Editor
     auth:
       disable_login_form: true
-  ingress:
-    enabled: true
-    ingressClassName: istio
-    hosts:
-      - grafana.duclee.store
-    path: /
-    tls: 
-    - secretName: grafana-general-tls
-      hosts:
-      - grafana.duclee.store
-
+  
   additionalDataSources: 
   - name: Tempo
     type: tempo
@@ -54,18 +33,6 @@ grafana:
     secureJsonData:
       httpHeaderValue1: "fake"
 prometheus:
-  ingress:
-    enabled: true
-    ingressClassName: "istio"
-    hosts:
-      - prometheus.duclee.store
-    paths: 
-    - /
-    tls: 
-      - secretName: monitoring-tls
-        hosts:
-          - prometheus.nexura.store
-
   prometheusSpec:
     additionalScrapeConfigs: 
       - job_name: dapr-sidecars
