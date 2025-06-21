@@ -12,15 +12,42 @@ certManager:
   cloudflareEmail: ledangduc7601@gmail.com
   stagingACME: https://acme-staging-v02.api.letsencrypt.org/directory
   productionACME: https://acme-v02.api.letsencrypt.org/directory
+  certName: duclee
   dnsNames:
   - duclee.store
-  - vault.duclee.store
-  - alertmanager.duclee.store
-  - grafana.duclee.store
-  - prometheus.duclee.store
+  - "*.duclee.store"
+
 istio:
-  namespace: api-gateway
-  domain: duclee.store
+  istio:
+  services:
+    - name: frontend
+      host: duclee.store
+      service: frontend
+      namespace: default
+      port: 3000
+    - name: grafana
+      host: grafana.duclee.store
+      service: kube-prometheus-grafana
+      namespace: monitoring
+      port: 80
+    - name: prometheus
+      host: prometheus.duclee.store
+      namespace: monitoring
+      service: kube-prometheus-kube-prome-prometheus
+      port: 9090
+    - name: alertmanager
+      host: alertmanager.duclee.store
+      namespace: monitoring
+      service: kube-prometheus-kube-prome-alertmanager
+      port: 9093
+    - name: argocd
+      host: argocd.duclee.store
+      namespace: argocd
+      service: argocd-server
+      port: 80
+  gatewaySelector:
+    istio: gateway
+  credentialName: duclee-tls
 
 certificates:
   - name: monitoring

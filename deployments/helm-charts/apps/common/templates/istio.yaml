@@ -1,49 +1,55 @@
+---
 apiVersion: networking.istio.io/v1
 kind: Gateway
 metadata:
-  name: {{ include "common.fullname" . | printf "%s-gateway" }}
+  name: app-gateway
 spec:
   selector:
-    istio: gateway  
+    {{- toYaml $.Values.istio.gatewaySelector | nindent 4 }}
   servers:
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    tls:
-      httpsRedirect: true
-    hosts:
-      {{- toYaml .Values.certManager.dnsNames | nindent 4 }}
-  - port:
-      number: 443
-      name: https
-      protocol: HTTPS
-    tls:
-      mode: SIMPLE
-      credentialName: {{ .Values.istio.namespace | printf "%s-tls" }} # This should match the Certificate secretName
-    hosts:
-      {{- toYaml .Values.certManager.dnsNames | nindent 4 }}
-
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      tls:
+        httpsRedirect: true
+      hosts:
+{{- range .Values.istio.services }}
+        - {{ .host }}
+{{- end }}
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: {{ $.Values.istio.credentialName }}
+      hosts:
+{{- range .Values.istio.services }}
+        - {{ .host }}
+{{- end }}
 ---
+{{- range .Values.istio.services }}
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
-  name: {{ include "common.fullname" . | printf "%s-virtualservice" }}
+  name: {{ printf "%s-virtualservice" .name }}
 spec:
   hosts:
-    {{- toYaml .Values.certManager.dnsNames | nindent 4 }}
+    - {{ .host }}
   gateways:
-    - {{ include "common.fullname" . | printf "%s-gateway" | quote }}
+    - app-gateway
   http:
     - match:
         - uri:
             prefix: /
       route:
         - destination:
-            host: frontend.default.svc.cluster.local
+            host: {{ .service }}.{{ .namespace }}.svc.cluster.local
             port:
-              number: 3000
+              number: {{ .port }}
 ---
+{{- end }}
 apiVersion: security.istio.io/v1
 kind: PeerAuthentication
 metadata:
