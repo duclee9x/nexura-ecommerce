@@ -1,20 +1,15 @@
 ---
-{{- if .Values.certificates }}
-{{- range .Values.certificates }}
----
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: {{ .name | printf "%s-cert" }}
-  namespace: {{ .namespace }}
+  name: {{ .Values.certManager.certName }}
+  namespace: {{ .Values.certManager.namespace }}
 spec:
-  secretName: {{ .name | printf "%s-tls" | quote }}
+  secretName: {{ .Values.certManager.certName | printf "%s-tls" | quote }}
   issuerRef:
-    name: {{include "common.fullname" $ }}-{{ $.Values.certManager.issuer }}
+    name: {{include "common.fullname" . }}-{{ .Values.certManager.issuer }}
     kind: ClusterIssuer
   dnsNames:
-{{- range .dnsNames }}
-    - {{ . }}
-{{- end }}
-{{- end }}
+{{- range .Values.certManager.dnsNames }}
+    - {{ . | quote}}
 {{- end }}
