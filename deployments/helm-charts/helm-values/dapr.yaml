@@ -2,7 +2,7 @@ global:
   logAsJson: true
   prometheus:
     enabled: true
-    port: 9090
+    port: 80
   mtls:
     enabled: false
  
