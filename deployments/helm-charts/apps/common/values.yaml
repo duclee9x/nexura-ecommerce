@@ -34,12 +34,12 @@ istio:
       host: prometheus.duclee.store
       namespace: monitoring
       service: prometheus-server
-      port: 9090
+      port: 80
     - name: argocd
       host: argocd.duclee.store
       namespace: argocd
       service: argocd-server
-      port: 80
+      port: 443
   gatewaySelector:
     istio: gateway
   credentialName: duclee-tls
