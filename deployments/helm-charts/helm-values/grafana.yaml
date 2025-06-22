@@ -1,0 +1,31 @@
+adminUser: admin
+
+grafana.ini:
+  auth:
+    disable_login_form: false       # Keep login form enabled
+    disable_signout_menu: false     # Allow switching accounts
+  auth.anonymous:
+    enabled: true                   # Enable anonymous access
+    org_name: Main Org.             # Optional, default org
+    org_role: Viewer                # Role for anonymous users: Viewer | Editor | Admin
+
+security:
+  allow_embedding: true    
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus-server.monitoring.svc.cluster.local
+        isDefault: true
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://loki.monitoring.svc.cluster.local:3100
+      - name: Tempo
+        type: tempo
+        access: proxy
+        url: http://tempo.monitoring.svc.cluster.local:3200

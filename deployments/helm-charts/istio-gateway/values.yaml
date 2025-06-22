@@ -32,6 +32,8 @@ _internal_defaults_do_not_set:
     prometheus.io/path: "/stats/prometheus"
     inject.istio.io/templates: "gateway"
     sidecar.istio.io/inject: "true"
+    argocd.argoproj.io/sync-wave: "1"
+
 
   # Define the security context for the pod.
   # If unset, this will be automatically set to the minimum privileges required to bind to port 80 and 443.
