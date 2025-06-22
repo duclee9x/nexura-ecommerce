@@ -10,7 +10,7 @@ lb:
     cloud-provider-kind -enable-lb-port-mapping
 
 [working-directory: 'provision/vault-server']
-vault-server:
+vault:
     ./generate-creds.sh
     vault server -config=vault-server.hcl
 
