@@ -27,19 +27,14 @@ istio:
       port: 3000
     - name: grafana
       host: grafana.duclee.store
-      service: kube-prometheus-grafana
+      service: grafana
       namespace: monitoring
       port: 80
     - name: prometheus
       host: prometheus.duclee.store
       namespace: monitoring
-      service: kube-prometheus-kube-prome-prometheus
+      service: prometheus-server
       port: 9090
-    - name: alertmanager
-      host: alertmanager.duclee.store
-      namespace: monitoring
-      service: kube-prometheus-kube-prome-alertmanager
-      port: 9093
     - name: argocd
       host: argocd.duclee.store
       namespace: argocd
