@@ -9,6 +9,9 @@ require:
 lb:
     cloud-provider-kind -enable-lb-port-mapping
 
+up:
+    kubectl apply -f provision/argo
+
 [working-directory: 'provision/vault-server']
 vault:
     ./generate-creds.sh
@@ -35,9 +38,9 @@ helm-infra:
     helm upgrade --install loki deployments/helm-charts/loki/ -f deployments/helm-charts/helm-values/loki.yaml -n monitoring --create-namespace 
     helm upgrade --install prometheus deployments/helm-charts/prometheus/ -f deployments/helm-charts/helm-values/prometheus.yaml -n monitoring --create-namespace
     helm upgrade --install k8s-monitoring deployments/helm-charts/k8s-monitoring/ -f deployments/helm-charts/helm-values/monitoring.yaml -n monitoring --create-namespace 
-unprovision:
+unkind:
     kind delete clusters kind
-provision:
+kind:
     kind create cluster --config provision/kind.yaml
 
 install-argo:
