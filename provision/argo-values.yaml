@@ -1,0 +1,10 @@
+configs:
+  cm:
+    users.anonymous.enabled: "true"
+    policy.default: role:readonly
+
+  rbac:
+    policy.csv: |
+      g, admin, role:admin
+    policy.default: role:readonly
+    scopes: '[groups]'

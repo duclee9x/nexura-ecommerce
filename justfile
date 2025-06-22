@@ -41,8 +41,10 @@ provision:
     kind create cluster --config provision/kind.yaml
 
 install-argo:
-    kubectl create namespace argocd
-    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+    kubectl apply -f provision/vault-token.yaml
+    helm repo add argo https://argoproj.github.io/argo-helm
+    helm repo update
+    helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace -f provision/argo-values.yaml 
     
 argo-pass:
     kubectl get secret argocd-initial-admin-secret -n argocd -o yaml | yq .data.password | base64 -d
