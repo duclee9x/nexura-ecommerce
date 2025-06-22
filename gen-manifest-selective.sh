@@ -14,6 +14,7 @@ INFRA_ALL=(external-secrets cert-manager istio-base istiod istio-gateway dapr te
 APPS=()
 INFRA=()
 VERSION=""
+ARGS_CONTAINED_INFRA="false"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -37,6 +38,7 @@ while [[ $# -gt 0 ]]; do
       shift 1
       ;;
     --infra)
+      ARGS_CONTAINED_INFRA="true"
       if [[ -n "$2" && "$2" != --* ]]; then
         IFS=',' read -ra INFRA <<< "$2"
         shift 2
@@ -46,6 +48,7 @@ while [[ $# -gt 0 ]]; do
       fi
       ;;
     --infra=*)
+      ARGS_CONTAINED_INFRA="true"
       val="${1#*=}"
       if [[ -n "$val" ]]; then
         IFS=',' read -ra INFRA <<< "$val"
@@ -70,7 +73,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # If --infra was provided with no value, set to all infra
-if [[ "$*" =~ "--infra" ]] && [ ${#INFRA[@]} -eq 0 ]; then
+if [[ "${#INFRA[@]}" -eq 0 && "${ARGS_CONTAINED_INFRA}" == "true" ]]; then
   INFRA=("${INFRA_ALL[@]}")
 fi
 
