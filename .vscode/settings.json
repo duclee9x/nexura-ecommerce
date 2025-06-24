@@ -1,5 +1,0 @@
-{
-    "yaml.schemas": {
-        "https://json.schemastore.org/chart.json": "file:///d%3A/nexura-ecommerce/helm/apps/common/templates/configmap.yaml"
-    }
-}

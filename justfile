@@ -1,8 +1,4 @@
 
-
-# get-ip:
-#     docker ps --filter name=kindccm* --format json | jq .Ports 
-
 require:
     kubectl apply -f provision/vault-token.yaml
 
