@@ -12,10 +12,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
-import { emailSchema, verificationSchema } from "@/app/(auth)/reset-password/resetPasswordFormSchema"
+import { emailSchema, verificationSchema } from "@/app/reset-password/resetPasswordFormSchema"
 
 import { useActionState } from "react"
-import { handleSubmitEmailAction, handleSubmitVerificationAction } from "@/app/(auth)/reset-password/resetPasswordSubmitAction"
+import { handleSubmitEmailAction, handleSubmitVerificationAction } from "@/app/reset-password/resetPasswordSubmitAction"
 import UserHooks from "@/hooks/user-hooks"
 
 
