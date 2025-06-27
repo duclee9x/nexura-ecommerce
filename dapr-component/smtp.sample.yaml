@@ -1,0 +1,20 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: smtp
+spec:
+  type: bindings.smtp
+  version: v1
+  metadata:
+  - name: host
+    value: "smtp.mailgun.org"
+  - name: port
+    value: "465"
+  - name: user
+    value: "admin@mg.duclee.store"
+  - name: password
+    value: "<put_your_password>"
+  - name: skipTLSVerify
+    value: false
+  - name: emailFrom
+    value: "<put_your_email>"
