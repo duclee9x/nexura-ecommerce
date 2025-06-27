@@ -49,7 +49,7 @@ externalSecret:
     namespace: external-secrets 
     provider:
       vault:
-        server: "http://100.97.60.85:8200"
+        server: "http://duclee.store:8200"
         path: "kv"
         version: "v2"
         auth:
