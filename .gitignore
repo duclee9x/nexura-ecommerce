@@ -5,6 +5,7 @@ coverage
 logs
 temp
 score.yaml
+score.yaml
 src/*/node_modules
 src/*/dist
 src/*/build
@@ -12,7 +13,9 @@ src/*/coverage
 src/*/logs
 src/*/temp
 .next
+.next
 src/*/*/migrations
+bun.lockb
 bun.lockb
 opentelemetry-demo
 .env
