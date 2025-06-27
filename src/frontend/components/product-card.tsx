@@ -20,9 +20,9 @@ type ProductCardProps = {
   categories:        Category[] | undefined
   product:           Product
   viewMode?:         "grid" | "list"
-  isInWishlist:      boolean | undefined
-  onWishlistToggle:  () => Promise<void>
-  isWishlistLoading: boolean | null
+  isInWishlist?:      boolean | undefined
+  onWishlistToggle?:  () => Promise<void>
+  isWishlistLoading?: boolean | null
 }
 
 export function ProductCard({ product, viewMode = "grid", categories, isInWishlist, onWishlistToggle, isWishlistLoading }: ProductCardProps) {
@@ -40,17 +40,25 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
   const mainImage = product.images.find(img => img.isMain) || product.images[0]
   const defaultVariant = product.variants[0]
   const [ showQuickView, setShowQuickView ] = useState(false)
-  const [ selectedVariant, setSelectedVariant ] = useState<ProductVariant | null>(defaultVariant)
+  const [ selectedVariant, setSelectedVariant ] = useState<ProductVariant | undefined>(undefined)
   const [ quantity, setQuantity ] = useState(1)
   const { currency } = useCurrency()
+
+  const maxPrice = product.variants.reduce((max, variant) => Math.max(max, variant.price), 0)
+  const minPrice = product.variants.reduce((min, variant) => Math.min(min, variant.price), maxPrice)
+  const price = maxPrice === minPrice ? formatPrice(maxPrice) : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`
+
   // Check if product is in cart
   const isInCart = items.some(
     (item: CartItem) => item.productId === product.id &&
       (!selectedVariant || item.variantId === selectedVariant.id)
   )
   if (!user) {
-    router.push("/login")
-    return null
+    toast({
+      title:       "Please login to add to cart",
+      description: "You need to be logged in to add items to your cart.",
+    })
+    return
   }
   const handleAddToCart = () => {
     if (!selectedVariant) return
@@ -220,7 +228,7 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
               <p className="text-sm text-text-muted">{category.name}</p>
             )}
             <div className="flex items-center justify-between mt-2">
-              <span className="font-semibold text-text-base">{formatPrice(selectedVariant?.price || 0)}</span>
+              <span className="font-semibold text-text-base">{price}</span>
               <Button
                 size="sm"
                 variant="ghost"

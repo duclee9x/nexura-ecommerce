@@ -29,26 +29,7 @@ export function SiteFooter() {
                   All Products
                 </a>
               </li>
-              <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground">
-                  Backpacks
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground">
-                  Travel Accessories
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground">
-                  New Arrivals
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground">
-                  Sale
-                </a>
-              </li>
+
             </ul>
           </div>
           <div>
@@ -91,7 +72,7 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="border-t mt-12 pt-6 text-center text-sm text-muted-foreground">
-          <p>© 2023 NEXURA. All rights reserved.</p>
+          <p>© 2025 Duc Lee. All rights reserved.</p>
         </div>
       </div>
     </footer>

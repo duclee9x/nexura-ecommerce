@@ -5,7 +5,7 @@ import type {
   ServiceError,
 } from "@grpc/grpc-js";
 
-import { PrismaClient } from "@nexura/cart-service/src/db/prisma-client";
+import { PrismaClient } from "../../db/prisma-client";
 
 import { handleError } from "@nexura/common/utils";
 

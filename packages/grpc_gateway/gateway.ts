@@ -63,6 +63,7 @@ export const getAllUsersGateway = async (): Promise<GetAllUsersResponse> => {
 };
 
 export const updateUserGateway = async (updateUserRequest: UpdateUserRequest): Promise<UpdateUserResponse> => {
+  console.log("updateUserRequest", updateUserRequest);
   return userService.updateUser(updateUserRequest);
 };
 

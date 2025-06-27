@@ -10,7 +10,6 @@ import Link from "next/link"
 interface BannerSlide {
   title: string
   tag: string
-  buttonText: string
   backgroundImage: string
   href: string
 }

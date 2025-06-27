@@ -13,7 +13,7 @@ export default function AuthLayout({
   const router = useRouter()
 
   useEffect(() => {
-    if (!isLoading && user) {
+    if (!isLoading && !user) {
       router.push("/")
     }
   }, [

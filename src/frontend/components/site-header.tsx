@@ -36,43 +36,21 @@ export function SiteHeader() {
 
   const navigation = [
     { name: "Latest Products", href: "/products" },
-    { name: "Backpacks", href: "/products", category: "backpack" },
-    { name: "Bags", href: "/products", category: "bag" },
-    { name: "Accessories", href: "/products", category: "accessory" },
-    { name: "Blog", href: "/blog" },
-    { name: "Stores", href: "/stores" },
   ]
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* Announcement Bar */}
-      <div className="bg-black text-white dark:bg-gray-900 text-xs py-2 px-4 text-center">
+      {/* <div className="bg-black text-white dark:bg-gray-900 text-xs py-2 px-4 text-center">
         <p>Enjoy an exclusive 10% coupon for your first purchase.</p>
-      </div>
+      </div> */}
 
-      <div className="container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 text-center h-16 items-center">
-        <div className="hidden lg:flex items-center gap-8 flex-1">
-          <nav className="lg:flex items-center space-x-6 text-sm">
-            {navigation.map(item => (
-              <Link
-                key={item.name}
-                href={{
-                  pathname: item.href,
-                  query:    item.category ? { category: item.category } : undefined,
-                }}
-                className={`text-muted hover:text-primary/80 ${pathname === item.href ? "text-primary font-medium" : "text-muted-foreground/60 transition-colors"
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </nav>
-        </div>
-        <div className="hidden md:flex md:text-left lg:text-center">
+      <div className="container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 text-center h-16 items-center">
+        <div className="hidden md:flex md:text-left lg:text-left">
           <Link href="/" className="w-full font-bold text-xl">
             NEXURA
           </Link>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-end gap-4">
           <CurrencySelector />
           <ThemeToggle />
           <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />

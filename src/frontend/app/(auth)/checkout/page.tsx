@@ -170,11 +170,7 @@ export default function CheckoutPage() {
   const handleRemoveCoupon = (code: string) => {
     setCoupons(coupons.filter(c => c.code !== code))
   }
-  if (!user) {
-    router.push("/login")
-    return null
-  }
-  
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">

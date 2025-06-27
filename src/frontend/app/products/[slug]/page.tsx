@@ -199,7 +199,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
   // State hooks
   const [ quantity, setQuantity ] = useState(1)
   const [ activeTab, setActiveTab ] = useState("description")
-  const [ selectedVariant, setSelectedVariant ] = useState<ProductVariant | null>(null)
+  const [ selectedVariant, setSelectedVariant ] = useState<ProductVariant | undefined>(undefined)
   const [ isAddingToCart, setIsAddingToCart ] = useState(false)
   const [ currentImageIndex, setCurrentImageIndex ] = useState(0)
   const [ isImageViewerOpen, setIsImageViewerOpen ] = useState(false)
@@ -229,13 +229,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     dragFree:      true,
   })
 
-  // Effect hooks
-  useEffect(() => {
-    if (product?.variants.length) {
-      setSelectedVariant(product.variants[0])
-    }
-  }, [product])
-
+  
   useEffect(() => {
     if (!mainEmbla || !thumbEmbla) return
 
@@ -384,7 +378,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     }
   }
   // Handle variant selection and update currentImageIndex
-  const handleVariantSelect = (variant: ProductVariant | null) => {
+  const handleVariantSelect = (variant: ProductVariant | undefined) => {
     setSelectedVariant(variant)
     if (variant && variant.imageIds && variant.imageIds.length > 0 && product) {
       // Find all image indices that match the variant's imageIds

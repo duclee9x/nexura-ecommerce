@@ -5,13 +5,13 @@ export const GetUserSchema = z.object({
 });
 
 export const UpdateUserSchema = z.object({
-  id:   z.string(),
   user: z.object({
+    id: z.string().min(5),
     firstName:         z.string().min(2).optional(),
     lastName:          z.string().min(2).optional(),
     phone:             z.string().min(10).optional(),
     gender:            z.enum([
-      "male", "female", "other"
+      "male", "female", "other",""
     ]).optional(),
     dateOfBirth:       z.string().optional(),
     profilePictureUrl: z.string().optional(),

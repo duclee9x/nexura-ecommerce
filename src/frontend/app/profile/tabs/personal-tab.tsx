@@ -48,24 +48,54 @@ export default function PersonalTab({ user, useUpdateUser }: PersonalTabProps) {
 
   const { mutateAsync: updateUser, isPending, error } = useUpdateUser
   const [ imageState, setImageState ] = useState<ImageState>(initialImageState);
-  const [ formData, setFormData ] = useState<FormData>({
-    firstName:   user?.firstName || "",
-    lastName:    user?.lastName || "",
-    email:       user?.email || "",
-    phone:       user?.phone || "",
-    gender:      user?.gender || "",
-    dateOfBirth: user?.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : ""
+  const [formData, setFormData] = useState<FormData>(() => {
+    // Safely parse dateOfBirth, handling both string and Date objects
+    const getFormattedDate = (dateStr: string | undefined | null): string => {
+      if (!dateStr) return '';
+      try {
+        const date = new Date(dateStr);
+        return isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0];
+      } catch {
+        return '';
+      }
+    };
+
+    return {
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      gender: user?.gender || "",
+      dateOfBirth: getFormattedDate(user?.dateOfBirth)
+    };
   });
 
 
   const getFieldError = (fieldName: string): string | undefined => {
-    if (!error?.message) return undefined;
-    try {
-      const errors = JSON.parse(error.message);
-      return errors[fieldName];
-    } catch {
-      return undefined;
+    if (!error) return undefined;
+    
+    // Handle gRPC error details if available
+    if (error.message?.includes('INVALID_ARGUMENT')) {
+      try {
+        // Try to parse the error details from the message
+        // Using [\s\S] instead of . with s flag for broader compatibility
+        const errorMatch = error.message.match(/details: (\[[\s\S]*?\])/);
+        if (errorMatch) {
+          const errorDetails = JSON.parse(errorMatch[1]);
+          const fieldError = errorDetails.find((d: any) => d.field === fieldName);
+          return fieldError?.message;
+        }
+      } catch (e) {
+        console.error('Error parsing error details:', e);
+      }
     }
+    
+    // Fallback to simple error message parsing
+    if (error.message?.includes(fieldName)) {
+      return error.message;
+    }
+    
+    return undefined;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -137,30 +167,38 @@ export default function PersonalTab({ user, useUpdateUser }: PersonalTabProps) {
 
 
 
-    if (Object.keys(updatedFields).length > 1) {
-      updateUser({
+    if (Object.keys(updatedFields).length <= 1) {
+      toast.info("No changes to save");
+      return;
+    }
+
+    try {
+      await updateUser({
         user: {
-          id:                user?.id || "",
-          firstName:         updatedFields.firstName || "",
-          lastName:          updatedFields.lastName || "",
-          email:             updatedFields.email || "",
-          phone:             updatedFields.phone || "",
-          gender:            updatedFields.gender || "",
-          dateOfBirth:       updatedFields.dateOfBirth || "",
-          profilePictureUrl: updatedFields.profilePictureUrl || "",
-          createdAt:         user?.createdAt || "",
-          isActive:          user?.isActive || false,
-          isVerified:        user?.isVerified || false,
-          role:              user?.role || "",
-          updatedAt:         new Date().toISOString(),
-          lastLogin:         user?.lastLogin || "",
-          permissions:       user?.permissions || ""
+          ...user,
+          ...updatedFields,
+          // Ensure we don't override the entire user object
+          id: user.id,
+          updatedAt: new Date().toISOString(),
         },
         currentPassword: "",
-        newPassword:     ""
+        newPassword: ""
       });
-    } else {
-      toast.info("No changes to save");
+      
+      // Show success message
+      toast.success("Profile updated successfully!");
+      
+      // Reset the form state if needed
+      if (imageState.avatarFile) {
+        setImageState(prev => ({
+          ...prev,
+          avatarFile: null,
+          previewUrl: null
+        }));
+      }
+    } catch (err) {
+      // Error is already handled by the mutation
+      console.error("Error updating profile:", err);
     }
   };
 
@@ -186,17 +224,19 @@ export default function PersonalTab({ user, useUpdateUser }: PersonalTabProps) {
     });
   };
 
+  if (!user) {
+    return <PersonalSkeleton />;
+  }
+  
   if (isPending) {
     return (
       <TabsContent value="personal" className="space-y-6">
-        <div className="flex items-center justify-center h-32">
-          <p>Loading...</p>
+        <div className="flex flex-col items-center justify-center h-64 space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          <p className="text-muted-foreground">Updating your profile...</p>
         </div>
       </TabsContent>
     );
-  }
-  if (!user) {
-    return <PersonalSkeleton />;
   }
   return (
     <TabsContent value="personal" className="space-y-6">

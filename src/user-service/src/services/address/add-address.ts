@@ -1,6 +1,6 @@
 import type { sendUnaryData, ServerUnaryCall, ServiceError } from '@grpc/grpc-js';
 import type { AddAddressRequest, AddressResponse } from '@nexura/grpc_gateway/protos';
-import { PrismaClient } from '@nexura/user-service/src/db/prisma-client'
+import { PrismaClient } from '../../db/prisma-client'
 
 import { handleError } from '@nexura/common/utils';
 import { AddAndUpdateAddressSchema } from './validator-address';

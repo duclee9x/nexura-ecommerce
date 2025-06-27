@@ -26,7 +26,7 @@ export const createServiceConfig = (
   return {
     name,
     endpoint:     process.env[envVarName] || `localhost:${defaultPort}`,
-    daprEndpoint: daprPort ? `http://localhost:${daprPort}` : undefined,
+    daprEndpoint: daprPort ? `http://localhost:${daprPort}` : `http://localhost:${defaultPort}`,
     options:      {
       ...defaultGrpcOptions,
       ...(process.env[envVarOptions] 

@@ -30,8 +30,8 @@ import { ImageViewer } from "@/components/image-viewer"
 interface ProductDetailsSectionProps {
   product:             Product
   onImageClick?:       (index: number) => void
-  onVariantSelect:     (variant: ProductVariant | null) => void
-  selectedVariant:     ProductVariant | null
+  onVariantSelect:     (variant: ProductVariant | undefined) => void
+  selectedVariant:     ProductVariant | undefined
   onAddToCart?:        () => void
   onQuantityChange?:   (value: number) => void
   quantity?:           number
@@ -304,7 +304,7 @@ export function ProductDetailsSection({
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onVariantSelect?.(null)}
+                  onClick={() => onVariantSelect?.(undefined)}
                   className="text-muted-foreground hover:text-foreground"
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />

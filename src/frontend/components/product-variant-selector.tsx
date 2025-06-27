@@ -6,15 +6,15 @@ import { ColorButton } from "@/components/ui/color-button"
 import { ProductVariant } from "@nexura/grpc_gateway/protos"
 
 interface ProductVariantSelectorProps {
-  variants:           ProductVariant[]
-  onVariantSelect:    (variant: ProductVariant | null) => void
-  selectedVariant:    ProductVariant | null
+  variants: ProductVariant[]
+  onVariantSelect: (variant: ProductVariant | undefined) => void
+  selectedVariant: ProductVariant | undefined
   disableOutOfStock?: boolean
 }
 
 interface AttributeInfo {
-  name:     string
-  values:   Set<string>
+  name: string
+  values: Set<string>
   required: boolean
 }
 
@@ -24,15 +24,15 @@ export function ProductVariantSelector({
   selectedVariant,
   disableOutOfStock = false,
 }: ProductVariantSelectorProps) {
-  const [ selectedValues, setSelectedValues ] = useState<Record<string, string>>({})
+  const [selectedValues, setSelectedValues] = useState<Record<string, string>>({})
 
   // Extract unique attributes and their values from variants
   const variantAttributes = variants.reduce<Record<string, AttributeInfo>>((acc, variant) => {
     variant.attributes.forEach((attr) => {
       if (!acc[attr.name]) {
         acc[attr.name] = {
-          name:     attr.name,
-          values:   new Set(),
+          name: attr.name,
+          values: new Set(),
           required: true
         }
       }
@@ -43,9 +43,9 @@ export function ProductVariantSelector({
 
   // Convert to array and sort attributes for consistent display
   const variantableAttributes = Object.entries(variantAttributes)
-    .map(([ name, info ]) => ({
+    .map(([name, info]) => ({
       name,
-      values:   Array.from(info.values),
+      values: Array.from(info.values),
       required: info.required
     }))
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -63,17 +63,28 @@ export function ProductVariantSelector({
     }
   }, [selectedVariant])
 
-  // Handle attribute value selection
+  // Handle attribute value selection and deselection
   const handleValueSelect = (attributeName: string, value: string) => {
-    const newSelectedValues = {
-      ...selectedValues,
-      [attributeName]: value,
+    // Toggle selection - if the same value is clicked, deselect it
+    const newSelectedValues = { ...selectedValues }
+    
+    if (newSelectedValues[attributeName] === value) {
+      // Deselect the attribute
+      delete newSelectedValues[attributeName]
+    } else {
+      // Select the new value
+      newSelectedValues[attributeName] = value
     }
+    
     setSelectedValues(newSelectedValues)
 
-    // Find matching variant
-    const matchingVariant = findMatchingVariant(newSelectedValues)
-    onVariantSelect(matchingVariant)
+    // Find matching variant if we have all required attributes selected
+    if (Object.keys(newSelectedValues).length === variantableAttributes.length) {
+      const matchingVariant = findMatchingVariant(newSelectedValues)
+      onVariantSelect(matchingVariant)
+    } else {
+      onVariantSelect(undefined)
+    }
   }
 
   // Find a variant that matches the selected attribute values
@@ -82,7 +93,7 @@ export function ProductVariantSelector({
 
     // If not all variantable attributes are selected, return null
     if (selectedAttributeNames.length !== variantableAttributes.length) {
-      return null
+      return undefined
     }
 
     // Find a variant that matches all selected attribute values
@@ -93,40 +104,42 @@ export function ProductVariantSelector({
           attr => attr.name === attributeName && attr.value === selectedValue
         )
       })
-    }) || null
+    }) || undefined
   }
 
-  
+  // Check if a specific attribute value is available based on current selection
   const isValueAvailable = (attributeName: string, value: string) => {
     // Find variants that have this attribute value
     const matchingVariants = variants.filter((variant) => {
       // Check if this variant has the current attribute value
       const hasAttributeValue = variant.attributes.some(
         attr => attr.name === attributeName && attr.value === value
-      );
+      )
+      
       // Check if this variant matches all other selected values
-      const matchesOtherSelections = Object.entries(selectedValues).every(([ attrName, selectedValue ]) => {
-        if (attrName === attributeName) return true; // skip the attribute being checked
+      const matchesOtherSelections = Object.entries(selectedValues).every(([attrName, selectedValue]) => {
+        if (attrName === attributeName) return true // skip the attribute being checked
         return variant.attributes.some(
           attr => attr.name === attrName && attr.value === selectedValue
-        );
-      });
-      return hasAttributeValue && matchesOtherSelections;
-    });
+        )
+      })
+      
+      return hasAttributeValue && matchesOtherSelections
+    })
     
     if (matchingVariants.length === 0) {
-      return false;
+      return false
     }
     
     if (disableOutOfStock) {
       // At least one matching variant must be in stock
       return matchingVariants.some(
         variant => variant.stock && variant.stock.quantity > 0
-      );
+      )
     }
     
-    return true;
-  };
+    return true
+  }
 
   return (
     <div className="space-y-6">
@@ -142,16 +155,21 @@ export function ProductVariantSelector({
               const isSelected = selectedValues[attribute.name] === value
               const isAvailable = isValueAvailable(attribute.name, value)
               const isDisabled = !isAvailable && !isSelected
+              
               return (
-                <ColorButton
-                  isColor={attribute.name.toLowerCase() === "color"}
-                  key={value}
-                  name={value}
-                  color={attribute.name.toLowerCase() === "color" ? value : "#CCCCCC"}
-                  isSelected={isSelected}
-                  disabled={isDisabled}
-                  onClick={() => handleValueSelect(attribute.name, value)}
-                />
+                <div 
+                  key={`${attribute.name}-${value}`}
+                  className={isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                >
+                  <ColorButton
+                    isColor={attribute.name.toLowerCase() === "color"}
+                    name={value}
+                    color={attribute.name.toLowerCase() === "color" ? value : "#CCCCCC"}
+                    isSelected={isSelected}
+                    disabled={isDisabled}
+                    onClick={() => handleValueSelect(attribute.name, value)}
+                  />
+                </div>
               )
             })}
           </div>

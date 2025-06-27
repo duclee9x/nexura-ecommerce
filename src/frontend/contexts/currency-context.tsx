@@ -116,7 +116,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
       return `${convertedPrice.toLocaleString()} đồng`
     }
     // For currencies that show symbol before the amount (most currencies)
-    return `${symbol}${convertedPrice.toFixed(2)}`
+    return `${symbol}${convertedPrice}`
   }
 
   return (
