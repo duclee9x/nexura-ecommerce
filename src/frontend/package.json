@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "DAPR_PORT=9999 next build",
+    "build": "DAPR_PORT=9999 DAPR_HTTP_PORT=3500 next build",
     "start": "next start",
     "generate-proto": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./ ./protos/nexura.proto",
     "gen-proto": "proto-loader-gen-types --longs=String --enums=String --defaults --oneofs --grpcLib=@grpc/grpc-js --outDir=protos/generated protos/nexura.proto",
@@ -60,6 +60,7 @@
     "date-fns": "latest",
     "embla-carousel-react": "^8.6.0",
     "formidable": "^3.5.2",
+    "framer-motion": "^12.19.2",
     "google-protobuf": "^3.21.4",
     "imagekit": "^6.0.0",
     "input-otp": "1.4.1",

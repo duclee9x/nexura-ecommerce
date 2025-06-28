@@ -1,4 +1,4 @@
-import Image from "next/image"
+export const dynamic = 'force-dynamic';
 import Link from "next/link"
 import { BannerCarousel } from "@/components/banner-carousel"
 import { ProductCard } from "@/components/product-card"
