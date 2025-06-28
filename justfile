@@ -13,6 +13,9 @@ vault:
     ./generate-creds.sh
     vault server -config=vault-server.hcl
 
+dns:
+    python provision/update-public-ip/main.py
+
 helm-app:
     helm upgrade --install common deployments/helm-charts/apps/common
     helm upgrade --install order deployments/helm-charts/apps/order

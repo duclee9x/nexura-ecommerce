@@ -55,6 +55,7 @@ apps:
     appPort: 3000
     daprHTTPPort: 8080
     daprGRPCPort: 50000
+    appSSL: false
     command: ["bun", "run", "dev"]
     env:
       DAPR_PORT: 50000

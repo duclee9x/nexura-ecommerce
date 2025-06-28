@@ -8,3 +8,5 @@ spec:
     samplingRate: "1"
     zipkin:
       endpointAddress: "http://tempo.monitoring.svc.cluster.local:4318/api/v2/spans"
+  mtls:
+    enabled: false

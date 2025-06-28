@@ -21,7 +21,7 @@ type ProductCardProps = {
   product:           Product
   viewMode?:         "grid" | "list"
   isInWishlist?:      boolean | undefined
-  onWishlistToggle?:  () => Promise<void>
+  onWishlistToggle?:  (productId: string) => Promise<void>
   isWishlistLoading?: boolean | null
 }
 
@@ -53,14 +53,15 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
     (item: CartItem) => item.productId === product.id &&
       (!selectedVariant || item.variantId === selectedVariant.id)
   )
-  if (!user) {
-    toast({
-      title:       "Please login to add to cart",
-      description: "You need to be logged in to add items to your cart.",
-    })
-    return
-  }
+
   const handleAddToCart = () => {
+    if (!user) {
+      toast({
+        title:       "Please login to add to cart",
+        description: "You need to be logged in to add items to your cart.",
+      })
+      return
+    }
     if (!selectedVariant) return
     addItem({
       productId:    product.id,
@@ -83,6 +84,13 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
   }
 
   const handleQuantityChange = (newQuantity: number) => {
+    if (!user) {
+      toast({
+        title:       "Please login to add to cart",
+        description: "You need to be logged in to add items to your cart.",
+      })
+      return
+    }
     if (!selectedVariant) return
 
     if (isInCart) {
@@ -114,7 +122,7 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
               "absolute top-2 right-2 bg-bg-base/80 dark:bg-bg-inverted/50 rounded-full hover:bg-bg-base dark:hover:bg-bg-inverted z-10",
               isInWishlist && "text-red-500"
             )}
-            onClick={onWishlistToggle}
+            onClick={() => onWishlistToggle?.(product.id)}
             disabled={isWishlistLoading}
           >
             <Heart className={cn(
@@ -183,7 +191,7 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
             "opacity-0 group-hover:opacity-100 transition-opacity",
             isInWishlist && "text-red-500"
           )}
-          onClick={onWishlistToggle}
+          onClick={() => onWishlistToggle?.(product.id)}
           disabled={isWishlistLoading}
         >
           <Heart className={cn(
@@ -263,6 +271,7 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
               onAddToCart={handleAddToCart}
               onQuantityChange={handleQuantityChange}
               onGoToCart={handleGoToCart}
+              onWishlistToggle={onWishlistToggle}
             />
           </div>
         </DialogContent>

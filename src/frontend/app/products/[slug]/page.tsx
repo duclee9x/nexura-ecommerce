@@ -259,11 +259,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     return <ProductDetailSkeleton />
   }
 
-  if (!user) {
-    router.push("/login")
-    return null
-  }
-
   // Error state
   if (isError || !product) {
     const errorMessage = (() => {
@@ -297,6 +292,13 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
 
   // Handle add to cart with stock check and user feedback
   const handleAddToCart = async () => {
+    if (!user) {
+      toast({
+        title:       "Please login to add to cart",
+        description: "You need to be logged in to add items to your cart.",
+      })
+      return
+    }
     setIsAddingToCart(true)
     if (!product || !selectedVariant || !cart) return;
     const currentItemOnCart = cart.items.find(item => item.productId === product.id && item.variantId === selectedVariant.id);
@@ -356,6 +358,14 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
     })
   }
   const handleWishlistToggle = async (productId: string) => {
+    if (!user) {
+      toast({
+        title:       "Please login to add to wishlist",
+        description: "You need to be logged in to add items to your wishlist.",
+        variant:     "destructive"
+      })
+      return
+    }
     try {
       setIsWishlistLoading(prev => ({ ...prev, [productId]: true }))
       const isInWishlist = wishlistItems.find(item => item.productId === productId)
@@ -425,6 +435,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ slug: 
               stockStatus={getStockStatus()}
               maxQuantity={selectedVariant?.stock?.quantity ?? 0}
               quantityDisabled={!selectedVariant || (selectedVariant.stock?.quantity ?? 0) <= 0}
+              onWishlistToggle={handleWishlistToggle}
             />
           </>
         )}

@@ -10,19 +10,22 @@ interface SessionContextType {
   isAuthenticated: boolean
   error:           Error | null
   refetch:         () => void
+  logout:          () => void
 }
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined)
 
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const { useGetSession } = UserHooks()
+  const { useGetSession, useLogout } = UserHooks()
   const { data: user, isLoading, error, refetch } = useGetSession()
+  const { mutateAsync: logout } = useLogout
   const value = {
     user:            user || null,
     isLoading,
     isAuthenticated: !!user,
     error,
     refetch,
+    logout,
   }
 
   return (

@@ -62,15 +62,7 @@ async function start() {
 }
 
 // Handle shutdown signals
-const signals = ["SIGINT",
-                                                               "SIGTERM"
-                                                              
-                                                              
-                                                              
-                                                              
-                                                              
-                                                              
-                                                              ];
+const signals = ["SIGINT", "SIGTERM"];
 
 signals.forEach((signal) => {
   process.on(signal, async () => {

@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input"
 import { Product, ProductVariant } from "@nexura/grpc_gateway/protos"
 import { useCurrency } from "@/contexts/currency-context"
 import { ImageViewer } from "@/components/image-viewer"
+import { useWishlist } from "@/contexts/wishlist-context"
 
 interface ProductDetailsSectionProps {
   product:             Product
@@ -42,6 +43,7 @@ interface ProductDetailsSectionProps {
   maxQuantity?:        number
   isAddingToCart?:     boolean
   quantityDisabled?:   boolean
+  onWishlistToggle?:   (productId: string) => Promise<void>
 }
 
 export function ProductDetailsSection({
@@ -58,6 +60,7 @@ export function ProductDetailsSection({
   maxQuantity = 0,
   isAddingToCart = false,
   quantityDisabled = false,
+  onWishlistToggle,
 }: ProductDetailsSectionProps) {
   const [ mainCarouselRef, mainEmbla ] = useEmblaCarousel()
   const [ thumbCarouselRef, thumbEmbla ] = useEmblaCarousel({
@@ -66,7 +69,8 @@ export function ProductDetailsSection({
   })
   const { formatPrice } = useCurrency()
   const [ isImageViewerOpen, setIsImageViewerOpen ] = useState(false)
-
+  const { wishlistItems } = useWishlist()
+  const isInWishlist = wishlistItems.some(item => item.productId === product.id)
   // Update carousel when currentImageIndex changes
   useEffect(() => {
     if (mainEmbla && typeof currentImageIndex === 'number') {
@@ -227,7 +231,7 @@ export function ProductDetailsSection({
 
         <div className="flex items-center gap-2">
           <span className="text-2xl font-bold">{formatPrice(parseFloat(getCurrentPrice()))}</span>
-          {product.basePrice && selectedVariant?.price != product.basePrice && (
+          {product.basePrice && selectedVariant?.price && selectedVariant?.price < product.basePrice && (
             <span className="text-lg text-muted-foreground line-through">{formatPrice(product.basePrice)}</span>
           )}
 
@@ -333,8 +337,13 @@ export function ProductDetailsSection({
                 </>
               )}
             </Button>
-            <Button variant="outline" size="icon" className="h-11 w-11">
-              <Heart className="h-5 w-5" />
+            <Button 
+              variant="outline"
+              onClick={() => onWishlistToggle?.(product.id)} 
+              size="icon" 
+              className={`h-11 w-11 ${isInWishlist ? 'hover:bg-primary/50' : ''}`}
+            >
+              <Heart className={`h-5 w-5 ${isInWishlist ? 'fill-red-500 text-red-500 '  : ''}`} />
             </Button>
             <Button variant="outline" size="icon" className="h-11 w-11">
               <Share2 className="h-5 w-5" />

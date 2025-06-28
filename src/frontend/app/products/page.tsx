@@ -28,6 +28,7 @@ import ProductHooks from "@/hooks/product-hooks"
 import { Product } from "@nexura/grpc_gateway/protos"
 import { useQueryClient } from "@tanstack/react-query"
 import { useSession } from "@/contexts/session-context"
+import { toast } from "@/hooks/use-toast"
 
 // Loading Skeleton Components
 function ProductGridSkeleton() {
@@ -82,9 +83,9 @@ function ErrorState({ message, onRetry }: { message: string; onRetry?: () => voi
 
 interface filterType {
   categories: string[]
-  types:      string[]
-  colors:     string[]
-  features:   string[]
+  types: string[]
+  colors: string[]
+  features: string[]
 }
 
 export default function ProductCatalogPage() {
@@ -92,18 +93,18 @@ export default function ProductCatalogPage() {
   const searchParams = useSearchParams()
   const categoryParam = searchParams.get("category")
   const { formatPrice } = useCurrency()
-  const [ viewMode, setViewMode ] = useState("grid")
-  const [ sortBy, setSortBy ] = useState("featured")
-  const [ priceRange, setPriceRange ] = useState([ 0, 200 ])
-  const [ filteredProducts, setFilteredProducts ] = useState<Product[]>([])
-  const [ filters, setFilters ] = useState<filterType>({
+  const [viewMode, setViewMode] = useState("grid")
+  const [sortBy, setSortBy] = useState("featured")
+  const [priceRange, setPriceRange] = useState([0, 200])
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
+  const [filters, setFilters] = useState<filterType>({
     categories: categoryParam ? [categoryParam] : [],
-    types:      [],
-    colors:     [],
-    features:   [],
+    types: [],
+    colors: [],
+    features: [],
   })
-  const [ searchQuery, setSearchQuery ] = useState("")
-  const [ isWishlistLoading, setIsWishlistLoading ] = useState<{ [key: string]: boolean }>({})
+  const [searchQuery, setSearchQuery] = useState("")
+  const [isWishlistLoading, setIsWishlistLoading] = useState<{ [key: string]: boolean }>({})
 
   const { data: categories, isLoading: isCategoriesLoading } = useGetCategories()
   const {
@@ -125,7 +126,7 @@ export default function ProductCatalogPage() {
   // Move the filtering logic to a separate function
   const filterProducts = (products: Product[] | undefined) => {
     if (!products) return [];
-    
+
     return products.filter((product) => {
       // Search query filter
       if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase())) {
@@ -133,16 +134,16 @@ export default function ProductCatalogPage() {
       }
 
       // Category filter
-      if (filters.categories.length > 0 && !filters.categories.some(category => 
+      if (filters.categories.length > 0 && !filters.categories.some(category =>
         product.categories.includes(category)
       )) {
         return false;
       }
 
       // Color filter
-      if (filters.colors.length > 0 && !filters.colors.some(color => 
-        product.variants.some(variant => 
-          variant.attributes.some(attr => 
+      if (filters.colors.length > 0 && !filters.colors.some(color =>
+        product.variants.some(variant =>
+          variant.attributes.some(attr =>
             attr.name.toLowerCase() === 'color' && attr.extraValue === color
           )
         )
@@ -170,13 +171,6 @@ export default function ProductCatalogPage() {
     products, searchQuery, filters, priceRange
   ]);
 
-  useEffect(() => {
-    if (!isUserLoading && !user) {
-      router.push("/login")
-    }
-  }, [
-    isUserLoading, user, router
-  ])
 
   const handleFilterChange = (filterType: keyof filterType, value: string) => {
     setFilters((prev) => {
@@ -189,7 +183,7 @@ export default function ProductCatalogPage() {
       } else {
         return {
           ...prev,
-          [filterType]: [ ...currentFilters, value ],
+          [filterType]: [...currentFilters, value],
         }
       }
     })
@@ -198,11 +192,11 @@ export default function ProductCatalogPage() {
   const clearAllFilters = () => {
     setFilters({
       categories: [],
-      types:      [],
-      colors:     [],
-      features:   [],
+      types: [],
+      colors: [],
+      features: [],
     })
-    setPriceRange([ 0, 200 ])
+    setPriceRange([0, 200])
     setSearchQuery("")
   }
 
@@ -215,7 +209,14 @@ export default function ProductCatalogPage() {
     (searchQuery ? 1 : 0)
 
   const handleWishlistToggle = async (productId: string) => {
-    if (!user) return
+    if (!user) {
+      toast({
+        title: "Please login to add to wishlist",
+        description: "You need to be logged in to add items to your wishlist.",
+        variant: "destructive"
+      })
+      return
+    }
     try {
       setIsWishlistLoading(prev => ({ ...prev, [productId]: true }))
       const isInWishlist = wishlistItems?.find(item => item.productId === productId)
@@ -231,20 +232,6 @@ export default function ProductCatalogPage() {
     }
   }
 
-  // Loading state
-  if (isUserLoading) {
-    return (
-      <div className="container mx-auto px-4">
-        <div className="flex justify-center items-center h-[50vh]">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
-      </div>
-    )
-  }
-
-  if (!user) {
-    return null
-  }
 
   if (isProductsLoading || isCategoriesLoading) {
     return (
@@ -307,7 +294,7 @@ export default function ProductCatalogPage() {
           </div>
         </div>
 
-        <ErrorState 
+        <ErrorState
           message={"Internal server error. Please try again later."}
           onRetry={() => {
             queryClient.invalidateQueries({ queryKey: ["productsCatalog"] });
@@ -380,7 +367,7 @@ export default function ProductCatalogPage() {
                       <Label>Price Range</Label>
                     </div>
                     <Slider
-                      defaultValue={[ 0, 200 ]}
+                      defaultValue={[0, 200]}
                       min={0}
                       max={200}
                       step={5}
@@ -487,7 +474,7 @@ export default function ProductCatalogPage() {
               <h3 className="font-medium">Price Range</h3>
             </div>
             <Slider
-              defaultValue={[ 0, 200 ]}
+              defaultValue={[0, 200]}
               min={0}
               max={200}
               step={5}
@@ -625,7 +612,7 @@ export default function ProductCatalogPage() {
                     variant="ghost"
                     size="icon"
                     className="h-4 w-4 p-0 hover:bg-transparent"
-                    onClick={() => setPriceRange([ 0, 200 ])}
+                    onClick={() => setPriceRange([0, 200])}
                   >
                     <X className="h-3 w-3" />
                   </Button>
