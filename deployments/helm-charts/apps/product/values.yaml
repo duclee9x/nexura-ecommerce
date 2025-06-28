@@ -55,6 +55,7 @@ serviceAccount:
 # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 podAnnotations: {
   dapr.io/enabled: "true",
+  dapr.io/config: "tracing",
   dapr.io/app-id: product,
   dapr.io/app-port: "50053",
   dapr.io/grpc-port: "50003",

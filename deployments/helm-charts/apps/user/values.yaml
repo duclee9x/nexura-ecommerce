@@ -57,6 +57,7 @@ podAnnotations: {
   dapr.io/enabled: "true",
   dapr.io/app-id: user,
   dapr.io/app-port: "50051",
+  dapr.io/config: "tracing",
   dapr.io/grpc-port: "50001",
 }
 # This is for setting Kubernetes Labels to a Pod.

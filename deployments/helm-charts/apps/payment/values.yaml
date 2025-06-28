@@ -56,6 +56,7 @@ serviceAccount:
 podAnnotations: {
   dapr.io/enabled: "true",
   dapr.io/app-id: payment,
+  dapr.io/config: "tracing",
   dapr.io/app-port: "50057",
   dapr.io/grpc-port: "50007",
 }

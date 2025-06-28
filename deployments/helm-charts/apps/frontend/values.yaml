@@ -74,6 +74,7 @@ podAnnotations: {
   dapr.io/enabled: "true",
   dapr.io/app-id: frontend,
   dapr.io/app-port: "3000",
+  dapr.io/config: "tracing",
   dapr.io/grpc-port: "50000",
   dapr.io/http-port: "8080",
 }
