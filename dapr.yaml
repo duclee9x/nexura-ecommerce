@@ -53,7 +53,7 @@ apps:
     appDirPath: src/frontend
     appProtocol: http
     appPort: 3000
-    daprHTTPPort: 8080
+    daprHTTPPort: 55500
     daprGRPCPort: 50000
     appSSL: false
     command: ["bun", "run", "dev"]
