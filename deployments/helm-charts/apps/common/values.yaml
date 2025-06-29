@@ -1,6 +1,8 @@
 config:
   imagekit: https://ik.imagekit.io/duclee9x/
-  
+redis:
+  auth:
+    enabled: false
 
 certManager:
   namespace: cert-manager
