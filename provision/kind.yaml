@@ -4,7 +4,7 @@ networking:
   ipFamily: ipv4
 nodes:
   - role: control-plane
-    image: kindest/node:v1.30.13@sha256:397209b3d947d154f6641f2d0ce8d473732bd91c87d9575ade99049aa33cd648
+    image: kindest/node:v1.33.0@sha256:91e9ed777db80279c22d1d1068c091b899b2078506e4a0f797fbf6e397c0b0b2
     extraPortMappings:
     - containerPort: 80
       hostPort: 80
@@ -13,6 +13,6 @@ nodes:
       hostPort: 443
       protocol: TCP
   - role: worker
-    image: kindest/node:v1.30.13@sha256:397209b3d947d154f6641f2d0ce8d473732bd91c87d9575ade99049aa33cd648
+    image: kindest/node:v1.33.0@sha256:91e9ed777db80279c22d1d1068c091b899b2078506e4a0f797fbf6e397c0b0b2
   - role: worker
-    image: kindest/node:v1.30.13@sha256:397209b3d947d154f6641f2d0ce8d473732bd91c87d9575ade99049aa33cd648
+    image: kindest/node:v1.33.0@sha256:91e9ed777db80279c22d1d1068c091b899b2078506e4a0f797fbf6e397c0b0b2
