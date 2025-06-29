@@ -8,5 +8,6 @@ spec:
   metadata:
   - name: redisHost
     value: {{ .Release.Name }}-redis-master:6379
-  - name: redisPassword
-    value: ""
+
+scopes:
+  - workflow
