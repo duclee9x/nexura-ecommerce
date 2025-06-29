@@ -7,11 +7,11 @@ spec:
   version: v1
   metadata:
   - name: host
-    value: "smtp.zoho.com"
+    value: "smtp.mailgun.org"
   - name: port
-    value: "587"
+    value: "465"
   - name: user
-    value: "duclee@zohomail.com"
+    value: "admin@mg.duclee.store"
   - name: password
     secretKeyRef:
       name: smtp-secret
@@ -19,5 +19,9 @@ spec:
   - name: skipTLSVerify
     value: false
   - name: emailFrom
-    value: "admin@duclee.store"
-  
+    value: "admin@mg.duclee.store"
+scopes:
+- frontend
+- user
+- order
+- workflow
