@@ -7,7 +7,7 @@ if (!DAPR_PORT || !DAPR_HTTP_PORT){
 }
 const orderConfig = createServiceConfig('OrderService', DAPR_PORT, Number(DAPR_HTTP_PORT));
 const orderClient = createClient(OrderServiceClient, orderConfig);
-const workflowConfig = createServiceConfig('WorkflowService', DAPR_PORT, 50002);
+const workflowConfig = createServiceConfig('WorkflowService', DAPR_PORT, Number(DAPR_HTTP_PORT));
 export const orderService = {
   createOrder: async (request: CreateOrderRequest): Promise<CreateOrderResponse> => {
     return promisifyGrpcCall(orderClient, 'createOrder', request);

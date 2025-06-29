@@ -52,7 +52,6 @@ podAnnotations: {
   dapr.io/enabled: "true",
   dapr.io/app-id: workflow,
   dapr.io/config: "tracing",
-  dapr.io/config: "workflow-config", 
   dapr.io/app-port: "8166",
   dapr.io/grpc-port: "50010",
   dapr.io/http-port: "3684",
