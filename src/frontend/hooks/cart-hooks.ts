@@ -114,6 +114,8 @@ export default function CartHooks() {
         }
       },
       onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["cart"] });
+        queryClient.invalidateQueries({ queryKey: ["cartVariants"] });
         toast({
           title:       "SUCCESS",
           description: "Remove item successfully",

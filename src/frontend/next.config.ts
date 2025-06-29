@@ -43,7 +43,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  output:                'standalone',
+  output: "standalone",
   outputFileTracingRoot: path.resolve(__dirname, '../../'),
   experimental:          {
     turbo: {

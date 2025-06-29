@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -16,7 +15,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import UserHooks from "@/hooks/user-hooks"
-
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useState } from "react"
@@ -29,8 +27,8 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
-  const router = useRouter()
   const queryClient = new QueryClient()
+  const { useLogin } = UserHooks()
   const [ isLoading, setIsLoading ] = useState(false)
   const form = useForm<LoginFormValues>({
     resolver:      zodResolver(loginSchema),
@@ -43,18 +41,9 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     try {
       setIsLoading(true)
-      const response = await fetch('/api/auth/login', {
-        method:  'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to login')
+      const response = await useLogin.mutateAsync(data)
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to login')
       }
       await queryClient.invalidateQueries({ queryKey: ['userSession'] });
       toast.success("Logged in successfully")

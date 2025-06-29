@@ -8,7 +8,6 @@ import {
   getCountriesGateway,
   getDistrictsByProvinceGateway,
   getProvincesByCountryGateway,
-  getUserGateway,
   getWardsByDistrictGateway,
   resetPasswordGateway,
   updateAddressGateway,
@@ -23,7 +22,6 @@ import {
   ResetPasswordRequest,
   RegisterUserForAdminRequest,
   UpdateUserRequest,
-  User,
   DeleteUserRequest,
   AddAddressRequest,
   UpdateAddressRequest,
@@ -61,6 +59,24 @@ export default function UserHooks() {
         staleTime:            1000 * 60 * 5,
         
       }),
+    useVerifyEmailApi: useMutation({
+      mutationFn: async (token: string) => {
+        const response = await fetch("/api/auth/verify-email", {
+          method:  "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ token }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          return { success: false, message: error.message };
+        }
+        await response.json();
+        return { success: true };
+      },
+    }),
     useVerifyAccount: useMutation({
       mutationFn: (request: VerifyAccountRequest) => {
         return verifyAccountGateway(request).catch((error) => {

@@ -189,7 +189,7 @@ export default function CheckoutPage() {
           <Tabs defaultValue="addresses">
             <AddressTab 
               type="checkout" 
-              user={user} 
+              user={user!} 
               setAddress={setAddress} 
               currentAddress={address}
             />

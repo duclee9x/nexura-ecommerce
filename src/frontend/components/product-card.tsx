@@ -32,11 +32,10 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
   const router = useRouter()
  
   const { useAddItem, useUpdateItem } = CartHooks()
-  const { mutateAsync: addItem } = useAddItem
+  const { mutateAsync: addItem, isPending: isAddingToCart } = useAddItem
   const { mutateAsync: updateQuantity } = useUpdateItem
 
   const { formatPrice } = useCurrency()
-  const [ isAdding, setIsAdding ] = useState(false)
   const mainImage = product.images.find(img => img.isMain) || product.images[0]
   const defaultVariant = product.variants[0]
   const [ showQuickView, setShowQuickView ] = useState(false)
@@ -71,7 +70,6 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
       userId:       user.id,
       currencyCode: currency
     })
-    setIsAdding(true)
     toast({
       title:       "Item added to cart",
       description: `${product.name} - ${selectedVariant.sku}`,
@@ -154,10 +152,10 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
                 e.preventDefault()
                 setShowQuickView(true)
               }}
-              disabled={isAdding}
-              className={isAdding ? "btn-accent" : "btn-primary"}
+              disabled={isAddingToCart}
+              className={isAddingToCart ? "btn-accent" : "btn-primary"}
             >
-              {isAdding ? (
+              {isAddingToCart ? (
                 <>
                   <Check className="mr-2 h-4 w-4" />
                   Added
@@ -244,10 +242,10 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
                   e.preventDefault()
                   setShowQuickView(true)
                 }}
-                disabled={isAdding}
+                disabled={isAddingToCart}
                 className="text-text-base hover:bg-bg-subtle"
               >
-                {isAdding ? <Check className="h-4 w-4" /> : <ShoppingBag className="h-4 w-4" />}
+                {isAddingToCart ? <Check className="h-4 w-4" /> : <ShoppingBag className="h-4 w-4" />}
               </Button>
             </div>
           </div>
@@ -265,7 +263,7 @@ export function ProductCard({ product, viewMode = "grid", categories, isInWishli
               product={product}
               stockStatus={getStockStatus(selectedVariant || defaultVariant)}
               selectedVariant={selectedVariant}
-              isAddingToCart={isAdding}
+              isAddingToCart={isAddingToCart}
               quantity={quantity}
               onVariantSelect={setSelectedVariant}
               onAddToCart={handleAddToCart}

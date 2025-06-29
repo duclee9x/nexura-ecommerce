@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
+import UserHooks from "@/hooks/user-hooks"
 export default function VerifyEmailPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -12,6 +12,8 @@ export default function VerifyEmailPage() {
   const [ status, setStatus ] = useState<"loading" | "success" | "error">("loading")
   const [ message, setMessage ] = useState("")
   const [ isPending, setIsPending ] = useState(false)
+
+  const {useVerifyEmailApi} = UserHooks()
 
   useEffect(() => {
     const verify = async () => {
@@ -23,15 +25,13 @@ export default function VerifyEmailPage() {
 
       setIsPending(true)
       try {
-        const response = await fetch(`/api/auth/verify-email?token=${token}`)
-        const data = await response.json()
-                
-        if (data.success) {
+        const response = await useVerifyEmailApi.mutateAsync(token) 
+        if (response.success) {
           setStatus("success")
           setMessage("Email verified successfully! You can now log in.")
         } else {
           setStatus("error")
-          setMessage(data.error || "Failed to verify email")
+          setMessage(response.message || "Failed to verify email")
         }
       } catch (error) {
         setStatus("error")
