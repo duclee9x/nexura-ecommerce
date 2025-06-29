@@ -5,3 +5,9 @@ metadata:
 spec:
   actor:
     stateStore: statestore
+  tracing:
+    samplingRate: "1"
+    otel:
+      endpointAddress: "tempo.monitoring.svc.cluster.local:4317"
+      isSecure: false
+      protocol: grpc
