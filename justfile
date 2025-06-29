@@ -42,7 +42,7 @@ unkind:
 kind:
     kind create cluster --config provision/kind.yaml
 
-install-argo:
+install-argo: dns
     kubectl apply -f provision/vault-token.yaml
     helm repo add argo https://argoproj.github.io/argo-helm
     helm repo update
