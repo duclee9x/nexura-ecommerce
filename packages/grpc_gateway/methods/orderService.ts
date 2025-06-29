@@ -7,13 +7,13 @@ if (!DAPR_PORT || !DAPR_HTTP_PORT){
 }
 const orderConfig = createServiceConfig('OrderService', DAPR_PORT, Number(DAPR_HTTP_PORT));
 const orderClient = createClient(OrderServiceClient, orderConfig);
-
+const workflowConfig = createServiceConfig('WorkflowService', DAPR_PORT, 50002);
 export const orderService = {
   createOrder: async (request: CreateOrderRequest): Promise<CreateOrderResponse> => {
     return promisifyGrpcCall(orderClient, 'createOrder', request);
   },
   createOrderWorkflow: async (request: CreateOrderRequest): Promise<{ instanceID: string }> => {
-    const endpoint = orderConfig.daprEndpoint + `/v1.0/workflows/dapr/orderProcessingWorkflow/start`;
+    const endpoint = workflowConfig.daprEndpoint + `/v1.0/workflows/dapr/orderProcessingWorkflow/start`;
     console.log(`request service address: ${JSON.stringify(endpoint)}`)
     console.log(`request ${JSON.stringify(request)}`)
     const response = await fetch(endpoint, {
@@ -27,7 +27,7 @@ export const orderService = {
     return promisifyGrpcCall(orderClient, 'updateOrderPayment', request);
   },
   getOrderWorkflow: async (instanceID: string) => {
-    const endpoint = orderConfig.daprEndpoint + `/v1.0/workflows/dapr/${instanceID}`;
+    const endpoint = workflowConfig.daprEndpoint + `/v1.0/workflows/dapr/${instanceID}`;
     console.log(`request service address: ${JSON.stringify(endpoint)}`)
     return fetch(endpoint, {
       method: 'GET',
